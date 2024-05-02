@@ -17,5 +17,9 @@ Language: en-GB
 Config/testthat/edition: 3
 URL: https://github.com/mrc-ide/dust2
 BugReports: https://github.com/mrc-ide/dust2/issues
+LinkingTo:
+    cpp11,
+    mcstate2
 Suggests:
     testthat (>= 3.0.0)
+Remotes: mrc-ide/mcstate2
