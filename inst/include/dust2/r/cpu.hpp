@@ -13,19 +13,42 @@ SEXP dust2_cpu_alloc(cpp11::list r_pars,
                      cpp11::sexp r_time,
                      cpp11::sexp r_dt,
                      cpp11::sexp r_n_particles,
+                     cpp11::sexp r_n_groups,
                      cpp11::sexp r_seed,
                      cpp11::sexp r_deterministic) {
   using rng_state_type = typename T::rng_state_type;
 
-  // Need to consider here the way that we are spreading out the
-  // multiple parameter case _early_. For now we ignore that entirely
-  // and assume we are doing just one.
-  auto shared = T::build_shared(r_pars);
-  auto internal = T::build_internal(r_pars);
-
   auto time = to_double(r_time, "time");
   auto dt = to_double(r_dt, "r_dt");
   auto n_particles = to_size(r_n_particles, "n_particles");
+  auto n_groups = to_size(r_n_groups, "n_groups");
+
+  std::vector<T::shared_state> shared;
+  std::vector<T::internal_state> internal;
+
+  size_t size = 0;
+  cpp11::sexp group_names = R_NilValue;
+  if (n_groups == 0) {
+    shared.push_back(T::build_shared(r_pars));
+    internal.push_back(T::build_shared(r_pars, shared));
+    size = T::size(shared[0]);
+  } else {
+    if (r_pars.size() != n_groups) {
+      cpp11::stop("Expected 'pars' to have length %d to match n_groups",
+                  n_groups)
+    }
+    for (size_t i = 0; i < n_groups; ++i) {
+      shared.push_back(T::build_shared(r_pars[i]));
+      internal.push_back(T::build_shared(r_pars[i], shared));
+      if (i == 0) {
+        size = T::size(shared[i]);
+      } else if (T::size(shared[i]) != size) {
+        cpp11::stop("Invalid size generated for group %d", i + 1);
+      }
+    }
+    group_names = r_pars.attr("names");
+  }
+
   auto seed = mcstate::random::r::as_rng_seed<rng_state_type>(r_seed);
   auto deterministic = to_bool(r_deterministic, "deterministic");
 

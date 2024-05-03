@@ -37,6 +37,8 @@ public:
     return 1;
   }
 
+  // This is the bit that we'll use to do fast parameter updating, and
+  // we'll guarantee somewhere that the size does not change.
   static void update_shared(cpp11::list pars, shared_state& shared) {
     const cpp11::sexp r_sd = pars["sd"];
     if (r_sd != R_NilValue) {
@@ -87,7 +89,8 @@ public:
   }
 
   // This one could be optional
-  static internal_state build_internal(cpp11::list pars) {
+  static internal_state build_internal(cpp11::list pars,
+                                       const shared_type& shared) {
     return walk::internal_state{};
   }
 };
