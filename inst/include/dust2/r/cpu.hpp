@@ -33,7 +33,12 @@ SEXP dust2_cpu_alloc(cpp11::list r_pars,
                              seed, deterministic);
   cpp11::external_pointer<dust_cpu<T>> ptr(obj, true, false);
 
-  return cpp11::writable::list({ptr});
+  // Later, we'll export a bit more back from the model (in particular
+  // models need to provide information about how they organise
+  // variables, ode models report computed control, etc.
+  auto size = T::size(shared);
+
+  return cpp11::writable::list{ptr, cpp11::as_sexp(size)};
 }
 
 template <typename T>
