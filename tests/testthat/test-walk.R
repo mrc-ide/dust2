@@ -79,7 +79,7 @@ test_that("require that dt is 1 for now", {
 
 
 ## Not a test at all of the model, but of the error handling in
-## r/helpers.hpp
+## helpers.hpp
 test_that("validate inputs", {
   pars <- list(sd = 1, random_initial = TRUE)
   expect_error(
