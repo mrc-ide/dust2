@@ -31,7 +31,7 @@ public:
     rng_(n_particles_, seed, deterministic) {
     // TODO: above, filter states need adding here too.
     if (dt != 1) {
-      throw std::runtime_error("Assuming dt = 1 for now");
+      throw std::runtime_error("Requiring dt = 1 for now");
     }
   }
 

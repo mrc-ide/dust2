@@ -5,7 +5,7 @@ namespace r {
 
 inline void check_scalar(cpp11::sexp x, const char * name) {
   if (LENGTH(x) != 1) {
-    cpp11::stop("'%s' must be scalar", name);
+    cpp11::stop("'%s' must be a scalar", name);
   }
 }
 
