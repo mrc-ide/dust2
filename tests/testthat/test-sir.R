@@ -16,9 +16,6 @@ test_that("can run simple sir model", {
   s0 <- dust2_cpu_sir_state(ptr)
   expect_equal(s0, rep(c(990, 10, 0, 0, 0), 10))
 
-  r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
-  cmp <- sir_cmp$new(pars)
-
   expect_null(dust2_cpu_sir_run_steps(ptr, 30))
   s1 <- matrix(dust2_cpu_sir_state(ptr), 5)
   expect_true(all(s1[1, ] < 990))
