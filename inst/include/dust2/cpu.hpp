@@ -132,6 +132,21 @@ public:
     fn(shared_[i]);
   }
 
+  // This will need some changes once we have different data entries
+  // across particles
+  template <typename It>
+  void compare_data(const typename T::data_type& data, It it) {
+    const real_type * state_data = state_.data();
+    for (size_t i = 0; i < n_groups_; ++i) {
+      for (size_t j = 0; j < n_particles_; ++j, ++it) {
+        const auto k = n_particles_ * i + j;
+        const auto offset = k * n_state_;
+        *it = T::compare_data(time_, dt_, state_data + offset, data,
+                              shared_[i], internal_[i], rng_.state(k));
+      }
+    }
+  }
+
 private:
   size_t n_state_;
   size_t n_particles_;

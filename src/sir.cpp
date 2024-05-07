@@ -49,3 +49,9 @@ SEXP dust2_cpu_sir_set_state(cpp11::sexp ptr, cpp11::sexp r_state) {
 SEXP dust2_cpu_sir_rng_state(cpp11::sexp ptr) {
   return dust2::r::dust2_cpu_rng_state<sir>(ptr);
 }
+
+[[cpp11::register]]
+SEXP dust2_cpu_sir_compare_data(cpp11::sexp ptr,
+                                cpp11::sexp r_data) {
+  return dust2::r::dust2_cpu_compare_data<sir>(ptr, r_data);
+}

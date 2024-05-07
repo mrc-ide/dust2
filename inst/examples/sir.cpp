@@ -70,7 +70,6 @@ public:
     state_next[4] = n_SI;
   }
 
-  // Then, rather than a constructor we have some converters:
   static shared_state build_shared(cpp11::list pars) {
     const real_type I0 = with_default(10, pars["I0"]);
     const real_type N = with_default(1000, pars["N"]);
@@ -83,12 +82,18 @@ public:
     return shared_state{N, I0, beta, gamma, exp_noise};
   }
 
-  // This one could be optional
   static internal_state build_internal(cpp11::list pars) {
     return sir::internal_state{};
   }
 
-  static real_type compare_data(const real_type * state,
+  static data_type build_data(cpp11::sexp r_data) {
+    auto data = static_cast<cpp11::list>(r_data);
+    return data_type{cpp11::as_cpp<real_type>(data["incidence"])};
+  }
+
+  static real_type compare_data(const real_type time,
+                                const real_type dt,
+                                const real_type * state,
                                 const data_type& data,
                                 const shared_state& shared,
                                 internal_state& internal,

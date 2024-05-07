@@ -170,5 +170,17 @@ SEXP dust2_cpu_update_pars(cpp11::sexp ptr, cpp11::list r_pars,
   return R_NilValue;
 }
 
+// This one exists to help push around the comparison part of things;
+// it's not expected to be called often by users.
+template <typename T>
+SEXP dust2_cpu_compare_data(cpp11::sexp ptr,
+                            cpp11::sexp r_data) {
+  auto *obj = cpp11::as_cpp<cpp11::external_pointer<dust_cpu<T>>>(ptr).get();
+  const auto data = T::build_data(r_data);
+  cpp11::writable::doubles ret(obj->n_particles());
+  obj->compare_data(data, REAL(ret));
+  return ret;
+}
+
 }
 }

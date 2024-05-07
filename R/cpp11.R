@@ -28,6 +28,10 @@ dust2_cpu_sir_rng_state <- function(ptr) {
   .Call(`_dust2_dust2_cpu_sir_rng_state`, ptr)
 }
 
+dust2_cpu_sir_compare_data <- function(ptr, r_data) {
+  .Call(`_dust2_dust2_cpu_sir_compare_data`, ptr, r_data)
+}
+
 dust2_cpu_walk_alloc <- function(r_pars, r_time, r_dt, r_n_particles, r_n_groups, r_seed, r_deterministic) {
   .Call(`_dust2_dust2_cpu_walk_alloc`, r_pars, r_time, r_dt, r_n_particles, r_n_groups, r_seed, r_deterministic)
 }
