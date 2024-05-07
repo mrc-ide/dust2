@@ -3,6 +3,7 @@
 // This will likely move around a bit.  Also note that we have an odd
 // choice of directory here.
 #include <mcstate/random/random.hpp>
+#include <mcstate/random/density.hpp>
 
 namespace dust2 {
 
