@@ -145,3 +145,23 @@ test_that("return names passed in with groups", {
   obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 4, 42, FALSE)
   expect_equal(obj[[3]], letters[1:4])
 })
+
+
+test_that("can create multi-state walk model", {
+  pars <- list(len = 3, sd = 1, random_initial = TRUE)
+  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
+  expect_equal(obj[[2]], 3)
+  ptr <- obj[[1]]
+  expect_equal(dust2_cpu_walk_state(ptr), rep(0, 30))
+  expect_null(dust2_cpu_walk_set_state_initial(ptr))
+
+  r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
+  s0 <- dust2_cpu_walk_state(ptr)
+  expect_equal(s0, c(r$normal(3, 0, 1)))
+
+  expect_null(dust2_cpu_walk_run_steps(ptr, 5))
+  s1 <- dust2_cpu_walk_state(ptr)
+
+  cmp <- r$normal(3 * 5, 0, 1)
+  expect_equal(s1, s0 + c(apply(array(cmp, c(3, 5, 10)), c(1, 3), sum)))
+})
