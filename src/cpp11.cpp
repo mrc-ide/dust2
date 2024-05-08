@@ -61,6 +61,13 @@ extern "C" SEXP _dust2_dust2_cpu_walk_set_time(SEXP ptr, SEXP r_time) {
     return cpp11::as_sexp(dust2_cpu_walk_set_time(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time)));
   END_CPP11
 }
+// walk.cpp
+SEXP dust2_cpu_walk_update_pars(cpp11::sexp ptr, cpp11::list pars, bool grouped);
+extern "C" SEXP _dust2_dust2_cpu_walk_update_pars(SEXP ptr, SEXP pars, SEXP grouped) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_cpu_walk_update_pars(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(pars), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+  END_CPP11
+}
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
@@ -72,6 +79,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_cpu_walk_set_time",          (DL_FUNC) &_dust2_dust2_cpu_walk_set_time,          2},
     {"_dust2_dust2_cpu_walk_state",             (DL_FUNC) &_dust2_dust2_cpu_walk_state,             1},
     {"_dust2_dust2_cpu_walk_time",              (DL_FUNC) &_dust2_dust2_cpu_walk_time,              1},
+    {"_dust2_dust2_cpu_walk_update_pars",       (DL_FUNC) &_dust2_dust2_cpu_walk_update_pars,       3},
     {NULL, NULL, 0}
 };
 }

@@ -113,6 +113,17 @@ public:
     rng_.import_state();
   }
 
+  template<typename Fn>
+  void update_shared(size_t i, Fn fn) {
+    // TODO: check that size was not modified, error if so (quite a
+    // bit later).
+    fn(shared_[i]);
+  }
+
+  auto n_groups() const {
+    return n_groups_;
+  }
+
 private:
   size_t n_state_;
   size_t n_particles_;
