@@ -20,8 +20,8 @@ SEXP dust2_cpu_alloc(cpp11::list r_pars,
   using internal_state = typename T::internal_state;
   using rng_state_type = typename T::rng_state_type;
 
-  auto time = check_time(r_time);
-  auto dt = check_dt(r_dt);
+  const auto time = check_time(r_time);
+  const auto dt = check_dt(r_dt);
 
   auto n_particles = to_size(r_n_particles, "n_particles");
   auto n_groups = to_size(r_n_groups, "n_groups");
@@ -113,6 +113,14 @@ SEXP dust2_cpu_rng_state(cpp11::sexp ptr) {
   cpp11::writable::raws ret(len);
   std::memcpy(RAW(ret), state.data(), len);
   return ret;
+}
+
+template <typename T>
+SEXP dust2_cpu_set_time(cpp11::sexp ptr, cpp11::sexp r_time) {
+  auto *obj = cpp11::as_cpp<cpp11::external_pointer<dust_cpu<T>>>(ptr).get();
+  const auto time = check_time(r_time);
+  obj->set_time(time);
+  return R_NilValue;
 }
 
 }

@@ -211,3 +211,17 @@ test_that("require that parameter length matches requested number of groups", {
     dust2_cpu_walk_alloc(pars, 0, 1, 10, 3, 42, FALSE),
     "Expected 'pars' to have length 3 to match 'n_groups'")
 })
+
+
+test_that("can set time", {
+  pars <- list(sd = 1, random_initial = TRUE)
+  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
+  ptr <- obj[[1]]
+  expect_equal(dust2_cpu_walk_time(ptr), 0)
+  expect_null(dust2_cpu_walk_set_time(ptr, 4))
+  expect_equal(dust2_cpu_walk_time(ptr), 4)
+  expect_null(dust2_cpu_walk_set_time(ptr, 0))
+  expect_equal(dust2_cpu_walk_time(ptr), 0)
+  expect_error(dust2_cpu_walk_set_time(ptr, 0.5),
+               "Expected 'time' to be integer-like")
+})

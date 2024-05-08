@@ -94,6 +94,9 @@ public:
     return state_;
   }
 
+  // Fairly useless getter/setter - we might better exposing time
+  // directly as a field.  However, for the MPI and GPU version this
+  // will almost certainly do something.
   auto time() const {
     return time_;
   }
