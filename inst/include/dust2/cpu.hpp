@@ -24,7 +24,7 @@ public:
     n_particles_(n_particles),
     n_groups_(shared.size()),
     n_particles_total_(n_particles_ * n_groups_),
-    state_(n_state_ * n_particles_),
+    state_(n_state_ * n_particles_total_),
     state_next_(n_state_ * n_particles_total_),
     shared_(shared),
     internal_(internal),
@@ -57,7 +57,7 @@ public:
     // approaches.
     for (size_t i = 0; i < n_groups_; ++i) {
       for (size_t j = 0; j < n_particles_; ++j) {
-        const auto k = n_groups_ * i + j;
+        const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
         run_particle(time_, dt_, n_steps,
                      shared_[i], internal_[i],
@@ -81,7 +81,7 @@ public:
     real_type * state_data = state_.data();
     for (size_t i = 0; i < n_groups_; ++i) {
       for (size_t j = 0; j < n_particles_; ++j) {
-        const auto k = n_groups_ * i + j;
+        const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
         T::initial(time_, dt_,
                    shared_[i], internal_[i],

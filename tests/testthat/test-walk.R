@@ -122,3 +122,26 @@ test_that("validate inputs", {
     dust2_cpu_walk_alloc(pars, 5, 1, 10, 0, 42, 1),
     "'deterministic' must be scalar logical")
 })
+
+
+test_that("can initialise multiple groups with different parameter sets", {
+  pars <- lapply(1:4, function(sd) list(sd = sd, random_initial = TRUE))
+  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 4, 42, FALSE)
+  ptr <- obj[[1]]
+  expect_equal(dust2_cpu_walk_state(ptr), rep(0, 40))
+
+  expect_null(dust2_cpu_walk_run_steps(ptr, 3))
+  s <- dust2_cpu_walk_state(ptr)
+
+  r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 40)
+  expect_equal(s, colSums(r$normal(3, 0, 1)) * rep(1:4, each = 10))
+  expect_equal(dust2_cpu_walk_time(ptr), 3)
+})
+
+
+test_that("return names passed in with groups", {
+  pars <- lapply(1:4, function(sd) list(sd = sd, random_initial = TRUE))
+  names(pars) <- letters[1:4]
+  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 4, 42, FALSE)
+  expect_equal(obj[[3]], letters[1:4])
+})
