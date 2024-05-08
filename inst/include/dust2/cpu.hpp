@@ -13,23 +13,34 @@ public:
 
   using rng_int_type = typename rng_state_type::int_type;
 
-  dust_cpu(shared_state shared,
-           internal_state internal,
+  dust_cpu(std::vector<shared_state> shared,
+           std::vector<internal_state> internal,
            real_type time,
            real_type dt,
-           size_t n_particles,
+           size_t n_particles, // per group
            const std::vector<rng_int_type>& seed,
            bool deterministic) :
+    n_state_(T::size(shared[0])),
     n_particles_(n_particles),
-    n_state_(T::size(shared)),
+    n_groups_(shared.size()),
+    n_particles_total_(n_particles_ * n_groups_),
     state_(n_state_ * n_particles_),
-    state_next_(n_state_ * n_particles_),
+    state_next_(n_state_ * n_particles_total_),
     shared_(shared),
     internal_(internal),
     time_(time),
     dt_(dt),
-    rng_(n_particles_, seed, deterministic) {
-    // TODO: above, filter states need adding here too.
+    rng_(n_particles_total_, seed, deterministic) {
+    // TODO: above, filter rng states need adding here too, or
+    // somewhere at least (we might move the filter elsewhere though,
+    // in which case that particular bit of weirdness goes away).
+    for (size_t i = 1; i < n_groups_; ++i) {
+      if (T::size(shared[i]) != n_state_) {
+        // TODO: we should throw a better error message here, with an
+        // indication of the implied size, I think.
+        throw std::runtime_error("Groups do not all have the same state size");
+      }
+    }
     if (dt != 1) {
       throw std::runtime_error("Requiring dt = 1 for now");
     }
@@ -39,14 +50,21 @@ public:
     // Ignore errors for now.
     real_type * state_data = state_.data();
     real_type * state_next_data = state_next_.data();
-    // Later we parallelise this and track errors carefully.
-    for (size_t i = 0; i < n_particles_; ++i) {
-      const auto offset = i * n_state_;
-      run_particle(time_, dt_, n_steps,
-                   shared_, internal_,
-                   state_data + offset,
-                   rng_.state(i),
-                   state_next_data + offset);
+
+    // Later we parallelise this and track errors carefully.  We
+    // should be able to parallelise with 'pragma omp parallel for
+    // collapse(2)' here, but for MPI we might investigate other
+    // approaches.
+    for (size_t i = 0; i < n_groups_; ++i) {
+      for (size_t j = 0; j < n_particles_; ++j) {
+        const auto k = n_groups_ * i + j;
+        const auto offset = k * n_state_;
+        run_particle(time_, dt_, n_steps,
+                     shared_[i], internal_[i],
+                     state_data + offset,
+                     rng_.state(k),
+                     state_next_data + offset);
+      }
     }
     if (n_steps % 2 == 1) {
       std::swap(state_, state_next_);
@@ -61,12 +79,15 @@ public:
 
   void set_state_initial() {
     real_type * state_data = state_.data();
-    for (size_t i = 0; i < n_particles_; ++i) {
-      const auto offset = i * n_state_;
-      T::initial(time_, dt_,
-                 shared_, internal_,
-                 rng_.state(i),
-                 state_data + offset);
+    for (size_t i = 0; i < n_groups_; ++i) {
+      for (size_t j = 0; j < n_particles_; ++j) {
+        const auto k = n_groups_ * i + j;
+        const auto offset = k * n_state_;
+        T::initial(time_, dt_,
+                   shared_[i], internal_[i],
+                   rng_.state(k),
+                   state_data + offset);
+      }
     }
   }
 
@@ -89,7 +110,7 @@ public:
     time_ = time;
   }
 
-  auto rng_state() { // TOOD: should be const, error in mcstate2
+  auto rng_state() { // TODO: should be const, error in mcstate2
     return rng_.export_state();
   }
 
@@ -98,12 +119,14 @@ public:
   }
 
 private:
-  size_t n_particles_;
   size_t n_state_;
+  size_t n_particles_;
+  size_t n_groups_;
+  size_t n_particles_total_;
   std::vector<real_type> state_;
   std::vector<real_type> state_next_;
-  shared_state shared_;
-  internal_state internal_;
+  std::vector<shared_state> shared_;
+  std::vector<internal_state> internal_;
   real_type time_;
   real_type dt_;
   mcstate::random::prng<rng_state_type> rng_;

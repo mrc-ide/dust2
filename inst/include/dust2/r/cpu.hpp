@@ -16,6 +16,8 @@ SEXP dust2_cpu_alloc(cpp11::list r_pars,
                      cpp11::sexp r_n_groups,
                      cpp11::sexp r_seed,
                      cpp11::sexp r_deterministic) {
+  using shared_state = typename T::shared_state;
+  using internal_state = typename T::internal_state;
   using rng_state_type = typename T::rng_state_type;
 
   auto time = to_double(r_time, "time");
@@ -23,23 +25,23 @@ SEXP dust2_cpu_alloc(cpp11::list r_pars,
   auto n_particles = to_size(r_n_particles, "n_particles");
   auto n_groups = to_size(r_n_groups, "n_groups");
 
-  std::vector<T::shared_state> shared;
-  std::vector<T::internal_state> internal;
+  std::vector<shared_state> shared;
+  std::vector<internal_state> internal;
 
   size_t size = 0;
   cpp11::sexp group_names = R_NilValue;
   if (n_groups == 0) {
     shared.push_back(T::build_shared(r_pars));
-    internal.push_back(T::build_shared(r_pars, shared));
+    internal.push_back(T::build_internal(r_pars));
     size = T::size(shared[0]);
   } else {
-    if (r_pars.size() != n_groups) {
+    if (r_pars.size() != static_cast<int>(n_groups)) {
       cpp11::stop("Expected 'pars' to have length %d to match n_groups",
-                  n_groups)
+                  static_cast<int>(n_groups));
     }
     for (size_t i = 0; i < n_groups; ++i) {
       shared.push_back(T::build_shared(r_pars[i]));
-      internal.push_back(T::build_shared(r_pars[i], shared));
+      internal.push_back(T::build_internal(r_pars[i]));
       if (i == 0) {
         size = T::size(shared[i]);
       } else if (T::size(shared[i]) != size) {
@@ -59,9 +61,8 @@ SEXP dust2_cpu_alloc(cpp11::list r_pars,
   // Later, we'll export a bit more back from the model (in particular
   // models need to provide information about how they organise
   // variables, ode models report computed control, etc.
-  auto size = T::size(shared);
 
-  return cpp11::writable::list{ptr, cpp11::as_sexp(size)};
+  return cpp11::writable::list{ptr, cpp11::as_sexp(size), group_names};
 }
 
 template <typename T>

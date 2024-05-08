@@ -89,8 +89,7 @@ public:
   }
 
   // This one could be optional
-  static internal_state build_internal(cpp11::list pars,
-                                       const shared_type& shared) {
+  static internal_state build_internal(cpp11::list pars) {
     return walk::internal_state{};
   }
 };

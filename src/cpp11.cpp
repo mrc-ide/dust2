@@ -6,10 +6,10 @@
 #include <R_ext/Visibility.h>
 
 // walk.cpp
-SEXP dust2_cpu_walk_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::sexp r_n_particles, cpp11::sexp r_seed, cpp11::sexp r_deterministic);
-extern "C" SEXP _dust2_dust2_cpu_walk_alloc(SEXP r_pars, SEXP r_time, SEXP r_dt, SEXP r_n_particles, SEXP r_seed, SEXP r_deterministic) {
+SEXP dust2_cpu_walk_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic);
+extern "C" SEXP _dust2_dust2_cpu_walk_alloc(SEXP r_pars, SEXP r_time, SEXP r_dt, SEXP r_n_particles, SEXP r_n_groups, SEXP r_seed, SEXP r_deterministic) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_cpu_walk_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_dt), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_seed), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_deterministic)));
+    return cpp11::as_sexp(dust2_cpu_walk_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_dt), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_seed), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_deterministic)));
   END_CPP11
 }
 // walk.cpp
@@ -57,7 +57,7 @@ extern "C" SEXP _dust2_dust2_cpu_walk_rng_state(SEXP ptr) {
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
-    {"_dust2_dust2_cpu_walk_alloc",             (DL_FUNC) &_dust2_dust2_cpu_walk_alloc,             6},
+    {"_dust2_dust2_cpu_walk_alloc",             (DL_FUNC) &_dust2_dust2_cpu_walk_alloc,             7},
     {"_dust2_dust2_cpu_walk_rng_state",         (DL_FUNC) &_dust2_dust2_cpu_walk_rng_state,         1},
     {"_dust2_dust2_cpu_walk_run_steps",         (DL_FUNC) &_dust2_dust2_cpu_walk_run_steps,         2},
     {"_dust2_dust2_cpu_walk_set_state",         (DL_FUNC) &_dust2_dust2_cpu_walk_set_state,         2},
