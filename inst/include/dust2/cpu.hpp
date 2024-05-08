@@ -34,13 +34,10 @@ public:
     // TODO: above, filter rng states need adding here too, or
     // somewhere at least (we might move the filter elsewhere though,
     // in which case that particular bit of weirdness goes away).
-    for (size_t i = 1; i < n_groups_; ++i) {
-      if (T::size(shared[i]) != n_state_) {
-        // TODO: we should throw a better error message here, with an
-        // indication of the implied size, I think.
-        throw std::runtime_error("Groups do not all have the same state size");
-      }
-    }
+
+    // We don't check that the size is the same across all states;
+    // this should be done by the caller (similarly, we don't check
+    // that shared and internal have the same size).
     if (dt != 1) {
       throw std::runtime_error("Requiring dt = 1 for now");
     }
