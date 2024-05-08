@@ -175,3 +175,11 @@ test_that("prevent models from having different state lengths", {
     dust2_cpu_walk_alloc(pars, 0, 1, 10, 3, 42, FALSE),
     "Expected state length for group 3 to be 2, but it was 3")
 })
+
+
+test_that("require that parameter length matches requested number of groups", {
+  pars <- lapply(1:4, function(sd) list(sd = sd, random_initial = TRUE))
+  expect_error(
+    dust2_cpu_walk_alloc(pars, 0, 1, 10, 3, 42, FALSE),
+    "Expected 'pars' to have length 3 to match 'n_groups'")
+})

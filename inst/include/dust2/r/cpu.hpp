@@ -36,7 +36,7 @@ SEXP dust2_cpu_alloc(cpp11::list r_pars,
     size = T::size(shared[0]);
   } else {
     if (r_pars.size() != static_cast<int>(n_groups)) {
-      cpp11::stop("Expected 'pars' to have length %d to match n_groups",
+      cpp11::stop("Expected 'pars' to have length %d to match 'n_groups'",
                   static_cast<int>(n_groups));
     }
     for (size_t i = 0; i < n_groups; ++i) {
