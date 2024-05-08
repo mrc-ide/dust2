@@ -42,10 +42,12 @@ SEXP dust2_cpu_alloc(cpp11::list r_pars,
     for (size_t i = 0; i < n_groups; ++i) {
       shared.push_back(T::build_shared(r_pars[i]));
       internal.push_back(T::build_internal(r_pars[i]));
+      const auto size_i = T::size(shared[i]);
       if (i == 0) {
-        size = T::size(shared[i]);
-      } else if (T::size(shared[i]) != size) {
-        cpp11::stop("Invalid size generated for group %d", i + 1);
+        size = size_i;
+      } else if (size_i != size) {
+        cpp11::stop("Expected state length for group %d to be %d, but it was %d",
+                    i + 1, size, size_i);
       }
     }
     group_names = r_pars.attr("names");

@@ -165,3 +165,13 @@ test_that("can create multi-state walk model", {
   cmp <- r$normal(3 * 5, 0, 1)
   expect_equal(s1, s0 + c(apply(array(cmp, c(3, 5, 10)), c(1, 3), sum)))
 })
+
+
+test_that("prevent models from having different state lengths", {
+  pars <- list(list(sd = 1, len = 2),
+               list(sd = 2, len = 2),
+               list(sd = 3, len = 3))
+  expect_error(
+    dust2_cpu_walk_alloc(pars, 0, 1, 10, 3, 42, FALSE),
+    "Expected state length for group 3 to be 2, but it was 3")
+})
