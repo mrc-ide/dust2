@@ -52,6 +52,37 @@ inline bool to_bool(cpp11::sexp x, const char * name) {
   cpp11::stop("'%s' must be scalar logical", name);
 }
 
+template <typename T>
+bool is_integer_like(T x, T eps) {
+  return std::abs(x - round(x)) <= eps;
+}
+
+inline double check_time(cpp11::sexp r_time) {
+  const auto time = to_double(r_time, "time");
+  const auto eps = 1e-8;
+  // We can relax this later and carefully align time onto a grid
+  if (!is_integer_like(time, eps)) {
+    throw std::runtime_error("Expected 'time' to be integer-like");
+  }
+  return time;
+}
+
+inline double check_dt(cpp11::sexp r_dt) {
+  const auto dt = to_double(r_dt, "dt");
+  const auto eps = 1e-8;
+  if (dt <= 0) {
+    cpp11::stop("Expected 'dt' to be greater than 0");
+  }
+  if (dt > 1) {
+    cpp11::stop("Expected 'dt' to be at most 1");
+  }
+  const auto inv_dt = 1 / dt;
+  if (!is_integer_like(inv_dt, eps)) {
+    throw std::runtime_error("Expected 'dt' to be the inverse of an integer");
+  }
+  return dt;
+}
+
 // template <typename real_type>
 // inline cpp11::sexp to_matrix(std::vector<real_type> x, size_t nr, size_t nc) {
 //   cpp11::writable::integers dim{static_cast<int>(nr), static_cast<int>(nc)};

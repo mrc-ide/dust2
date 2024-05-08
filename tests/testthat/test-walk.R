@@ -71,12 +71,40 @@ test_that("can run deterministically", {
 })
 
 
-test_that("require that dt is 1 for now", {
+test_that("Allow fractional dt", {
+  pars <- list(sd = 1, random_initial = TRUE)
+  obj <- dust2_cpu_walk_alloc(pars, 0, 0.5, 10, 0, 42, FALSE)
+  ptr <- obj[[1]]
+  expect_equal(dust2_cpu_walk_time(ptr), 0)
+  expect_null(dust2_cpu_walk_run_steps(ptr, 3))
+  expect_equal(dust2_cpu_walk_time(ptr), 1.5)
+  expect_null(dust2_cpu_walk_run_steps(ptr, 5))
+  expect_equal(dust2_cpu_walk_time(ptr), 4)
+})
+
+
+test_that("provided dt is reasonable", {
   pars <- list(sd = 1, random_initial = TRUE)
   expect_error(
-    dust2_cpu_walk_alloc(pars, 0, 0.5, 10, 0, 42, FALSE),
-    "Requiring dt = 1 for now",
-    fixed = TRUE)
+    dust2_cpu_walk_alloc(pars, 0, 0, 10, 0, 42, FALSE),
+    "Expected 'dt' to be greater than 0")
+  expect_error(
+    dust2_cpu_walk_alloc(pars, 0, -1, 10, 0, 42, FALSE),
+    "Expected 'dt' to be greater than 0")
+  expect_error(
+    dust2_cpu_walk_alloc(pars, 0, 1.5, 10, 0, 42, FALSE),
+    "Expected 'dt' to be at most 1")
+  expect_error(
+    dust2_cpu_walk_alloc(pars, 0, sqrt(2) / 2, 10, 0, 42, FALSE),
+    "Expected 'dt' to be the inverse of an integer")
+})
+
+
+test_that("time starts as an integer", {
+  pars <- list(sd = 1, random_initial = TRUE)
+  expect_error(
+    dust2_cpu_walk_alloc(pars, 1.5, 1, 10, 0, 42, FALSE),
+    "Expected 'time' to be integer-like")
 })
 
 

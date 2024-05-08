@@ -20,8 +20,9 @@ SEXP dust2_cpu_alloc(cpp11::list r_pars,
   using internal_state = typename T::internal_state;
   using rng_state_type = typename T::rng_state_type;
 
-  auto time = to_double(r_time, "time");
-  auto dt = to_double(r_dt, "r_dt");
+  auto time = check_time(r_time);
+  auto dt = check_dt(r_dt);
+
   auto n_particles = to_size(r_n_particles, "n_particles");
   auto n_groups = to_size(r_n_groups, "n_groups");
 
