@@ -154,6 +154,31 @@ SEXP dust2_cpu_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool grouped) {
   return R_NilValue;
 }
 
+// Not really intended to be called by users, this just helps us test
+// bookkeeping really.
+template <typename T>
+SEXP dust2_cpu_reorder(cpp11::sexp ptr, cpp11::integers r_index) {
+  auto *obj = cpp11::as_cpp<cpp11::external_pointer<dust_cpu<T>>>(ptr).get();
+  const auto n_particles = obj->n_particles();
+  const auto n_groups = obj->n_groups();
+  const int len = n_particles * n_groups;
+  // We really should expect a matrix perhaps, but this test will
+  // catch that confusingly at least.  Users won't actually call this.
+  if (r_index.size() != len) {
+    cpp11::stop("Expected an index of length %d", len);
+  }
+  std::vector<size_t> index;
+  index.reserve(len);
+  for (auto i : r_index) {
+    if (i < 1 || i > len) {
+      cpp11::stop("Expected 'index' values to lie in [1, %d]", n_particles);
+    }
+    index.push_back(i - 1);
+  }
+  obj->reorder(index.begin());
+  return R_NilValue;
+}
+
 template <typename T>
 SEXP dust2_cpu_rng_state(cpp11::sexp ptr) {
   using rng_state_type = typename T::rng_state_type;

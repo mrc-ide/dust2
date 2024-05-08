@@ -104,6 +104,20 @@ public:
     }
   }
 
+  template <typename It>
+  void reorder(It it) {
+    for (size_t i = 0; i < n_groups_; ++i) {
+      for (size_t j = 0; j < n_particles_; ++j) {
+        const auto k_to = n_particles_ * i + j;
+        const auto k_from = n_particles_ * i + *(it + k_to);
+        std::copy_n(state_.begin() + k_from * n_state_,
+                    n_state_,
+                    state_next_.begin() + k_to * n_state_);
+      }
+    }
+    std::swap(state_, state_next_);
+  }
+
   auto& state() const {
     return state_;
   }

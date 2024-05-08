@@ -376,3 +376,16 @@ test_that("can set ungrouped state into grouped model", {
   expect_equal(dust2_cpu_walk_state(ptr, TRUE),
                array(s, c(3, 10, 4)))
 })
+
+
+test_that("can reorder state", {
+  pars <- list(sd = 1, random_initial = TRUE)
+  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
+  ptr <- obj[[1]]
+  expect_null(dust2_cpu_walk_set_state_initial(ptr))
+  s1 <- dust2_cpu_walk_state(ptr)
+  i <- sample(10, replace = TRUE)
+  expect_null(dust2_cpu_walk_reorder(ptr, i))
+  s2 <- dust2_cpu_walk_state(ptr)
+  expect_equal(s2, s1[i])
+})
