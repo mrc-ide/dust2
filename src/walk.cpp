@@ -26,8 +26,8 @@ SEXP dust2_cpu_walk_run_steps(cpp11::sexp ptr, cpp11::sexp r_n_steps) {
 }
 
 [[cpp11::register]]
-SEXP dust2_cpu_walk_state(cpp11::sexp ptr) {
-  return dust2::r::dust2_cpu_state<walk>(ptr);
+SEXP dust2_cpu_walk_state(cpp11::sexp ptr, bool grouped) {
+  return dust2::r::dust2_cpu_state<walk>(ptr, grouped);
 }
 
 [[cpp11::register]]

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <numeric>
+
 namespace dust2 {
 namespace r {
 
@@ -83,14 +85,21 @@ inline double check_dt(cpp11::sexp r_dt) {
   return dt;
 }
 
-// template <typename real_type>
-// inline cpp11::sexp to_matrix(std::vector<real_type> x, size_t nr, size_t nc) {
-//   cpp11::writable::integers dim{static_cast<int>(nr), static_cast<int>(nc)};
-//   cpp11::writable::doubles ret(x.size());
-//   std::copy(x.begin(), x.end(), REAL(ret));
-//   ret.attr("dim") = dim;
-//   return ret;
-// }
+// The initializer_list is a type-safe variadic-like approach.
+template <typename It>
+cpp11::sexp export_array_n(It it, std::initializer_list<size_t> dims) {
+  const auto len =
+    std::accumulate(dims.begin(), dims.end(), 1, std::multiplies<>{});
+  cpp11::writable::integers r_dim(dims.size());
+  auto dim_i = dims.begin();
+  for (size_t i = 0; i < dims.size(); ++i, ++dim_i) {
+    r_dim[i] = *dim_i;
+  }
+  cpp11::writable::doubles ret(len);
+  std::copy_n(it, len, ret.begin());
+  ret.attr("dim") = r_dim;
+  return ret;
+}
 
 }
 }

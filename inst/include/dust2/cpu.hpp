@@ -101,6 +101,18 @@ public:
     return time_;
   }
 
+  auto n_state() const {
+    return n_state_;
+  }
+
+  auto n_particles() const {
+    return n_particles_;
+  }
+
+  auto n_groups() const {
+    return n_groups_;
+  }
+
   void set_time(real_type time) {
     time_ = time;
   }

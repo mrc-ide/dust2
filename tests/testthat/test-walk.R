@@ -11,14 +11,14 @@ test_that("can run simple walk model", {
   expect_type(dust2_cpu_walk_rng_state(ptr), "raw")
   expect_length(dust2_cpu_walk_rng_state(ptr), 32 * 10)
 
-  expect_equal(dust2_cpu_walk_state(ptr), rep(0, 10))
+  expect_equal(dust2_cpu_walk_state(ptr, FALSE), matrix(0, 1, 10))
   expect_equal(dust2_cpu_walk_time(ptr), 0)
 
   expect_null(dust2_cpu_walk_run_steps(ptr, 3))
-  s <- dust2_cpu_walk_state(ptr)
+  s <- dust2_cpu_walk_state(ptr, FALSE)
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
-  expect_equal(s, colSums(r$normal(3, 0, 1)))
+  expect_equal(s, rbind(colSums(r$normal(3, 0, 1))))
   expect_equal(dust2_cpu_walk_time(ptr), 3)
 })
 
@@ -29,13 +29,14 @@ test_that("can set model state from a vector", {
   ptr <- obj[[1]]
   s <- runif(10)
   expect_null(dust2_cpu_walk_set_state(ptr, s))
-  expect_equal(dust2_cpu_walk_state(ptr), s)
+  expect_equal(dust2_cpu_walk_state(ptr, FALSE),
+               rbind(s, deparse.level = 0))
 
   expect_null(dust2_cpu_walk_run_steps(ptr, 3))
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
-  expect_equal(dust2_cpu_walk_state(ptr),
-               colSums(r$normal(3, 0, 1)) + s)
+  expect_equal(dust2_cpu_walk_state(ptr, FALSE),
+               rbind(colSums(r$normal(3, 0, 1)) + s))
 })
 
 
@@ -45,8 +46,8 @@ test_that("can set model state from initial conditions", {
   ptr <- obj[[1]]
   expect_null(dust2_cpu_walk_set_state_initial(ptr))
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
-  expect_equal(dust2_cpu_walk_state(ptr),
-               drop(r$normal(1, 0, 1)))
+  expect_equal(dust2_cpu_walk_state(ptr, FALSE),
+               r$normal(1, 0, 1))
 })
 
 
@@ -57,8 +58,8 @@ test_that("can set model state from initial conditions with empty version", {
   obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
   ptr <- obj[[1]]
   expect_null(dust2_cpu_walk_set_state_initial(ptr))
-  expect_equal(dust2_cpu_walk_state(ptr),
-               rep(0, 10))
+  expect_equal(dust2_cpu_walk_state(ptr, FALSE),
+               matrix(0, 1, 10))
 })
 
 
@@ -67,8 +68,8 @@ test_that("can run deterministically", {
   obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, TRUE)
   ptr <- obj[[1]]
   expect_null(dust2_cpu_walk_run_steps(ptr, 3))
-  expect_equal(dust2_cpu_walk_state(ptr),
-               rep(0, 10))
+  expect_equal(dust2_cpu_walk_state(ptr, FALSE),
+               matrix(0, 1, 10))
 })
 
 
@@ -131,12 +132,12 @@ test_that("validate inputs", {
 
   expect_identical(
     dust2_cpu_walk_state(
-      dust2_cpu_walk_alloc(pars, 5, 1, 10, 0, 42, FALSE)[[1]]),
-    rep(0, 10))
+      dust2_cpu_walk_alloc(pars, 5, 1, 10, 0, 42, FALSE)[[1]], FALSE),
+    matrix(0, 1, 10))
   expect_identical(
     dust2_cpu_walk_state(
-      dust2_cpu_walk_alloc(pars, 5, 1, 10L, 0, 42, FALSE)[[1]]),
-    rep(0, 10))
+      dust2_cpu_walk_alloc(pars, 5, 1, 10L, 0, 42, FALSE)[[1]], FALSE),
+    matrix(0, 1, 10))
   expect_error(
     dust2_cpu_walk_alloc(pars, 5, 1, 9.5, 0, 42, FALSE),
     "'n_particles' must be integer-like")
@@ -157,13 +158,15 @@ test_that("can initialise multiple groups with different parameter sets", {
   pars <- lapply(1:4, function(sd) list(sd = sd, random_initial = TRUE))
   obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 4, 42, FALSE)
   ptr <- obj[[1]]
-  expect_equal(dust2_cpu_walk_state(ptr), rep(0, 40))
+  expect_equal(dust2_cpu_walk_state(ptr, TRUE), array(0, c(1, 10, 4)))
 
   expect_null(dust2_cpu_walk_run_steps(ptr, 3))
-  s <- dust2_cpu_walk_state(ptr)
+  s <- dust2_cpu_walk_state(ptr, TRUE)
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 40)
-  expect_equal(s, colSums(r$normal(3, 0, 1)) * rep(1:4, each = 10))
+  expect_equal(
+    s,
+    array(colSums(r$normal(3, 0, 1)) * rep(1:4, each = 10), c(1, 10, 4)))
   expect_equal(dust2_cpu_walk_time(ptr), 3)
 })
 
@@ -182,18 +185,19 @@ test_that("can create multi-state walk model", {
   obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
   expect_equal(obj[[2]], 3)
   ptr <- obj[[1]]
-  expect_equal(dust2_cpu_walk_state(ptr), rep(0, 30))
+  expect_equal(dust2_cpu_walk_state(ptr, FALSE), matrix(0, 3, 10))
+  expect_equal(dust2_cpu_walk_state(ptr, TRUE), array(0, c(3, 10, 1)))
   expect_null(dust2_cpu_walk_set_state_initial(ptr))
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
-  s0 <- dust2_cpu_walk_state(ptr)
-  expect_equal(s0, c(r$normal(3, 0, 1)))
+  s0 <- dust2_cpu_walk_state(ptr, FALSE)
+  expect_equal(s0, r$normal(3, 0, 1))
 
   expect_null(dust2_cpu_walk_run_steps(ptr, 5))
-  s1 <- dust2_cpu_walk_state(ptr)
+  s1 <- dust2_cpu_walk_state(ptr, FALSE)
 
   cmp <- r$normal(3 * 5, 0, 1)
-  expect_equal(s1, s0 + c(apply(array(cmp, c(3, 5, 10)), c(1, 3), sum)))
+  expect_equal(s1, s0 + apply(array(cmp, c(3, 5, 10)), c(1, 3), sum))
 })
 
 
