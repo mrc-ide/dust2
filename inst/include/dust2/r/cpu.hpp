@@ -174,11 +174,30 @@ SEXP dust2_cpu_update_pars(cpp11::sexp ptr, cpp11::list r_pars,
 // it's not expected to be called often by users.
 template <typename T>
 SEXP dust2_cpu_compare_data(cpp11::sexp ptr,
-                            cpp11::sexp r_data) {
+                            cpp11::sexp r_data,
+                            bool grouped) {
+  using data_type = typename T::data_type;
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<dust_cpu<T>>>(ptr).get();
-  const auto data = T::build_data(r_data);
-  cpp11::writable::doubles ret(obj->n_particles());
+  const auto n_groups = obj->n_groups();
+  std::vector<data_type> data;
+  if (grouped) {
+    auto r_data_list = cpp11::as_cpp<cpp11::list>(r_data);
+    check_length(r_data_list, n_groups, "data");
+    for (size_t i = 0; i < n_groups; ++i) {
+      data.push_back(T::build_data(r_data_list[i]));
+    }
+  } else {
+    if (n_groups > 1) {
+      cpp11::stop("Can't compare with grouped = FALSE with more than one group");
+    }
+    data.push_back(T::build_data(r_data));
+  }
+
+  cpp11::writable::doubles ret(obj->n_particles() * obj->n_groups());
   obj->compare_data(data, REAL(ret));
+  if (grouped) {
+    set_array_dims(ret, {obj->n_particles(), obj->n_groups()});
+  }
   return ret;
 }
 
