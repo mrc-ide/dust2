@@ -132,8 +132,6 @@ public:
     fn(shared_[i]);
   }
 
-  // This will need some changes once we have different data entries
-  // across particles
   template <typename It>
   void compare_data(const std::vector<data_type>& data, It it) {
     const real_type * state_data = state_.data();
