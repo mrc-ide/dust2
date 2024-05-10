@@ -90,7 +90,7 @@ public:
     std::copy_n(it, state_.size(), state_.begin());
   }
 
-  auto state() const {
+  auto& state() const {
     return state_;
   }
 

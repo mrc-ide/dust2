@@ -83,14 +83,16 @@ SEXP dust2_cpu_run_steps(cpp11::sexp ptr, cpp11::sexp r_n_steps) {
 template <typename T>
 SEXP dust2_cpu_state(cpp11::sexp ptr, bool grouped) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<dust_cpu<T>>>(ptr).get();
-  const auto state = obj->state().begin();
+  cpp11::sexp ret = R_NilValue;
+  const auto it = obj->state().begin();
   if (grouped) {
-    return export_array_n(state,
-                          {obj->n_state(), obj->n_particles(), obj->n_groups()});
+    ret = export_array_n(it,
+                         {obj->n_state(), obj->n_particles(), obj->n_groups()});
   } else {
-    return export_array_n(state,
-                          {obj->n_state(), obj->n_particles() * obj->n_groups()});
+    ret = export_array_n(it,
+                         {obj->n_state(), obj->n_particles() * obj->n_groups()});
   }
+  return ret;
 }
 
 template <typename T>
