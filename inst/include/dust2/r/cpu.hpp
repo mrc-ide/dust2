@@ -31,7 +31,8 @@ SEXP dust2_cpu_alloc(cpp11::list r_pars,
 
   size_t size = 0;
   cpp11::sexp group_names = R_NilValue;
-  if (n_groups == 0) {
+  const auto grouped = n_groups > 0;
+  if (!grouped) {
     shared.push_back(T::build_shared(r_pars));
     internal.push_back(T::build_internal(r_pars));
     size = T::size(shared[0]);
@@ -62,10 +63,13 @@ SEXP dust2_cpu_alloc(cpp11::list r_pars,
   cpp11::external_pointer<dust_cpu<T>> ptr(obj, true, false);
 
   // Later, we'll export a bit more back from the model (in particular
-  // models need to provide information about how they organise
-  // variables, ode models report computed control, etc.
+  // models need to provide information about ~how they organise
+  // variables~, ode models report computed control, etc.
 
-  return cpp11::writable::list{ptr, cpp11::as_sexp(size), group_names};
+  cpp11::sexp r_size = cpp11::as_sexp(size);
+  cpp11::sexp r_grouped = cpp11::as_sexp(grouped);
+
+  return cpp11::writable::list{ptr, r_size, r_grouped, group_names};
 }
 
 template <typename T>
@@ -120,6 +124,29 @@ SEXP dust2_cpu_set_time(cpp11::sexp ptr, cpp11::sexp r_time) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<dust_cpu<T>>>(ptr).get();
   const auto time = check_time(r_time);
   obj->set_time(time);
+  return R_NilValue;
+}
+
+template <typename T>
+SEXP dust2_cpu_update_pars(cpp11::sexp ptr, cpp11::list r_pars,
+                           bool grouped) {
+  auto *obj = cpp11::as_cpp<cpp11::external_pointer<dust_cpu<T>>>(ptr).get();
+  if (grouped) {
+    const auto n_groups = obj->n_groups();
+    if (r_pars.size() != static_cast<int>(n_groups)) {
+      cpp11::stop("Expected 'pars' to have length %d to match 'n_groups'",
+                  static_cast<int>(n_groups));
+    }
+    for (size_t i = 0; i < n_groups; ++i) {
+      obj->update_shared(i, [&] (auto& shared) {
+                              T::update_shared(r_pars[i], shared);
+                            });
+    }
+  } else {
+    obj->update_shared(0, [&] (auto& shared) {
+                            T::update_shared(r_pars, shared);
+                          });
+  }
   return R_NilValue;
 }
 

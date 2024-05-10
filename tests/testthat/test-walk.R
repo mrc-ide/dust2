@@ -1,10 +1,11 @@
 test_that("can run simple walk model", {
   pars <- list(sd = 1, random_initial = TRUE)
   obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
-  expect_length(obj, 3)
+  expect_length(obj, 4)
   expect_type(obj[[1]], "externalptr")
   expect_equal(obj[[2]], 1)
-  expect_null(obj[[3]])
+  expect_false(obj[[3]])
+  expect_null(obj[[4]])
 
   ptr <- obj[[1]]
   expect_type(dust2_cpu_walk_rng_state(ptr), "raw")
@@ -171,7 +172,8 @@ test_that("return names passed in with groups", {
   pars <- lapply(1:4, function(sd) list(sd = sd, random_initial = TRUE))
   names(pars) <- letters[1:4]
   obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 4, 42, FALSE)
-  expect_equal(obj[[3]], letters[1:4])
+  expect_true(obj[[3]])
+  expect_equal(obj[[4]], letters[1:4])
 })
 
 
@@ -224,4 +226,53 @@ test_that("can set time", {
   expect_equal(dust2_cpu_walk_time(ptr), 0)
   expect_error(dust2_cpu_walk_set_time(ptr, 0.5),
                "Expected 'time' to be integer-like")
+})
+
+
+test_that("can update parameters", {
+  pars1 <- list(sd = 1, random_initial = TRUE)
+  pars2 <- list(sd = 10)
+  obj <- dust2_cpu_walk_alloc(pars1, 0, 1, 10, 0, 42, FALSE)
+  ptr <- obj[[1]]
+
+  expect_null(dust2_cpu_walk_run_steps(ptr, 1))
+  s1 <- dust2_cpu_walk_state(ptr)
+
+  expect_null(dust2_cpu_walk_update_pars(ptr, pars2, FALSE))
+  expect_null(dust2_cpu_walk_run_steps(ptr, 1))
+  s2 <- dust2_cpu_walk_state(ptr)
+
+  r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
+  expect_equal(s1, drop(r$normal(1, 0, 1)))
+  expect_equal(s2, s1 + drop(r$normal(1, 0, 10)))
+})
+
+
+test_that("can update parameters for grouped models", {
+  pars1 <- lapply(1:4, function(sd) list(sd = sd, random_initial = TRUE))
+  pars2 <- lapply(1:4, function(sd) list(sd = 10 * sd))
+
+  obj <- dust2_cpu_walk_alloc(pars1, 0, 1, 10, 4, 42, FALSE)
+  ptr <- obj[[1]]
+
+  expect_null(dust2_cpu_walk_run_steps(ptr, 1))
+  s1 <- dust2_cpu_walk_state(ptr)
+
+  expect_null(dust2_cpu_walk_update_pars(ptr, pars2, TRUE))
+  expect_null(dust2_cpu_walk_run_steps(ptr, 1))
+  s2 <- dust2_cpu_walk_state(ptr)
+
+  r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 40)
+  expect_equal(s1, drop(r$normal(1, 0, 1)) * rep(1:4, each = 10))
+  expect_equal(s2, s1 + drop(r$normal(1, 0, 10)) * rep(1:4, each = 10))
+})
+
+
+test_that("params must be same length to update", {
+  pars1 <- lapply(1:4, function(sd) list(sd = sd, random_initial = TRUE))
+  pars2 <- lapply(1:5, function(sd) list(sd = 10 * sd))
+  obj <- dust2_cpu_walk_alloc(pars1, 0, 1, 10, 4, 42, FALSE)
+  ptr <- obj[[1]]
+  expect_error(dust2_cpu_walk_update_pars(ptr, pars2, TRUE),
+               "Expected 'pars' to have length 4 to match 'n_groups'");
 })
