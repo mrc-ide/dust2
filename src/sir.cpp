@@ -26,8 +26,8 @@ SEXP dust2_cpu_sir_run_steps(cpp11::sexp ptr, cpp11::sexp r_n_steps) {
 }
 
 [[cpp11::register]]
-SEXP dust2_cpu_sir_state(cpp11::sexp ptr) {
-  return dust2::r::dust2_cpu_state<sir>(ptr);
+SEXP dust2_cpu_sir_state(cpp11::sexp ptr, bool grouped) {
+  return dust2::r::dust2_cpu_state<sir>(ptr, grouped);
 }
 
 [[cpp11::register]]
@@ -52,6 +52,7 @@ SEXP dust2_cpu_sir_rng_state(cpp11::sexp ptr) {
 
 [[cpp11::register]]
 SEXP dust2_cpu_sir_compare_data(cpp11::sexp ptr,
-                                cpp11::sexp r_data) {
-  return dust2::r::dust2_cpu_compare_data<sir>(ptr, r_data);
+                                cpp11::sexp r_data,
+                                bool grouped) {
+  return dust2::r::dust2_cpu_compare_data<sir>(ptr, r_data, grouped);
 }

@@ -11,6 +11,12 @@ inline void check_scalar(cpp11::sexp x, const char * name) {
   }
 }
 
+inline void check_length(cpp11::sexp x, int len, const char * name) {
+  if (LENGTH(x) != len) {
+    cpp11::stop("'%s' must have length %d", name, len);
+  }
+}
+
 inline double to_double(cpp11::sexp x, const char * name) {
   check_scalar(x, name);
   if (TYPEOF(x) == REALSXP) {
@@ -99,6 +105,16 @@ cpp11::sexp export_array_n(It it, std::initializer_list<size_t> dims) {
   std::copy_n(it, len, ret.begin());
   ret.attr("dim") = r_dim;
   return ret;
+}
+
+inline void set_array_dims(cpp11::sexp data,
+                           std::initializer_list<size_t> dims) {
+  cpp11::writable::integers r_dim(dims.size());
+  auto dim_i = dims.begin();
+  for (size_t i = 0; i < dims.size(); ++i, ++dim_i) {
+    r_dim[i] = *dim_i;
+  }
+  data.attr("dim") = r_dim;
 }
 
 }

@@ -135,13 +135,13 @@ public:
   // This will need some changes once we have different data entries
   // across particles
   template <typename It>
-  void compare_data(const typename T::data_type& data, It it) {
+  void compare_data(const std::vector<data_type>& data, It it) {
     const real_type * state_data = state_.data();
     for (size_t i = 0; i < n_groups_; ++i) {
       for (size_t j = 0; j < n_particles_; ++j, ++it) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
-        *it = T::compare_data(time_, dt_, state_data + offset, data,
+        *it = T::compare_data(time_, dt_, state_data + offset, data[i],
                               shared_[i], internal_[i], rng_.state(k));
       }
     }
