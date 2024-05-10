@@ -92,21 +92,6 @@ inline double check_dt(cpp11::sexp r_dt) {
 }
 
 // The initializer_list is a type-safe variadic-like approach.
-template <typename It>
-cpp11::sexp export_array_n(It it, std::initializer_list<size_t> dims) {
-  const auto len =
-    std::accumulate(dims.begin(), dims.end(), 1, std::multiplies<>{});
-  cpp11::writable::integers r_dim(dims.size());
-  auto dim_i = dims.begin();
-  for (size_t i = 0; i < dims.size(); ++i, ++dim_i) {
-    r_dim[i] = *dim_i;
-  }
-  cpp11::writable::doubles ret(len);
-  std::copy_n(it, len, ret.begin());
-  ret.attr("dim") = r_dim;
-  return ret;
-}
-
 inline void set_array_dims(cpp11::sexp data,
                            std::initializer_list<size_t> dims) {
   cpp11::writable::integers r_dim(dims.size());
@@ -115,6 +100,16 @@ inline void set_array_dims(cpp11::sexp data,
     r_dim[i] = *dim_i;
   }
   data.attr("dim") = r_dim;
+}
+
+template <typename It>
+cpp11::sexp export_array_n(It it, std::initializer_list<size_t> dims) {
+  const auto len =
+    std::accumulate(dims.begin(), dims.end(), 1, std::multiplies<>{});
+  cpp11::writable::doubles ret(len);
+  std::copy_n(it, len, ret.begin());
+  set_array_dims(ret, dims);
+  return ret;
 }
 
 }
