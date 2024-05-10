@@ -268,7 +268,7 @@ test_that("can update parameters for grouped models", {
 })
 
 
-test_that("can update parameters for grouped models", {
+test_that("params must be same length to update", {
   pars1 <- lapply(1:4, function(sd) list(sd = sd, random_initial = TRUE))
   pars2 <- lapply(1:5, function(sd) list(sd = 10 * sd))
   obj <- dust2_cpu_walk_alloc(pars1, 0, 1, 10, 4, 42, FALSE)
