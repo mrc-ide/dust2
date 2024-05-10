@@ -38,9 +38,6 @@ public:
     // We don't check that the size is the same across all states;
     // this should be done by the caller (similarly, we don't check
     // that shared and internal have the same size).
-    if (dt != 1) {
-      throw std::runtime_error("Requiring dt = 1 for now");
-    }
   }
 
   auto run_steps(size_t n_steps) {
@@ -97,13 +94,14 @@ public:
     return state_;
   }
 
+  // Fairly useless getter/setter - we might be better exposing time
+  // directly as a field.  However, for the MPI and GPU version this
+  // will almost certainly do something.
   auto time() const {
     return time_;
   }
 
   void set_time(real_type time) {
-    // TODO: some validation needs to be done here to deal with
-    // offsets relative to dt.
     time_ = time;
   }
 
@@ -133,11 +131,11 @@ private:
                            real_type * state, rng_state_type& rng_state,
                            real_type * state_next) {
     for (size_t i = 0; i < n_steps; ++i) {
-      T::update(time, dt, state, shared, internal, rng_state, state_next);
+      T::update(time + i * dt, dt, state, shared, internal, rng_state,
+                state_next);
       std::swap(state, state_next);
     }
   }
 };
-
 
 }

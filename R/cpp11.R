@@ -27,3 +27,7 @@ dust2_cpu_walk_set_state <- function(ptr, r_state) {
 dust2_cpu_walk_rng_state <- function(ptr) {
   .Call(`_dust2_dust2_cpu_walk_rng_state`, ptr)
 }
+
+dust2_cpu_walk_set_time <- function(ptr, r_time) {
+  .Call(`_dust2_dust2_cpu_walk_set_time`, ptr, r_time)
+}
