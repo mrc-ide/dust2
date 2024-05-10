@@ -16,6 +16,7 @@ public:
   // have quite a bit of variation in exactly what is wanted to be
   // changed in different contexts.
   struct shared_state {
+    size_t len;
     real_type sd;
     bool random_initial;
   };
@@ -34,9 +35,11 @@ public:
   using rng_state_type = mcstate::random::generator<real_type>;
 
   static size_t size(const shared_state& shared) {
-    return 1;
+    return shared.len;
   }
 
+  // This is the bit that we'll use to do fast parameter updating, and
+  // we'll guarantee somewhere that the size does not change.
   static void update_shared(cpp11::list pars, shared_state& shared) {
     const cpp11::sexp r_sd = pars["sd"];
     if (r_sd != R_NilValue) {
@@ -59,10 +62,12 @@ public:
                       rng_state_type& rng_state,
                       real_type * state_next) {
     if (shared.random_initial) {
-      state_next[0] =
-        mcstate::random::normal<real_type>(rng_state, 0, shared.sd);
+      for (size_t i = 0; i < shared.len; ++i) {
+        state_next[i] =
+          mcstate::random::normal<real_type>(rng_state, 0, shared.sd);
+      }
     } else {
-      state_next[0] = 0;
+      std::fill(state_next, state_next + shared.len, 0);
     }
   }
 
@@ -74,16 +79,23 @@ public:
                      internal_state& internal,
                      rng_state_type& rng_state,
                      real_type * state_next) {
-    state_next[0] =
-      mcstate::random::normal(rng_state, state[0], shared.sd * dt);
+    for (size_t i = 0; i < shared.len; ++i) {
+      state_next[i] =
+        mcstate::random::normal(rng_state, state[i], shared.sd * dt);
+    }
   }
 
   // Then, rather than a constructor we have some converters:
   static shared_state build_shared(cpp11::list pars) {
+    size_t len = 1;
+    const cpp11::sexp r_len = pars["len"];
+    if (r_len != R_NilValue) {
+      len = cpp11::as_cpp<int>(r_len);
+    }
     const walk::real_type sd = cpp11::as_cpp<walk::real_type>(pars["sd"]);
     const bool random_initial = pars["random_initial"] == R_NilValue ? false :
       cpp11::as_cpp<bool>(pars["random_initial"]);
-    return shared_state{sd, random_initial};
+    return shared_state{len, sd, random_initial};
   }
 
   // This one could be optional
