@@ -27,16 +27,15 @@ test_that("can set model state from a vector", {
   pars <- list(sd = 1, random_initial = TRUE)
   obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
   ptr <- obj[[1]]
-  s <- runif(10)
-  expect_null(dust2_cpu_walk_set_state(ptr, s))
-  expect_equal(dust2_cpu_walk_state(ptr, FALSE),
-               rbind(s, deparse.level = 0))
+  s <- rbind(runif(10))
+  expect_null(dust2_cpu_walk_set_state(ptr, s, FALSE))
+  expect_equal(dust2_cpu_walk_state(ptr, FALSE), s)
 
   expect_null(dust2_cpu_walk_run_steps(ptr, 3))
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
   expect_equal(dust2_cpu_walk_state(ptr, FALSE),
-               rbind(colSums(r$normal(3, 0, 1)) + s))
+               colSums(r$normal(3, 0, 1)) + s)
 })
 
 
@@ -278,5 +277,102 @@ test_that("params must be same length to update", {
   obj <- dust2_cpu_walk_alloc(pars1, 0, 1, 10, 4, 42, FALSE)
   ptr <- obj[[1]]
   expect_error(dust2_cpu_walk_update_pars(ptr, pars2, TRUE),
-               "Expected 'pars' to have length 4 to match 'n_groups'");
+               "Expected 'pars' to have length 4 to match 'n_groups'")
+})
+
+
+test_that("can set state where n_state > 1", {
+  pars <- list(len = 3, sd = 1, random_initial = TRUE)
+  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
+  ptr <- obj[[1]]
+
+  ## One state per particle:
+  s <- matrix(runif(30), 3, 10)
+  expect_null(dust2_cpu_walk_set_state(ptr, s, FALSE))
+  expect_equal(dust2_cpu_walk_state(ptr, FALSE), s)
+
+  ## Shared state:
+  s <- matrix(runif(3), 3, 1)
+  expect_null(dust2_cpu_walk_set_state(ptr, s, FALSE))
+  expect_equal(dust2_cpu_walk_state(ptr, FALSE), s[, rep(1, 10)])
+
+  ## Appropriate errors:
+  expect_error(
+    dust2_cpu_walk_set_state(ptr, matrix(0, 2, 10), FALSE),
+    "Expected the first dimension of 'state' to have size 3")
+  expect_error(
+    dust2_cpu_walk_set_state(ptr, matrix(0, 3, 15), FALSE),
+    "Expected the second dimension of 'state' to have size 10 or 1")
+  expect_error(
+    dust2_cpu_walk_set_state(ptr, array(0, c(3, 10, 1)), FALSE),
+    "Expected 'state' to be a 2d array")
+})
+
+
+test_that("can set state where n_state > 1 and groups are present", {
+  pars <- lapply(1:4, function(i) list(len = 3, sd = i))
+  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 4, 42, FALSE)
+  ptr <- obj[[1]]
+
+  ## One state per particle:
+  s <- array(runif(3 * 10 * 4), c(3, 10, 4))
+  s <- array(as.numeric(seq_len(3 * 10 * 4)), c(3, 10, 4))
+  expect_null(dust2_cpu_walk_set_state(ptr, s, TRUE))
+  expect_equal(dust2_cpu_walk_state(ptr, TRUE), s)
+
+  ## Shared state within groups
+  s <- array(runif(3 * 1 * 4), c(3, 1, 4))
+  s <- array(as.numeric(seq_len(3 * 1 * 4)), c(3, 1, 4))
+  expect_null(dust2_cpu_walk_set_state(ptr, s, TRUE))
+  expect_equal(dust2_cpu_walk_state(ptr, TRUE), s[, rep(1, 10), ])
+
+  ## Shared state across groups
+  s <- array(runif(3 * 10 * 1), c(3, 10, 1))
+  s <- array(as.numeric(seq_len(3 * 10 * 1)), c(3, 10, 1))
+  expect_null(dust2_cpu_walk_set_state(ptr, s, TRUE))
+  expect_equal(dust2_cpu_walk_state(ptr, TRUE), s[, , rep(1, 4)])
+
+  ## Shared state across everything
+  s <- array(runif(3 * 1 * 1), c(3, 1, 1))
+  s <- array(as.numeric(seq_len(3 * 1 * 1)), c(3, 1, 1))
+  expect_null(dust2_cpu_walk_set_state(ptr, s, TRUE))
+  expect_equal(dust2_cpu_walk_state(ptr, TRUE), s[, rep(1, 10), rep(1, 4)])
+
+  ## Appropriate errors:
+  expect_error(
+    dust2_cpu_walk_set_state(ptr, array(0, c(2, 10, 4)), TRUE),
+    "Expected the first dimension of 'state' to have size 3")
+  expect_error(
+    dust2_cpu_walk_set_state(ptr, array(0, c(3, 15, 4)), TRUE),
+    "Expected the second dimension of 'state' to have size 10 or 1")
+  expect_error(
+    dust2_cpu_walk_set_state(ptr, array(0, c(3, 10, 2)), TRUE),
+    "Expected the third dimension of 'state' to have size 4 or 1")
+  expect_error(
+    dust2_cpu_walk_set_state(ptr, array(0, c(3, 10)), TRUE),
+    "Expected 'state' to be a 3d array")
+})
+
+
+## This one is for consistency with some of the bits above and allows
+## setting state while ignoring the grouped structure.  This is most
+## likely to be used when having one particle per group but it can be
+## used in any context really.
+test_that("can set ungrouped state into grouped model", {
+  pars <- lapply(1:4, function(i) list(len = 3, sd = i))
+  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 4, 42, FALSE)
+  ptr <- obj[[1]]
+
+  ## One state per particle:
+  s <- array(runif(30), c(3, 10 * 4))
+  expect_null(dust2_cpu_walk_set_state(ptr, s, FALSE))
+  expect_equal(dust2_cpu_walk_state(ptr, FALSE), s)
+  expect_equal(dust2_cpu_walk_state(ptr, TRUE),
+               array(s, c(3, 10, 4)))
+
+  s <- array(runif(3), c(3, 1))
+  expect_null(dust2_cpu_walk_set_state(ptr, s, FALSE))
+  expect_equal(dust2_cpu_walk_state(ptr, FALSE), array(s, c(3, 40)))
+  expect_equal(dust2_cpu_walk_state(ptr, TRUE),
+               array(s, c(3, 10, 4)))
 })

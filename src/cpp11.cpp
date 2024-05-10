@@ -41,10 +41,10 @@ extern "C" SEXP _dust2_dust2_cpu_walk_set_state_initial(SEXP ptr) {
   END_CPP11
 }
 // walk.cpp
-SEXP dust2_cpu_walk_set_state(cpp11::sexp ptr, cpp11::sexp r_state);
-extern "C" SEXP _dust2_dust2_cpu_walk_set_state(SEXP ptr, SEXP r_state) {
+SEXP dust2_cpu_walk_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool grouped);
+extern "C" SEXP _dust2_dust2_cpu_walk_set_state(SEXP ptr, SEXP r_state, SEXP grouped) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_cpu_walk_set_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_state)));
+    return cpp11::as_sexp(dust2_cpu_walk_set_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_state), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
   END_CPP11
 }
 // walk.cpp
@@ -74,7 +74,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_cpu_walk_alloc",             (DL_FUNC) &_dust2_dust2_cpu_walk_alloc,             7},
     {"_dust2_dust2_cpu_walk_rng_state",         (DL_FUNC) &_dust2_dust2_cpu_walk_rng_state,         1},
     {"_dust2_dust2_cpu_walk_run_steps",         (DL_FUNC) &_dust2_dust2_cpu_walk_run_steps,         2},
-    {"_dust2_dust2_cpu_walk_set_state",         (DL_FUNC) &_dust2_dust2_cpu_walk_set_state,         2},
+    {"_dust2_dust2_cpu_walk_set_state",         (DL_FUNC) &_dust2_dust2_cpu_walk_set_state,         3},
     {"_dust2_dust2_cpu_walk_set_state_initial", (DL_FUNC) &_dust2_dust2_cpu_walk_set_state_initial, 1},
     {"_dust2_dust2_cpu_walk_set_time",          (DL_FUNC) &_dust2_dust2_cpu_walk_set_time,          2},
     {"_dust2_dust2_cpu_walk_state",             (DL_FUNC) &_dust2_dust2_cpu_walk_state,             2},

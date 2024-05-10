@@ -121,9 +121,36 @@ SEXP dust2_cpu_set_state_initial(cpp11::sexp ptr) {
 }
 
 template <typename T>
-SEXP dust2_cpu_set_state(cpp11::sexp ptr, cpp11::sexp r_state) {
+SEXP dust2_cpu_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool grouped) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<dust_cpu<T>>>(ptr).get();
-  obj->set_state(REAL(r_state));
+  // Suppose that we have a n_state x n_particles x n_groups grouped
+  // system, we then require that we have a state array with rank 3;
+  // for an ungrouped system this will be rank 2 array.
+  auto dim = cpp11::as_cpp<cpp11::integers>(r_state.attr("dim"));
+  const auto rank = dim.size();
+  const auto rank_expected = grouped ? 3 : 2;
+  if (rank != rank_expected) {
+    cpp11::stop("Expected 'state' to be a %dd array", rank_expected);
+  }
+  const int n_state = obj->n_state();
+  const int n_particles =
+    grouped ? obj->n_particles() : obj->n_particles() * obj->n_groups();
+  const int n_groups = grouped ? obj->n_groups() : 1;
+  if (dim[0] != n_state) {
+    cpp11::stop("Expected the first dimension of 'state' to have size %d",
+                n_state);
+  }
+  const auto recycle_particle = n_particles > 1 && dim[1] == 1;
+  if (dim[1] != n_particles && dim[1] != 1) {
+    cpp11::stop("Expected the second dimension of 'state' to have size %d or 1",
+                n_particles);
+  }
+  const auto recycle_group = !grouped || (n_groups > 1 && dim[2] == 1);
+  if (grouped && dim[2] != n_groups && dim[2] != 1) {
+    cpp11::stop("Expected the third dimension of 'state' to have size %d or 1",
+                n_groups);
+  }
+  obj->set_state(REAL(r_state), recycle_particle, recycle_group);
   return R_NilValue;
 }
 

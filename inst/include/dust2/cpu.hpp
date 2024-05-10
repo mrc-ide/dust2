@@ -86,8 +86,22 @@ public:
   }
 
   template <typename It>
-  void set_state(It it) {
-    std::copy_n(it, state_.size(), state_.begin());
+  void set_state(It it, bool recycle_particle, bool recycle_group) {
+    const auto offset_read_group = recycle_group ? 0 :
+      (n_state_ * (recycle_particle ? 1 : n_particles_));
+    const auto offset_read_particle = recycle_particle ? 0 : n_state_;
+
+    real_type * state_data = state_.data();
+    for (size_t i = 0; i < n_groups_; ++i) {
+      for (size_t j = 0; j < n_particles_; ++j) {
+        const auto offset_read =
+          i * offset_read_group + j * offset_read_particle;
+        const auto offset_write = (n_particles_ * i + j) * n_state_;
+        std::copy_n(it + offset_read,
+                    n_state_,
+                    state_data + offset_write);
+      }
+    }
   }
 
   auto& state() const {

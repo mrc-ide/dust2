@@ -41,8 +41,9 @@ SEXP dust2_cpu_walk_set_state_initial(cpp11::sexp ptr) {
 }
 
 [[cpp11::register]]
-SEXP dust2_cpu_walk_set_state(cpp11::sexp ptr, cpp11::sexp r_state) {
-  return dust2::r::dust2_cpu_set_state<walk>(ptr, r_state);
+SEXP dust2_cpu_walk_set_state(cpp11::sexp ptr, cpp11::sexp r_state,
+                              bool grouped) {
+  return dust2::r::dust2_cpu_set_state<walk>(ptr, r_state, grouped);
 }
 
 [[cpp11::register]]
