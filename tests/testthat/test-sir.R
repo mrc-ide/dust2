@@ -26,7 +26,7 @@ test_that("can run simple sir model", {
 
 test_that("can compare to data", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 0.5)
-  obj <- dust2_cpu_sir_alloc(pars, 0, 1, 10, 42, FALSE)
+  obj <- dust2_cpu_sir_alloc(pars, 0, 1, 10, 0, 42, FALSE)
   ptr <- obj[[1]]
 
   s <- rbind(0, 0, 0, 0, rpois(10, 30))
@@ -44,7 +44,7 @@ test_that("can compare to data", {
 
 test_that("can compare to data when missing", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 0.5)
-  obj <- dust2_cpu_sir_alloc(pars, 0, 1, 10, 42, FALSE)
+  obj <- dust2_cpu_sir_alloc(pars, 0, 1, 10, 0, 42, FALSE)
   ptr <- obj[[1]]
 
   s <- rbind(0, 0, 0, 0, rpois(10, 30))
