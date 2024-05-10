@@ -132,10 +132,6 @@ public:
     fn(shared_[i]);
   }
 
-  auto n_groups() const {
-    return n_groups_;
-  }
-
 private:
   size_t n_state_;
   size_t n_particles_;
