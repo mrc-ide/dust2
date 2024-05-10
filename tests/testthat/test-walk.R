@@ -240,15 +240,15 @@ test_that("can update parameters", {
   ptr <- obj[[1]]
 
   expect_null(dust2_cpu_walk_run_steps(ptr, 1))
-  s1 <- dust2_cpu_walk_state(ptr)
+  s1 <- dust2_cpu_walk_state(ptr, FALSE)
 
   expect_null(dust2_cpu_walk_update_pars(ptr, pars2, FALSE))
   expect_null(dust2_cpu_walk_run_steps(ptr, 1))
-  s2 <- dust2_cpu_walk_state(ptr)
+  s2 <- dust2_cpu_walk_state(ptr, FALSE)
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
-  expect_equal(s1, drop(r$normal(1, 0, 1)))
-  expect_equal(s2, s1 + drop(r$normal(1, 0, 10)))
+  expect_equal(s1, r$normal(1, 0, 1))
+  expect_equal(s2, s1 + r$normal(1, 0, 10))
 })
 
 
@@ -260,15 +260,15 @@ test_that("can update parameters for grouped models", {
   ptr <- obj[[1]]
 
   expect_null(dust2_cpu_walk_run_steps(ptr, 1))
-  s1 <- dust2_cpu_walk_state(ptr)
+  s1 <- dust2_cpu_walk_state(ptr, FALSE)
 
   expect_null(dust2_cpu_walk_update_pars(ptr, pars2, TRUE))
   expect_null(dust2_cpu_walk_run_steps(ptr, 1))
-  s2 <- dust2_cpu_walk_state(ptr)
+  s2 <- dust2_cpu_walk_state(ptr, FALSE)
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 40)
-  expect_equal(s1, drop(r$normal(1, 0, 1)) * rep(1:4, each = 10))
-  expect_equal(s2, s1 + drop(r$normal(1, 0, 10)) * rep(1:4, each = 10))
+  expect_equal(s1, r$normal(1, 0, 1) * rep(1:4, each = 10))
+  expect_equal(s2, s1 + r$normal(1, 0, 10) * rep(1:4, each = 10))
 })
 
 
