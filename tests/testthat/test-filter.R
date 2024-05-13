@@ -64,3 +64,25 @@ test_that("can run run unfilter on structured model", {
   ptr <- obj[[1]]
   expect_equal(dust2_cpu_sir_unfilter_run(ptr, NULL, FALSE), f(pars))
 })
+
+
+test_that("validate time for filter", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  time_start <- 0
+  time <- as.integer(c(4, 8, 12, 16))
+  data <- lapply(1:4, function(i) list(incidence = i))
+  dt <- 1
+
+  expect_error(
+    dust2_cpu_sir_unfilter_alloc(pars, 5, time, dt, data, 0),
+    "Expected 'time[1]' (5) to be larger than the previous value (4)",
+    fixed = TRUE)
+  expect_error(
+    dust2_cpu_sir_unfilter_alloc(pars, 0, time + c(0, 0, .1, 0), dt, data, 0),
+    "Expected 'time[3]' to be integer-like",
+    fixed = TRUE)
+  expect_error(
+    dust2_cpu_sir_unfilter_alloc(pars, 0, as.character(time), dt, data, 0),
+    "'time' must be a numeric vector",
+    fixed = TRUE)
+})
