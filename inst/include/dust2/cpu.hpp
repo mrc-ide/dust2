@@ -132,6 +132,10 @@ public:
     return time_;
   }
 
+  auto dt() const {
+    return dt_;
+  }
+
   auto n_state() const {
     return n_state_;
   }

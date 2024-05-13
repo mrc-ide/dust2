@@ -1,35 +1,10 @@
- #pragma once
+#pragma once
 
 #include <dust2/r/helpers.hpp>
-#include <dust2/cpu.hpp>
+#include <dust2/filter.hpp>
 
 namespace dust2 {
 namespace r {
-
-// There's a big question here of if we take a model pointer or do the
-// initialisation ourself.  I think that we really need to do the
-// latter because otherwise the rng is quite hard to think about
-// because the user might end up holding two copies?  Or we can offer
-// both approaches (though we've never once needed to initialise the
-// model first).  The user will mostly interact with this as
-//
-// filter <- make_filter_sir(pars, ...)
-// filter$run(pars) # update pars, verify size has not changed.
-//
-// The first bit of init
-template <typename T>
-struct unfilter_state {
-  using real_type = typename T::real_type;
-  using data_type = typename T::data_type;
-  dust_cpu<T> model;
-  real_type time_start;
-  std::vector<real_type> time;
-  std::vector<size_t> step;
-  std::vector<data_type> data;
-  std::vector<real_type> ll;
-  std::vector<real_type> ll_step;
-  size_t n_groups;
-};
 
 // TODO: this name must be changed!
 template <typename T>
@@ -51,17 +26,6 @@ cpp11::sexp dust2_cpu_unfilter_alloc(cpp11::list r_pars,
   const auto internal = build_internal<T>(shared);
   const auto data = check_data<T>(r_data, time.size(), n_groups, "data");
 
-  n_groups = shared.size();
-
-  // This probably gets reused a bit, too, easily pulled into a
-  // helper; it will be used in a simulate() method too
-  std::vector<size_t> step;
-  for (size_t i = 0; i < time.size(); i++) {
-    const auto t0 = i == 0 ? time_start : time[i - 1];
-    const auto t1 = time[i];
-    step.push_back(static_cast<size_t>(std::round((t1 - t0) / dt)));
-  }
-
   // It's possible that we don't want to always really be
   // deterministic here?  Though nooone can think of a case where
   // that's actually the behaviour wanted.  For now let's go fully
@@ -74,14 +38,11 @@ cpp11::sexp dust2_cpu_unfilter_alloc(cpp11::list r_pars,
   // we need.  At this point we could have constructed the model out
   // of one that exists already on the R side, but I think that's
   // going to feel weirder overall.
-  const auto model = dust_cpu<T>(shared, internal, time_start, dt, n_particles,
+  const auto model = dust2::dust_cpu<T>(shared, internal, time_start, dt, n_particles,
                                  seed, deterministic);
 
-  std::vector<real_type> ll(n_groups);
-  std::vector<real_type> ll_step(n_groups);
-  auto obj = new unfilter_state<T>{model, time_start, time, step, data,
-                                   ll, ll_step, n_groups};
-  cpp11::external_pointer<unfilter_state<T>> ptr(obj, true, false);
+  auto obj = new unfilter<T>(model, time_start, time, data);
+  cpp11::external_pointer<unfilter<T>> ptr(obj, true, false);
 
   cpp11::sexp r_n_state = cpp11::as_sexp(obj->model.n_state());
   cpp11::sexp r_group_names = R_NilValue;
@@ -98,34 +59,15 @@ template <typename T>
 cpp11::sexp dust2_cpu_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
                                    bool grouped) {
   auto *obj =
-    cpp11::as_cpp<cpp11::external_pointer<unfilter_state<T>>>(ptr).get();
-
+    cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
   if (r_pars != R_NilValue) {
     update_pars(obj->model, cpp11::as_cpp<cpp11::list>(r_pars), grouped);
   }
+  obj->run();
 
-  // There's a question of how much we move this into the C++ part
-  // (rather than this interface layer) which we will want to do to
-  // make this more extendable.
-  const auto time_start = obj->time_start;
-  const auto& step = obj->step;
-  const auto n_groups = obj->n_groups;
-  const auto n_times = step.size();
-
-  obj->model.set_time(time_start);
-  obj->model.set_state_initial();
-  std::fill(obj->ll.begin(), obj->ll.end(), 0);
-
-  auto it_data = obj->data.begin();
-  for (size_t i = 0; i < n_times; ++i, it_data += n_groups) {
-    obj->model.run_steps(step[i]); // just compute this at point of use?
-    obj->model.compare_data(it_data, obj->ll_step.begin());
-    for (size_t j = 0; j < n_groups; ++j) {
-      obj->ll[j] += obj->ll_step[j];
-    }
-  }
-
-  return cpp11::writable::doubles(obj->ll);
+  cpp11::writable::doubles ret(obj->model.n_groups());
+  obj->last_log_likelihood(REAL(ret));
+  return ret;
 }
 
 }
