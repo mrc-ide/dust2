@@ -129,22 +129,7 @@ template <typename T>
 SEXP dust2_cpu_update_pars(cpp11::sexp ptr, cpp11::list r_pars,
                            bool grouped) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<dust_cpu<T>>>(ptr).get();
-  if (grouped) {
-    const auto n_groups = obj->n_groups();
-    if (r_pars.size() != static_cast<int>(n_groups)) {
-      cpp11::stop("Expected 'pars' to have length %d to match 'n_groups'",
-                  static_cast<int>(n_groups));
-    }
-    for (size_t i = 0; i < n_groups; ++i) {
-      obj->update_shared(i, [&] (auto& shared) {
-                              T::update_shared(r_pars[i], shared);
-                            });
-    }
-  } else {
-    obj->update_shared(0, [&] (auto& shared) {
-                            T::update_shared(r_pars, shared);
-                          });
-  }
+  update_pars(*obj, r_pars, grouped);
   return R_NilValue;
 }
 
