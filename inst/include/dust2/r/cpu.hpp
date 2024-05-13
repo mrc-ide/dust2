@@ -81,10 +81,18 @@ SEXP dust2_cpu_run_steps(cpp11::sexp ptr, cpp11::sexp r_n_steps) {
 }
 
 template <typename T>
-SEXP dust2_cpu_state(cpp11::sexp ptr) {
+SEXP dust2_cpu_state(cpp11::sexp ptr, bool grouped) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<dust_cpu<T>>>(ptr).get();
-  // return to_matrix(obj->state(), obj->n_state, obj->n_particles);
-  return cpp11::as_sexp(obj->state());
+  cpp11::sexp ret = R_NilValue;
+  const auto it = obj->state().begin();
+  if (grouped) {
+    ret = export_array_n(it,
+                         {obj->n_state(), obj->n_particles(), obj->n_groups()});
+  } else {
+    ret = export_array_n(it,
+                         {obj->n_state(), obj->n_particles() * obj->n_groups()});
+  }
+  return ret;
 }
 
 template <typename T>
@@ -93,6 +101,18 @@ SEXP dust2_cpu_time(cpp11::sexp ptr) {
   return cpp11::as_sexp(obj->time());
 }
 
+// If this is a grouped model then we will return a matrix with
+// dimensions )(state x particle x group) and if we are ungrouped
+// (state x particle); the difference is really only apparent in the
+// case where we have a single group to drop.  In dust1 we had the
+// option for (state x group) for simulations too.
+//
+// For now perhaps lets just ignore this detail and always return the
+// 3d version as the code to do grouped/ungrouped switching is deep
+// within one of the many in-progress branches and I can't find it
+// yet.
+//
+// In the case where we have time, that goes in the last position
 template <typename T>
 SEXP dust2_cpu_set_state_initial(cpp11::sexp ptr) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<dust_cpu<T>>>(ptr).get();

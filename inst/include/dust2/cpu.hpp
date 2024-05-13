@@ -90,7 +90,7 @@ public:
     std::copy_n(it, state_.size(), state_.begin());
   }
 
-  auto state() const {
+  auto& state() const {
     return state_;
   }
 
@@ -99,6 +99,18 @@ public:
   // will almost certainly do something.
   auto time() const {
     return time_;
+  }
+
+  auto n_state() const {
+    return n_state_;
+  }
+
+  auto n_particles() const {
+    return n_particles_;
+  }
+
+  auto n_groups() const {
+    return n_groups_;
   }
 
   void set_time(real_type time) {
@@ -118,10 +130,6 @@ public:
     // TODO: check that size was not modified, error if so (quite a
     // bit later).
     fn(shared_[i]);
-  }
-
-  auto n_groups() const {
-    return n_groups_;
   }
 
 private:

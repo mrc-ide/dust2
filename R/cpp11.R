@@ -8,8 +8,8 @@ dust2_cpu_walk_run_steps <- function(ptr, r_n_steps) {
   .Call(`_dust2_dust2_cpu_walk_run_steps`, ptr, r_n_steps)
 }
 
-dust2_cpu_walk_state <- function(ptr) {
-  .Call(`_dust2_dust2_cpu_walk_state`, ptr)
+dust2_cpu_walk_state <- function(ptr, grouped) {
+  .Call(`_dust2_dust2_cpu_walk_state`, ptr, grouped)
 }
 
 dust2_cpu_walk_time <- function(ptr) {
