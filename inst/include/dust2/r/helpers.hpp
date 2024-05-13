@@ -244,5 +244,26 @@ std::vector<typename T::data_type> check_data(cpp11::list r_data,
   return data;
 }
 
+template <typename T>
+void update_pars(dust_cpu<T>& obj, cpp11::list r_pars, bool grouped) {
+  if (grouped) {
+    const auto n_groups = obj.n_groups();
+    if (r_pars.size() != static_cast<int>(n_groups)) {
+      cpp11::stop("Expected 'pars' to have length %d to match 'n_groups'",
+                  static_cast<int>(n_groups));
+    }
+    for (size_t i = 0; i < n_groups; ++i) {
+      cpp11::list r_pars_i = r_pars[i];
+      obj.update_shared(i, [&] (auto& shared) {
+                             T::update_shared(r_pars_i, shared);
+                            });
+    }
+  } else {
+    obj.update_shared(0, [&] (auto& shared) {
+                           T::update_shared(r_pars, shared);
+                          });
+  }
+}
+
 }
 }

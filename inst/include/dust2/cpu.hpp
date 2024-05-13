@@ -7,6 +7,7 @@ namespace dust2 {
 template <typename T>
 class dust_cpu {
 public:
+  using model_type = T;
   using real_type = typename T::real_type;
   using rng_state_type = typename T::rng_state_type;
   using shared_state = typename T::shared_state;

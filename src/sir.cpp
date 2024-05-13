@@ -76,6 +76,7 @@ SEXP dust2_cpu_sir_unfilter_alloc(cpp11::list r_pars,
 }
 
 [[cpp11::register]]
-SEXP dust2_cpu_sir_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_pars) {
-  return dust2::r::dust2_cpu_unfilter_run<sir>(ptr, r_pars);
+SEXP dust2_cpu_sir_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
+                                bool grouped) {
+  return dust2::r::dust2_cpu_unfilter_run<sir>(ptr, r_pars, grouped);
 }

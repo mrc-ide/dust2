@@ -6,5 +6,5 @@ test_that("can create an unfilter object", {
   dt <- 1
   obj <- dust2_cpu_sir_unfilter_alloc(pars, time_start, time, dt, data, 0)
   ptr <- obj[[1]]
-  ll <- dust2_cpu_sir_unfilter_run(ptr, NULL)
+  ll <- dust2_cpu_sir_unfilter_run(ptr, NULL, FALSE)
 })
