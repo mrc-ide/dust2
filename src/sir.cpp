@@ -37,6 +37,12 @@ SEXP dust2_cpu_sir_time(cpp11::sexp ptr) {
 }
 
 [[cpp11::register]]
+SEXP dust2_cpu_sir_update_pars(cpp11::sexp ptr, cpp11::list pars,
+                               bool grouped) {
+  return dust2::r::dust2_cpu_update_pars<sir>(ptr, pars, grouped);
+}
+
+[[cpp11::register]]
 SEXP dust2_cpu_sir_set_state_initial(cpp11::sexp ptr) {
   return dust2::r::dust2_cpu_set_state_initial<sir>(ptr);
 }

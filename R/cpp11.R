@@ -16,6 +16,10 @@ dust2_cpu_sir_time <- function(ptr) {
   .Call(`_dust2_dust2_cpu_sir_time`, ptr)
 }
 
+dust2_cpu_sir_update_pars <- function(ptr, pars, grouped) {
+  .Call(`_dust2_dust2_cpu_sir_update_pars`, ptr, pars, grouped)
+}
+
 dust2_cpu_sir_set_state_initial <- function(ptr) {
   .Call(`_dust2_dust2_cpu_sir_set_state_initial`, ptr)
 }
