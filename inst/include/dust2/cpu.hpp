@@ -138,8 +138,8 @@ public:
   template <typename ItData, typename ItOutput>
   void compare_data(ItData data, ItOutput output) {
     const real_type * state_data = state_.data();
-    for (size_t i = 0; i < n_groups_; ++i) {
-      for (size_t j = 0; j < n_particles_; ++j, ++output, ++data) {
+    for (size_t i = 0; i < n_groups_; ++i, ++data) {
+      for (size_t j = 0; j < n_particles_; ++j, ++output) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
         *output = T::compare_data(time_, dt_, state_data + offset, *data,
