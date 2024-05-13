@@ -25,7 +25,7 @@ struct unfilter_state {
   real_type time_start;
   std::vector<real_type> time;
   std::vector<size_t> step;
-  std::vector<std::vector<data_type>> data;
+  std::vector<data_type> data;
   size_t n_groups;
 };
 
@@ -76,11 +76,12 @@ cpp11::sexp dust2_cpu_unfilter_alloc(cpp11::list r_pars,
                                    shared.size()};
   cpp11::external_pointer<unfilter_state<T>> ptr(obj, true, false);
 
-  // NOTE: not (yet) returning length here, but we could
   const bool grouped = n_groups > 0;
   cpp11::sexp r_n_state = cpp11::as_sexp(obj->model.n_state());
   cpp11::sexp r_group_names = R_NilValue;
-  //cpp11::sexp r_group_names = grouped ? r_pars.attr("names") : cpp11::as_sexp(R_NilValue);
+  if (grouped) {
+    r_group_names = r_pars.attr("names");
+  }
   cpp11::sexp r_grouped = cpp11::as_sexp(grouped);
 
   return cpp11::writable::list{ptr, r_n_state, r_grouped, r_group_names};
@@ -112,9 +113,10 @@ cpp11::sexp dust2_cpu_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_pars) {
   obj->model.set_time(time_start);
   obj->model.set_state_initial();
 
-  for (size_t i = 0; i < n_times; ++i) {
+  auto it_data = obj->data.begin();
+  for (size_t i = 0; i < n_times; ++i, it_data += n_groups) {
     obj->model.run_steps(step[i]); // just compute this at point of use?
-    obj->model.compare_data(obj->data[i], ll_step.begin());
+    obj->model.compare_data(it_data, ll_step.begin());
     for (size_t j = 0; j < n_groups; ++j) {
       ll[j] += ll_step[j];
     }
