@@ -93,6 +93,7 @@ cpp11::sexp dust2_cpu_unfilter_alloc(cpp11::list r_pars,
   return cpp11::writable::list{ptr, r_n_state, r_grouped, r_group_names};
 }
 
+
 template <typename T>
 cpp11::sexp dust2_cpu_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
                                    bool grouped) {
@@ -126,7 +127,6 @@ cpp11::sexp dust2_cpu_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
 
   return cpp11::writable::doubles(obj->ll);
 }
-
 
 }
 }
