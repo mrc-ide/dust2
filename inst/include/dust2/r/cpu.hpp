@@ -45,6 +45,7 @@ SEXP dust2_cpu_alloc(cpp11::list r_pars,
   }
   cpp11::sexp r_n_state = cpp11::as_sexp(obj->n_state());
   cpp11::sexp r_grouped = cpp11::as_sexp(grouped);
+  // cpp11::sexp r_group_names = grouped ? r_pars.attr("names") : cpp11::as_sexp(R_NilValue);
 
   return cpp11::writable::list{ptr, r_n_state, r_grouped, r_group_names};
 }

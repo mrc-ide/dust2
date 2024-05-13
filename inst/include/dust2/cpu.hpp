@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 namespace dust2 {
 
 template <typename T>
