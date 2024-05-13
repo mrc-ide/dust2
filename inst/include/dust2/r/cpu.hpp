@@ -172,7 +172,7 @@ SEXP dust2_cpu_compare_data(cpp11::sexp ptr,
   }
 
   cpp11::writable::doubles ret(obj->n_particles() * obj->n_groups());
-  obj->compare_data(data, REAL(ret));
+  obj->compare_data(data.begin(), REAL(ret));
   if (grouped) {
     set_array_dims(ret, {obj->n_particles(), obj->n_groups()});
   }

@@ -134,16 +134,15 @@ public:
     fn(shared_[i]);
   }
 
-  // TODO: consider taking an iterator to data here, too?
-  template <typename It>
-  void compare_data(const std::vector<data_type>& data, It it) {
+  template <typename ItData, typename ItOutput>
+  void compare_data(ItData data, ItOutput output) {
     const real_type * state_data = state_.data();
     for (size_t i = 0; i < n_groups_; ++i) {
-      for (size_t j = 0; j < n_particles_; ++j, ++it) {
+      for (size_t j = 0; j < n_particles_; ++j, ++output, ++data) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
-        *it = T::compare_data(time_, dt_, state_data + offset, data[i],
-                              shared_[i], internal_[i], rng_.state(k));
+        *output = T::compare_data(time_, dt_, state_data + offset, *data,
+                                  shared_[i], internal_[i], rng_.state(k));
       }
     }
   }
