@@ -82,7 +82,7 @@ public:
     return shared_state{N, I0, beta, gamma, exp_noise};
   }
 
-  static internal_state build_internal(cpp11::list pars) {
+  static internal_state build_internal(const shared_state& shared) {
     return sir::internal_state{};
   }
 

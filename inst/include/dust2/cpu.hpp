@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 namespace dust2 {
 
 template <typename T>
@@ -132,6 +134,7 @@ public:
     fn(shared_[i]);
   }
 
+  // TODO: consider taking an iterator to data here, too?
   template <typename It>
   void compare_data(const std::vector<data_type>& data, It it) {
     const real_type * state_data = state_.data();
