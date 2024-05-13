@@ -124,7 +124,7 @@ std::vector<real_type> check_time_sequence(real_type time_start,
       cpp11::stop("Expected 'time[%d]' to be integer-like", i + 1);
     }
     if (t <= prev) {
-      cpp11::stop("Expected 'time[%d]' (%d) to larger than the previous value (%d)",
+      cpp11::stop("Expected 'time[%d]' (%d) to be larger than the previous value (%d)",
                   i + 1, static_cast<int>(prev), static_cast<int>(t));
     }
     prev = t;

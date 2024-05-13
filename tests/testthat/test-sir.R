@@ -96,3 +96,23 @@ test_that("validate data size on compare", {
     dust2_cpu_sir_compare_data(ptr, vector("list", 3), TRUE),
     "'data' must have length 4")
 })
+
+
+test_that("can update parameters", {
+  base <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  update <- list(beta = 0.3, gamma = 0.2)
+  combined <- modifyList(base, update)
+
+  obj1 <- dust2_cpu_sir_alloc(base, 0, 1, 10, 0, 42, FALSE)
+  ptr1 <- obj1[[1]]
+  expect_null(dust2_cpu_sir_update_pars(ptr1, update, FALSE))
+  expect_null(dust2_cpu_sir_run_steps(ptr1, 10))
+
+  obj2 <- dust2_cpu_sir_alloc(combined, 0, 1, 10, 0, 42, FALSE)
+  ptr2 <- obj2[[1]]
+  expect_null(dust2_cpu_sir_run_steps(ptr2, 10))
+
+  expect_equal(
+    dust2_cpu_sir_state(ptr2, FALSE),
+    dust2_cpu_sir_state(ptr1, FALSE))
+})
