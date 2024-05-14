@@ -4,6 +4,7 @@
 // choice of directory here.
 #include <mcstate/random/random.hpp>
 #include <mcstate/random/density.hpp>
+#include <dust2/tools.hpp>
 
 namespace dust2 {
 

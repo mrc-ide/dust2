@@ -96,3 +96,26 @@ test_that("validate data size on compare", {
     dust2_cpu_sir_compare_data(ptr, vector("list", 3), TRUE),
     "'data' must have length 4")
 })
+
+
+test_that("can reset cases daily", {
+  n_time <- 20
+  n_particles <- 100
+
+  pars <- list(beta = 1.0, gamma = 0.5, N = 1000, I0 = 10, exp_noise = 1e6)
+  obj <- dust2_cpu_sir_alloc(pars, 0, 0.25, n_particles, 0, 42, FALSE)
+  ptr <- obj[[1]]
+  dust2_cpu_sir_set_state_initial(ptr)
+  res <- array(NA_real_, c(5, n_particles, n_time))
+  for (i in seq_len(n_time)) {
+    dust2_cpu_sir_run_steps(ptr, 1)
+    res[, , i] <- dust2_cpu_sir_state(ptr, FALSE)
+  }
+
+  ## Cumulative cases never decrease:
+  expect_true(all(diff(t(res[4, , ])) >= 0))
+
+  ## Incidence resets every four steps:
+  expect_equal(which(apply(diff(t(res[5, , ])) < 0, 1, any)),
+               c(4, 8, 12, 16))
+})

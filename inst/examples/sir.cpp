@@ -57,7 +57,7 @@ public:
     const auto I = state[1];
     const auto R = state[2];
     const auto cases_cumul = state[3];
-    // const auto cases_inc = state[4];
+    const auto cases_inc = state[4];
     const auto p_SI = 1 - mcstate::math::exp(-shared.beta * I / shared.N * dt);
     const auto p_IR = 1 - mcstate::math::exp(-shared.gamma * dt);
     const auto n_SI = mcstate::random::binomial<real_type>(rng_state, S, p_SI);
@@ -66,8 +66,7 @@ public:
     state_next[1] = I + n_SI - n_IR;
     state_next[2] = R + n_IR;
     state_next[3] = cases_cumul + n_SI;
-    // state_next[4] = (time % shared.freq == 0) ? n_SI : (cases_inc + n_SI);
-    state_next[4] = n_SI;
+    state_next[4] = dust2::tools::accumulate_periodic(time, static_cast<real_type>(1), cases_inc, n_SI);
   }
 
   static shared_state build_shared(cpp11::list pars) {
