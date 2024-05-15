@@ -121,6 +121,7 @@ public:
     std::swap(state_, state_next_);
   }
 
+  template <typename Iter>
   void set_state(Iter iter) {
     std::copy_n(iter, state_.size(), state_.begin());
   }
