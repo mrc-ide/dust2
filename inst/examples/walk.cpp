@@ -99,7 +99,7 @@ public:
   }
 
   // This one could be optional
-  static internal_state build_internal(cpp11::list pars) {
+  static internal_state build_internal(const shared_state& shared) {
     return walk::internal_state{};
   }
 };

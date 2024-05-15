@@ -81,8 +81,22 @@ public:
     return shared_state{N, I0, beta, gamma, exp_noise};
   }
 
-  static internal_state build_internal(cpp11::list pars) {
+  static internal_state build_internal(const shared_state& shared) {
     return sir::internal_state{};
+  }
+
+  // This is the bit that we'll use to do fast parameter updating, and
+  // we'll guarantee somewhere that the size does not change.
+  static void update_shared(cpp11::list pars, shared_state& shared) {
+    shared.I0 = with_default(10, pars["I0"]);
+    shared.beta = with_default(0.2, pars["beta"]);
+    shared.gamma = with_default(0.1, pars["gamma"]);
+  }
+
+  // This is a reasonable default implementation in the no-internal
+  // case
+  static void update_internal(const shared_state& shared,
+                              internal_state& internal) {
   }
 
   static data_type build_data(cpp11::sexp r_data) {
