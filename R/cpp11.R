@@ -8,6 +8,10 @@ dust2_cpu_sir_run_steps <- function(ptr, r_n_steps) {
   .Call(`_dust2_dust2_cpu_sir_run_steps`, ptr, r_n_steps)
 }
 
+dust2_cpu_sir_run_to_time <- function(ptr, r_time) {
+  .Call(`_dust2_dust2_cpu_sir_run_to_time`, ptr, r_time)
+}
+
 dust2_cpu_sir_state <- function(ptr, grouped) {
   .Call(`_dust2_dust2_cpu_sir_state`, ptr, grouped)
 }
@@ -50,6 +54,10 @@ dust2_cpu_walk_alloc <- function(r_pars, r_time, r_dt, r_n_particles, r_n_groups
 
 dust2_cpu_walk_run_steps <- function(ptr, r_n_steps) {
   .Call(`_dust2_dust2_cpu_walk_run_steps`, ptr, r_n_steps)
+}
+
+dust2_cpu_walk_run_to_time <- function(ptr, r_time) {
+  .Call(`_dust2_dust2_cpu_walk_run_to_time`, ptr, r_time)
 }
 
 dust2_cpu_walk_state <- function(ptr, grouped) {

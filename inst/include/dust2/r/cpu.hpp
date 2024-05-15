@@ -58,6 +58,19 @@ SEXP dust2_cpu_run_steps(cpp11::sexp ptr, cpp11::sexp r_n_steps) {
 }
 
 template <typename T>
+SEXP dust2_cpu_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {
+  auto *obj = cpp11::as_cpp<cpp11::external_pointer<dust_cpu<T>>>(ptr).get();
+  const auto time = check_time(r_time, "time");
+  const auto curr = obj->time();
+  if (time < curr) {
+    cpp11::stop("Can't run to time %f, model already at time %f",
+                time, curr);
+  }
+  obj->run_to_time(time);
+  return R_NilValue;
+}
+
+template <typename T>
 SEXP dust2_cpu_state(cpp11::sexp ptr, bool grouped) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<dust_cpu<T>>>(ptr).get();
   cpp11::sexp ret = R_NilValue;

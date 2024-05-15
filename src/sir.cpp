@@ -27,6 +27,11 @@ SEXP dust2_cpu_sir_run_steps(cpp11::sexp ptr, cpp11::sexp r_n_steps) {
 }
 
 [[cpp11::register]]
+SEXP dust2_cpu_sir_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {
+  return dust2::r::dust2_cpu_run_to_time<sir>(ptr, r_time);
+}
+
+[[cpp11::register]]
 SEXP dust2_cpu_sir_state(cpp11::sexp ptr, bool grouped) {
   return dust2::r::dust2_cpu_state<sir>(ptr, grouped);
 }
