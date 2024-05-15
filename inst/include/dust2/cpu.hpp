@@ -187,7 +187,7 @@ private:
   mcstate::random::prng<rng_state_type> rng_;
 
   static void run_particle(real_type time, real_type dt, size_t n_steps,
-                           shared_state shared, internal_state internal,
+                           const shared_state& shared, internal_state& internal,
                            real_type * state, rng_state_type& rng_state,
                            real_type * state_next) {
     for (size_t i = 0; i < n_steps; ++i) {
