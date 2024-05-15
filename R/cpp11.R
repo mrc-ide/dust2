@@ -48,6 +48,18 @@ dust2_cpu_sir_unfilter_run <- function(ptr, r_pars, r_initial, grouped) {
   .Call(`_dust2_dust2_cpu_sir_unfilter_run`, ptr, r_pars, r_initial, grouped)
 }
 
+dust2_cpu_sir_filter_alloc <- function(r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_seed) {
+  .Call(`_dust2_dust2_cpu_sir_filter_alloc`, r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_seed)
+}
+
+dust2_cpu_sir_filter_run <- function(ptr, r_pars, grouped) {
+  .Call(`_dust2_dust2_cpu_sir_filter_run`, ptr, r_pars, grouped)
+}
+
+test_resample_weight <- function(w, u) {
+  .Call(`_dust2_test_resample_weight`, w, u)
+}
+
 dust2_cpu_walk_alloc <- function(r_pars, r_time, r_dt, r_n_particles, r_n_groups, r_seed, r_deterministic) {
   .Call(`_dust2_dust2_cpu_walk_alloc`, r_pars, r_time, r_dt, r_n_particles, r_n_groups, r_seed, r_deterministic)
 }
