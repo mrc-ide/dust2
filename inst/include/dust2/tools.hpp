@@ -11,7 +11,7 @@ template <>
 inline bool is_evenly_divisible_by(double num, double by) {
   // This eps is chosen to be less than machine precision, though more
   // than sqrt(precision) and is consistent with the maximum expected
-  // accumulation of rounding error for pathalogical choices of dt.
+  // accumulation of rounding error for pathological choices of dt.
   constexpr double eps = 1e-13;
   return std::abs(std::fmod(num, by)) < eps;
 }
