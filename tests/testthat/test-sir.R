@@ -30,7 +30,7 @@ test_that("can compare to data", {
   ptr <- obj[[1]]
 
   s <- rbind(0, 0, 0, 0, rpois(10, 30))
-  dust2_cpu_sir_set_state(ptr, s)
+  dust2_cpu_sir_set_state(ptr, s, FALSE)
   d <- list(incidence = 30)
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
@@ -48,7 +48,7 @@ test_that("can compare to data when missing", {
   ptr <- obj[[1]]
 
   s <- rbind(0, 0, 0, 0, rpois(10, 30))
-  dust2_cpu_sir_set_state(ptr, s)
+  dust2_cpu_sir_set_state(ptr, s, FALSE)
   d <- list(incidence = NA_real_)
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
@@ -68,7 +68,7 @@ test_that("can compare against multple parameter groups at once", {
 
   s <- dust2_cpu_sir_state(ptr, TRUE)
   s[5, , ] <- rpois(10, 30)
-  dust2_cpu_sir_set_state(ptr, s)
+  dust2_cpu_sir_set_state(ptr, s, TRUE)
 
   d <- lapply(1:4, function(i) list(incidence = 30 + i))
   res <- dust2_cpu_sir_compare_data(ptr, d, TRUE)
