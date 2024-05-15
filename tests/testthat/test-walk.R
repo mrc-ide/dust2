@@ -404,3 +404,19 @@ test_that("can reorder state in a multiparameter model", {
     s2,
     vapply(1:4, function(j) s1[, i[, j], j, drop = FALSE], matrix(0, 1, 10)))
 })
+
+
+test_that("validate inputs for reordering", {
+  pars <- list(sd = 1, random_initial = TRUE)
+  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
+  ptr <- obj[[1]]
+  expect_null(dust2_cpu_walk_set_state_initial(ptr))
+  s1 <- dust2_cpu_walk_state(ptr, FALSE)
+  expect_error(
+    dust2_cpu_walk_reorder(ptr, c(1L, 2L, 3L)),
+    "Expected an index of length 10")
+  expect_error(
+    dust2_cpu_walk_reorder(ptr, seq_len(10) + 1L),
+    "Expected 'index' values to lie in [1, 10]",
+    fixed = TRUE)
+})
