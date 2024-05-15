@@ -439,3 +439,15 @@ test_that("can run walk model to time", {
   expect_equal(dust2_cpu_walk_time(ptr2), 10)
   expect_equal(dust2_cpu_walk_state(ptr2, FALSE), s1)
 })
+
+
+test_that("time must not be in the past", {
+  pars <- list(sd = 1)
+  obj <- dust2_cpu_walk_alloc(pars, 0, 0.25, 10, 0, 42, FALSE)
+  ptr <- obj[[1]]
+
+  dust2_cpu_walk_set_state_initial(ptr)
+  expect_error(
+    dust2_cpu_walk_run_to_time(ptr, -5),
+    "Can't run to time -5.*, model already at time 0.*")
+})
