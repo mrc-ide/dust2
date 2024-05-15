@@ -56,6 +56,10 @@ dust2_cpu_walk_set_state <- function(ptr, r_state, grouped) {
   .Call(`_dust2_dust2_cpu_walk_set_state`, ptr, r_state, grouped)
 }
 
+dust2_cpu_walk_reorder <- function(ptr, r_index) {
+  .Call(`_dust2_dust2_cpu_walk_reorder`, ptr, r_index)
+}
+
 dust2_cpu_walk_rng_state <- function(ptr) {
   .Call(`_dust2_dust2_cpu_walk_rng_state`, ptr)
 }

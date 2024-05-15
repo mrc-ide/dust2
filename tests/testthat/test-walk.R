@@ -376,3 +376,31 @@ test_that("can set ungrouped state into grouped model", {
   expect_equal(dust2_cpu_walk_state(ptr, TRUE),
                array(s, c(3, 10, 4)))
 })
+
+
+test_that("can reorder state", {
+  pars <- list(sd = 1, random_initial = TRUE)
+  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
+  ptr <- obj[[1]]
+  expect_null(dust2_cpu_walk_set_state_initial(ptr))
+  s1 <- dust2_cpu_walk_state(ptr, FALSE)
+  i <- sample(10, replace = TRUE)
+  expect_null(dust2_cpu_walk_reorder(ptr, i))
+  s2 <- dust2_cpu_walk_state(ptr, FALSE)
+  expect_equal(s2, s1[, i, drop = FALSE])
+})
+
+
+test_that("can reorder state in a multiparameter model", {
+  pars <- lapply(1:4, function(sd) list(sd = sd, random_initial = TRUE))
+  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 4, 42, FALSE)
+  ptr <- obj[[1]]
+  expect_null(dust2_cpu_walk_set_state_initial(ptr))
+  s1 <- dust2_cpu_walk_state(ptr, TRUE)
+  i <- replicate(4, sample(10, replace = TRUE))
+  expect_null(dust2_cpu_walk_reorder(ptr, i))
+  s2 <- dust2_cpu_walk_state(ptr, TRUE)
+  expect_equal(
+    s2,
+    vapply(1:4, function(j) s1[, i[, j], j, drop = FALSE], matrix(0, 1, 10)))
+})

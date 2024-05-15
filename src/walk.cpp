@@ -47,6 +47,11 @@ SEXP dust2_cpu_walk_set_state(cpp11::sexp ptr, cpp11::sexp r_state,
 }
 
 [[cpp11::register]]
+SEXP dust2_cpu_walk_reorder(cpp11::sexp ptr, cpp11::integers r_index) {
+  return dust2::r::dust2_cpu_reorder<walk>(ptr, r_index);
+}
+
+[[cpp11::register]]
 SEXP dust2_cpu_walk_rng_state(cpp11::sexp ptr) {
   return dust2::r::dust2_cpu_rng_state<walk>(ptr);
 }

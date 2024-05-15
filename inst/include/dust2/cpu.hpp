@@ -85,8 +85,8 @@ public:
     }
   }
 
-  template <typename It>
-  void set_state(It it, bool recycle_particle, bool recycle_group) {
+  template <typename Iter>
+  void set_state(Iter iter, bool recycle_particle, bool recycle_group) {
     const auto offset_read_group = recycle_group ? 0 :
       (n_state_ * (recycle_particle ? 1 : n_particles_));
     const auto offset_read_particle = recycle_particle ? 0 : n_state_;
@@ -97,11 +97,25 @@ public:
         const auto offset_read =
           i * offset_read_group + j * offset_read_particle;
         const auto offset_write = (n_particles_ * i + j) * n_state_;
-        std::copy_n(it + offset_read,
+        std::copy_n(iter + offset_read,
                     n_state_,
                     state_data + offset_write);
       }
     }
+  }
+
+  template <typename Iter>
+  void reorder(Iter iter) {
+    for (size_t i = 0; i < n_groups_; ++i) {
+      for (size_t j = 0; j < n_particles_; ++j) {
+        const auto k_to = n_particles_ * i + j;
+        const auto k_from = n_particles_ * i + *(iter + k_to);
+        std::copy_n(state_.begin() + k_from * n_state_,
+                    n_state_,
+                    state_next_.begin() + k_to * n_state_);
+      }
+    }
+    std::swap(state_, state_next_);
   }
 
   auto& state() const {
@@ -146,15 +160,15 @@ public:
     fn(shared_[i]);
   }
 
-  template <typename It>
-  void compare_data(const std::vector<data_type>& data, It it) {
+  template <typename Iter>
+  void compare_data(const std::vector<data_type>& data, Iter iter) {
     const real_type * state_data = state_.data();
     for (size_t i = 0; i < n_groups_; ++i) {
-      for (size_t j = 0; j < n_particles_; ++j, ++it) {
+      for (size_t j = 0; j < n_particles_; ++j, ++iter) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
-        *it = T::compare_data(time_, dt_, state_data + offset, data[i],
-                              shared_[i], internal_[i], rng_.state(k));
+        *iter = T::compare_data(time_, dt_, state_data + offset, data[i],
+                                shared_[i], internal_[i], rng_.state(k));
       }
     }
   }
