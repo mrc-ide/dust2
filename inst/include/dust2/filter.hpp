@@ -22,9 +22,10 @@ public:
     time_start_(time_start),
     time_(time),
     data_(data),
+    n_particles_(model.n_particles()),
     n_groups_(model.n_groups()),
-    ll_(n_groups_, 0),
-    ll_step_(n_groups_, 0) {
+    ll_(n_particles_ * n_groups_, 0),
+    ll_step_(n_particles_ * n_groups_, 0) {
     const auto dt = model_.dt();
     for (size_t i = 0; i < time_.size(); i++) {
       const auto t0 = i == 0 ? time_start_ : time_[i - 1];
@@ -44,7 +45,7 @@ public:
     for (size_t i = 0; i < n_times; ++i, it_data += n_groups_) {
       model.run_steps(step_[i]); // just compute this at point of use?
       model.compare_data(it_data, ll_step_.begin());
-      for (size_t j = 0; j < n_groups_; ++j) {
+      for (size_t j = 0; j < ll_.size(); ++j) {
         ll_[j] += ll_step_[j];
       }
     }
@@ -52,7 +53,7 @@ public:
 
   template <typename It>
   void last_log_likelihood(It it) {
-    std::copy_n(ll_.begin(), n_groups_, it);
+    std::copy(ll_.begin(), ll_.end(), it);
   }
 
 private:
@@ -60,6 +61,7 @@ private:
   std::vector<real_type> time_;
   std::vector<size_t> step_;
   std::vector<data_type> data_;
+  size_t n_particles_;
   size_t n_groups_;
   std::vector<real_type> ll_;
   std::vector<real_type> ll_step_;

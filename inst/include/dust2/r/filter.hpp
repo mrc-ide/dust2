@@ -13,10 +13,12 @@ cpp11::sexp dust2_cpu_unfilter_alloc(cpp11::list r_pars,
                                      cpp11::sexp r_time,
                                      cpp11::sexp r_dt,
                                      cpp11::list r_data,
+                                     cpp11::sexp r_n_particles,
                                      cpp11::sexp r_n_groups) {
   using real_type = typename T::real_type;
   using rng_state_type = typename T::rng_state_type;
 
+  auto n_particles = to_size(r_n_particles, "n_particles");
   auto n_groups = to_size(r_n_groups, "n_groups");
   const bool grouped = n_groups > 0;
   const auto time_start = check_time(r_time_start, "time_start");
@@ -32,7 +34,6 @@ cpp11::sexp dust2_cpu_unfilter_alloc(cpp11::list r_pars,
   // deterministic.
   auto seed = mcstate::random::r::as_rng_seed<rng_state_type>(R_NilValue);
   const auto deterministic = true;
-  const size_t n_particles = 1;
 
   // Then allocate the model; this pulls together almost all the data
   // we need.  At this point we could have constructed the model out
@@ -54,7 +55,6 @@ cpp11::sexp dust2_cpu_unfilter_alloc(cpp11::list r_pars,
   return cpp11::writable::list{ptr, r_n_state, r_grouped, r_group_names};
 }
 
-
 template <typename T>
 cpp11::sexp dust2_cpu_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
                                    bool grouped) {
@@ -65,8 +65,13 @@ cpp11::sexp dust2_cpu_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
   }
   obj->run();
 
-  cpp11::writable::doubles ret(obj->model.n_groups());
+  const auto n_groups = obj->model.n_groups();
+  const auto n_particles = obj->model.n_particles();
+  cpp11::writable::doubles ret(n_groups * n_particles);
   obj->last_log_likelihood(REAL(ret));
+  if (grouped && n_particles > 1) {
+    set_array_dims(ret, {n_particles, n_groups});
+  }
   return ret;
 }
 

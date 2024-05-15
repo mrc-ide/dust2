@@ -121,6 +121,10 @@ public:
     std::swap(state_, state_next_);
   }
 
+  void set_state(Iter iter) {
+    std::copy_n(iter, state_.size(), state_.begin());
+  }
+
   auto& state() const {
     return state_;
   }

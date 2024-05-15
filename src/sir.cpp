@@ -70,9 +70,11 @@ SEXP dust2_cpu_sir_unfilter_alloc(cpp11::list r_pars,
                                   cpp11::sexp r_time,
                                   cpp11::sexp r_dt,
                                   cpp11::list r_data,
+                                  cpp11::sexp r_n_particles,
                                   cpp11::sexp r_n_groups) {
   return dust2::r::dust2_cpu_unfilter_alloc<sir>(r_pars, r_time_start, r_time,
-                                                 r_dt, r_data, r_n_groups);
+                                                 r_dt, r_data, r_n_particles,
+                                                 r_n_groups);
 }
 
 [[cpp11::register]]

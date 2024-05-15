@@ -23,7 +23,7 @@ test_that("can run an unfilter", {
     sum(dpois(1:4, incidence + 1e-6, log = TRUE))
   }
 
-  obj <- dust2_cpu_sir_unfilter_alloc(base, time_start, time, dt, data, 0)
+  obj <- dust2_cpu_sir_unfilter_alloc(base, time_start, time, dt, data, 1, 0)
   ptr <- obj[[1]]
   expect_equal(dust2_cpu_sir_unfilter_run(ptr, NULL, FALSE), f(pars1))
 
@@ -60,9 +60,9 @@ test_that("can run run unfilter on structured model", {
     rowSums(dpois(observed, incidence + 1e-6, log = TRUE))
   }
 
-  obj <- dust2_cpu_sir_unfilter_alloc(pars, time_start, time, dt, data, 3)
+  obj <- dust2_cpu_sir_unfilter_alloc(pars, time_start, time, dt, data, 1, 3)
   ptr <- obj[[1]]
-  expect_equal(dust2_cpu_sir_unfilter_run(ptr, NULL, FALSE), f(pars))
+  expect_equal(dust2_cpu_sir_unfilter_run(ptr, NULL, TRUE), f(pars))
 })
 
 
@@ -74,15 +74,50 @@ test_that("validate time for filter", {
   dt <- 1
 
   expect_error(
-    dust2_cpu_sir_unfilter_alloc(pars, 5, time, dt, data, 0),
+    dust2_cpu_sir_unfilter_alloc(pars, 5, time, dt, data, 1, 0),
     "Expected 'time[1]' (5) to be larger than the previous value (4)",
     fixed = TRUE)
+  time2 <- time + c(0, 0, .1, 0)
   expect_error(
-    dust2_cpu_sir_unfilter_alloc(pars, 0, time + c(0, 0, .1, 0), dt, data, 0),
+    dust2_cpu_sir_unfilter_alloc(pars, 0, time2, dt, data, 1, 0),
     "Expected 'time[3]' to be integer-like",
     fixed = TRUE)
   expect_error(
-    dust2_cpu_sir_unfilter_alloc(pars, 0, as.character(time), dt, data, 0),
+    dust2_cpu_sir_unfilter_alloc(pars, 0, as.character(time), dt, data, 1, 0),
     "'time' must be a numeric vector",
     fixed = TRUE)
+})
+
+
+test_that("can run replicated unfilter", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  time_start <- 0
+  time <- c(4, 8, 12, 16)
+  data <- lapply(1:4, function(i) list(incidence = i))
+  dt <- 1
+  obj1 <- dust2_cpu_sir_unfilter_alloc(pars, time_start, time, dt, data, 5, 0)
+  obj2 <- dust2_cpu_sir_unfilter_alloc(pars, time_start, time, dt, data, 1, 0)
+
+  expect_equal(
+    dust2_cpu_sir_unfilter_run(obj1[[1]], NULL, FALSE),
+    rep(dust2_cpu_sir_unfilter_run(obj2[[1]], NULL, FALSE), 5))
+})
+
+
+test_that("can run replicated structured unfilter", {
+  pars <- list(
+    list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6),
+    list(beta = 0.2, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6))
+  time_start <- 0
+  time <- c(4, 8, 12, 16)
+  data <- lapply(1:4, function(i) {
+    lapply(seq_len(2), function(j) list(incidence = 2 * (i - 1) + j))
+  })
+  dt <- 1
+  obj1 <- dust2_cpu_sir_unfilter_alloc(pars, time_start, time, dt, data, 5, 2)
+  obj2 <- dust2_cpu_sir_unfilter_alloc(pars, time_start, time, dt, data, 1, 2)
+
+  expect_equal(
+    dust2_cpu_sir_unfilter_run(obj1[[1]], NULL, TRUE),
+    matrix(rep(dust2_cpu_sir_unfilter_run(obj2[[1]], NULL, TRUE), each = 5), 5))
 })
