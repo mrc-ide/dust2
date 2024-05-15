@@ -84,12 +84,12 @@ template <typename T>
 SEXP dust2_cpu_state(cpp11::sexp ptr, bool grouped) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<dust_cpu<T>>>(ptr).get();
   cpp11::sexp ret = R_NilValue;
-  const auto it = obj->state().begin();
+  const auto iter = obj->state().begin();
   if (grouped) {
-    ret = export_array_n(it,
+    ret = export_array_n(iter,
                          {obj->n_state(), obj->n_particles(), obj->n_groups()});
   } else {
-    ret = export_array_n(it,
+    ret = export_array_n(iter,
                          {obj->n_state(), obj->n_particles() * obj->n_groups()});
   }
   return ret;

@@ -102,12 +102,12 @@ inline void set_array_dims(cpp11::sexp data,
   data.attr("dim") = r_dim;
 }
 
-template <typename It>
-cpp11::sexp export_array_n(It it, std::initializer_list<size_t> dims) {
+template <typename Iter>
+cpp11::sexp export_array_n(Iter iter, std::initializer_list<size_t> dims) {
   const auto len =
     std::accumulate(dims.begin(), dims.end(), 1, std::multiplies<>{});
   cpp11::writable::doubles ret(len);
-  std::copy_n(it, len, ret.begin());
+  std::copy_n(iter, len, ret.begin());
   set_array_dims(ret, dims);
   return ret;
 }
