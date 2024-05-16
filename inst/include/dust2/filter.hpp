@@ -51,9 +51,9 @@ public:
     }
   }
 
-  template <typename It>
-  void last_log_likelihood(It it) {
-    std::copy(ll_.begin(), ll_.end(), it);
+  template <typename Iter>
+  void last_log_likelihood(Iter iter) {
+    std::copy(ll_.begin(), ll_.end(), iter);
   }
 
 private:
