@@ -160,15 +160,15 @@ public:
     fn(shared_[i]);
   }
 
-  template <typename Iter>
-  void compare_data(const std::vector<data_type>& data, Iter iter) {
+  template <typename IterData, typename IterOutput>
+  void compare_data(IterData data, IterOutput output) {
     const real_type * state_data = state_.data();
-    for (size_t i = 0; i < n_groups_; ++i) {
-      for (size_t j = 0; j < n_particles_; ++j, ++iter) {
+    for (size_t i = 0; i < n_groups_; ++i, ++data) {
+      for (size_t j = 0; j < n_particles_; ++j, ++output) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
-        *iter = T::compare_data(time_, dt_, state_data + offset, data[i],
-                                shared_[i], internal_[i], rng_.state(k));
+        *output = T::compare_data(time_, dt_, state_data + offset, *data,
+                                  shared_[i], internal_[i], rng_.state(k));
       }
     }
   }
@@ -187,7 +187,7 @@ private:
   mcstate::random::prng<rng_state_type> rng_;
 
   static void run_particle(real_type time, real_type dt, size_t n_steps,
-                           shared_state shared, internal_state internal,
+                           const shared_state& shared, internal_state& internal,
                            real_type * state, rng_state_type& rng_state,
                            real_type * state_next) {
     for (size_t i = 0; i < n_steps; ++i) {

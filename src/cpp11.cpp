@@ -34,6 +34,13 @@ extern "C" SEXP _dust2_dust2_cpu_sir_time(SEXP ptr) {
   END_CPP11
 }
 // sir.cpp
+SEXP dust2_cpu_sir_update_pars(cpp11::sexp ptr, cpp11::list pars, bool grouped);
+extern "C" SEXP _dust2_dust2_cpu_sir_update_pars(SEXP ptr, SEXP pars, SEXP grouped) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_cpu_sir_update_pars(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(pars), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+  END_CPP11
+}
+// sir.cpp
 SEXP dust2_cpu_sir_set_state_initial(cpp11::sexp ptr);
 extern "C" SEXP _dust2_dust2_cpu_sir_set_state_initial(SEXP ptr) {
   BEGIN_CPP11
@@ -142,6 +149,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_cpu_sir_set_state_initial",  (DL_FUNC) &_dust2_dust2_cpu_sir_set_state_initial,  1},
     {"_dust2_dust2_cpu_sir_state",              (DL_FUNC) &_dust2_dust2_cpu_sir_state,              2},
     {"_dust2_dust2_cpu_sir_time",               (DL_FUNC) &_dust2_dust2_cpu_sir_time,               1},
+    {"_dust2_dust2_cpu_sir_update_pars",        (DL_FUNC) &_dust2_dust2_cpu_sir_update_pars,        3},
     {"_dust2_dust2_cpu_walk_alloc",             (DL_FUNC) &_dust2_dust2_cpu_walk_alloc,             7},
     {"_dust2_dust2_cpu_walk_reorder",           (DL_FUNC) &_dust2_dust2_cpu_walk_reorder,           2},
     {"_dust2_dust2_cpu_walk_rng_state",         (DL_FUNC) &_dust2_dust2_cpu_walk_rng_state,         1},
