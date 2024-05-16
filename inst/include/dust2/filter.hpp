@@ -34,11 +34,13 @@ public:
     }
   }
 
-  void run() {
+  void run(bool set_initial) {
     const auto n_times = step_.size();
 
     model.set_time(time_start_);
-    model.set_state_initial();
+    if (set_initial) {
+      model.set_state_initial();
+    }
     std::fill(ll_.begin(), ll_.end(), 0);
 
     auto it_data = data_.begin();
