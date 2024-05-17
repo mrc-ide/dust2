@@ -166,7 +166,6 @@ test_that("can run particle filter", {
   obj <- dust2_cpu_sir_filter_alloc(
     pars, time_start, time, dt, data, n_particles, 0, seed)
   ptr <- obj[[1]]
-  s <- dust2_cpu_sir_filter_rng_state(ptr)
   res <- replicate(20, dust2_cpu_sir_filter_run(ptr, NULL, FALSE))
 
   cmp_filter <- sir_filter_manual(
@@ -196,10 +195,8 @@ test_that("can run a nested particle filter and get the same result", {
   ## Here, we can check the layout of the rng within the filter and model:
   n_streams <- (n_particles + 1) * 2
   r <- mcstate2::mcstate_rng$new(n_streams = n_streams, seed = seed)$state()
-  rr <- array(r, c(length(r) / n_streams, n_particles + 1, 2))
   s <- dust2_cpu_sir_filter_rng_state(ptr)
-  expect_equal(s[[1]], c(rr[, 1, ]))
-  expect_equal(s[[2]], c(rr[, -1, ]))
+  expect_equal(s, r)
 
   res <- replicate(20, dust2_cpu_sir_filter_run(ptr, NULL, TRUE))
 
@@ -211,12 +208,15 @@ test_that("can run a nested particle filter and get the same result", {
   s1 <- dust2_cpu_sir_filter_rng_state(ptr1)
   res1 <- replicate(20, dust2_cpu_sir_filter_run(ptr1, NULL, FALSE))
   expect_equal(res1, res[1, ])
+  expect_equal(s1, s[1:3232])
 
+  seed2 <- r[3233:3264]
   data2 <- lapply(data, "[[", 2)
   obj2 <- dust2_cpu_sir_filter_alloc(
-    pars[[2]], time_start, time, dt, data2, n_particles, 0, rr[, 1, 2])
+    pars[[2]], time_start, time, dt, data2, n_particles, 0, seed2)
   ptr2 <- obj2[[1]]
   s2 <- dust2_cpu_sir_filter_rng_state(ptr2)
   res2 <- replicate(20, dust2_cpu_sir_filter_run(ptr2, NULL, FALSE))
   expect_equal(res2, res[2, ])
+  expect_equal(s2, s[3233:6464])
 })

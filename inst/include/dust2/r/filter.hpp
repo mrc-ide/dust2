@@ -177,9 +177,28 @@ cpp11::sexp dust2_cpu_filter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
 template <typename T>
 cpp11::sexp dust2_cpu_filter_rng_state(cpp11::sexp ptr) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
-  const auto state_filter = rng_state_as_raw(obj->rng_state());
-  const auto state_model = rng_state_as_raw(obj->model.rng_state());
-  return cpp11::writable::list{state_filter, state_model};
+  using rng_state_type = typename T::rng_state_type;
+
+  // Undo the construction as above so that the rng state comes out in
+  // the same format it goes in, as a single raw vector.
+  const auto& state_filter = obj->rng_state();
+  const auto& state_model = obj->model.rng_state();
+  const auto n_particles = obj->model.n_particles();
+  const auto n_groups = obj->model.n_groups();
+  const auto n_state = rng_state_type::size();
+  const auto n_bytes = sizeof(typename rng_state_type::int_type);
+  const auto n_bytes_state = n_bytes * n_state;
+  cpp11::writable::raws ret(n_bytes * (state_filter.size() + state_model.size()));
+  for (size_t i = 0; i < n_groups; ++i) {
+    std::memcpy(RAW(ret) + i * n_bytes_state * (n_particles + 1),
+                state_filter.data() + i * n_state,
+                n_bytes_state);
+    std::memcpy(RAW(ret) + i * n_bytes_state * (n_particles + 1) + n_bytes_state,
+                state_model.data() + i * n_state * n_particles,
+                n_bytes_state * n_particles);
+  }
+
+  return ret;
 }
 
 }
