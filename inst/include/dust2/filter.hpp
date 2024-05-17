@@ -152,6 +152,10 @@ public:
     std::copy_n(ll_.begin(), n_groups_, it);
   }
 
+  auto rng_state() { // TODO: should be const, error in mcstate2
+    return rng_.export_state();
+  }
+
 private:
   real_type time_start_;
   std::vector<real_type> time_;

@@ -151,3 +151,72 @@ test_that("can run replicated structured unfilter", {
     dust2_cpu_sir_unfilter_run(obj1[[1]], NULL, NULL, TRUE),
     matrix(rep(cmp, each = 5), 5))
 })
+
+
+test_that("can run particle filter", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+
+  time_start <- 0
+  time <- c(4, 8, 12, 16)
+  data <- lapply(1:4, function(i) list(incidence = i))
+  dt <- 1
+  n_particles <- 100
+  seed <- 42
+
+  obj <- dust2_cpu_sir_filter_alloc(
+    pars, time_start, time, dt, data, n_particles, 0, seed)
+  ptr <- obj[[1]]
+  s <- dust2_cpu_sir_filter_rng_state(ptr)
+  res <- replicate(20, dust2_cpu_sir_filter_run(ptr, NULL, FALSE))
+
+  cmp_filter <- sir_filter_manual(
+    pars, time_start, time, dt, data, n_particles, seed)
+  expect_equal(res, replicate(20, cmp_filter(NULL)))
+})
+
+
+test_that("can run a nested particle filter and get the same result", {
+  pars <- list(
+    list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6),
+    list(beta = 0.2, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6))
+
+  time_start <- 0
+  time <- c(4, 8, 12, 16)
+  data <- lapply(1:4, function(i) {
+    list(list(incidence = i), list(incidence = i + 1))
+  })
+  dt <- 1
+  n_particles <- 100
+  seed <- 42
+
+  obj <- dust2_cpu_sir_filter_alloc(
+    pars, time_start, time, dt, data, n_particles, 2, seed)
+  ptr <- obj[[1]]
+
+  ## Here, we can check the layout of the rng within the filter and model:
+  n_streams <- (n_particles + 1) * 2
+  r <- mcstate2::mcstate_rng$new(n_streams = n_streams, seed = seed)$state()
+  rr <- array(r, c(length(r) / n_streams, n_particles + 1, 2))
+  s <- dust2_cpu_sir_filter_rng_state(ptr)
+  expect_equal(s[[1]], c(rr[, 1, ]))
+  expect_equal(s[[2]], c(rr[, -1, ]))
+
+  res <- replicate(20, dust2_cpu_sir_filter_run(ptr, NULL, TRUE))
+
+  ## now compare:
+  data1 <- lapply(data, "[[", 1)
+  obj1 <- dust2_cpu_sir_filter_alloc(
+    pars[[1]], time_start, time, dt, data1, n_particles, 0, seed)
+  ptr1 <- obj1[[1]]
+  s1 <- dust2_cpu_sir_filter_rng_state(ptr1)
+  res1 <- replicate(20, dust2_cpu_sir_filter_run(ptr1, NULL, FALSE))
+  expect_equal(res1, res[1, ])
+
+  data2 <- lapply(data, "[[", 2)
+  obj2 <- dust2_cpu_sir_filter_alloc(
+    pars[[2]], time_start, time, dt, data2, n_particles, 0, rr[, 1, 2])
+  ptr2 <- obj2[[1]]
+  s2 <- dust2_cpu_sir_filter_rng_state(ptr2)
+  res2 <- replicate(20, dust2_cpu_sir_filter_run(ptr2, NULL, FALSE))
+  expect_equal(res2, res[2, ])
+})

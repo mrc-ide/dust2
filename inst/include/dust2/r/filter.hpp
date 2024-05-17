@@ -91,8 +91,8 @@ cpp11::sexp dust2_cpu_filter_alloc(cpp11::list r_pars,
   using rng_state_type = typename T::rng_state_type;
   using rng_seed_type = std::vector<typename rng_state_type::int_type>;
 
-  auto n_particles = to_size(r_n_particles, "n_particles");
-  auto n_groups = to_size(r_n_groups, "n_groups");
+  const auto n_particles = to_size(r_n_particles, "n_particles");
+  const auto n_groups = to_size(r_n_groups, "n_groups");
   const auto grouped = n_groups > 0;
   const auto time_start = check_time(r_time_start, "time_start");
   const auto time = check_time_sequence<real_type>(time_start, r_time, "time");
@@ -114,13 +114,34 @@ cpp11::sexp dust2_cpu_filter_alloc(cpp11::list r_pars,
   // state required by the filter (n_groups streams worth) and the
   // model (n_groups * n_particles worth, though the last bit of
   // expansion could be done by the model itself instead?)
-  const auto n_streams = n_groups * (n_particles + 1);
+  //
+  // There are two ways of sorting out the state here:
+  //
+  // 1. we could take the first n_groups states for the filter and the
+  // remaining for the models.  This has the nice property that we can
+  // expand the model state later if we support growing models
+  // (mrc-5355).  However, it has the undesirable consequence that a
+  // filter with multiple groups will stream differently to a filter
+  // containing a the first group only.
+  //
+  // 2. we take each block of (1+n_particles) states for each group,
+  // giving the first to the filter and the rest to the model.  This
+  // means that we can change the number of groups without affecting
+  // the results, though we can't change the number of particles as
+  // easily.
+  const auto n_groups_effective = grouped ? n_groups : 1;
+  const auto n_streams = n_groups_effective * (n_particles + 1);
   const auto rng_state = mcstate::random::prng<rng_state_type>(n_streams, seed, deterministic).export_state();
   const auto rng_len = rng_state_type::size();
-  const rng_seed_type seed_filter(rng_state.begin(),
-                                  rng_state.begin() + rng_len * n_groups);
-  const rng_seed_type seed_model(rng_state.begin() + rng_len * n_groups,
-                                 rng_state.end());
+  rng_seed_type seed_filter;
+  rng_seed_type seed_model;
+  for (size_t i = 0; i < n_groups_effective; ++i) {
+    const auto it = rng_state.begin() + i * rng_len * (n_particles + 1);
+    seed_filter.insert(seed_filter.end(),
+                       it, it + rng_len);
+    seed_model.insert(seed_model.end(),
+                      it + rng_len, it + rng_len * (n_particles + 1));
+  }
 
   const auto model = dust2::dust_cpu<T>(shared, internal, time_start, dt, n_particles,
                                         seed_model, deterministic);
@@ -151,6 +172,14 @@ cpp11::sexp dust2_cpu_filter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
   cpp11::writable::doubles ret(obj->model.n_groups());
   obj->last_log_likelihood(REAL(ret));
   return ret;
+}
+
+template <typename T>
+cpp11::sexp dust2_cpu_filter_rng_state(cpp11::sexp ptr) {
+  auto *obj = cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
+  const auto state_filter = rng_state_as_raw(obj->rng_state());
+  const auto state_model = rng_state_as_raw(obj->model.rng_state());
+  return cpp11::writable::list{state_filter, state_model};
 }
 
 }

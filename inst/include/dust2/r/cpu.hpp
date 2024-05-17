@@ -21,8 +21,8 @@ SEXP dust2_cpu_alloc(cpp11::list r_pars,
   const auto time = check_time(r_time, "time");
   const auto dt = check_dt(r_dt);
 
-  auto n_particles = to_size(r_n_particles, "n_particles");
-  auto n_groups = to_size(r_n_groups, "n_groups");
+  const auto n_particles = to_size(r_n_particles, "n_particles");
+  const auto n_groups = to_size(r_n_groups, "n_groups");
 
   const auto shared = build_shared<T>(r_pars, n_groups);
   // Later, we need one of these per thread
@@ -144,14 +144,8 @@ SEXP dust2_cpu_reorder(cpp11::sexp ptr, cpp11::integers r_index) {
 
 template <typename T>
 SEXP dust2_cpu_rng_state(cpp11::sexp ptr) {
-  using rng_state_type = typename T::rng_state_type;
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<dust_cpu<T>>>(ptr).get();
-
-  const auto state = obj->rng_state();
-  const auto len = sizeof(typename rng_state_type::int_type) * state.size();
-  cpp11::writable::raws ret(len);
-  std::memcpy(RAW(ret), state.data(), len);
-  return ret;
+  return rng_state_as_raw(obj->rng_state());
 }
 
 template <typename T>
