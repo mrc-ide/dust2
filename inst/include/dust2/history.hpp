@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 namespace dust {
 
 // We might want a version of this that saves a subset of state too,
@@ -34,7 +36,7 @@ public:
   }
 
   template <typename Iter>
-  void add(Iter iter, real_type time) {
+  void add(real_type time, Iter iter) {
     // TODO: bounds check here (and in the method below)?
     std::copy_n(iter, len_state_, state_.begin() + len_state_ * position_);
     times_[position_] = time;
@@ -43,7 +45,7 @@ public:
   }
 
   template <typename IterReal, typename IterSize>
-  void add(IterReal iter_state, real_type time, IterSize iter_order) {
+  void add(real_type time, IterReal iter_state, IterSize iter_order) {
     // This can't easily call add(Iter, real_type) because we need
     // read position_ and write reorder_; the duplication is minimal
     // though.
@@ -63,18 +65,18 @@ public:
   }
 
   auto size_state() const {
-    return position_ * len_;
+    return position_ * len_state_;
   }
 
   template <typename Iter>
   void export_time(Iter iter) {
-    std::copy_n(time_.begin(), position_, iter);
+    std::copy_n(times_.begin(), position_, iter);
   }
 
   template <typename Iter>
   void export_state(Iter iter, bool reorder) {
     reorder = reorder && n_particles_ > 1 && position_ > 0 &&
-      std::any_of(reorder.begin(), reorder.end(), [](auto v) { return v; });
+      std::any_of(reorder_.begin(), reorder_.end(), [](auto v) { return v; });
     if (reorder) {
       throw std::runtime_error("reorder extraction not implemented");
       /*
@@ -110,12 +112,8 @@ public:
       */
     } else {
       // No reordering is requested or possible so just dump out directly:
-      std::copy_n(state_.begin(), position_ * len_, iter);
+      std::copy_n(state_.begin(), position_ * len_state_, iter);
     }
-  }
-
-  auto& state() const {
-    return state_.cbegin()
   }
 
 private:
