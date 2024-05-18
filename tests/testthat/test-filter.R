@@ -32,7 +32,7 @@ test_that("can run an unfilter", {
 })
 
 
-test_that("can run run unfilter on structured model", {
+test_that("can run unfilter on structured model", {
   base <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
   n_groups <- 3
   pars <- lapply(seq_len(n_groups),
