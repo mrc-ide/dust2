@@ -121,6 +121,25 @@ test_that("can reset cases daily", {
 })
 
 
+test_that("can run sir model to time", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  obj1 <- dust2_cpu_sir_alloc(pars, 0, 0.25, 10, 0, 42, FALSE)
+  obj2 <- dust2_cpu_sir_alloc(pars, 0, 0.25, 10, 0, 42, FALSE)
+  ptr1 <- obj1[[1]]
+  ptr2 <- obj2[[1]]
+
+  dust2_cpu_sir_set_state_initial(ptr1)
+  expect_null(dust2_cpu_sir_run_steps(ptr1, 40))
+  expect_equal(dust2_cpu_sir_time(ptr1), 10)
+  s1 <- dust2_cpu_sir_state(ptr1, FALSE)
+
+  dust2_cpu_sir_set_state_initial(ptr2)
+  expect_null(dust2_cpu_sir_run_to_time(ptr2, 10))
+  expect_equal(dust2_cpu_sir_time(ptr2), 10)
+  expect_equal(dust2_cpu_sir_state(ptr2, FALSE), s1)
+})
+
+
 test_that("can update parameters", {
   base <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
   update <- list(beta = 0.3, gamma = 0.2)

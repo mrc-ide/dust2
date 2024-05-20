@@ -420,3 +420,34 @@ test_that("validate inputs for reordering", {
     "Expected 'index' values to lie in [1, 10]",
     fixed = TRUE)
 })
+
+
+test_that("can run walk model to time", {
+  pars <- list(sd = 1)
+  obj1 <- dust2_cpu_walk_alloc(pars, 0, 0.25, 10, 0, 42, FALSE)
+  obj2 <- dust2_cpu_walk_alloc(pars, 0, 0.25, 10, 0, 42, FALSE)
+  ptr1 <- obj1[[1]]
+  ptr2 <- obj2[[1]]
+
+  dust2_cpu_walk_set_state_initial(ptr1)
+  expect_null(dust2_cpu_walk_run_steps(ptr1, 40))
+  expect_equal(dust2_cpu_walk_time(ptr1), 10)
+  s1 <- dust2_cpu_walk_state(ptr1, FALSE)
+
+  dust2_cpu_walk_set_state_initial(ptr2)
+  expect_null(dust2_cpu_walk_run_to_time(ptr2, 10))
+  expect_equal(dust2_cpu_walk_time(ptr2), 10)
+  expect_equal(dust2_cpu_walk_state(ptr2, FALSE), s1)
+})
+
+
+test_that("time must not be in the past", {
+  pars <- list(sd = 1)
+  obj <- dust2_cpu_walk_alloc(pars, 0, 0.25, 10, 0, 42, FALSE)
+  ptr <- obj[[1]]
+
+  dust2_cpu_walk_set_state_initial(ptr)
+  expect_error(
+    dust2_cpu_walk_run_to_time(ptr, -5),
+    "Can't run to time -5.*, model already at time 0.*")
+})

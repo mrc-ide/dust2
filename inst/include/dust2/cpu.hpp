@@ -43,6 +43,11 @@ public:
     // that shared and internal have the same size).
   }
 
+  auto run_to_time(real_type time) {
+    const size_t n_steps = std::round(std::max(0.0, time - time_) / dt_);
+    return run_steps(n_steps);
+  }
+
   auto run_steps(size_t n_steps) {
     // Ignore errors for now.
     real_type * state_data = state_.data();
@@ -66,11 +71,6 @@ public:
     if (n_steps % 2 == 1) {
       std::swap(state_, state_next_);
     }
-    // Time management here is going to require some effort once we
-    // support interesting dt so that we always land on times with no
-    // non-integer bits, but for now we require that dt is 1 so this
-    // is easy.  We need this to hold within run_particle too, so it's
-    // possible that's where the calculation here will be done.
     time_ = time_ + n_steps * dt_;
   }
 
