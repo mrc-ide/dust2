@@ -5,6 +5,7 @@
 #include <vector>
 #include <dust2/common.hpp>
 #include <dust2/cpu.hpp>
+#include <cpp11.hpp>
 
 namespace dust2 {
 namespace r {

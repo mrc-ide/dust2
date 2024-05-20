@@ -1,5 +1,6 @@
 #include <dust2/filter_details.hpp>
 #include <dust2/history.hpp>
+#include <dust2/r/helpers.hpp>
 
 #include <cpp11/integers.hpp>
 #include <cpp11/doubles.hpp>
@@ -27,7 +28,7 @@ cpp11::sexp test_history(cpp11::doubles r_time, cpp11::list r_state,
   const size_t n_particles = r_dim[1];
   const size_t n_groups = r_dim[2];
 
-  dust::history<double> h(n_state, n_particles, n_groups, n_times);
+  dust2::history<double> h(n_state, n_particles, n_groups, n_times);
   for (size_t i = 0; i < static_cast<size_t>(r_state.size()); ++i) {
     if (r_order == R_NilValue) {
       h.add(r_time[i], REAL(r_state[i]));
@@ -45,6 +46,7 @@ cpp11::sexp test_history(cpp11::doubles r_time, cpp11::list r_state,
   cpp11::writable::doubles ret_state(static_cast<int>(h.size_state()));
   h.export_time(REAL(ret_time));
   h.export_state(REAL(ret_state), reorder);
+  dust2::r::set_array_dims(ret_state, {n_state, n_particles, n_groups, h.size_time()});
 
   return cpp11::writable::list{ret_time, ret_state};
 }
