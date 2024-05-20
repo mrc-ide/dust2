@@ -31,6 +31,23 @@ inline double to_double(cpp11::sexp x, const char * name) {
   cpp11::stop("'%s' must be scalar numeric", name);
 }
 
+template <typename real_type>
+inline std::vector<real_type> to_vector_real(cpp11::sexp x, const char * name) {
+  if (TYPEOF(x) == REALSXP) {
+    auto x_dbl = cpp11::as_cpp<cpp11::doubles>(x);
+    std::vector<real_type> ret(x_dbl.size());
+    std::copy(x_dbl.begin(), x_dbl.end(), ret.begin());
+    return ret;
+  }
+  if (TYPEOF(x) == INTSXP) {
+    auto x_int = cpp11::as_cpp<cpp11::integers>(x);
+    std::vector<real_type> ret(x_int.size());
+    std::copy(x_int.begin(), x_int.end(), ret.begin());
+    return ret;
+  }
+  cpp11::stop("'%s' must be a numeric vector", name);
+}
+
 inline int to_int(cpp11::sexp x, const char * name) {
   check_scalar(x, name);
   if (TYPEOF(x) == INTSXP) {
@@ -92,6 +109,27 @@ inline double check_dt(cpp11::sexp r_dt) {
     cpp11::stop("Expected 'dt' to be the inverse of an integer");
   }
   return dt;
+}
+
+template <typename real_type>
+std::vector<real_type> check_time_sequence(real_type time_start,
+                                           cpp11::sexp r_time,
+                                           const char * name) {
+  auto time = to_vector_real<real_type>(r_time, name);
+  auto prev = time_start;
+  const auto eps = 1e-8;
+  for (size_t i = 0; i < time.size(); ++i) {
+    const auto t = time[i];
+    if (!is_integer_like(t, eps)) {
+      cpp11::stop("Expected 'time[%d]' to be integer-like", i + 1);
+    }
+    if (t <= prev) {
+      cpp11::stop("Expected 'time[%d]' (%d) to be larger than the previous value (%d)",
+                  i + 1, static_cast<int>(prev), static_cast<int>(t));
+    }
+    prev = t;
+  }
+  return time;
 }
 
 // The initializer_list is a type-safe variadic-like approach.
@@ -172,6 +210,38 @@ void update_pars(dust_cpu<T>& obj, cpp11::list r_pars, bool grouped) {
                            T::update_shared(r_pars, shared);
                           });
   }
+}
+
+template <typename T>
+std::vector<typename T::data_type> check_data(cpp11::list r_data,
+                                              size_t n_time,
+                                              size_t n_groups,
+                                              const char * name) {
+  const bool grouped = n_groups > 0;
+  std::vector<typename T::data_type> data;
+
+  check_length(r_data, n_time, name);
+
+  if (grouped) {
+    // There are two ways we might recieve things; as a list-of-lists
+    // or as a list matrix.  We might also want to cope with a
+    // data.frame but we can probably do that on the R side, and might
+    // provide helpers there that throw much nicer errors than we can
+    // throw here, really.
+    for (size_t i = 0; i < n_time; ++i) {
+      auto r_data_i = cpp11::as_cpp<cpp11::list>(r_data[i]);
+      check_length(r_data_i, n_groups, "data[i]"); // can do better with sstream
+      for (size_t j = 0; j < n_groups; ++j) {
+        data.push_back(T::build_data(r_data_i[j]));
+      }
+    }
+  } else {
+    for (size_t i = 0; i < n_time; ++i) {
+      data.push_back(T::build_data(r_data[i]));
+    }
+  }
+
+  return data;
 }
 
 }
