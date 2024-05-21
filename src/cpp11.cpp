@@ -89,6 +89,34 @@ extern "C" SEXP _dust2_dust2_cpu_sir_unfilter_run(SEXP ptr, SEXP r_pars, SEXP r_
     return cpp11::as_sexp(dust2_cpu_sir_unfilter_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
   END_CPP11
 }
+// sir.cpp
+SEXP dust2_cpu_sir_filter_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed);
+extern "C" SEXP _dust2_dust2_cpu_sir_filter_alloc(SEXP r_pars, SEXP r_time_start, SEXP r_time, SEXP r_dt, SEXP r_data, SEXP r_n_particles, SEXP r_n_groups, SEXP r_seed) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_cpu_sir_filter_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time_start), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_dt), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_data), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_seed)));
+  END_CPP11
+}
+// sir.cpp
+SEXP dust2_cpu_sir_filter_run(cpp11::sexp ptr, cpp11::sexp r_pars, bool grouped);
+extern "C" SEXP _dust2_dust2_cpu_sir_filter_run(SEXP ptr, SEXP r_pars, SEXP grouped) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_cpu_sir_filter_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_pars), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+  END_CPP11
+}
+// sir.cpp
+SEXP dust2_cpu_sir_filter_rng_state(cpp11::sexp ptr);
+extern "C" SEXP _dust2_dust2_cpu_sir_filter_rng_state(SEXP ptr) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_cpu_sir_filter_rng_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr)));
+  END_CPP11
+}
+// test.cpp
+cpp11::integers test_resample_weight(std::vector<double> w, double u);
+extern "C" SEXP _dust2_test_resample_weight(SEXP w, SEXP u) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(test_resample_weight(cpp11::as_cpp<cpp11::decay_t<std::vector<double>>>(w), cpp11::as_cpp<cpp11::decay_t<double>>(u)));
+  END_CPP11
+}
 // walk.cpp
 SEXP dust2_cpu_walk_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic);
 extern "C" SEXP _dust2_dust2_cpu_walk_alloc(SEXP r_pars, SEXP r_time, SEXP r_dt, SEXP r_n_particles, SEXP r_n_groups, SEXP r_seed, SEXP r_deterministic) {
@@ -171,6 +199,9 @@ extern "C" {
 static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_cpu_sir_alloc",              (DL_FUNC) &_dust2_dust2_cpu_sir_alloc,              7},
     {"_dust2_dust2_cpu_sir_compare_data",       (DL_FUNC) &_dust2_dust2_cpu_sir_compare_data,       3},
+    {"_dust2_dust2_cpu_sir_filter_alloc",       (DL_FUNC) &_dust2_dust2_cpu_sir_filter_alloc,       8},
+    {"_dust2_dust2_cpu_sir_filter_rng_state",   (DL_FUNC) &_dust2_dust2_cpu_sir_filter_rng_state,   1},
+    {"_dust2_dust2_cpu_sir_filter_run",         (DL_FUNC) &_dust2_dust2_cpu_sir_filter_run,         3},
     {"_dust2_dust2_cpu_sir_rng_state",          (DL_FUNC) &_dust2_dust2_cpu_sir_rng_state,          1},
     {"_dust2_dust2_cpu_sir_run_steps",          (DL_FUNC) &_dust2_dust2_cpu_sir_run_steps,          2},
     {"_dust2_dust2_cpu_sir_run_to_time",        (DL_FUNC) &_dust2_dust2_cpu_sir_run_to_time,        2},
@@ -192,6 +223,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_cpu_walk_state",             (DL_FUNC) &_dust2_dust2_cpu_walk_state,             2},
     {"_dust2_dust2_cpu_walk_time",              (DL_FUNC) &_dust2_dust2_cpu_walk_time,              1},
     {"_dust2_dust2_cpu_walk_update_pars",       (DL_FUNC) &_dust2_dust2_cpu_walk_update_pars,       3},
+    {"_dust2_test_resample_weight",             (DL_FUNC) &_dust2_test_resample_weight,             2},
     {NULL, NULL, 0}
 };
 }

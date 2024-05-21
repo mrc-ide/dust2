@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstring>
 #include <numeric>
 #include <vector>
 #include <dust2/common.hpp>
@@ -275,6 +276,14 @@ void set_state(dust_cpu<T>& obj, cpp11::sexp r_state, bool grouped) {
                 n_groups);
   }
   obj.set_state(REAL(r_state), recycle_particle, recycle_group);
+}
+
+template <typename T>
+SEXP rng_state_as_raw(const std::vector<T>& state) {
+  const auto len = sizeof(T) * state.size();
+  cpp11::writable::raws ret(len);
+  std::memcpy(RAW(ret), state.data(), len);
+  return ret;
 }
 
 }
