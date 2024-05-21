@@ -87,6 +87,20 @@ bool is_integer_like(T x, T eps) {
   return std::abs(x - std::round(x)) <= eps;
 }
 
+template <typename T>
+cpp11::integers as_integers(cpp11::doubles x, const char * name) {
+  const auto len = x.size();
+  cpp11::writable::integers ret(x.size());
+  for (auto i = 0; i < len; ++i) {
+    if (!cpp11::is_convertible_without_loss_to_integer(x[i])) {
+      cpp11::stop("All values of '%s' must be integer-like, but '%s[%d]' was not",
+                  name, name, i + 1);
+    }
+    ret[i] = static_cast<int>(std::round(x[i]));
+  }
+  return ret;
+}
+
 inline double check_time(cpp11::sexp r_time, const char * name) {
   const auto time = to_double(r_time, name);
   const auto eps = 1e-8;
@@ -142,14 +156,7 @@ inline std::vector<size_t> check_index(cpp11::sexp r_index, size_t max,
     return ret;
   }
   if (TYPEOF(r_index) == REALSXP) {
-    const auto data_real = REAL(r_index);
-    for (int i = 0; i < LENGTH(r_index); ++i) {
-      if (!cpp11::is_convertible_without_loss_to_integer(data_real[i])) {
-        cpp11::stop("All values of '%s' must be integer-like, but '%s[%d]' was not",
-                    name, max, name, i + 1);
-      }
-      return check_index(cpp11::as_cpp<cpp11::integers>(r_index), max, name);
-    }
+    return check_index(as_integers(r_index), max, name);
   }
   if (TYPEOF(r_index) != INTSXP) {
     cpp11::stop("Expected an integer vector for '%s'", name);
