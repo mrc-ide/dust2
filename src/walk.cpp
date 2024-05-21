@@ -71,3 +71,8 @@ SEXP dust2_cpu_walk_update_pars(cpp11::sexp ptr, cpp11::list pars,
                                 bool grouped) {
   return dust2::r::dust2_cpu_update_pars<walk>(ptr, pars, grouped);
 }
+
+[[cpp11::register]]
+SEXP dust2_cpu_walk_simulate(cpp11::sexp ptr, cpp11::sexp r_times, bool grouped) {
+  return dust2::r::dust2_cpu_simulate<walk>(ptr, r_times, grouped);
+}

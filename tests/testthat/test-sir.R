@@ -146,3 +146,24 @@ test_that("can update parameters", {
     dust_model_state(obj2),
     dust_model_state(obj1))
 })
+
+
+test_that("can run simulation", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  obj1 <- dust2_cpu_sir_alloc(pars, 0, 1, 10, 0, 42, FALSE)
+  obj2 <- dust2_cpu_sir_alloc(pars, 0, 1, 10, 0, 42, FALSE)
+  ptr1 <- obj1[[1]]
+  ptr2 <- obj2[[1]]
+  dust2_cpu_sir_set_state_initial(ptr1)
+  dust2_cpu_sir_set_state_initial(ptr2)
+
+  res <- dust2_cpu_sir_simulate(ptr1, 0:20, FALSE)
+  expect_equal(dim(res), c(5, 10, 21))
+
+  expect_equal(res[, , 21], dust2_cpu_sir_state(ptr1, FALSE))
+  expect_equal(dust2_cpu_sir_time(ptr1), 20)
+
+  expect_equal(res[, , 1], dust2_cpu_sir_state(ptr2, FALSE))
+  dust2_cpu_sir_run_to_time(ptr2, 10)
+  expect_equal(res[, , 11], dust2_cpu_sir_state(ptr2, FALSE))
+})

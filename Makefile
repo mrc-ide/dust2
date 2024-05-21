@@ -7,6 +7,9 @@ all:
 test:
 	${RSCRIPT} -e 'devtools::test()'
 
+test_leaks:
+	R -d 'valgrind --leak-check=full' -e 'devtools::test()'
+
 roxygen:
 	@mkdir -p man
 	${RSCRIPT} -e "devtools::document()"
@@ -31,4 +34,4 @@ check_all:
 clean:
 	rm -f src/*.o src/*.so src/*.gcda src/*.gcno src/*.gcov
 
-.PHONY: clean all test document install
+.PHONY: clean all test document install test_leaks

@@ -4,6 +4,7 @@
 #include <mcstate/r/random.hpp>
 
 #include <dust2/cpu.hpp>
+#include <dust2/history.hpp>
 
 namespace dust2 {
 namespace r {
@@ -197,6 +198,39 @@ SEXP dust2_cpu_compare_data(cpp11::sexp ptr,
   obj->compare_data(data.begin(), REAL(ret));
   if (grouped) {
     set_array_dims(ret, {obj->n_particles(), obj->n_groups()});
+  }
+  return ret;
+}
+
+template <typename T>
+SEXP dust2_cpu_simulate(cpp11::sexp ptr,
+                        cpp11::sexp r_times,
+                        bool grouped) {
+  // TODO: Support version with state index
+  using real_type = typename T::real_type;
+  auto *obj = cpp11::as_cpp<cpp11::external_pointer<dust_cpu<T>>>(ptr).get();
+  const auto times = check_time_sequence(obj->time(), r_times, false, "time");
+  const auto n_state = obj->n_state();
+  const auto n_particles = obj->n_particles();
+  const auto n_groups = obj->n_groups();
+  const auto n_times = times.size();
+
+  dust2::history<real_type> h(n_state, n_particles, n_groups, n_times);
+  for (size_t i = 0; i < n_times; ++i) {
+    obj->run_to_time(times[i]);
+    h.add(times[i], obj->state().begin());
+  }
+
+  // There is an extra copy here vs using the R memory to back the
+  // history.  That's an optimisation that would be fairly easy to
+  // make later.
+  const auto len = n_state * n_particles * n_groups * n_times;
+  cpp11::sexp ret = cpp11::writable::doubles(len);
+  h.export_state(REAL(ret), false);
+  if (grouped) {
+    set_array_dims(ret, {n_state, n_particles, n_groups, n_times});
+  } else {
+    set_array_dims(ret, {n_state, n_particles * n_groups, n_times});
   }
   return ret;
 }

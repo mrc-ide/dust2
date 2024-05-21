@@ -416,3 +416,22 @@ test_that("time must not be in the past", {
     dust_model_run_to_time(obj, -5),
     "Can't run to time -5.*, model already at time 0.*")
 })
+
+
+test_that("can simulate walk model", {
+  pars <- lapply(1:4, function(sd) list(len = 3, sd = sd))
+  obj1 <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 4, 42, FALSE)
+  obj2 <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 4, 42, FALSE)
+  ptr1 <- obj1[[1]]
+  ptr2 <- obj2[[1]]
+
+  res <- dust2_cpu_walk_simulate(ptr1, 0:20, TRUE)
+  expect_equal(dim(res), c(3, 10, 4, 21))
+
+  expect_equal(res[, , , 21], dust2_cpu_walk_state(ptr1, TRUE))
+  expect_equal(dust2_cpu_walk_time(ptr1), 20)
+
+  expect_equal(res[, , , 1], dust2_cpu_walk_state(ptr2, TRUE))
+  dust2_cpu_walk_run_to_time(ptr2, 10)
+  expect_equal(res[, , , 11], dust2_cpu_walk_state(ptr2, TRUE))
+})
