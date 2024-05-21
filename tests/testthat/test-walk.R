@@ -233,7 +233,7 @@ test_that("can update parameters", {
   expect_null(dust_model_run_steps(obj, 1))
   s1 <- dust_model_state(obj)
 
-  expect_null(dust_model_update_pars(obj, pars2, FALSE))
+  expect_null(dust_model_update_pars(obj, pars2))
   expect_null(dust_model_run_steps(obj, 1))
   s2 <- dust_model_state(obj)
 
@@ -253,7 +253,7 @@ test_that("can update parameters for grouped models", {
   expect_null(dust_model_run_steps(obj, 1))
   s1 <- dust_model_state(obj)
 
-  expect_null(dust_model_update_pars(obj, pars2, TRUE))
+  expect_null(dust_model_update_pars(obj, pars2))
   expect_null(dust_model_run_steps(obj, 1))
   s2 <- dust_model_state(obj)
 
@@ -269,7 +269,7 @@ test_that("params must be same length to update", {
   pars1 <- lapply(1:4, function(sd) list(sd = sd, random_initial = TRUE))
   pars2 <- lapply(1:5, function(sd) list(sd = 10 * sd))
   obj <- dust_model_create(walk(), pars1, n_particles = 10, n_groups = 4)
-  expect_error(dust_model_update_pars(obj, pars2, TRUE),
+  expect_error(dust_model_update_pars(obj, pars2),
                "Expected 'pars' to have length 4 to match 'n_groups'")
 })
 

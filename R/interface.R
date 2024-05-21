@@ -207,7 +207,7 @@ dust_model_rng_state <- function(model) {
 ##' @export
 dust_model_update_pars <- function(model, pars) {
   check_is_dust_model(model)
-  model$methods$update_pars(model, pars, model$grouped)
+  model$methods$update_pars(model$ptr, pars, model$grouped)
   invisible()
 }
 
@@ -240,7 +240,7 @@ dust_model_run_steps <- function(model, steps) {
 ##' @rdname dust_model_run
 dust_model_run_to_time <- function(model, time) {
   check_is_dust_model(model)
-  model$methods$run_time(model$ptr, time)
+  model$methods$run_to_time(model$ptr, time)
   invisible()
 }
 
@@ -265,7 +265,7 @@ dust_model_run_to_time <- function(model, time) {
 ##' @export
 dust_model_reorder <- function(model, index) {
   check_is_dust_model(model)
-  model$methods$reorder(model$ptr, time)
+  model$methods$reorder(model$ptr, index)
   invisible()
 }
 
