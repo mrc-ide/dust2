@@ -6,8 +6,8 @@ test_that("can run simple sir model", {
   expect_equal(obj$n_state, 5)
 
   ptr <- obj$ptr
-  expect_type(dust2_cpu_sir_rng_state(ptr), "raw")
-  expect_length(dust2_cpu_sir_rng_state(ptr), 32 * 10)
+  expect_type(dust_model_rng_state(obj), "raw")
+  expect_length(dust_model_rng_state(obj), 32 * 10)
 
   expect_equal(dust_model_state(obj), matrix(0, 5, 10))
   expect_equal(dust_model_time(obj), 0)
@@ -55,7 +55,7 @@ test_that("can compare to data when missing", {
   expect_equal(
     dust2_cpu_sir_compare_data(ptr, d, FALSE),
     rep(0, 10))
-  expect_equal(dust2_cpu_sir_rng_state(ptr), r$state())
+  expect_equal(dust_model_rng_state(obj), r$state())
 })
 
 

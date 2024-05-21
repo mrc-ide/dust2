@@ -8,7 +8,8 @@ dust_model <- function(name, env = parent.env(parent.frame())) {
 
   methods_nms <- c("alloc",
                    "state", "set_state", "set_state_initial",
-                   "time", "set_time")
+                   "time", "set_time",
+                   "rng_state")
 
   methods <- lapply(sprintf("dust2_cpu_%s_%s", name, methods_nms),
                     function(x) env[[x]])
@@ -163,6 +164,26 @@ dust_model_set_time <- function(model, time) {
   check_is_dust_model(model)
   model$methods$set_time(model$ptr, time)
   invisible()
+}
+
+
+##' Fetch the random number generator (RNG) state from the model.
+##'
+##' @title Fetch rng state
+##'
+##' @inheritParams dust_model_state
+##'
+##' @return A raw vector, this could be quite long.
+##'
+##' @seealso You can pass the state you get back from this function as
+##'   the seed object to `dust_model_create`.  In future,
+##'   `dust_model_set_rng_state` will also let you set state into an
+##'   existing model.
+##'
+##' @export
+dust_model_rng_state <- function(model) {
+  check_is_dust_model(model)
+  model$methods$rng_state(model$ptr)
 }
 
 

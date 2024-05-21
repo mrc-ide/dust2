@@ -4,8 +4,8 @@ test_that("can run simple walk model", {
   expect_s3_class(obj, "dust_model")
 
   ptr <- obj$ptr
-  expect_type(dust2_cpu_walk_rng_state(ptr), "raw")
-  expect_length(dust2_cpu_walk_rng_state(ptr), 32 * 10)
+  expect_type(dust_model_rng_state(obj), "raw")
+  expect_length(dust_model_rng_state(obj), 32 * 10)
 
   expect_equal(dust_model_state(obj), matrix(0, 1, 10))
   expect_equal(dust_model_time(obj), 0)
