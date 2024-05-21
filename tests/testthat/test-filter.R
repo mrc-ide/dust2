@@ -11,14 +11,15 @@ test_that("can run an unfilter", {
   ## Manually compute likelihood:
   f <- function(pars) {
     base[names(pars)] <- pars
-    obj <- dust2_cpu_sir_alloc(base, time_start, dt, 1, 0, NULL, TRUE)
-    ptr <- obj[[1]]
-    dust2_cpu_sir_set_state_initial(ptr)
+    obj <- dust_model_create(sir(), base, time = time_start, dt = dt,
+                             n_particles = 1, deterministic = TRUE)
+    ptr <- obj$ptr
+    dust_model_set_state_initial(obj)
     incidence <- numeric(length(time))
     time0 <- c(time_start, time)
     for (i in seq_along(time)) {
       dust2_cpu_sir_run_steps(ptr, round((time[i] - time0[i]) / dt))
-      incidence[i] <- dust2_cpu_sir_state(ptr, FALSE)[5, , drop = TRUE]
+      incidence[i] <- dust_model_state(obj)[5, , drop = TRUE]
     }
     sum(dpois(1:4, incidence + 1e-6, log = TRUE))
   }
@@ -43,14 +44,15 @@ test_that("can run an unfilter with manually set state", {
 
   ## Manually compute likelihood:
   f <- function(pars) {
-    obj <- dust2_cpu_sir_alloc(pars, time_start, dt, 1, 0, NULL, TRUE)
-    ptr <- obj[[1]]
-    dust2_cpu_sir_set_state(ptr, state, FALSE)
+    obj <- dust_model_create(sir(), pars, time = time_start, dt = dt,
+                             n_particles = 1, deterministic = TRUE)
+    ptr <- obj$ptr
+    dust_model_set_state(obj, state)
     incidence <- numeric(length(time))
     time0 <- c(time_start, time)
     for (i in seq_along(time)) {
       dust2_cpu_sir_run_steps(ptr, round((time[i] - time0[i]) / dt))
-      incidence[i] <- dust2_cpu_sir_state(ptr, FALSE)[5, , drop = TRUE]
+      incidence[i] <- dust_model_state(obj)[5, , drop = TRUE]
     }
     sum(dpois(1:4, incidence + 1e-6, log = TRUE))
   }
@@ -76,14 +78,16 @@ test_that("can run unfilter on structured model", {
 
   ## Manually compute likelihood:
   f <- function(pars) {
-    obj <- dust2_cpu_sir_alloc(pars, time_start, dt, 1, n_groups, NULL, TRUE)
-    ptr <- obj[[1]]
-    dust2_cpu_sir_set_state_initial(ptr)
+    obj <- dust_model_create(sir(), pars, time = time_start, dt = dt,
+                             n_particles = 1, n_groups = n_groups,
+                             deterministic = TRUE)
+    ptr <- obj$ptr
+    dust_model_set_state_initial(obj)
     incidence <- matrix(0, n_groups, length(time))
     time0 <- c(time_start, time)
     for (i in seq_along(time)) {
       dust2_cpu_sir_run_steps(ptr, round((time[i] - time0[i]) / dt))
-      incidence[, i] <- dust2_cpu_sir_state(ptr, FALSE)[5, , drop = TRUE]
+      incidence[, i] <- dust_model_state(obj)[5, , , drop = TRUE]
     }
     observed <- matrix(unlist(data, use.names = FALSE), n_groups)
     rowSums(dpois(observed, incidence + 1e-6, log = TRUE))
