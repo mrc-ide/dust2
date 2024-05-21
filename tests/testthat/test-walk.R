@@ -444,7 +444,32 @@ test_that("can simulate walk model with index", {
   ptr1 <- obj1[[1]]
   ptr2 <- obj2[[1]]
 
-  res1 <- dust2_cpu_walk_simulate(ptr1, 0:20, c(2L, 4L), TRUE)
+  res1 <- dust2_cpu_walk_simulate(ptr1, 0:20, c(2, 4), TRUE)
   res2 <- dust2_cpu_walk_simulate(ptr2, 0:20, NULL, TRUE)
   expect_equal(res1, res2[c(2, 4), , , ])
+})
+
+
+test_that("can validate index values", {
+  pars <- list(len = 3, sd = 1)
+  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
+  ptr <- obj[[1]]
+  expect_error(
+    dust2_cpu_walk_simulate(ptr, 0:20, c("2", "4"), TRUE),
+    "Expected an integer vector for 'index'")
+  expect_error(
+    dust2_cpu_walk_simulate(ptr, 0:20, c(2, 2.9), TRUE),
+    "All values of 'index' must be integer-like, but 'index[2]' was not",
+    fixed = TRUE)
+  expect_error(
+    dust2_cpu_walk_simulate(ptr, 0:20, c(2, 20), TRUE),
+    "All values of 'index' must be in [1, 3], but 'index[2]' was 20",
+    fixed = TRUE)
+  expect_error(
+    dust2_cpu_walk_simulate(ptr, 0:20, c(2, 3, -4), TRUE),
+    "All values of 'index' must be in [1, 3], but 'index[3]' was -4",
+    fixed = TRUE)
+  expect_error(
+    dust2_cpu_walk_simulate(ptr, 0:20, integer(), TRUE),
+    "'index' must have nonzero length")
 })

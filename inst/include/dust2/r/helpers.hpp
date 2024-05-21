@@ -87,8 +87,7 @@ bool is_integer_like(T x, T eps) {
   return std::abs(x - std::round(x)) <= eps;
 }
 
-template <typename T>
-cpp11::integers as_integers(cpp11::doubles x, const char * name) {
+inline cpp11::integers as_integers(cpp11::doubles x, const char * name) {
   const auto len = x.size();
   cpp11::writable::integers ret(x.size());
   for (auto i = 0; i < len; ++i) {
@@ -156,7 +155,8 @@ inline std::vector<size_t> check_index(cpp11::sexp r_index, size_t max,
     return ret;
   }
   if (TYPEOF(r_index) == REALSXP) {
-    return check_index(as_integers(r_index), max, name);
+    cpp11::doubles r_index_real = cpp11::as_cpp<cpp11::doubles>(r_index);
+    return check_index(as_integers(r_index_real, name), max, name);
   }
   if (TYPEOF(r_index) != INTSXP) {
     cpp11::stop("Expected an integer vector for '%s'", name);
