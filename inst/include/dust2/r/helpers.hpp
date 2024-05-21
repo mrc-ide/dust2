@@ -135,6 +135,41 @@ std::vector<real_type> check_time_sequence(real_type time_start,
   return time;
 }
 
+inline std::vector<size_t> check_index(cpp11::sexp r_index, size_t max,
+                                       const char * name) {
+  std::vector<size_t> ret;
+  if (r_index == R_NilValue) {
+    return ret;
+  }
+  if (TYPEOF(r_index) == REALSXP) {
+    const auto data_real = REAL(r_index);
+    for (int i = 0; i < LENGTH(r_index); ++i) {
+      if (!cpp11::is_convertible_without_loss_to_integer(data_real[i])) {
+        cpp11::stop("All values of '%s' must be integer-like, but '%s[%d]' was not",
+                    name, max, name, i + 1);
+      }
+      return check_index(cpp11::as_cpp<cpp11::integers>(r_index), max, name);
+    }
+  }
+  if (TYPEOF(r_index) != INTSXP) {
+    cpp11::stop("Expected an integer vector for '%s'", name);
+  }
+  const int len = LENGTH(r_index);
+  if (len == 0) {
+    cpp11::stop("'%s' must have nonzero length", name);
+  }
+  ret.reserve(len);
+  const auto data = INTEGER(r_index);
+  for (int i = 0; i < len; ++i) {
+    if (data[i] < 1 || data[i] > static_cast<int>(max)) {
+      cpp11::stop("All values of '%s' must be in [1, %d], but '%s[%d]' was %d",
+                  name, max, name, i + 1, data[i]);
+    }
+    ret.push_back(data[i] - 1);
+  }
+  return ret;
+}
+
 // The initializer_list is a type-safe variadic-like approach.
 inline void set_array_dims(cpp11::sexp data,
                            std::initializer_list<size_t> dims) {

@@ -80,8 +80,9 @@ SEXP dust2_cpu_sir_compare_data(cpp11::sexp ptr,
 }
 
 [[cpp11::register]]
-SEXP dust2_cpu_sir_simulate(cpp11::sexp ptr, cpp11::sexp r_times, bool grouped) {
-  return dust2::r::dust2_cpu_simulate<sir>(ptr, r_times, grouped);
+SEXP dust2_cpu_sir_simulate(cpp11::sexp ptr, cpp11::sexp r_times,
+                            cpp11::sexp r_index, bool grouped) {
+  return dust2::r::dust2_cpu_simulate<sir>(ptr, r_times, r_index, grouped);
 }
 
 [[cpp11::register]]
