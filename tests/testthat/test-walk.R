@@ -1,21 +1,17 @@
 test_that("can run simple walk model", {
   pars <- list(sd = 1, random_initial = TRUE)
-  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
-  expect_length(obj, 4)
-  expect_type(obj[[1]], "externalptr")
-  expect_equal(obj[[2]], 1)
-  expect_false(obj[[3]])
-  expect_null(obj[[4]])
+  obj <- dust_model_create(walk(), pars, n_particles = 10, seed = 42)
+  expect_s3_class(obj, "dust_model")
 
-  ptr <- obj[[1]]
+  ptr <- obj$ptr
   expect_type(dust2_cpu_walk_rng_state(ptr), "raw")
   expect_length(dust2_cpu_walk_rng_state(ptr), 32 * 10)
 
-  expect_equal(dust2_cpu_walk_state(ptr, FALSE), matrix(0, 1, 10))
+  expect_equal(dust_model_state(obj), matrix(0, 1, 10))
   expect_equal(dust2_cpu_walk_time(ptr), 0)
 
   expect_null(dust2_cpu_walk_run_steps(ptr, 3))
-  s <- dust2_cpu_walk_state(ptr, FALSE)
+  s <- dust_model_state(obj)
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
   expect_equal(s, rbind(colSums(r$normal(3, 0, 1))))
@@ -25,27 +21,26 @@ test_that("can run simple walk model", {
 
 test_that("can set model state from a vector", {
   pars <- list(sd = 1, random_initial = TRUE)
-  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
-  ptr <- obj[[1]]
+  obj <- dust_model_create(walk(), pars, n_particles = 10, seed = 42)
+  ptr <- obj$ptr
   s <- rbind(runif(10))
-  expect_null(dust2_cpu_walk_set_state(ptr, s, FALSE))
-  expect_equal(dust2_cpu_walk_state(ptr, FALSE), s)
+  expect_null(dust_model_set_state(obj, s))
+  expect_equal(dust_model_state(obj), s)
 
   expect_null(dust2_cpu_walk_run_steps(ptr, 3))
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
-  expect_equal(dust2_cpu_walk_state(ptr, FALSE),
+  expect_equal(dust_model_state(obj),
                colSums(r$normal(3, 0, 1)) + s)
 })
 
 
 test_that("can set model state from initial conditions", {
   pars <- list(sd = 1, random_initial = TRUE)
-  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
-  ptr <- obj[[1]]
-  expect_null(dust2_cpu_walk_set_state_initial(ptr))
+  obj <- dust_model_create(walk(), pars, n_particles = 10, seed = 42)
+  expect_null(dust_model_set_state_initial(obj))
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
-  expect_equal(dust2_cpu_walk_state(ptr, FALSE),
+  expect_equal(dust_model_state(obj),
                r$normal(1, 0, 1))
 })
 
@@ -54,28 +49,27 @@ test_that("can set model state from initial conditions", {
 ## feature of the walk model and not dust though.
 test_that("can set model state from initial conditions with empty version", {
   pars <- list(sd = 1)
-  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
-  ptr <- obj[[1]]
-  expect_null(dust2_cpu_walk_set_state_initial(ptr))
-  expect_equal(dust2_cpu_walk_state(ptr, FALSE),
+  obj <- dust_model_create(walk(), pars, n_particles = 10, seed = 42)
+  expect_null(dust_model_set_state_initial(obj))
+  expect_equal(dust_model_state(obj),
                matrix(0, 1, 10))
 })
 
 
 test_that("can run deterministically", {
   pars <- list(sd = 1)
-  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, TRUE)
-  ptr <- obj[[1]]
+  obj <- dust_model_create(walk(), pars, n_particles = 10, deterministic = TRUE)
+  ptr <- obj$ptr
   expect_null(dust2_cpu_walk_run_steps(ptr, 3))
-  expect_equal(dust2_cpu_walk_state(ptr, FALSE),
+  expect_equal(dust_model_state(obj),
                matrix(0, 1, 10))
 })
 
 
 test_that("Allow fractional dt", {
   pars <- list(sd = 1, random_initial = TRUE)
-  obj <- dust2_cpu_walk_alloc(pars, 0, 0.5, 10, 0, 42, FALSE)
-  ptr <- obj[[1]]
+  obj <- dust_model_create(walk(), pars, dt = 0.5, n_particles = 10, seed = 42)
+  ptr <- obj$ptr
   expect_equal(dust2_cpu_walk_time(ptr), 0)
   expect_null(dust2_cpu_walk_run_steps(ptr, 3))
   expect_equal(dust2_cpu_walk_time(ptr), 1.5)
@@ -87,16 +81,16 @@ test_that("Allow fractional dt", {
 test_that("provided dt is reasonable", {
   pars <- list(sd = 1, random_initial = TRUE)
   expect_error(
-    dust2_cpu_walk_alloc(pars, 0, 0, 10, 0, 42, FALSE),
+    dust_model_create(walk(), pars, n_particles = 10, dt = 0),
     "Expected 'dt' to be greater than 0")
   expect_error(
-    dust2_cpu_walk_alloc(pars, 0, -1, 10, 0, 42, FALSE),
+    dust_model_create(walk(), pars, n_particles = 10, dt = -1),
     "Expected 'dt' to be greater than 0")
   expect_error(
-    dust2_cpu_walk_alloc(pars, 0, 1.5, 10, 0, 42, FALSE),
+    dust_model_create(walk(), pars, n_particles = 10, dt = 1.5),
     "Expected 'dt' to be at most 1")
   expect_error(
-    dust2_cpu_walk_alloc(pars, 0, sqrt(2) / 2, 10, 0, 42, FALSE),
+    dust_model_create(walk(), pars, n_particles = 10, dt = sqrt(2) / 2),
     "Expected 'dt' to be the inverse of an integer")
 })
 
@@ -104,7 +98,7 @@ test_that("provided dt is reasonable", {
 test_that("time starts as an integer", {
   pars <- list(sd = 1, random_initial = TRUE)
   expect_error(
-    dust2_cpu_walk_alloc(pars, 1.5, 1, 10, 0, 42, FALSE),
+    dust_model_create(walk(), pars, n_particles = 10, time = 1.5),
     "Expected 'time' to be integer-like")
 })
 
@@ -114,53 +108,54 @@ test_that("time starts as an integer", {
 test_that("validate inputs", {
   pars <- list(sd = 1, random_initial = TRUE)
   expect_error(
-    dust2_cpu_walk_alloc(pars, 0:3, 1, 10, 0, 42, FALSE),
+    dust_model_create(walk(), pars, time = 1:3, n_particles = 10),
     "'time' must be a scalar")
 
   expect_identical(
     dust2_cpu_walk_time(
-      dust2_cpu_walk_alloc(pars, 5L, 1, 10, 0, 42, FALSE)[[1]]),
+      dust_model_create(walk(), pars, time = 5L, n_particles = 10)$ptr),
     5.0)
   expect_identical(
     dust2_cpu_walk_time(
-      dust2_cpu_walk_alloc(pars, 5, 1, 10, 0, 42, FALSE)[[1]]),
+      dust_model_create(walk(), pars, time = 5, n_particles = 10)$ptr),
     5.0)
   expect_error(
-    dust2_cpu_walk_alloc(pars, "5", 1, 10, 0, 42, FALSE),
+    dust_model_create(walk(), pars, time = "5", n_particles = 10),
     "'time' must be scalar numeric")
 
   expect_identical(
-    dust2_cpu_walk_state(
-      dust2_cpu_walk_alloc(pars, 5, 1, 10, 0, 42, FALSE)[[1]], FALSE),
+    dust_model_state(
+      dust_model_create(walk(), pars, n_particles = 10)),
     matrix(0, 1, 10))
   expect_identical(
-    dust2_cpu_walk_state(
-      dust2_cpu_walk_alloc(pars, 5, 1, 10L, 0, 42, FALSE)[[1]], FALSE),
+    dust_model_state(
+      dust_model_create(walk(), pars, n_particles = 10L)),
     matrix(0, 1, 10))
   expect_error(
-    dust2_cpu_walk_alloc(pars, 5, 1, 9.5, 0, 42, FALSE),
+    dust_model_create(walk(), pars, n_particles = 9.5),
     "'n_particles' must be integer-like")
   expect_error(
-    dust2_cpu_walk_alloc(pars, 5, 1, "10", 0, 42, FALSE),
+    dust_model_create(walk(), pars, n_particles = "10"),
     "'n_particles' must be scalar integer")
   expect_error(
-    dust2_cpu_walk_alloc(pars, 5, 1, -5, 0, 42, FALSE),
+    dust_model_create(walk(), pars, n_particles = -5),
     "'n_particles' must be non-negative")
 
   expect_error(
-    dust2_cpu_walk_alloc(pars, 5, 1, 10, 0, 42, 1),
+    dust_model_create(walk(), pars, n_particles = 10, deterministic = 1),
     "'deterministic' must be scalar logical")
 })
 
 
 test_that("can initialise multiple groups with different parameter sets", {
   pars <- lapply(1:4, function(sd) list(sd = sd, random_initial = TRUE))
-  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 4, 42, FALSE)
-  ptr <- obj[[1]]
-  expect_equal(dust2_cpu_walk_state(ptr, TRUE), array(0, c(1, 10, 4)))
+  obj <- dust_model_create(walk(), pars, n_particles = 10, n_groups = 4,
+                           seed = 42)
+  ptr <- obj$ptr
+  expect_equal(dust_model_state(obj), array(0, c(1, 10, 4)))
 
   expect_null(dust2_cpu_walk_run_steps(ptr, 3))
-  s <- dust2_cpu_walk_state(ptr, TRUE)
+  s <- dust_model_state(obj)
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 40)
   expect_equal(
@@ -173,27 +168,27 @@ test_that("can initialise multiple groups with different parameter sets", {
 test_that("return names passed in with groups", {
   pars <- lapply(1:4, function(sd) list(sd = sd, random_initial = TRUE))
   names(pars) <- letters[1:4]
-  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 4, 42, FALSE)
-  expect_true(obj[[3]])
-  expect_equal(obj[[4]], letters[1:4])
+  obj <- dust_model_create(walk(), pars, n_particles = 10, n_groups = 4)
+  ## This interface will change/improve soon
+  expect_true(obj$grouped)
+  expect_equal(obj$group_names, letters[1:4])
 })
 
 
 test_that("can create multi-state walk model", {
   pars <- list(len = 3, sd = 1, random_initial = TRUE)
-  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
-  expect_equal(obj[[2]], 3)
-  ptr <- obj[[1]]
-  expect_equal(dust2_cpu_walk_state(ptr, FALSE), matrix(0, 3, 10))
-  expect_equal(dust2_cpu_walk_state(ptr, TRUE), array(0, c(3, 10, 1)))
-  expect_null(dust2_cpu_walk_set_state_initial(ptr))
+  obj <- dust_model_create(walk(), pars, n_particles = 10, seed = 42)
+  expect_equal(obj$n_state, 3)
+  ptr <- obj$ptr
+  expect_equal(dust_model_state(obj), array(0, c(3, 10)))
+  expect_null(dust_model_set_state_initial(obj))
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
-  s0 <- dust2_cpu_walk_state(ptr, FALSE)
+  s0 <- dust_model_state(obj)
   expect_equal(s0, r$normal(3, 0, 1))
 
   expect_null(dust2_cpu_walk_run_steps(ptr, 5))
-  s1 <- dust2_cpu_walk_state(ptr, FALSE)
+  s1 <- dust_model_state(obj)
 
   cmp <- r$normal(3 * 5, 0, 1)
   expect_equal(s1, s0 + apply(array(cmp, c(3, 5, 10)), c(1, 3), sum))
@@ -205,7 +200,7 @@ test_that("prevent models from having different state lengths", {
                list(sd = 2, len = 2),
                list(sd = 3, len = 3))
   expect_error(
-    dust2_cpu_walk_alloc(pars, 0, 1, 10, 3, 42, FALSE),
+    dust_model_create(walk(), pars, n_particles = 10, n_groups = 3),
     "Expected state length for group 3 to be 2, but it was 3")
 })
 
@@ -213,15 +208,15 @@ test_that("prevent models from having different state lengths", {
 test_that("require that parameter length matches requested number of groups", {
   pars <- lapply(1:4, function(sd) list(sd = sd, random_initial = TRUE))
   expect_error(
-    dust2_cpu_walk_alloc(pars, 0, 1, 10, 3, 42, FALSE),
+    dust_model_create(walk(), pars, n_particles = 10, n_groups = 3),
     "Expected 'pars' to have length 3 to match 'n_groups'")
 })
 
 
 test_that("can set time", {
   pars <- list(sd = 1, random_initial = TRUE)
-  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
-  ptr <- obj[[1]]
+  obj <- dust_model_create(walk(), pars, n_particles = 10)
+  ptr <- obj$ptr
   expect_equal(dust2_cpu_walk_time(ptr), 0)
   expect_null(dust2_cpu_walk_set_time(ptr, 4))
   expect_equal(dust2_cpu_walk_time(ptr), 4)
@@ -235,15 +230,15 @@ test_that("can set time", {
 test_that("can update parameters", {
   pars1 <- list(sd = 1, random_initial = TRUE)
   pars2 <- list(sd = 10)
-  obj <- dust2_cpu_walk_alloc(pars1, 0, 1, 10, 0, 42, FALSE)
-  ptr <- obj[[1]]
+  obj <- dust_model_create(walk(), pars1, n_particles = 10, seed = 42)
+  ptr <- obj$ptr
 
   expect_null(dust2_cpu_walk_run_steps(ptr, 1))
-  s1 <- dust2_cpu_walk_state(ptr, FALSE)
+  s1 <- dust_model_state(obj)
 
   expect_null(dust2_cpu_walk_update_pars(ptr, pars2, FALSE))
   expect_null(dust2_cpu_walk_run_steps(ptr, 1))
-  s2 <- dust2_cpu_walk_state(ptr, FALSE)
+  s2 <- dust_model_state(obj)
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
   expect_equal(s1, r$normal(1, 0, 1))
@@ -255,27 +250,30 @@ test_that("can update parameters for grouped models", {
   pars1 <- lapply(1:4, function(sd) list(sd = sd, random_initial = TRUE))
   pars2 <- lapply(1:4, function(sd) list(sd = 10 * sd))
 
-  obj <- dust2_cpu_walk_alloc(pars1, 0, 1, 10, 4, 42, FALSE)
-  ptr <- obj[[1]]
+  obj <- dust_model_create(walk(), pars1, n_particles = 10, n_groups = 4,
+                           seed = 42)
+  ptr <- obj$ptr
 
   expect_null(dust2_cpu_walk_run_steps(ptr, 1))
-  s1 <- dust2_cpu_walk_state(ptr, FALSE)
+  s1 <- dust_model_state(obj)
 
   expect_null(dust2_cpu_walk_update_pars(ptr, pars2, TRUE))
   expect_null(dust2_cpu_walk_run_steps(ptr, 1))
-  s2 <- dust2_cpu_walk_state(ptr, FALSE)
+  s2 <- dust_model_state(obj)
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 40)
-  expect_equal(s1, r$normal(1, 0, 1) * rep(1:4, each = 10))
-  expect_equal(s2, s1 + r$normal(1, 0, 10) * rep(1:4, each = 10))
+  expect_equal(s1, array(r$normal(1, 0, 1) * rep(1:4, each = 10),
+                         c(1, 10, 4)))
+  expect_equal(s2, array(s1 + drop(r$normal(1, 0, 10)) * rep(1:4, each = 10),
+                         c(1, 10, 4)))
 })
 
 
 test_that("params must be same length to update", {
   pars1 <- lapply(1:4, function(sd) list(sd = sd, random_initial = TRUE))
   pars2 <- lapply(1:5, function(sd) list(sd = 10 * sd))
-  obj <- dust2_cpu_walk_alloc(pars1, 0, 1, 10, 4, 42, FALSE)
-  ptr <- obj[[1]]
+  obj <- dust_model_create(walk(), pars1, n_particles = 10, n_groups = 4)
+  ptr <- obj$ptr
   expect_error(dust2_cpu_walk_update_pars(ptr, pars2, TRUE),
                "Expected 'pars' to have length 4 to match 'n_groups'")
 })
@@ -283,123 +281,100 @@ test_that("params must be same length to update", {
 
 test_that("can set state where n_state > 1", {
   pars <- list(len = 3, sd = 1, random_initial = TRUE)
-  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
-  ptr <- obj[[1]]
+  obj <- dust_model_create(walk(), pars, n_particles = 10, seed = 42)
+  ptr <- obj$ptr
 
   ## One state per particle:
   s <- matrix(runif(30), 3, 10)
-  expect_null(dust2_cpu_walk_set_state(ptr, s, FALSE))
-  expect_equal(dust2_cpu_walk_state(ptr, FALSE), s)
+  expect_null(dust_model_set_state(obj, s))
+  expect_equal(dust_model_state(obj), s)
 
   ## Shared state:
   s <- matrix(runif(3), 3, 1)
-  expect_null(dust2_cpu_walk_set_state(ptr, s, FALSE))
-  expect_equal(dust2_cpu_walk_state(ptr, FALSE), s[, rep(1, 10)])
+  expect_null(dust_model_set_state(obj, s))
+  expect_equal(dust_model_state(obj), s[, rep(1, 10)])
 
   ## Appropriate errors:
   expect_error(
-    dust2_cpu_walk_set_state(ptr, matrix(0, 2, 10), FALSE),
+    dust_model_set_state(obj, matrix(0, 2, 10)),
     "Expected the first dimension of 'state' to have size 3")
   expect_error(
-    dust2_cpu_walk_set_state(ptr, matrix(0, 3, 15), FALSE),
+    dust_model_set_state(obj, matrix(0, 3, 15)),
     "Expected the second dimension of 'state' to have size 10 or 1")
   expect_error(
-    dust2_cpu_walk_set_state(ptr, array(0, c(3, 10, 1)), FALSE),
+    dust_model_set_state(obj, array(0, c(3, 10, 1))),
     "Expected 'state' to be a 2d array")
 })
 
 
 test_that("can set state where n_state > 1 and groups are present", {
   pars <- lapply(1:4, function(i) list(len = 3, sd = i))
-  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 4, 42, FALSE)
-  ptr <- obj[[1]]
+  obj <- dust_model_create(walk(), pars, n_particles = 10, n_groups = 4,
+                           seed = 42)
 
   ## One state per particle:
   s <- array(runif(3 * 10 * 4), c(3, 10, 4))
   s <- array(as.numeric(seq_len(3 * 10 * 4)), c(3, 10, 4))
-  expect_null(dust2_cpu_walk_set_state(ptr, s, TRUE))
-  expect_equal(dust2_cpu_walk_state(ptr, TRUE), s)
+  expect_null(dust_model_set_state(obj, s))
+  expect_equal(dust_model_state(obj), s)
 
   ## Shared state within groups
   s <- array(runif(3 * 1 * 4), c(3, 1, 4))
   s <- array(as.numeric(seq_len(3 * 1 * 4)), c(3, 1, 4))
-  expect_null(dust2_cpu_walk_set_state(ptr, s, TRUE))
-  expect_equal(dust2_cpu_walk_state(ptr, TRUE), s[, rep(1, 10), ])
+  expect_null(dust_model_set_state(obj, s))
+  expect_equal(dust_model_state(obj), s[, rep(1, 10), ])
 
   ## Shared state across groups
   s <- array(runif(3 * 10 * 1), c(3, 10, 1))
   s <- array(as.numeric(seq_len(3 * 10 * 1)), c(3, 10, 1))
-  expect_null(dust2_cpu_walk_set_state(ptr, s, TRUE))
-  expect_equal(dust2_cpu_walk_state(ptr, TRUE), s[, , rep(1, 4)])
+  expect_null(dust_model_set_state(obj, s))
+  expect_equal(dust_model_state(obj), s[, , rep(1, 4)])
 
   ## Shared state across everything
   s <- array(runif(3 * 1 * 1), c(3, 1, 1))
   s <- array(as.numeric(seq_len(3 * 1 * 1)), c(3, 1, 1))
-  expect_null(dust2_cpu_walk_set_state(ptr, s, TRUE))
-  expect_equal(dust2_cpu_walk_state(ptr, TRUE), s[, rep(1, 10), rep(1, 4)])
+  expect_null(dust_model_set_state(obj, s))
+  expect_equal(dust_model_state(obj), s[, rep(1, 10), rep(1, 4)])
 
   ## Appropriate errors:
   expect_error(
-    dust2_cpu_walk_set_state(ptr, array(0, c(2, 10, 4)), TRUE),
+    dust_model_set_state(obj, array(0, c(2, 10, 4))),
     "Expected the first dimension of 'state' to have size 3")
   expect_error(
-    dust2_cpu_walk_set_state(ptr, array(0, c(3, 15, 4)), TRUE),
+    dust_model_set_state(obj, array(0, c(3, 15, 4))),
     "Expected the second dimension of 'state' to have size 10 or 1")
   expect_error(
-    dust2_cpu_walk_set_state(ptr, array(0, c(3, 10, 2)), TRUE),
+    dust_model_set_state(obj, array(0, c(3, 10, 2))),
     "Expected the third dimension of 'state' to have size 4 or 1")
   expect_error(
-    dust2_cpu_walk_set_state(ptr, array(0, c(3, 10)), TRUE),
+    dust_model_set_state(obj, array(0, c(3, 10))),
     "Expected 'state' to be a 3d array")
-})
-
-
-## This one is for consistency with some of the bits above and allows
-## setting state while ignoring the grouped structure.  This is most
-## likely to be used when having one particle per group but it can be
-## used in any context really.
-test_that("can set ungrouped state into grouped model", {
-  pars <- lapply(1:4, function(i) list(len = 3, sd = i))
-  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 4, 42, FALSE)
-  ptr <- obj[[1]]
-
-  ## One state per particle:
-  s <- array(runif(30), c(3, 10 * 4))
-  expect_null(dust2_cpu_walk_set_state(ptr, s, FALSE))
-  expect_equal(dust2_cpu_walk_state(ptr, FALSE), s)
-  expect_equal(dust2_cpu_walk_state(ptr, TRUE),
-               array(s, c(3, 10, 4)))
-
-  s <- array(runif(3), c(3, 1))
-  expect_null(dust2_cpu_walk_set_state(ptr, s, FALSE))
-  expect_equal(dust2_cpu_walk_state(ptr, FALSE), array(s, c(3, 40)))
-  expect_equal(dust2_cpu_walk_state(ptr, TRUE),
-               array(s, c(3, 10, 4)))
 })
 
 
 test_that("can reorder state", {
   pars <- list(sd = 1, random_initial = TRUE)
-  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
-  ptr <- obj[[1]]
-  expect_null(dust2_cpu_walk_set_state_initial(ptr))
-  s1 <- dust2_cpu_walk_state(ptr, FALSE)
+  obj <- dust_model_create(walk(), pars, n_particles = 10, seed = 42)
+  ptr <- obj$ptr
+  expect_null(dust_model_set_state_initial(obj))
+  s1 <- dust_model_state(obj)
   i <- sample(10, replace = TRUE)
   expect_null(dust2_cpu_walk_reorder(ptr, i))
-  s2 <- dust2_cpu_walk_state(ptr, FALSE)
+  s2 <- dust_model_state(obj)
   expect_equal(s2, s1[, i, drop = FALSE])
 })
 
 
 test_that("can reorder state in a multiparameter model", {
   pars <- lapply(1:4, function(sd) list(sd = sd, random_initial = TRUE))
-  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 4, 42, FALSE)
-  ptr <- obj[[1]]
-  expect_null(dust2_cpu_walk_set_state_initial(ptr))
-  s1 <- dust2_cpu_walk_state(ptr, TRUE)
+  obj <- dust_model_create(walk(), pars, n_particles = 10, n_groups = 4,
+                           seed = 42)
+  ptr <- obj$ptr
+  expect_null(dust_model_set_state_initial(obj))
+  s1 <- dust_model_state(obj)
   i <- replicate(4, sample(10, replace = TRUE))
   expect_null(dust2_cpu_walk_reorder(ptr, i))
-  s2 <- dust2_cpu_walk_state(ptr, TRUE)
+  s2 <- dust_model_state(obj)
   expect_equal(
     s2,
     vapply(1:4, function(j) s1[, i[, j], j, drop = FALSE], matrix(0, 1, 10)))
@@ -408,10 +383,10 @@ test_that("can reorder state in a multiparameter model", {
 
 test_that("validate inputs for reordering", {
   pars <- list(sd = 1, random_initial = TRUE)
-  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
-  ptr <- obj[[1]]
-  expect_null(dust2_cpu_walk_set_state_initial(ptr))
-  s1 <- dust2_cpu_walk_state(ptr, FALSE)
+  obj <- dust_model_create(walk(), pars, n_particles = 10, seed = 42)
+  ptr <- obj$ptr
+  expect_null(dust_model_set_state_initial(obj))
+  s1 <- dust_model_state(obj)
   expect_error(
     dust2_cpu_walk_reorder(ptr, c(1L, 2L, 3L)),
     "Expected an index of length 10")
@@ -424,29 +399,31 @@ test_that("validate inputs for reordering", {
 
 test_that("can run walk model to time", {
   pars <- list(sd = 1)
-  obj1 <- dust2_cpu_walk_alloc(pars, 0, 0.25, 10, 0, 42, FALSE)
-  obj2 <- dust2_cpu_walk_alloc(pars, 0, 0.25, 10, 0, 42, FALSE)
-  ptr1 <- obj1[[1]]
-  ptr2 <- obj2[[1]]
+  obj1 <- dust_model_create(walk(), pars, n_particles = 10, dt = 0.25,
+                            seed = 42)
+  obj2 <- dust_model_create(walk(), pars, n_particles = 10, dt = 0.25,
+                            seed = 42)
+  ptr1 <- obj1$ptr
+  ptr2 <- obj2$ptr
 
   dust2_cpu_walk_set_state_initial(ptr1)
   expect_null(dust2_cpu_walk_run_steps(ptr1, 40))
   expect_equal(dust2_cpu_walk_time(ptr1), 10)
-  s1 <- dust2_cpu_walk_state(ptr1, FALSE)
+  s1 <- dust_model_state(obj1)
 
   dust2_cpu_walk_set_state_initial(ptr2)
   expect_null(dust2_cpu_walk_run_to_time(ptr2, 10))
   expect_equal(dust2_cpu_walk_time(ptr2), 10)
-  expect_equal(dust2_cpu_walk_state(ptr2, FALSE), s1)
+  expect_equal(dust_model_state(obj2), s1)
 })
 
 
 test_that("time must not be in the past", {
   pars <- list(sd = 1)
-  obj <- dust2_cpu_walk_alloc(pars, 0, 0.25, 10, 0, 42, FALSE)
-  ptr <- obj[[1]]
+  obj <- dust_model_create(walk(), pars, dt = 0.25, n_particles = 10)
+  ptr <- obj$ptr
 
-  dust2_cpu_walk_set_state_initial(ptr)
+  dust_model_set_state_initial(obj)
   expect_error(
     dust2_cpu_walk_run_to_time(ptr, -5),
     "Can't run to time -5.*, model already at time 0.*")
