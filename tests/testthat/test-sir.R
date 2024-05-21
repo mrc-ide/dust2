@@ -16,7 +16,7 @@ test_that("can run simple sir model", {
   s0 <- dust_model_state(obj)
   expect_equal(s0, matrix(c(990, 10, 0, 0, 0), 5, 10))
 
-  expect_null(dust2_cpu_sir_run_steps(ptr, 30))
+  expect_null(dust_model_run_steps(obj, 30))
   s1 <- dust_model_state(obj)
   expect_true(all(s1[1, ] < 990))
   expect_true(all(s1[3, ] > 0))
@@ -110,7 +110,7 @@ test_that("can reset cases daily", {
   dust_model_set_state_initial(obj)
   res <- array(NA_real_, c(5, n_particles, n_time))
   for (i in seq_len(n_time)) {
-    dust2_cpu_sir_run_steps(ptr, 1)
+    dust_model_run_steps(obj, 1)
     res[, , i] <- dust_model_state(obj)
   }
 
@@ -131,12 +131,12 @@ test_that("can run sir model to time", {
   ptr2 <- obj2$ptr
 
   dust_model_set_state_initial(obj1)
-  expect_null(dust2_cpu_sir_run_steps(ptr1, 40))
+  expect_null(dust_model_run_steps(obj1, 40))
   expect_equal(dust_model_time(obj1), 10)
   s1 <- dust_model_state(obj1)
 
   dust_model_set_state_initial(obj2)
-  expect_null(dust2_cpu_sir_run_to_time(ptr2, 10))
+  expect_null(dust_model_run_to_time(obj2, 10))
   expect_equal(dust_model_time(obj2), 10)
   expect_equal(dust_model_state(obj2), s1)
 })
@@ -150,11 +150,11 @@ test_that("can update parameters", {
   obj1 <- dust_model_create(sir(), base, n_particles = 10, seed = 42)
   ptr1 <- obj1$ptr
   expect_null(dust2_cpu_sir_update_pars(ptr1, update, FALSE))
-  expect_null(dust2_cpu_sir_run_steps(ptr1, 10))
+  expect_null(dust_model_run_steps(obj1, 10))
 
   obj2 <- dust_model_create(sir(), combined, n_particles = 10, seed = 42)
   ptr2 <- obj2$ptr
-  expect_null(dust2_cpu_sir_run_steps(ptr2, 10))
+  expect_null(dust_model_run_steps(obj2, 10))
 
   expect_equal(
     dust_model_state(obj2),

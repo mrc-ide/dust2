@@ -187,6 +187,39 @@ dust_model_rng_state <- function(model) {
 }
 
 
+##' Run a model, advancing time and the state by repeatedly running
+##' its `update` method.  You can advance a model either a fixed
+##' (positive) number of steps, or up to a time (which must be in the
+##' future).
+##'
+##' @title Run model
+##'
+##' @inheritParams dust_model_state
+##'
+##' @param steps The number of steps to run forward
+##'
+##' @return Nothing, called for side effects only
+##'
+##' @export
+##'
+##' @rdname dust_model_run
+dust_model_run_steps <- function(model, steps) {
+  check_is_dust_model(model)
+  model$methods$run_steps(model$ptr, steps)
+  invisible()
+}
+
+
+##' @param time Time to run to
+##' @export
+##' @rdname dust_model_run
+dust_model_run_to_time <- function(model, time) {
+  check_is_dust_model(model)
+  model$methods$run_time(model$ptr, time)
+  invisible()
+}
+
+
 ##' @export
 print.dust_model_generator <- function(x, ...) {
   cli::cli_h1("<dust_model_generator: {x$name}>")
