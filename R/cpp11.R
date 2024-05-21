@@ -20,6 +20,10 @@ dust2_cpu_sir_time <- function(ptr) {
   .Call(`_dust2_dust2_cpu_sir_time`, ptr)
 }
 
+dust2_cpu_sir_set_time <- function(ptr, r_time) {
+  .Call(`_dust2_dust2_cpu_sir_set_time`, ptr, r_time)
+}
+
 dust2_cpu_sir_update_pars <- function(ptr, pars, grouped) {
   .Call(`_dust2_dust2_cpu_sir_update_pars`, ptr, pars, grouped)
 }
@@ -30,6 +34,10 @@ dust2_cpu_sir_set_state_initial <- function(ptr) {
 
 dust2_cpu_sir_set_state <- function(ptr, r_state, grouped) {
   .Call(`_dust2_dust2_cpu_sir_set_state`, ptr, r_state, grouped)
+}
+
+dust2_cpu_sir_reorder <- function(ptr, r_index) {
+  .Call(`_dust2_dust2_cpu_sir_reorder`, ptr, r_index)
 }
 
 dust2_cpu_sir_rng_state <- function(ptr) {

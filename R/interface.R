@@ -9,10 +9,16 @@ dust_model <- function(name, env = parent.env(parent.frame())) {
   methods_nms <- c("alloc",
                    "state", "set_state", "set_state_initial",
                    "time", "set_time",
-                   "rng_state")
+                   "rng_state",
+                   "update_pars",
+                   "run_steps", "run_to_time",
+                   "reorder")
 
   methods <- lapply(sprintf("dust2_cpu_%s_%s", name, methods_nms),
                     function(x) env[[x]])
+  ok <- !vapply(methods, is.null, TRUE)
+  stopifnot(all(ok))
+
   names(methods) <- methods_nms
   ret <- list(name = name,
               methods = methods)
@@ -187,6 +193,25 @@ dust_model_rng_state <- function(model) {
 }
 
 
+##' Update parameters used by the model.  This can be used to update a
+##' subset of parameters that do not change the extent of the model,
+##' and will be potentially faster than creating a new model object.
+##'
+##' @title Update parameters
+##'
+##' @inheritParams dust_model_state
+##'
+##' @param pars Parameters to set into the model.
+##'
+##' @return Nothing, called for side effects only
+##' @export
+dust_model_update_pars <- function(model, pars) {
+  check_is_dust_model(model)
+  model$methods$update_pars(model, pars, model$grouped)
+  invisible()
+}
+
+
 ##' Run a model, advancing time and the state by repeatedly running
 ##' its `update` method.  You can advance a model either a fixed
 ##' (positive) number of steps, or up to a time (which must be in the
@@ -216,6 +241,31 @@ dust_model_run_steps <- function(model, steps) {
 dust_model_run_to_time <- function(model, time) {
   check_is_dust_model(model)
   model$methods$run_time(model$ptr, time)
+  invisible()
+}
+
+
+##' Reorder states within a model.
+##'
+##' @title Reorder states
+##'
+##' @inheritParams dust_model_state
+##'
+##' @param index The parameter ordering.  For an ungrouped model this
+##'   is a vector where each element is the parameter index (if
+##'   element `i` is `j` then after reordering the `i`th particle will
+##'   have the state previously used by `j`).  All elements must lie
+##'   in [1, n_particles], repetition is allowed.  If the model is
+##'   grouped, `index` must be a matrix with `n_particles` rows and
+##'   `n_groups` columns, with each column corresponding to the
+##'   reordering for a group.
+##'
+##' @return Nothing, called for side effects only.
+##'
+##' @export
+dust_model_reorder <- function(model, index) {
+  check_is_dust_model(model)
+  model$methods$reorder(model$ptr, time)
   invisible()
 }
 
