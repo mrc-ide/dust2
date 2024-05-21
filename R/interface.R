@@ -7,7 +7,8 @@ dust_model <- function(name, env = parent.env(parent.frame())) {
   ## how DBI works.
 
   methods_nms <- c("alloc",
-                   "state", "set_state", "set_state_initial")
+                   "state", "set_state", "set_state_initial",
+                   "time", "set_time")
 
   methods <- lapply(sprintf("dust2_cpu_%s_%s", name, methods_nms),
                     function(x) env[[x]])
@@ -124,6 +125,43 @@ dust_model_set_state <- function(model, state) {
 dust_model_set_state_initial <- function(model) {
   check_is_dust_model(model)
   model$methods$set_state_initial(model$ptr)
+  invisible()
+}
+
+
+##' Fetch the current time from the model.
+##'
+##' @title Fetch model time
+##'
+##' @inheritParams dust_model_state
+##'
+##' @return A single numeric value
+##' @seealso [dust_model_set_time]
+##' @export
+dust_model_time <- function(model) {
+  check_is_dust_model(model)
+  model$methods$time(model$ptr)
+}
+
+
+##' Set time into the model.  This updates the time to the provided
+##' value but does not affect the state.  You may want to call
+##' [dust_model_set_state] or [dust_model_set_state_initial] after
+##' calling this.
+##'
+##' @title Set model time
+##'
+##' @inheritParams dust_model_time
+##'
+##' @param time The time to set.  Currently this must be an
+##'   integer-like value, but in future we will allow setting to any
+##'   multiple of `dt`.
+##'
+##' @return Nothing, called for side effects only
+##' @export
+dust_model_set_time <- function(model, time) {
+  check_is_dust_model(model)
+  model$methods$set_time(model$ptr, time)
   invisible()
 }
 

@@ -8,14 +8,14 @@ test_that("can run simple walk model", {
   expect_length(dust2_cpu_walk_rng_state(ptr), 32 * 10)
 
   expect_equal(dust_model_state(obj), matrix(0, 1, 10))
-  expect_equal(dust2_cpu_walk_time(ptr), 0)
+  expect_equal(dust_model_time(obj), 0)
 
   expect_null(dust2_cpu_walk_run_steps(ptr, 3))
   s <- dust_model_state(obj)
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
   expect_equal(s, rbind(colSums(r$normal(3, 0, 1))))
-  expect_equal(dust2_cpu_walk_time(ptr), 3)
+  expect_equal(dust_model_time(obj), 3)
 
   expect_identical(dim(obj), c(1L, 10L))
 })
@@ -72,11 +72,11 @@ test_that("Allow fractional dt", {
   pars <- list(sd = 1, random_initial = TRUE)
   obj <- dust_model_create(walk(), pars, dt = 0.5, n_particles = 10, seed = 42)
   ptr <- obj$ptr
-  expect_equal(dust2_cpu_walk_time(ptr), 0)
+  expect_equal(dust_model_time(obj), 0)
   expect_null(dust2_cpu_walk_run_steps(ptr, 3))
-  expect_equal(dust2_cpu_walk_time(ptr), 1.5)
+  expect_equal(dust_model_time(obj), 1.5)
   expect_null(dust2_cpu_walk_run_steps(ptr, 5))
-  expect_equal(dust2_cpu_walk_time(ptr), 4)
+  expect_equal(dust_model_time(obj), 4)
 })
 
 
@@ -114,12 +114,12 @@ test_that("validate inputs", {
     "'time' must be a scalar")
 
   expect_identical(
-    dust2_cpu_walk_time(
-      dust_model_create(walk(), pars, time = 5L, n_particles = 10)$ptr),
+    dust_model_time(
+      dust_model_create(walk(), pars, time = 5L, n_particles = 10)),
     5.0)
   expect_identical(
-    dust2_cpu_walk_time(
-      dust_model_create(walk(), pars, time = 5, n_particles = 10)$ptr),
+    dust_model_time(
+      dust_model_create(walk(), pars, time = 5, n_particles = 10)),
     5.0)
   expect_error(
     dust_model_create(walk(), pars, time = "5", n_particles = 10),
@@ -163,7 +163,7 @@ test_that("can initialise multiple groups with different parameter sets", {
   expect_equal(
     s,
     array(colSums(r$normal(3, 0, 1)) * rep(1:4, each = 10), c(1, 10, 4)))
-  expect_equal(dust2_cpu_walk_time(ptr), 3)
+  expect_equal(dust_model_time(obj), 3)
 
   expect_identical(dim(obj), c(1L, 10L, 4L))
 })
@@ -221,13 +221,12 @@ test_that("require that parameter length matches requested number of groups", {
 test_that("can set time", {
   pars <- list(sd = 1, random_initial = TRUE)
   obj <- dust_model_create(walk(), pars, n_particles = 10)
-  ptr <- obj$ptr
-  expect_equal(dust2_cpu_walk_time(ptr), 0)
-  expect_null(dust2_cpu_walk_set_time(ptr, 4))
-  expect_equal(dust2_cpu_walk_time(ptr), 4)
-  expect_null(dust2_cpu_walk_set_time(ptr, 0))
-  expect_equal(dust2_cpu_walk_time(ptr), 0)
-  expect_error(dust2_cpu_walk_set_time(ptr, 0.5),
+  expect_equal(dust_model_time(obj), 0)
+  expect_null(dust_model_set_time(obj, 4))
+  expect_equal(dust_model_time(obj), 4)
+  expect_null(dust_model_set_time(obj, 0))
+  expect_equal(dust_model_time(obj), 0)
+  expect_error(dust_model_set_time(obj, 0.5),
                "Expected 'time' to be integer-like")
 })
 
@@ -411,14 +410,14 @@ test_that("can run walk model to time", {
   ptr1 <- obj1$ptr
   ptr2 <- obj2$ptr
 
-  dust2_cpu_walk_set_state_initial(ptr1)
+  dust_model_set_state_initial(obj1)
   expect_null(dust2_cpu_walk_run_steps(ptr1, 40))
-  expect_equal(dust2_cpu_walk_time(ptr1), 10)
+  expect_equal(dust_model_time(obj1), 10)
   s1 <- dust_model_state(obj1)
 
-  dust2_cpu_walk_set_state_initial(ptr2)
+  dust_model_set_state_initial(ptr2)
   expect_null(dust2_cpu_walk_run_to_time(ptr2, 10))
-  expect_equal(dust2_cpu_walk_time(ptr2), 10)
+  expect_equal(dust_model_time(obj2), 10)
   expect_equal(dust_model_state(obj2), s1)
 })
 

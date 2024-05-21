@@ -10,7 +10,7 @@ test_that("can run simple sir model", {
   expect_length(dust2_cpu_sir_rng_state(ptr), 32 * 10)
 
   expect_equal(dust_model_state(obj), matrix(0, 5, 10))
-  expect_equal(dust2_cpu_sir_time(ptr), 0)
+  expect_equal(dust_model_time(obj), 0)
 
   expect_null(dust_model_set_state_initial(obj))
   s0 <- dust_model_state(obj)
@@ -132,12 +132,12 @@ test_that("can run sir model to time", {
 
   dust_model_set_state_initial(obj1)
   expect_null(dust2_cpu_sir_run_steps(ptr1, 40))
-  expect_equal(dust2_cpu_sir_time(ptr1), 10)
+  expect_equal(dust_model_time(obj1), 10)
   s1 <- dust_model_state(obj1)
 
   dust_model_set_state_initial(obj2)
   expect_null(dust2_cpu_sir_run_to_time(ptr2, 10))
-  expect_equal(dust2_cpu_sir_time(ptr2), 10)
+  expect_equal(dust_model_time(obj2), 10)
   expect_equal(dust_model_state(obj2), s1)
 })
 
