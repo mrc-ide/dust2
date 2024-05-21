@@ -1,4 +1,4 @@
-dust_model <- function(name, env) {
+dust_model <- function(name, env = parent.env(parent.frame())) {
   prefix <- sprintf("dust2_cpu_%s", name)
   ## I don't love that this requires running through sprintf() each
   ## time we create a model, but using a function for the model (see
@@ -56,14 +56,22 @@ dust_model_create <- function(model, pars, n_particles, n_groups = 0,
                               time = 0, dt = 1,
                               seed = NULL, deterministic = FALSE) {
   if (!inherits(model, "dust_model_generator")) {
-    ## TODO: we can detect if the user has passed 'sir' rather than
-    ## 'sir()' probably.
-    cli::cli_abort("Expected 'model' to be a 'dust_model_generator' object")
+    hint <- NULL
+    if (is_uncalled_generator(model) && is.symbol(name <- substitute(model))) {
+      hint <- c(i = "Did you mean '{name}()' (i.e., with parentheses)")
+    }
+    cli::cli_abort(
+      c("Expected 'model' to be a 'dust_model_generator' object",
+        hint),
+      arg = "model")
   }
   res <- model$methods$alloc(pars, time, dt, n_particles, n_groups,
                              seed, deterministic)
   ## Here, we augment things slightly
   res$name <- model$name
+  res$n_particles <- as.integer(n_particles)
+  res$n_groups <- as.integer(max(n_groups), 1)
+  res$deterministic <- deterministic
   res$methods <- model$methods
   class(res) <- "dust_model"
   res
@@ -133,8 +141,8 @@ print.dust_model_generator <- function(x, ...) {
   ## Later, we might print some additional capabilities of the model
   ## here, such as if it can be used with a filter, a summary of its
   ## parameters (once we know how to access that), etc.
-  cli::cli_bullets(
-    i = "Use 'dust2::dust_model_create()' to create a model")
+  cli::cli_alert_info(
+    "Use 'dust2::dust_model_create()' to create a model with this generator")
   invisible(x)
 }
 
@@ -142,6 +150,17 @@ print.dust_model_generator <- function(x, ...) {
 ##' @export
 print.dust_model <- function(x, ...) {
   cli::cli_h1("<dust_model: {x$name}>")
+  if (x$grouped) {
+    cli::cli_alert_info(paste(
+      "{x$n_state} state x {x$n_particles} particle{?s} x",
+      "{x$n_groups} group{?s}"))
+  } else {
+    cli::cli_alert_info("{x$n_state} state x {x$n_particles} particle{?s}")
+  }
+  if (x$deterministic) {
+    cli::cli_bullets(c(
+      i = "This model is deterministic"))
+  }
   ## Later, we might print some additional capabilities of the model
   ## here, such as if it can be used with a filter, a summary of its
   ## parameters (once we know how to access that), etc.
@@ -160,4 +179,15 @@ check_is_dust_model <- function(model, call = parent.frame()) {
     cli::cli_abort("Expected 'model' to be a 'dust_model' object",
                    arg = "model", call = call)
   }
+}
+
+
+is_uncalled_generator <- function(model) {
+  if (!is.function(model)) {
+    return(FALSE)
+  }
+  code <- body(model)
+  rlang::is_call(code, "{") &&
+    length(code) == 2 &&
+    rlang::is_call(code[[2]], "dust_model")
 }

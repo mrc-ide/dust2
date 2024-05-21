@@ -16,6 +16,8 @@ test_that("can run simple walk model", {
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
   expect_equal(s, rbind(colSums(r$normal(3, 0, 1))))
   expect_equal(dust2_cpu_walk_time(ptr), 3)
+
+  expect_identical(dim(obj), c(1L, 10L))
 })
 
 
@@ -162,6 +164,8 @@ test_that("can initialise multiple groups with different parameter sets", {
     s,
     array(colSums(r$normal(3, 0, 1)) * rep(1:4, each = 10), c(1, 10, 4)))
   expect_equal(dust2_cpu_walk_time(ptr), 3)
+
+  expect_identical(dim(obj), c(1L, 10L, 4L))
 })
 
 
@@ -192,6 +196,7 @@ test_that("can create multi-state walk model", {
 
   cmp <- r$normal(3 * 5, 0, 1)
   expect_equal(s1, s0 + apply(array(cmp, c(3, 5, 10)), c(1, 3), sum))
+  expect_identical(dim(obj), c(3L, 10L))
 })
 
 
