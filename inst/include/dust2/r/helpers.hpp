@@ -286,5 +286,61 @@ SEXP rng_state_as_raw(const std::vector<T>& state) {
   return ret;
 }
 
+inline double read_real(cpp11::list args, const char * name) {
+  cpp11::sexp value = args[name];
+  if (value == R_NilValue) {
+    cpp11::stop("A value is expected for '%s'", name);
+  }
+  return to_double(value, name);
+}
+
+inline double read_real(cpp11::list args, const char * name,
+                        double default_value) {
+  cpp11::sexp value = args[name];
+  return value == R_NilValue ? default_value : to_double(value, name);
+}
+
+inline int read_int(cpp11::list args, const char * name) {
+  cpp11::sexp value = args[name];
+  if (value == R_NilValue) {
+    cpp11::stop("A value is expected for '%s'", name);
+  }
+  return to_int(value, name);
+}
+
+inline int read_int(cpp11::list args, const char * name,
+                    int default_value) {
+  cpp11::sexp value = args[name];
+  return value == R_NilValue ? default_value : to_int(value, name);
+}
+
+inline size_t read_size(cpp11::list args, const char * name) {
+  cpp11::sexp value = args[name];
+  if (value == R_NilValue) {
+    cpp11::stop("A value is expected for '%s'", name);
+  }
+  return to_size(value, name);
+}
+
+inline size_t read_size(cpp11::list args, const char * name,
+                        size_t default_value) {
+  cpp11::sexp value = args[name];
+  return value == R_NilValue ? default_value : to_size(value, name);
+}
+
+inline bool read_bool(cpp11::list args, const char * name) {
+  cpp11::sexp value = args[name];
+  if (value == R_NilValue) {
+    cpp11::stop("A value is expected for '%s'", name);
+  }
+  return to_bool(value, name);
+}
+
+inline bool read_bool(cpp11::list args, const char * name,
+                      bool default_value) {
+  cpp11::sexp value = args[name];
+  return value == R_NilValue ? default_value : to_bool(value, name);
+}
+
 }
 }
