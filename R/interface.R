@@ -273,10 +273,11 @@ dust_model_run_to_time <- function(model, time) {
 ##'   is a vector where each element is the parameter index (if
 ##'   element `i` is `j` then after reordering the `i`th particle will
 ##'   have the state previously used by `j`).  All elements must lie
-##'   in `[1, n_particles]`, repetition is allowed.  If the model is
-##'   grouped, `index` must be a matrix with `n_particles` rows and
-##'   `n_groups` columns, with each column corresponding to the
-##'   reordering for a group.
+##'   in `[1, n_particles]`, repetition of an index is allowed (so
+##'   that many new particles may have the state as one old particle).
+##'   If the model is grouped, `index` must be a matrix with
+##'   `n_particles` rows and `n_groups` columns, with each column
+##'   corresponding to the reordering for a group.
 ##'
 ##' @return Nothing, called for side effects only.
 ##'
