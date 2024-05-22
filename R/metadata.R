@@ -15,14 +15,14 @@
 ## it might depend a bit on if we actually need much special there -
 ## it might be worth looking at the GPU stuff again fairly soon
 ## actually.
-parse_metadata <- function(filename) {
+parse_metadata <- function(filename, call = NULL) {
   data <- decor::cpp_decorations(files = filename)
 
-  class <- parse_metadata_class(data)
+  class <- parse_metadata_class(data, call)
   list(class = class,
-       name = parse_metadata_name(data) %||% class,
-       has_compare = parse_metadata_has_compare(data),
-       parameters = parse_metadata_parameters(data))
+       name = parse_metadata_name(data, call) %||% class,
+       has_compare = parse_metadata_has_compare(data, call),
+       parameters = parse_metadata_parameters(data, call))
 }
 
 
@@ -52,7 +52,7 @@ parse_metadata_name <- function(data, call = NULL) {
   if (is.null(data)) {
     return(NULL)
   }
-  if (length(data) != 1 || !is.null(names(data))) {
+  if (length(data) != 1 || nzchar(names(data))) {
     cli::cli_abort(
       "Expected a single unnamed argument to '[[dust2::name()]]'",
       call = call)
@@ -81,7 +81,7 @@ parse_metadata_has_compare <- function(data, call = NULL) {
 }
 
 
-parse_metadata_parameters <- function(data) {
+parse_metadata_parameters <- function(data, call = NULL) {
   res <- data$params[data$decoration == "dust2::parameter"]
   ok <- vlapply(res, function(x) {
    length(x) == 1 && !nzchar(names(x)[[1]]) && is.symbol(x[[1]])
@@ -101,7 +101,7 @@ find_attribute_value_single <- function(data, name, required, call = NULL) {
   if (!any(i)) {
     if (required) {
       cli::cli_abort(
-        "Attribute '[[{name}()]] is required, but was not found",
+        "Attribute '[[{name}()]]' is required, but was not found",
         call = call)
     }
     return(NULL)
