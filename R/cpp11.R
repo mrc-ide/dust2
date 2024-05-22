@@ -72,6 +72,10 @@ test_resample_weight <- function(w, u) {
   .Call(`_dust2_test_resample_weight`, w, u)
 }
 
+test_history <- function(r_time, r_state, r_order, reorder) {
+  .Call(`_dust2_test_history`, r_time, r_state, r_order, reorder)
+}
+
 dust2_cpu_walk_alloc <- function(r_pars, r_time, r_dt, r_n_particles, r_n_groups, r_seed, r_deterministic) {
   .Call(`_dust2_dust2_cpu_walk_alloc`, r_pars, r_time, r_dt, r_n_particles, r_n_groups, r_seed, r_deterministic)
 }
