@@ -7,26 +7,26 @@ sir_filter_manual <- function(pars, time_start, time, dt, data, n_particles,
   r <- mcstate2::mcstate_rng$new(n_streams = 1, seed = seed)
   seed <- mcstate2::mcstate_rng$new(n_streams = 1, seed = seed)$jump()$state()
 
-  obj <- dust2_cpu_sir_alloc(pars, time_start, dt, n_particles, 0, seed, FALSE)
-  ptr <- obj[[1]]
+  obj <- dust_model_create(sir(), pars, n_particles,
+                           time = time_start, dt = dt, seed = seed)
   n_steps <- round((time - c(time_start, time[-length(time)])) / dt)
 
   function(pars) {
     if (!is.null(pars)) {
-      dust2_cpu_sir_update_pars(ptr, pars, FALSE)
+      dust_model_update_pars(obj, pars)
     }
-    expect_null(dust2_cpu_walk_set_time(ptr, time_start))
-    dust2_cpu_sir_set_state_initial(ptr)
+    dust_model_set_time(obj, time_start)
+    dust_model_set_state_initial(obj)
     ll <- 0
     for (i in seq_along(time)) {
-      dust2_cpu_sir_run_steps(ptr, n_steps[[i]])
-      tmp <- dust2_cpu_sir_compare_data(ptr, data[[i]], FALSE)
+      dust_model_run_steps(obj, n_steps[[i]])
+      tmp <- dust_model_compare_data(obj, data[[i]])
       w <- exp(tmp - max(tmp))
       ll <- ll + log(mean(w)) + max(tmp)
       u <- r$random_real(1)
       k <- test_resample_weight(w, u) + 1L
-      state <- dust2_cpu_sir_state(ptr, FALSE)
-      dust2_cpu_sir_set_state(ptr, state[, k], FALSE)
+      state <- dust_model_state(obj)
+      dust_model_set_state(obj, state[, k])
     }
     ll
   }
