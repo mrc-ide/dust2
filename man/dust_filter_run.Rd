@@ -19,7 +19,7 @@ provided, the model initial conditions are used.}
 }
 \value{
 A vector of likelihood values, with as many elements as
-there groups.
+there are groups.
 }
 \description{
 Run particle filter

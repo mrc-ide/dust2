@@ -13,10 +13,11 @@ dust_model_reorder(model, index)
 is a vector where each element is the parameter index (if
 element \code{i} is \code{j} then after reordering the \code{i}th particle will
 have the state previously used by \code{j}).  All elements must lie
-in \verb{[1, n_particles]}, repetition is allowed.  If the model is
-grouped, \code{index} must be a matrix with \code{n_particles} rows and
-\code{n_groups} columns, with each column corresponding to the
-reordering for a group.}
+in \verb{[1, n_particles]}, repetition of an index is allowed (so
+that many new particles may have the state as one old particle).
+If the model is grouped, \code{index} must be a matrix with
+\code{n_particles} rows and \code{n_groups} columns, with each column
+corresponding to the reordering for a group.}
 }
 \value{
 Nothing, called for side effects only.
