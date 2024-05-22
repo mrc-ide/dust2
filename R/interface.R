@@ -378,7 +378,7 @@ dust_unfilter_create <- function(generator, pars, time_start, time, data,
 ##'   provided, the model initial conditions are used.
 ##'
 ##' @return A vector of likelihood values, with as many elements as
-##'   there groups.
+##'   there are groups.
 ##'
 ##' @export
 dust_unfilter_run <- function(unfilter, pars = NULL, initial = NULL) {
@@ -465,7 +465,7 @@ dust_filter_create <- function(generator, pars, time_start, time, data,
 ##'   provided, the model initial conditions are used.
 ##'
 ##' @return A vector of likelihood values, with as many elements as
-##'   there groups.
+##'   there are groups.
 ##'
 ##' @export
 dust_filter_run <- function(filter, pars = NULL, initial = NULL) {
