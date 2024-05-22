@@ -6,22 +6,28 @@ dust_model <- function(name, env = parent.env(parent.frame())) {
   ## about the dependencies among packages.  This is also essentially
   ## how DBI works.
 
-  methods_nms <- c("alloc",
-                   "state", "set_state", "set_state_initial",
-                   "time", "set_time",
-                   "rng_state",
-                   "update_pars",
-                   "run_steps", "run_to_time",
-                   "reorder")
+  methods_core <- c("alloc",
+                    "state", "set_state", "set_state_initial",
+                    "time", "set_time",
+                    "rng_state",
+                    "update_pars",
+                    "run_steps", "run_to_time",
+                    "reorder")
+  methods_compare <- "compare_data"
+  methods_nms <- c(methods_core, methods_compare)
 
   methods <- lapply(sprintf("dust2_cpu_%s_%s", name, methods_nms),
                     function(x) env[[x]])
-  ok <- !vapply(methods, is.null, TRUE)
+  names(methods) <- methods_nms
+  ok <- !vapply(methods[methods_core], is.null, TRUE)
   stopifnot(all(ok))
 
-  names(methods) <- methods_nms
+  properties <- list(
+    has_compare = !is.null(methods$compare_data))
+  
   ret <- list(name = name,
-              methods = methods)
+              methods = methods,
+              properties = properties)
   ## TODO: check that alloc exists, then go through and add
   ## properties.
   class(ret) <- "dust_model_generator"
@@ -245,7 +251,9 @@ dust_model_run_to_time <- function(model, time) {
 }
 
 
-##' Reorder states within a model.
+##' Reorder states within a model.  This function is primarily used
+##' for debugging and may be removed from the interface if it is not
+##' generally useful.
 ##'
 ##' @title Reorder states
 ##'
@@ -267,6 +275,40 @@ dust_model_reorder <- function(model, index) {
   check_is_dust_model(model)
   model$methods$reorder(model$ptr, index)
   invisible()
+}
+
+
+##' Compare current model state against data.  This is only supported
+##' for models that have 'compare_data' support (i.e., the model
+##' definition includes a `compare_data` method).  The current state
+##' in the model ([dust_model_state]) is compared against the data
+##' provided as `data`.
+##'
+##' @title Compare model state against data
+##'
+##' @inheritParams dust_model_state
+##'
+##' @param data The data to compare against. If the model is ungrouped
+##'   then `data` is a list with elements corresponding to whatever
+##'   your model requires.  If your model is grouped, this should be a
+##'   list with as many elements as your model has groups, with each
+##'   element corresponding to the data your model requires.
+##'
+##' @return A numeric vector with as many elements as your model has
+##'   groups, corresponding to the log-likelihood of the data for each
+##'   group.
+##'
+##' @export
+dust_model_compare_data <- function(model, data) {
+  check_is_dust_model(model)
+  if (!model$properties$has_compare) {
+    ## This moves into something general soon?
+    cli::cli_abort(
+      paste("Can't compare against data, the '{model}' does not have",
+            "'compare_data' support"),
+      arg = "model")
+  }
+  model$methods$compare_data(model$ptr, data, model$grouped)
 }
 
 
@@ -295,6 +337,10 @@ print.dust_model <- function(x, ...) {
   if (x$deterministic) {
     cli::cli_bullets(c(
       i = "This model is deterministic"))
+  }
+  if (x$properties$has_compare) {
+    cli::cli_bullets(c(
+      i = "This model has 'compare_data' support"))
   }
   ## Later, we might print some additional capabilities of the model
   ## here, such as if it can be used with a filter, a summary of its

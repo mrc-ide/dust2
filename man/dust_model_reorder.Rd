@@ -22,5 +22,7 @@ reordering for a group.}
 Nothing, called for side effects only.
 }
 \description{
-Reorder states within a model.
+Reorder states within a model.  This function is primarily used
+for debugging and may be removed from the interface if it is not
+generally useful.
 }

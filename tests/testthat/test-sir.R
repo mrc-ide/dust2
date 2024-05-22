@@ -26,7 +26,6 @@ test_that("can run simple sir model", {
 test_that("can compare to data", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 0.5)
   obj <- dust_model_create(sir(), pars, n_particles = 10, seed = 42)
-  ptr <- obj$ptr
 
   s <- rbind(0, 0, 0, 0, rpois(10, 30))
   dust_model_set_state(obj, s)
@@ -36,7 +35,7 @@ test_that("can compare to data", {
   eps <- drop(r$exponential(1, 0.5))
 
   expect_equal(
-    dust2_cpu_sir_compare_data(ptr, d, FALSE),
+    dust_model_compare_data(obj, d),
     dpois(30, s[5, ] + eps, log = TRUE))
 })
 
@@ -44,7 +43,6 @@ test_that("can compare to data", {
 test_that("can compare to data when missing", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 0.5)
   obj <- dust_model_create(sir(), pars, n_particles = 10, seed = 42)
-  ptr <- obj$ptr
 
   s <- rbind(0, 0, 0, 0, rpois(10, 30))
   dust_model_set_state(obj, s)
@@ -52,7 +50,7 @@ test_that("can compare to data when missing", {
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
   expect_equal(
-    dust2_cpu_sir_compare_data(ptr, d, FALSE),
+    dust_model_compare_data(obj, d),
     rep(0, 10))
   expect_equal(dust_model_rng_state(obj), r$state())
 })
@@ -64,14 +62,13 @@ test_that("can compare against multple parameter groups at once", {
   })
   obj <- dust_model_create(sir(), pars, n_particles = 10, n_groups = 4, 
                            seed = 42)
-  ptr <- obj$ptr
 
   s <- dust_model_state(obj)
   s[5, , ] <- rpois(10, 30)
   dust_model_set_state(obj, s)
 
   d <- lapply(1:4, function(i) list(incidence = 30 + i))
-  res <- dust2_cpu_sir_compare_data(ptr, d, TRUE)
+  res <- dust_model_compare_data(obj, d)
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10 * 4)
   rate <- rep(10^(1:4), each = 10)
@@ -79,10 +76,6 @@ test_that("can compare against multple parameter groups at once", {
   expect_equal(
     res,
     matrix(dpois(rep(31:34, each = 10), s[5, , ] + eps, log = TRUE), 10, 4))
-
-  expect_error(
-    dust2_cpu_sir_compare_data(ptr, d, FALSE),
-    "Can't compare with grouped = FALSE with more than one group")
 })
 
 
@@ -91,9 +84,8 @@ test_that("validate data size on compare", {
     list(beta = 0.1 * i, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 10^i)
   })
   obj <- dust_model_create(sir(), pars, n_particles = 10, n_groups = 4)
-  ptr <- obj$ptr
   expect_error(
-    dust2_cpu_sir_compare_data(ptr, vector("list", 3), TRUE),
+    dust_model_compare_data(obj, vector("list", 3)),
     "'data' must have length 4")
 })
 
