@@ -1,0 +1,12 @@
+url: https://mrc-ide.github.io/dust2
+
+template:
+  bootstrap: 5
+
+reference:
+  - title: Models
+    contents:
+      - dust_model_create
+      - dust_model_state
+      - dust_model_set_state
+      - dust_model_set_state_initial
