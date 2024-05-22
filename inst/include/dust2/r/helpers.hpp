@@ -233,12 +233,14 @@ std::vector<typename T::data_type> check_data(cpp11::list r_data,
       auto r_data_i = cpp11::as_cpp<cpp11::list>(r_data[i]);
       check_length(r_data_i, n_groups, "data[i]"); // can do better with sstream
       for (size_t j = 0; j < n_groups; ++j) {
-        data.push_back(T::build_data(r_data_i[j]));
+        auto r_data_ij = cpp11::as_cpp<cpp11::list>(r_data_i[j]);
+        data.push_back(T::build_data(r_data_ij));
       }
     }
   } else {
     for (size_t i = 0; i < n_time; ++i) {
-      data.push_back(T::build_data(r_data[i]));
+      auto r_data_i = cpp11::as_cpp<cpp11::list>(r_data[i]);
+      data.push_back(T::build_data(r_data_i));
     }
   }
 

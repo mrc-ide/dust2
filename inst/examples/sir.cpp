@@ -70,14 +70,11 @@ public:
   }
 
   static shared_state build_shared(cpp11::list pars) {
-    const real_type I0 = with_default(10, pars["I0"]);
-    const real_type N = with_default(1000, pars["N"]);
-
-    const real_type beta = with_default(0.2, pars["beta"]);
-    const real_type gamma = with_default(0.1, pars["gamma"]);
-
-    const real_type exp_noise = with_default(1e6, pars["exp_noise"]);
-
+    const real_type I0 = dust2::r::read_real(pars, "I0", 10);
+    const real_type N = dust2::r::read_real(pars, "N", 1000);
+    const real_type beta = dust2::r::read_real(pars, "beta", 0.2);
+    const real_type gamma = dust2::r::read_real(pars, "gamma", 0.1);
+    const real_type exp_noise = dust2::r::read_real(pars, "exp_noise", 1e6);
     return shared_state{N, I0, beta, gamma, exp_noise};
   }
 
@@ -88,9 +85,9 @@ public:
   // This is the bit that we'll use to do fast parameter updating, and
   // we'll guarantee somewhere that the size does not change.
   static void update_shared(cpp11::list pars, shared_state& shared) {
-    shared.I0 = with_default(10, pars["I0"]);
-    shared.beta = with_default(0.2, pars["beta"]);
-    shared.gamma = with_default(0.1, pars["gamma"]);
+    shared.I0 = dust2::r::read_real(pars, "I0", shared.I0);
+    shared.beta = dust2::r::read_real(pars, "beta", shared.beta);
+    shared.gamma = dust2::r::read_real(pars, "gamma", shared.gamma);
   }
 
   // This is a reasonable default implementation in the no-internal
@@ -99,9 +96,10 @@ public:
                               internal_state& internal) {
   }
 
-  static data_type build_data(cpp11::sexp r_data) {
+  static data_type build_data(cpp11::list r_data) {
     auto data = static_cast<cpp11::list>(r_data);
-    return data_type{cpp11::as_cpp<real_type>(data["incidence"])};
+    auto incidence = dust2::r::read_real(data, "incidence");
+    return data_type{incidence};
   }
 
   static real_type compare_data(const real_type time,
