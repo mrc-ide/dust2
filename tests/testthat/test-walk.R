@@ -420,56 +420,55 @@ test_that("time must not be in the past", {
 
 test_that("can simulate walk model", {
   pars <- lapply(1:4, function(sd) list(len = 3, sd = sd))
-  obj1 <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 4, 42, FALSE)
-  obj2 <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 4, 42, FALSE)
-  ptr1 <- obj1[[1]]
-  ptr2 <- obj2[[1]]
+  obj1 <- dust_model_create(walk(), pars, n_particles = 10, n_groups = 4,
+                            seed = 42)
+  obj2 <- dust_model_create(walk(), pars, n_particles = 10, n_groups = 4,
+                            seed = 42)
 
-  res <- dust2_cpu_walk_simulate(ptr1, 0:20, NULL, TRUE)
+  res <- dust_model_simulate(obj1, 0:20)
   expect_equal(dim(res), c(3, 10, 4, 21))
 
-  expect_equal(res[, , , 21], dust2_cpu_walk_state(ptr1, TRUE))
-  expect_equal(dust2_cpu_walk_time(ptr1), 20)
+  expect_equal(res[, , , 21], dust_model_state(obj1))
+  expect_equal(dust_model_time(obj1), 20)
 
-  expect_equal(res[, , , 1], dust2_cpu_walk_state(ptr2, TRUE))
-  dust2_cpu_walk_run_to_time(ptr2, 10)
-  expect_equal(res[, , , 11], dust2_cpu_walk_state(ptr2, TRUE))
+  expect_equal(res[, , , 1], dust_model_state(obj2))
+  dust_model_run_to_time(obj2, 10)
+  expect_equal(res[, , , 11], dust_model_state(obj2))
 })
 
 
 test_that("can simulate walk model with index", {
   pars <- lapply(1:4, function(sd) list(len = 6, sd = sd))
-  obj1 <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 4, 42, FALSE)
-  obj2 <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 4, 42, FALSE)
-  ptr1 <- obj1[[1]]
-  ptr2 <- obj2[[1]]
+  obj1 <- dust_model_create(walk(), pars, n_particles = 10, n_groups = 4,
+                            seed = 42)
+  obj2 <- dust_model_create(walk(), pars, n_particles = 10, n_groups = 4,
+                            seed = 42)
 
-  res1 <- dust2_cpu_walk_simulate(ptr1, 0:20, c(2, 4), TRUE)
-  res2 <- dust2_cpu_walk_simulate(ptr2, 0:20, NULL, TRUE)
+  res1 <- dust_model_simulate(obj1, 0:20, c(2, 4))
+  res2 <- dust_model_simulate(obj2, 0:20)
   expect_equal(res1, res2[c(2, 4), , , ])
 })
 
 
 test_that("can validate index values", {
   pars <- list(len = 3, sd = 1)
-  obj <- dust2_cpu_walk_alloc(pars, 0, 1, 10, 0, 42, FALSE)
-  ptr <- obj[[1]]
+  obj <- dust_model_create(walk(), pars, n_particles = 10, seed = 42)
   expect_error(
-    dust2_cpu_walk_simulate(ptr, 0:20, c("2", "4"), TRUE),
+    dust_model_simulate(obj, 0:20, c("2", "4")),
     "Expected an integer vector for 'index'")
   expect_error(
-    dust2_cpu_walk_simulate(ptr, 0:20, c(2, 2.9), TRUE),
+    dust_model_simulate(obj, 0:20, c(2, 2.9)),
     "All values of 'index' must be integer-like, but 'index[2]' was not",
     fixed = TRUE)
   expect_error(
-    dust2_cpu_walk_simulate(ptr, 0:20, c(2, 20), TRUE),
+    dust_model_simulate(obj, 0:20, c(2, 20)),
     "All values of 'index' must be in [1, 3], but 'index[2]' was 20",
     fixed = TRUE)
   expect_error(
-    dust2_cpu_walk_simulate(ptr, 0:20, c(2, 3, -4), TRUE),
+    dust_model_simulate(obj, 0:20, c(2, 3, -4)),
     "All values of 'index' must be in [1, 3], but 'index[3]' was -4",
     fixed = TRUE)
   expect_error(
-    dust2_cpu_walk_simulate(ptr, 0:20, integer(), TRUE),
+    dust_model_simulate(obj, 0:20, integer()),
     "'index' must have nonzero length")
 })
