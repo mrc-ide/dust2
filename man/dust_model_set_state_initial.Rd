@@ -13,6 +13,6 @@ dust_model_set_state_initial(model)
 Nothing, called for side effects only
 }
 \description{
-Set model state from a models initial conditions.  This may depend
+Set model state from a model's initial conditions.  This may depend
 on the current time.
 }

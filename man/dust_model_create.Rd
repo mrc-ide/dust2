@@ -21,7 +21,7 @@ dust_model_create(
 
 \item{pars}{A list of parameters.  The format of this will depend
 on the model.  If \code{n_groups} is 1 or more, then this must be a
-list where each element of length \code{n_groups} where each element
+list of length \code{n_groups} where each element
 is a list of parameters for your model.}
 
 \item{n_particles}{The number of particles to create.}
