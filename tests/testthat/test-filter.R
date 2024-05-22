@@ -23,12 +23,11 @@ test_that("can run an unfilter", {
     sum(dpois(1:4, incidence + 1e-6, log = TRUE))
   }
 
-  obj <- dust2_cpu_sir_unfilter_alloc(base, time_start, time, dt, data, 1, 0)
-  ptr <- obj[[1]]
-  expect_equal(dust2_cpu_sir_unfilter_run(ptr, NULL, NULL, FALSE), f(pars1))
+  obj <- dust_unfilter_create(sir(), base, time_start, time, data)
+  expect_equal(dust_unfilter_run(obj), f(pars1))
 
-  expect_equal(dust2_cpu_sir_unfilter_run(ptr, pars1, NULL, FALSE), f(pars1))
-  expect_equal(dust2_cpu_sir_unfilter_run(ptr, pars2, NULL, FALSE), f(pars2))
+  expect_equal(dust_unfilter_run(obj, pars = pars1), f(pars1))
+  expect_equal(dust_unfilter_run(obj, pars = pars2), f(pars2))
 })
 
 
@@ -55,9 +54,8 @@ test_that("can run an unfilter with manually set state", {
     sum(dpois(1:4, incidence + 1e-6, log = TRUE))
   }
 
-  obj <- dust2_cpu_sir_unfilter_alloc(pars, time_start, time, dt, data, 1, 0)
-  ptr <- obj[[1]]
-  expect_equal(dust2_cpu_sir_unfilter_run(ptr, NULL, state, FALSE), f(pars))
+  obj <- dust_unfilter_create(sir(), pars, time_start, time, data)
+  expect_equal(dust_unfilter_run(obj, initial = state), f(pars))
 })
 
 
@@ -90,9 +88,8 @@ test_that("can run unfilter on structured model", {
     rowSums(dpois(observed, incidence + 1e-6, log = TRUE))
   }
 
-  obj <- dust2_cpu_sir_unfilter_alloc(pars, time_start, time, dt, data, 1, 3)
-  ptr <- obj[[1]]
-  expect_equal(dust2_cpu_sir_unfilter_run(ptr, NULL, NULL, TRUE), f(pars))
+  obj <- dust_unfilter_create(sir(), pars, time_start, time, data, n_groups = 3)
+  expect_equal(dust_unfilter_run(obj), f(pars))
 })
 
 
@@ -104,16 +101,18 @@ test_that("validate time for filter", {
   dt <- 1
 
   expect_error(
-    dust2_cpu_sir_unfilter_alloc(pars, 5, time, dt, data, 1, 0),
+    dust_unfilter_create(sir(), pars, time_start = 5, time = time, data = data),
     "Expected 'time[1]' (5) to be larger than the previous value (4)",
     fixed = TRUE)
   time2 <- time + c(0, 0, .1, 0)
   expect_error(
-    dust2_cpu_sir_unfilter_alloc(pars, 0, time2, dt, data, 1, 0),
+    dust_unfilter_create(sir(), pars, time_start = 0, time = time2,
+                         data = data),
     "Expected 'time[3]' to be integer-like",
     fixed = TRUE)
   expect_error(
-    dust2_cpu_sir_unfilter_alloc(pars, 0, as.character(time), dt, data, 1, 0),
+    dust_unfilter_create(sir(), pars, time_start = 0, time = as.character(time),
+                         data = data),
     "'time' must be a numeric vector",
     fixed = TRUE)
 })
@@ -125,12 +124,13 @@ test_that("can run replicated unfilter", {
   time <- c(4, 8, 12, 16)
   data <- lapply(1:4, function(i) list(incidence = i))
   dt <- 1
-  obj1 <- dust2_cpu_sir_unfilter_alloc(pars, time_start, time, dt, data, 5, 0)
-  obj2 <- dust2_cpu_sir_unfilter_alloc(pars, time_start, time, dt, data, 1, 0)
-
+  obj1 <- dust_unfilter_create(sir(), pars, time_start, time, data,
+                               n_particles = 5)
+  obj2 <- dust_unfilter_create(sir(), pars, time_start, time, data,
+                               n_particles = 1)
   expect_equal(
-    dust2_cpu_sir_unfilter_run(obj1[[1]], NULL, NULL, FALSE),
-    rep(dust2_cpu_sir_unfilter_run(obj2[[1]], NULL, NULL, FALSE), 5))
+    dust_unfilter_run(obj1),
+    rep(dust_unfilter_run(obj2), 5))
 })
 
 
@@ -144,13 +144,13 @@ test_that("can run replicated structured unfilter", {
     lapply(seq_len(2), function(j) list(incidence = 2 * (i - 1) + j))
   })
   dt <- 1
-  obj1 <- dust2_cpu_sir_unfilter_alloc(pars, time_start, time, dt, data, 5, 2)
-  obj2 <- dust2_cpu_sir_unfilter_alloc(pars, time_start, time, dt, data, 1, 2)
-
-  cmp <- dust2_cpu_sir_unfilter_run(obj2[[1]], NULL, NULL, TRUE)
+  obj1 <- dust_unfilter_create(sir(), pars, time_start, time, data,
+                               n_particles = 5, n_groups = 2)
+  obj2 <- dust_unfilter_create(sir(), pars, time_start, time, data,
+                               n_particles = 1, n_groups = 2)
   expect_equal(
-    dust2_cpu_sir_unfilter_run(obj1[[1]], NULL, NULL, TRUE),
-    matrix(rep(cmp, each = 5), 5))
+    dust_unfilter_run(obj1),
+    matrix(rep(dust_unfilter_run(obj2), each = 5), 5))
 })
 
 
@@ -164,10 +164,9 @@ test_that("can run particle filter", {
   n_particles <- 100
   seed <- 42
 
-  obj <- dust2_cpu_sir_filter_alloc(
-    pars, time_start, time, dt, data, n_particles, 0, seed)
-  ptr <- obj[[1]]
-  res <- replicate(20, dust2_cpu_sir_filter_run(ptr, NULL, FALSE))
+  obj <- dust_filter_create(sir(), pars, time_start, time, data,
+                           n_particles = n_particles, seed = seed)
+  res <- replicate(20, dust_filter_run(obj))
 
   cmp_filter <- sir_filter_manual(
     pars, time_start, time, dt, data, n_particles, seed)
@@ -189,35 +188,33 @@ test_that("can run a nested particle filter and get the same result", {
   n_particles <- 100
   seed <- 42
 
-  obj <- dust2_cpu_sir_filter_alloc(
-    pars, time_start, time, dt, data, n_particles, 2, seed)
-  ptr <- obj[[1]]
+  obj <- dust_filter_create(sir(), pars, time_start, time, data,
+                            n_particles = n_particles, n_groups = 2,
+                            seed = seed)
 
   ## Here, we can check the layout of the rng within the filter and model:
   n_streams <- (n_particles + 1) * 2
   r <- mcstate2::mcstate_rng$new(n_streams = n_streams, seed = seed)$state()
-  s <- dust2_cpu_sir_filter_rng_state(ptr)
+  s <- dust_filter_rng_state(obj)
   expect_equal(s, r)
 
-  res <- replicate(20, dust2_cpu_sir_filter_run(ptr, NULL, TRUE))
+  res <- replicate(20, dust_filter_run(obj))
 
   ## now compare:
   data1 <- lapply(data, "[[", 1)
-  obj1 <- dust2_cpu_sir_filter_alloc(
-    pars[[1]], time_start, time, dt, data1, n_particles, 0, seed)
-  ptr1 <- obj1[[1]]
-  s1 <- dust2_cpu_sir_filter_rng_state(ptr1)
-  res1 <- replicate(20, dust2_cpu_sir_filter_run(ptr1, NULL, FALSE))
+  obj1 <- dust_filter_create(sir(), pars[[1]], time_start, time, data1,
+                             n_particles = n_particles, seed = seed)
+  s1 <- dust_filter_rng_state(obj1)
+  res1 <- replicate(20, dust_filter_run(obj1))
   expect_equal(res1, res[1, ])
   expect_equal(s1, s[1:3232])
 
   seed2 <- r[3233:3264]
   data2 <- lapply(data, "[[", 2)
-  obj2 <- dust2_cpu_sir_filter_alloc(
-    pars[[2]], time_start, time, dt, data2, n_particles, 0, seed2)
-  ptr2 <- obj2[[1]]
-  s2 <- dust2_cpu_sir_filter_rng_state(ptr2)
-  res2 <- replicate(20, dust2_cpu_sir_filter_run(ptr2, NULL, FALSE))
+  obj2 <- dust_filter_create(sir(), pars[[2]], time_start, time, data2,
+                             n_particles = n_particles, seed = seed2)
+  s2 <- dust_filter_rng_state(obj2)
+  res2 <- replicate(20, dust_filter_run(obj2))
   expect_equal(res2, res[2, ])
   expect_equal(s2, s[3233:6464])
 })

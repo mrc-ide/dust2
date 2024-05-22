@@ -5,6 +5,11 @@ dust_model <- function(name, env = parent.env(parent.frame())) {
   ## sir()), rather than an object, means that it's easier to think
   ## about the dependencies among packages.  This is also essentially
   ## how DBI works.
+  get_methods <- function(nms, prefix) {
+    set_names(
+      lapply(sprintf("dust2_cpu_%s_%s", prefix, nms), function(x) env[[x]]),
+      nms)
+  }
 
   methods_core <- c("alloc",
                     "state", "set_state", "set_state_initial",
@@ -14,12 +19,7 @@ dust_model <- function(name, env = parent.env(parent.frame())) {
                     "run_steps", "run_to_time",
                     "reorder")
   methods_compare <- "compare_data"
-  methods_filter <- c("unfilter_alloc", "unfilter_run")
-  methods_nms <- c(methods_core, methods_compare, methods_filter)
-
-  methods <- lapply(sprintf("dust2_cpu_%s_%s", name, methods_nms),
-                    function(x) env[[x]])
-  names(methods) <- methods_nms
+  methods <- get_methods(c(methods_core, methods_compare), name)
   ok <- !vapply(methods[methods_core], is.null, TRUE)
   stopifnot(all(ok))
 
@@ -27,8 +27,12 @@ dust_model <- function(name, env = parent.env(parent.frame())) {
     has_compare = !is.null(methods$compare_data))
 
   if (properties$has_compare) {
-    methods <- lapply(sprintf("dust2_cpu_%s_%s", name, methods_filter),
-                      function(x) env[[x]])
+    methods_unfilter <- c("alloc", "run")
+    methods$unfilter <-
+      get_methods(methods_unfilter, sprintf("%s_unfilter", name))
+    methods_filter <- c("alloc", "run", "rng_state")
+    methods$filter <-
+      get_methods(methods_filter, sprintf("%s_filter", name))
   }
 
   ret <- list(name = name,
@@ -325,46 +329,19 @@ dust_model_compare_data <- function(model, data) {
 ##'
 ##' @title Create an unfilter
 ##'
-##' @param generator A model generator object, with class
-##'   `dust_model_generator`.  The model must support `compare_data`
-##'   to be used with this function.
-##'
-##' @param pars Initial parameters for the model.  This should be the
-##'   *full* set of parameters; subsequent calls to
-##'   [dust_unfilter_run] may update subsets using the model's
-##'   `update_pars` method.
-##'
-##' @param time_start The start time for the simulation - this is
-##'   typically before the first data point.  Must be an integer-like
-##'   value.
-##'
-##' @param time A vector of times, each of which has a corresponding
-##'   entry in `data`.  The model will stop at each of these times to
-##'   compute the likelihood using the compare function.
-##'
-##' @param data The data to compare against.  This must be a list with
-##'   the same length as `time`, each element of which corresponds to
-##'   the data required for the model.  If the model is ungrouped then
-##'   each element of `data` is a list with elements corresponding to
-##'   whatever your model requires.  If your model is grouped, this
-##'   should be a list with as many elements as your model has groups,
-##'   with each element corresponding to the data your model requires.
-##'   We will likely introduce a friendlier data.frame based input
-##'   soon.
+##' @inheritParams dust_filter_create
 ##'
 ##' @param n_particles The number of particles to run.  Typically this
 ##'   is 1, but you can run with more than 1 if you want - currently
 ##'   they produce the same likelihood but if you provide different
 ##'   initial conditions then you would see different likelihoods.
 ##'
-##' @inheritParams dust_model_create
-##'
 ##' @return A `dust_unfilter` object, which can be used with
-##'   `dust_unfilter_run`
+##'   [dust_unfilter_run]
 ##'
 ##' @export
 dust_unfilter_create <- function(generator, pars, time_start, time, data,
-                                 n_particles = 1, n_groups = 1,
+                                 n_particles = 1, n_groups = 0,
                                  dt = 1) {
   check_is_dust_model_generator(generator)
   if (!generator$properties$has_compare) {
@@ -374,8 +351,13 @@ dust_unfilter_create <- function(generator, pars, time_start, time, data,
             "not have 'compare_data' support"),
       arg = "generator")
   }
-  res <- generator$methods$unfilter_alloc(pars, trime_start, time, dt, data,
+  res <- generator$methods$unfilter$alloc(pars, time_start, time, dt, data,
                                           n_particles, n_groups)
+  res$name <- generator$name
+  res$n_particles <- as.integer(n_particles)
+  res$n_groups <- as.integer(max(n_groups), 1)
+  res$deterministic <- TRUE
+  res$methods <- generator$methods$unfilter
   class(res) <- "dust_unfilter"
   res
 }
@@ -402,6 +384,112 @@ dust_unfilter_create <- function(generator, pars, time_start, time, data,
 dust_unfilter_run <- function(unfilter, pars = NULL, initial = NULL) {
   check_is_dust_unfilter(unfilter)
   unfilter$methods$run(unfilter$ptr, pars, initial, unfilter$grouped)
+}
+
+
+##' Create a particle filter object
+##'
+##' @title Create a particle filter
+##'
+##' @param generator A model generator object, with class
+##'   `dust_model_generator`.  The model must support `compare_data`
+##'   to be used with this function.
+##'
+##' @param pars Initial parameters for the model.  This should be the
+##'   *full* set of parameters; running the filter may update subsets
+##'   using the model's underlying `update_pars` method.
+##'
+##' @param time_start The start time for the simulation - this is
+##'   typically before the first data point.  Must be an integer-like
+##'   value.
+##'
+##' @param time A vector of times, each of which has a corresponding
+##'   entry in `data`.  The model will stop at each of these times to
+##'   compute the likelihood using the compare function.
+##'
+##' @param data The data to compare against.  This must be a list with
+##'   the same length as `time`, each element of which corresponds to
+##'   the data required for the model.  If the model is ungrouped then
+##'   each element of `data` is a list with elements corresponding to
+##'   whatever your model requires.  If your model is grouped, this
+##'   should be a list with as many elements as your model has groups,
+##'   with each element corresponding to the data your model requires.
+##'   We will likely introduce a friendlier data.frame based input
+##'   soon.
+##'
+##' @param n_particles The number of particles to run.  Larger numbers
+##'   will give lower variance in the likelihood estimate but run more
+##'   slowly.
+##'
+##' @inheritParams dust_model_create
+##'
+##' @return A `dust_unfilter` object, which can be used with
+##'   [dust_unfilter_run]
+##'
+##' @export
+dust_filter_create <- function(generator, pars, time_start, time, data,
+                               n_particles, n_groups = 0, dt = 1,
+                               seed = NULL) {
+  check_is_dust_model_generator(generator)
+  if (!generator$properties$has_compare) {
+    ## This moves into something general soon?
+    cli::cli_abort(
+      paste("Can't compare against data, the '{generator$name}' model does",
+            "not have 'compare_data' support"),
+      arg = "generator")
+  }
+  res <- generator$methods$filter$alloc(pars, time_start, time, dt, data,
+                                        n_particles, n_groups, seed)
+  res$name <- generator$name
+  res$n_particles <- as.integer(n_particles)
+  res$n_groups <- as.integer(max(n_groups), 1)
+  res$deterministic <- FALSE
+  res$methods <- generator$methods$filter
+  class(res) <- "dust_filter"
+  res
+}
+
+
+##' Run particle filter
+##'
+##' @title Run particle filter
+##'
+##' @param filter A `dust_filter` object, created by
+##'   [dust_filter_create]
+##'
+##' @param pars Optional parameters to run the filter with.  If not
+##'   provided, parameters are not updated
+##'
+##' @param initial Optional initial conditions, as a matrix (state x
+##'   particle) or 3d array (state x particle x group).  If not
+##'   provided, the model initial conditions are used.
+##'
+##' @return A vector of likelihood values, with as many elements as
+##'   there groups.
+##'
+##' @export
+dust_filter_run <- function(filter, pars = NULL, initial = NULL) {
+  check_is_dust_filter(filter)
+  if (!is.null(initial)) {
+    cli::cli_abort("Setting 'initial' not yet supported")
+  }
+  filter$methods$run(filter$ptr, pars, filter$grouped)
+}
+
+
+##' Get random number generator (RNG) state from the particle filter.
+##'
+##' @title Get filter RNG state
+##'
+##' @inheritParams dust_filter_run
+##'
+##' @return A raw vector, this could be quite long.  Later we will
+##'   describe how you might reseed a filter or model with this state.
+##'
+##' @export
+dust_filter_rng_state <- function(filter) {
+  check_is_dust_filter(filter)
+  filter$methods$rng_state(filter$ptr)
 }
 
 
@@ -471,6 +559,21 @@ check_is_dust_model <- function(model, call = parent.frame()) {
   }
 }
 
+
+check_is_dust_unfilter <- function(unfilter, call = parent.frame()) {
+  if (!inherits(unfilter, "dust_unfilter")) {
+    cli::cli_abort("Expected 'unfilter' to be a 'dust_unfilter' object",
+                   arg = "unfilter", call = call)
+  }
+}
+
+
+check_is_dust_filter <- function(filter, call = parent.frame()) {
+  if (!inherits(filter, "dust_filter")) {
+    cli::cli_abort("Expected 'filter' to be a 'dust_filter' object",
+                   arg = "filter", call = call)
+  }
+}
 
 is_uncalled_generator <- function(model) {
   if (!is.function(model)) {
