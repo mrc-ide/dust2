@@ -14,7 +14,8 @@ dust_model <- function(name, env = parent.env(parent.frame())) {
                     "run_steps", "run_to_time",
                     "reorder")
   methods_compare <- "compare_data"
-  methods_nms <- c(methods_core, methods_compare)
+  methods_filter <- c("unfilter_alloc", "unfilter_run")
+  methods_nms <- c(methods_core, methods_compare, methods_filter)
 
   methods <- lapply(sprintf("dust2_cpu_%s_%s", name, methods_nms),
                     function(x) env[[x]])
@@ -24,7 +25,12 @@ dust_model <- function(name, env = parent.env(parent.frame())) {
 
   properties <- list(
     has_compare = !is.null(methods$compare_data))
-  
+
+  if (properties$has_compare) {
+    methods <- lapply(sprintf("dust2_cpu_%s_%s", name, methods_filter),
+                      function(x) env[[x]])
+  }
+
   ret <- list(name = name,
               methods = methods,
               properties = properties)
@@ -97,7 +103,7 @@ dust_model_create <- function(generator, pars, n_particles, n_groups = 0,
 ##' @seealso [dust_model_set_state()] for setting state and
 ##'   [dust_model_set_state_initial()] for setting state to the
 ##'   model-specific initial conditions.
-##' 
+##'
 ##' @export
 dust_model_state <- function(model) {
   check_is_dust_model(model)
@@ -116,7 +122,7 @@ dust_model_state <- function(model) {
 ##' @param state A matrix or array of state.  If ungrouped, the
 ##'   dimension order expected is state x particle.  If grouped the
 ##'   order is state x particle x group.
-##' 
+##'
 ##' @return Nothing, called for side effects only
 ##' @export
 dust_model_set_state <- function(model, state) {
@@ -263,7 +269,7 @@ dust_model_run_to_time <- function(model, time) {
 ##'   is a vector where each element is the parameter index (if
 ##'   element `i` is `j` then after reordering the `i`th particle will
 ##'   have the state previously used by `j`).  All elements must lie
-##'   in [1, n_particles], repetition is allowed.  If the model is
+##'   in `[1, n_particles]`, repetition is allowed.  If the model is
 ##'   grouped, `index` must be a matrix with `n_particles` rows and
 ##'   `n_groups` columns, with each column corresponding to the
 ##'   reordering for a group.
@@ -304,11 +310,98 @@ dust_model_compare_data <- function(model, data) {
   if (!model$properties$has_compare) {
     ## This moves into something general soon?
     cli::cli_abort(
-      paste("Can't compare against data, the '{model}' does not have",
-            "'compare_data' support"),
+      paste("Can't compare against data, the '{model$name}' model does not",
+            "have 'compare_data' support"),
       arg = "model")
   }
   model$methods$compare_data(model$ptr, data, model$grouped)
+}
+
+
+##' Create an "unfilter" object, which can be used to compute a
+##' deterministic likelihood following the same algorithm as the
+##' particle filter, but limited to a single particle.  The name for
+##' this method will change in future.
+##'
+##' @title Create an unfilter
+##'
+##' @param generator A model generator object, with class
+##'   `dust_model_generator`.  The model must support `compare_data`
+##'   to be used with this function.
+##'
+##' @param pars Initial parameters for the model.  This should be the
+##'   *full* set of parameters; subsequent calls to
+##'   [dust_unfilter_run] may update subsets using the model's
+##'   `update_pars` method.
+##'
+##' @param time_start The start time for the simulation - this is
+##'   typically before the first data point.  Must be an integer-like
+##'   value.
+##'
+##' @param time A vector of times, each of which has a corresponding
+##'   entry in `data`.  The model will stop at each of these times to
+##'   compute the likelihood using the compare function.
+##'
+##' @param data The data to compare against.  This must be a list with
+##'   the same length as `time`, each element of which corresponds to
+##'   the data required for the model.  If the model is ungrouped then
+##'   each element of `data` is a list with elements corresponding to
+##'   whatever your model requires.  If your model is grouped, this
+##'   should be a list with as many elements as your model has groups,
+##'   with each element corresponding to the data your model requires.
+##'   We will likely introduce a friendlier data.frame based input
+##'   soon.
+##'
+##' @param n_particles The number of particles to run.  Typically this
+##'   is 1, but you can run with more than 1 if you want - currently
+##'   they produce the same likelihood but if you provide different
+##'   initial conditions then you would see different likelihoods.
+##'
+##' @inheritParams dust_model_create
+##'
+##' @return A `dust_unfilter` object, which can be used with
+##'   `dust_unfilter_run`
+##'
+##' @export
+dust_unfilter_create <- function(generator, pars, time_start, time, data,
+                                 n_particles = 1, n_groups = 1,
+                                 dt = 1) {
+  check_is_dust_model_generator(generator)
+  if (!generator$properties$has_compare) {
+    ## This moves into something general soon?
+    cli::cli_abort(
+      paste("Can't compare against data, the '{generator$name}' model does",
+            "not have 'compare_data' support"),
+      arg = "generator")
+  }
+  res <- generator$methods$unfilter_alloc(pars, trime_start, time, dt, data,
+                                          n_particles, n_groups)
+  class(res) <- "dust_unfilter"
+  res
+}
+
+
+##' Run unfilter
+##'
+##' @title Run unfilter
+##'
+##' @param unfilter A `dust_unfilter` object, created by
+##'   [dust_unfilter_create]
+##'
+##' @param pars Optional parameters to run the filter with.  If not
+##'   provided, parameters are not updated
+##'
+##' @param initial Optional initial conditions, as a matrix (state x
+##'   particle) or 3d array (state x particle x group).  If not
+##'   provided, the model initial conditions are used.
+##'
+##' @return A vector of likelihood values, with as many elements as
+##'   there groups.
+##'
+##' @export
+dust_unfilter_run <- function(unfilter, pars = NULL, initial = NULL) {
+  check_is_dust_unfilter(unfilter)
+  unfilter$methods$run(unfilter$ptr, pars, initial, unfilter$grouped)
 }
 
 

@@ -13,7 +13,6 @@ test_that("can run an unfilter", {
     base[names(pars)] <- pars
     obj <- dust_model_create(sir(), base, time = time_start, dt = dt,
                              n_particles = 1, deterministic = TRUE)
-    ptr <- obj$ptr
     dust_model_set_state_initial(obj)
     incidence <- numeric(length(time))
     time0 <- c(time_start, time)
