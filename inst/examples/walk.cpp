@@ -1,5 +1,9 @@
 #include <dust2/common.hpp>
 
+// [[dust2::class(walk)]]
+// [[dust2::parameter(sd)]]
+// [[dust2::parameter(len)]]
+// [[dust2::parameter(random_initial)]]
 class walk {
 public:
   // No constructor - turning this off is optional

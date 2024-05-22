@@ -1,11 +1,12 @@
 #include <dust2/common.hpp>
 
-namespace {
-inline double with_default(double default_value, cpp11::sexp value) {
-  return value == R_NilValue ? default_value : cpp11::as_cpp<double>(value);
-}
-}
-
+// [[dust2::class(sir)]]
+// [[dust2::has_compare()]]
+// [[dust2::parameter(I0)]]
+// [[dust2::parameter(N)]]
+// [[dust2::parameter(beta)]]
+// [[dust2::parameter(gamma)]]
+// [[dust2::parameter(exp_noise)]]
 class sir {
 public:
   sir() = delete;
