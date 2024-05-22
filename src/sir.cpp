@@ -42,6 +42,11 @@ SEXP dust2_cpu_sir_time(cpp11::sexp ptr) {
 }
 
 [[cpp11::register]]
+SEXP dust2_cpu_sir_set_time(cpp11::sexp ptr, cpp11::sexp r_time) {
+  return dust2::r::dust2_cpu_set_time<sir>(ptr, r_time);
+}
+
+[[cpp11::register]]
 SEXP dust2_cpu_sir_update_pars(cpp11::sexp ptr, cpp11::list pars,
                                bool grouped) {
   return dust2::r::dust2_cpu_update_pars<sir>(ptr, pars, grouped);
@@ -55,6 +60,11 @@ SEXP dust2_cpu_sir_set_state_initial(cpp11::sexp ptr) {
 [[cpp11::register]]
 SEXP dust2_cpu_sir_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool grouped) {
   return dust2::r::dust2_cpu_set_state<sir>(ptr, r_state, grouped);
+}
+
+[[cpp11::register]]
+SEXP dust2_cpu_sir_reorder(cpp11::sexp ptr, cpp11::integers r_index) {
+  return dust2::r::dust2_cpu_reorder<sir>(ptr, r_index);
 }
 
 [[cpp11::register]]

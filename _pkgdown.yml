@@ -10,3 +10,28 @@ reference:
       - dust_model_state
       - dust_model_set_state
       - dust_model_set_state_initial
+      - dust_model_time
+      - dust_model_set_time
+      - dust_model_rng_state
+      - dust_model_update_pars
+  - subtitle: Running
+    contents:
+      - dust_model_run_steps
+      - dust_model_run_to_time
+  - subtitle: Other
+    contents:
+      - dust_model_reorder
+  - title: Likelihood
+    contents:
+      - dust_model_compare_data
+  - subtitle: Deterministic unfilter
+    contents:
+      - dust_unfilter_create
+      - dust_unfilter_run
+  - subtitle: Particle filter
+    contents:
+      - dust_filter_create
+      - dust_filter_run
+      - dust_filter_rng_state
+    
+      

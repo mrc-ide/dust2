@@ -5,18 +5,17 @@ test_that("can run simple sir model", {
   expect_type(obj$ptr, "externalptr")
   expect_equal(obj$n_state, 5)
 
-  ptr <- obj$ptr
-  expect_type(dust2_cpu_sir_rng_state(ptr), "raw")
-  expect_length(dust2_cpu_sir_rng_state(ptr), 32 * 10)
+  expect_type(dust_model_rng_state(obj), "raw")
+  expect_length(dust_model_rng_state(obj), 32 * 10)
 
   expect_equal(dust_model_state(obj), matrix(0, 5, 10))
-  expect_equal(dust2_cpu_sir_time(ptr), 0)
+  expect_equal(dust_model_time(obj), 0)
 
   expect_null(dust_model_set_state_initial(obj))
   s0 <- dust_model_state(obj)
   expect_equal(s0, matrix(c(990, 10, 0, 0, 0), 5, 10))
 
-  expect_null(dust2_cpu_sir_run_steps(ptr, 30))
+  expect_null(dust_model_run_steps(obj, 30))
   s1 <- dust_model_state(obj)
   expect_true(all(s1[1, ] < 990))
   expect_true(all(s1[3, ] > 0))
@@ -27,7 +26,6 @@ test_that("can run simple sir model", {
 test_that("can compare to data", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 0.5)
   obj <- dust_model_create(sir(), pars, n_particles = 10, seed = 42)
-  ptr <- obj$ptr
 
   s <- rbind(0, 0, 0, 0, rpois(10, 30))
   dust_model_set_state(obj, s)
@@ -37,7 +35,7 @@ test_that("can compare to data", {
   eps <- drop(r$exponential(1, 0.5))
 
   expect_equal(
-    dust2_cpu_sir_compare_data(ptr, d, FALSE),
+    dust_model_compare_data(obj, d),
     dpois(30, s[5, ] + eps, log = TRUE))
 })
 
@@ -45,7 +43,6 @@ test_that("can compare to data", {
 test_that("can compare to data when missing", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 0.5)
   obj <- dust_model_create(sir(), pars, n_particles = 10, seed = 42)
-  ptr <- obj$ptr
 
   s <- rbind(0, 0, 0, 0, rpois(10, 30))
   dust_model_set_state(obj, s)
@@ -53,9 +50,9 @@ test_that("can compare to data when missing", {
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
   expect_equal(
-    dust2_cpu_sir_compare_data(ptr, d, FALSE),
+    dust_model_compare_data(obj, d),
     rep(0, 10))
-  expect_equal(dust2_cpu_sir_rng_state(ptr), r$state())
+  expect_equal(dust_model_rng_state(obj), r$state())
 })
 
 
@@ -65,14 +62,13 @@ test_that("can compare against multple parameter groups at once", {
   })
   obj <- dust_model_create(sir(), pars, n_particles = 10, n_groups = 4, 
                            seed = 42)
-  ptr <- obj$ptr
 
   s <- dust_model_state(obj)
   s[5, , ] <- rpois(10, 30)
   dust_model_set_state(obj, s)
 
   d <- lapply(1:4, function(i) list(incidence = 30 + i))
-  res <- dust2_cpu_sir_compare_data(ptr, d, TRUE)
+  res <- dust_model_compare_data(obj, d)
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10 * 4)
   rate <- rep(10^(1:4), each = 10)
@@ -80,10 +76,6 @@ test_that("can compare against multple parameter groups at once", {
   expect_equal(
     res,
     matrix(dpois(rep(31:34, each = 10), s[5, , ] + eps, log = TRUE), 10, 4))
-
-  expect_error(
-    dust2_cpu_sir_compare_data(ptr, d, FALSE),
-    "Can't compare with grouped = FALSE with more than one group")
 })
 
 
@@ -92,9 +84,8 @@ test_that("validate data size on compare", {
     list(beta = 0.1 * i, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 10^i)
   })
   obj <- dust_model_create(sir(), pars, n_particles = 10, n_groups = 4)
-  ptr <- obj$ptr
   expect_error(
-    dust2_cpu_sir_compare_data(ptr, vector("list", 3), TRUE),
+    dust_model_compare_data(obj, vector("list", 3)),
     "'data' must have length 4")
 })
 
@@ -106,11 +97,10 @@ test_that("can reset cases daily", {
   pars <- list(beta = 1.0, gamma = 0.5, N = 1000, I0 = 10, exp_noise = 1e6)
   obj <- dust_model_create(sir(), pars, n_particles = n_particles,
                            dt = 0.25, seed = 42)
-  ptr <- obj$ptr
   dust_model_set_state_initial(obj)
   res <- array(NA_real_, c(5, n_particles, n_time))
   for (i in seq_len(n_time)) {
-    dust2_cpu_sir_run_steps(ptr, 1)
+    dust_model_run_steps(obj, 1)
     res[, , i] <- dust_model_state(obj)
   }
 
@@ -127,17 +117,15 @@ test_that("can run sir model to time", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
   obj1 <- dust_model_create(sir(), pars, dt = 0.25, n_particles = 10, seed = 42)
   obj2 <- dust_model_create(sir(), pars, dt = 0.25, n_particles = 10, seed = 42)
-  ptr1 <- obj1$ptr
-  ptr2 <- obj2$ptr
 
   dust_model_set_state_initial(obj1)
-  expect_null(dust2_cpu_sir_run_steps(ptr1, 40))
-  expect_equal(dust2_cpu_sir_time(ptr1), 10)
+  expect_null(dust_model_run_steps(obj1, 40))
+  expect_equal(dust_model_time(obj1), 10)
   s1 <- dust_model_state(obj1)
 
   dust_model_set_state_initial(obj2)
-  expect_null(dust2_cpu_sir_run_to_time(ptr2, 10))
-  expect_equal(dust2_cpu_sir_time(ptr2), 10)
+  expect_null(dust_model_run_to_time(obj2, 10))
+  expect_equal(dust_model_time(obj2), 10)
   expect_equal(dust_model_state(obj2), s1)
 })
 
@@ -148,13 +136,11 @@ test_that("can update parameters", {
   combined <- modifyList(base, update)
 
   obj1 <- dust_model_create(sir(), base, n_particles = 10, seed = 42)
-  ptr1 <- obj1$ptr
-  expect_null(dust2_cpu_sir_update_pars(ptr1, update, FALSE))
-  expect_null(dust2_cpu_sir_run_steps(ptr1, 10))
+  expect_null(dust_model_update_pars(obj1, update))
+  expect_null(dust_model_run_steps(obj1, 10))
 
   obj2 <- dust_model_create(sir(), combined, n_particles = 10, seed = 42)
-  ptr2 <- obj2$ptr
-  expect_null(dust2_cpu_sir_run_steps(ptr2, 10))
+  expect_null(dust_model_run_steps(obj2, 10))
 
   expect_equal(
     dust_model_state(obj2),
