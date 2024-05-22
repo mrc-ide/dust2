@@ -13,17 +13,17 @@ test_that("can print information about generators", {
 test_that("error if given invalid inputs to dust_model_create", {
   expect_error(
     dust_model_create(NULL),
-    "Expected 'model' to be a 'dust_model_generator' object")
+    "Expected 'generator' to be a 'dust_model_generator' object")
   expect_error(
     dust_model_create("sir"),
-    "Expected 'model' to be a 'dust_model_generator' object")
+    "Expected 'generator' to be a 'dust_model_generator' object")
 
   foo <- function() {
     dust_model("foo")
   }
   err <- expect_error(
     dust_model_create(foo),
-    "Expected 'model' to be a 'dust_model_generator' object")
+    "Expected 'generator' to be a 'dust_model_generator' object")
   expect_equal(err$body,
                c(i = "Did you mean 'foo()' (i.e., with parentheses)"))
 })

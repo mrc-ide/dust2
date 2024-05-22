@@ -5,7 +5,7 @@
 \title{Create a dust object}
 \usage{
 dust_model_create(
-  model,
+  generator,
   pars,
   n_particles,
   n_groups = 0,
@@ -16,7 +16,7 @@ dust_model_create(
 )
 }
 \arguments{
-\item{model}{A model generator object, with class
+\item{generator}{A model generator object, with class
 \code{dust_model_generator}}
 
 \item{pars}{A list of parameters.  The format of this will depend

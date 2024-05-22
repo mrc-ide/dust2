@@ -27,7 +27,7 @@ dust_model <- function(name, env = parent.env(parent.frame())) {
 ##'
 ##' @title Create a dust object
 ##'
-##' @param model A model generator object, with class
+##' @param generator A model generator object, with class
 ##'   `dust_model_generator`
 ##'
 ##' @param pars A list of parameters.  The format of this will depend
@@ -52,27 +52,19 @@ dust_model <- function(name, env = parent.env(parent.frame())) {
 ##' @return A `dust_model` object, with opaque format.
 ##'
 ##' @export
-dust_model_create <- function(model, pars, n_particles, n_groups = 0,
+dust_model_create <- function(generator, pars, n_particles, n_groups = 0,
                               time = 0, dt = 1,
                               seed = NULL, deterministic = FALSE) {
-  if (!inherits(model, "dust_model_generator")) {
-    hint <- NULL
-    if (is_uncalled_generator(model) && is.symbol(name <- substitute(model))) {
-      hint <- c(i = "Did you mean '{name}()' (i.e., with parentheses)")
-    }
-    cli::cli_abort(
-      c("Expected 'model' to be a 'dust_model_generator' object",
-        hint),
-      arg = "model")
-  }
-  res <- model$methods$alloc(pars, time, dt, n_particles, n_groups,
-                             seed, deterministic)
+  check_is_dust_model_generator(generator, substitute(generator))
+  res <- generator$methods$alloc(pars, time, dt, n_particles, n_groups,
+                                 seed, deterministic)
   ## Here, we augment things slightly
-  res$name <- model$name
+  res$name <- generator$name
   res$n_particles <- as.integer(n_particles)
   res$n_groups <- as.integer(max(n_groups), 1)
   res$deterministic <- deterministic
-  res$methods <- model$methods
+  res$methods <- generator$methods
+  res$properties <- generator$properties
   class(res) <- "dust_model"
   res
 }
@@ -118,6 +110,7 @@ dust_model_set_state <- function(model, state) {
   model$methods$set_state(model$ptr, state, model$grouped)
   invisible()
 }
+
 
 ##' Set model state from a models initial conditions.  This may depend
 ##' on the current time.
@@ -171,6 +164,22 @@ print.dust_model <- function(x, ...) {
 ##' @export
 dim.dust_model <- function(x, ...) {
   c(x$n_state, x$n_particles, if (x$grouped) x$n_groups)
+}
+
+
+check_is_dust_model_generator <- function(generator, called_as,
+                                          call = parent.frame()) {
+  if (!inherits(generator, "dust_model_generator")) {
+    hint <- NULL
+    if (is_uncalled_generator(generator) && is.symbol(called_as)) {
+      hint <- c(
+        i = "Did you mean '{deparse(called_as)}()' (i.e., with parentheses)")
+    }
+    cli::cli_abort(
+      c("Expected 'generator' to be a 'dust_model_generator' object",
+        hint),
+      arg = "generator")
+  }
 }
 
 

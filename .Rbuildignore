@@ -23,4 +23,4 @@
 \.*gcov$
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^_pkgbuild\.yml$
+^_pkgdown\.yml$
