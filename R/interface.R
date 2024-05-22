@@ -32,7 +32,7 @@ dust_model <- function(name, env = parent.env(parent.frame())) {
 ##'
 ##' @param pars A list of parameters.  The format of this will depend
 ##'   on the model.  If `n_groups` is 1 or more, then this must be a
-##'   list where each element of length `n_groups` where each element
+##'   list of length `n_groups` where each element
 ##'   is a list of parameters for your model.
 ##'
 ##' @param n_particles The number of particles to create.
@@ -112,7 +112,7 @@ dust_model_set_state <- function(model, state) {
 }
 
 
-##' Set model state from a models initial conditions.  This may depend
+##' Set model state from a model's initial conditions.  This may depend
 ##' on the current time.
 ##'
 ##' @title Set model state to initial conditions
