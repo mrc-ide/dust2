@@ -92,16 +92,24 @@ SEXP dust2_cpu_sir_unfilter_alloc(cpp11::list r_pars,
                                   cpp11::sexp r_dt,
                                   cpp11::list r_data,
                                   cpp11::sexp r_n_particles,
-                                  cpp11::sexp r_n_groups) {
+                                  cpp11::sexp r_n_groups,
+                                  cpp11::sexp r_index) {
   return dust2::r::dust2_cpu_unfilter_alloc<sir>(r_pars, r_time_start, r_time,
                                                  r_dt, r_data, r_n_particles,
-                                                 r_n_groups);
+                                                 r_n_groups, r_index);
 }
 
 [[cpp11::register]]
 SEXP dust2_cpu_sir_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
-                                cpp11::sexp r_initial, bool grouped) {
-  return dust2::r::dust2_cpu_unfilter_run<sir>(ptr, r_pars, r_initial, grouped);
+                                cpp11::sexp r_initial, bool save_history,
+                                bool grouped) {
+  return dust2::r::dust2_cpu_unfilter_run<sir>(ptr, r_pars, r_initial,
+                                               save_history, grouped);
+}
+
+[[cpp11::register]]
+SEXP dust2_cpu_sir_unfilter_last_history(cpp11::sexp ptr, bool grouped) {
+  return dust2::r::dust2_cpu_unfilter_last_history<sir>(ptr, grouped);
 }
 
 [[cpp11::register]]

@@ -31,6 +31,35 @@ test_that("can run an unfilter", {
 })
 
 
+test_that("can get unfilter history", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+
+  time_start <- 0
+  time <- c(4, 8, 12, 16)
+  data <- lapply(1:4, function(i) list(incidence = i))
+  dt <- 1
+
+  obj <- dust_unfilter_create(sir(), pars, time_start, time, data)
+  dust_unfilter_run(obj)
+  expect_error(
+    dust_unfilter_last_history(obj),
+    "History is not current")
+  dust_unfilter_run(obj, save_history = TRUE)
+  h <- dust_unfilter_last_history(obj)
+  expect_equal(dust_unfilter_last_history(obj), h)
+  dust_unfilter_run(obj, save_history = FALSE)
+  expect_error(
+    dust_unfilter_last_history(obj),
+    "History is not current")
+
+  m <- dust_model_create(sir(), pars, time = time_start, n_particles = 1,
+                         deterministic = TRUE)
+  dust_model_set_state_initial(m)
+  cmp <- dust_model_simulate(m, time)
+  expect_equal(h, cmp)
+})
+
+
 test_that("can run an unfilter with manually set state", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
   state <- matrix(c(1000 - 17, 17, 0, 0, 0), ncol = 1)

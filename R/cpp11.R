@@ -52,12 +52,16 @@ dust2_cpu_sir_simulate <- function(ptr, r_times, r_index, grouped) {
   .Call(`_dust2_dust2_cpu_sir_simulate`, ptr, r_times, r_index, grouped)
 }
 
-dust2_cpu_sir_unfilter_alloc <- function(r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups) {
-  .Call(`_dust2_dust2_cpu_sir_unfilter_alloc`, r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups)
+dust2_cpu_sir_unfilter_alloc <- function(r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_index) {
+  .Call(`_dust2_dust2_cpu_sir_unfilter_alloc`, r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_index)
 }
 
-dust2_cpu_sir_unfilter_run <- function(ptr, r_pars, r_initial, grouped) {
-  .Call(`_dust2_dust2_cpu_sir_unfilter_run`, ptr, r_pars, r_initial, grouped)
+dust2_cpu_sir_unfilter_run <- function(ptr, r_pars, r_initial, save_history, grouped) {
+  .Call(`_dust2_dust2_cpu_sir_unfilter_run`, ptr, r_pars, r_initial, save_history, grouped)
+}
+
+dust2_cpu_sir_unfilter_last_history <- function(ptr, grouped) {
+  .Call(`_dust2_dust2_cpu_sir_unfilter_last_history`, ptr, grouped)
 }
 
 dust2_cpu_sir_filter_alloc <- function(r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_seed) {

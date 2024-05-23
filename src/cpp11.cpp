@@ -97,17 +97,24 @@ extern "C" SEXP _dust2_dust2_cpu_sir_simulate(SEXP ptr, SEXP r_times, SEXP r_ind
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_cpu_sir_unfilter_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups);
-extern "C" SEXP _dust2_dust2_cpu_sir_unfilter_alloc(SEXP r_pars, SEXP r_time_start, SEXP r_time, SEXP r_dt, SEXP r_data, SEXP r_n_particles, SEXP r_n_groups) {
+SEXP dust2_cpu_sir_unfilter_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_index);
+extern "C" SEXP _dust2_dust2_cpu_sir_unfilter_alloc(SEXP r_pars, SEXP r_time_start, SEXP r_time, SEXP r_dt, SEXP r_data, SEXP r_n_particles, SEXP r_n_groups, SEXP r_index) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_cpu_sir_unfilter_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time_start), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_dt), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_data), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups)));
+    return cpp11::as_sexp(dust2_cpu_sir_unfilter_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time_start), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_dt), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_data), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index)));
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_cpu_sir_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_pars, cpp11::sexp r_initial, bool grouped);
-extern "C" SEXP _dust2_dust2_cpu_sir_unfilter_run(SEXP ptr, SEXP r_pars, SEXP r_initial, SEXP grouped) {
+SEXP dust2_cpu_sir_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_pars, cpp11::sexp r_initial, bool save_history, bool grouped);
+extern "C" SEXP _dust2_dust2_cpu_sir_unfilter_run(SEXP ptr, SEXP r_pars, SEXP r_initial, SEXP save_history, SEXP grouped) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_cpu_sir_unfilter_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+    return cpp11::as_sexp(dust2_cpu_sir_unfilter_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(save_history), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+  END_CPP11
+}
+// sir.cpp
+SEXP dust2_cpu_sir_unfilter_last_history(cpp11::sexp ptr, bool grouped);
+extern "C" SEXP _dust2_dust2_cpu_sir_unfilter_last_history(SEXP ptr, SEXP grouped) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_cpu_sir_unfilter_last_history(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
   END_CPP11
 }
 // sir.cpp
@@ -239,39 +246,40 @@ extern "C" SEXP _dust2_dust2_cpu_walk_simulate(SEXP ptr, SEXP r_times, SEXP r_in
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
-    {"_dust2_dust2_cpu_sir_alloc",              (DL_FUNC) &_dust2_dust2_cpu_sir_alloc,              7},
-    {"_dust2_dust2_cpu_sir_compare_data",       (DL_FUNC) &_dust2_dust2_cpu_sir_compare_data,       3},
-    {"_dust2_dust2_cpu_sir_filter_alloc",       (DL_FUNC) &_dust2_dust2_cpu_sir_filter_alloc,       8},
-    {"_dust2_dust2_cpu_sir_filter_rng_state",   (DL_FUNC) &_dust2_dust2_cpu_sir_filter_rng_state,   1},
-    {"_dust2_dust2_cpu_sir_filter_run",         (DL_FUNC) &_dust2_dust2_cpu_sir_filter_run,         4},
-    {"_dust2_dust2_cpu_sir_reorder",            (DL_FUNC) &_dust2_dust2_cpu_sir_reorder,            2},
-    {"_dust2_dust2_cpu_sir_rng_state",          (DL_FUNC) &_dust2_dust2_cpu_sir_rng_state,          1},
-    {"_dust2_dust2_cpu_sir_run_steps",          (DL_FUNC) &_dust2_dust2_cpu_sir_run_steps,          2},
-    {"_dust2_dust2_cpu_sir_run_to_time",        (DL_FUNC) &_dust2_dust2_cpu_sir_run_to_time,        2},
-    {"_dust2_dust2_cpu_sir_set_state",          (DL_FUNC) &_dust2_dust2_cpu_sir_set_state,          3},
-    {"_dust2_dust2_cpu_sir_set_state_initial",  (DL_FUNC) &_dust2_dust2_cpu_sir_set_state_initial,  1},
-    {"_dust2_dust2_cpu_sir_set_time",           (DL_FUNC) &_dust2_dust2_cpu_sir_set_time,           2},
-    {"_dust2_dust2_cpu_sir_simulate",           (DL_FUNC) &_dust2_dust2_cpu_sir_simulate,           4},
-    {"_dust2_dust2_cpu_sir_state",              (DL_FUNC) &_dust2_dust2_cpu_sir_state,              2},
-    {"_dust2_dust2_cpu_sir_time",               (DL_FUNC) &_dust2_dust2_cpu_sir_time,               1},
-    {"_dust2_dust2_cpu_sir_unfilter_alloc",     (DL_FUNC) &_dust2_dust2_cpu_sir_unfilter_alloc,     7},
-    {"_dust2_dust2_cpu_sir_unfilter_run",       (DL_FUNC) &_dust2_dust2_cpu_sir_unfilter_run,       4},
-    {"_dust2_dust2_cpu_sir_update_pars",        (DL_FUNC) &_dust2_dust2_cpu_sir_update_pars,        3},
-    {"_dust2_dust2_cpu_walk_alloc",             (DL_FUNC) &_dust2_dust2_cpu_walk_alloc,             7},
-    {"_dust2_dust2_cpu_walk_reorder",           (DL_FUNC) &_dust2_dust2_cpu_walk_reorder,           2},
-    {"_dust2_dust2_cpu_walk_rng_state",         (DL_FUNC) &_dust2_dust2_cpu_walk_rng_state,         1},
-    {"_dust2_dust2_cpu_walk_run_steps",         (DL_FUNC) &_dust2_dust2_cpu_walk_run_steps,         2},
-    {"_dust2_dust2_cpu_walk_run_to_time",       (DL_FUNC) &_dust2_dust2_cpu_walk_run_to_time,       2},
-    {"_dust2_dust2_cpu_walk_set_state",         (DL_FUNC) &_dust2_dust2_cpu_walk_set_state,         3},
-    {"_dust2_dust2_cpu_walk_set_state_initial", (DL_FUNC) &_dust2_dust2_cpu_walk_set_state_initial, 1},
-    {"_dust2_dust2_cpu_walk_set_time",          (DL_FUNC) &_dust2_dust2_cpu_walk_set_time,          2},
-    {"_dust2_dust2_cpu_walk_simulate",          (DL_FUNC) &_dust2_dust2_cpu_walk_simulate,          4},
-    {"_dust2_dust2_cpu_walk_state",             (DL_FUNC) &_dust2_dust2_cpu_walk_state,             2},
-    {"_dust2_dust2_cpu_walk_time",              (DL_FUNC) &_dust2_dust2_cpu_walk_time,              1},
-    {"_dust2_dust2_cpu_walk_update_pars",       (DL_FUNC) &_dust2_dust2_cpu_walk_update_pars,       3},
-    {"_dust2_test_history",                     (DL_FUNC) &_dust2_test_history,                     4},
-    {"_dust2_test_resample_weight",             (DL_FUNC) &_dust2_test_resample_weight,             2},
-    {"_dust2_test_scale_log_weights",           (DL_FUNC) &_dust2_test_scale_log_weights,           1},
+    {"_dust2_dust2_cpu_sir_alloc",                 (DL_FUNC) &_dust2_dust2_cpu_sir_alloc,                 7},
+    {"_dust2_dust2_cpu_sir_compare_data",          (DL_FUNC) &_dust2_dust2_cpu_sir_compare_data,          3},
+    {"_dust2_dust2_cpu_sir_filter_alloc",          (DL_FUNC) &_dust2_dust2_cpu_sir_filter_alloc,          8},
+    {"_dust2_dust2_cpu_sir_filter_rng_state",      (DL_FUNC) &_dust2_dust2_cpu_sir_filter_rng_state,      1},
+    {"_dust2_dust2_cpu_sir_filter_run",            (DL_FUNC) &_dust2_dust2_cpu_sir_filter_run,            4},
+    {"_dust2_dust2_cpu_sir_reorder",               (DL_FUNC) &_dust2_dust2_cpu_sir_reorder,               2},
+    {"_dust2_dust2_cpu_sir_rng_state",             (DL_FUNC) &_dust2_dust2_cpu_sir_rng_state,             1},
+    {"_dust2_dust2_cpu_sir_run_steps",             (DL_FUNC) &_dust2_dust2_cpu_sir_run_steps,             2},
+    {"_dust2_dust2_cpu_sir_run_to_time",           (DL_FUNC) &_dust2_dust2_cpu_sir_run_to_time,           2},
+    {"_dust2_dust2_cpu_sir_set_state",             (DL_FUNC) &_dust2_dust2_cpu_sir_set_state,             3},
+    {"_dust2_dust2_cpu_sir_set_state_initial",     (DL_FUNC) &_dust2_dust2_cpu_sir_set_state_initial,     1},
+    {"_dust2_dust2_cpu_sir_set_time",              (DL_FUNC) &_dust2_dust2_cpu_sir_set_time,              2},
+    {"_dust2_dust2_cpu_sir_simulate",              (DL_FUNC) &_dust2_dust2_cpu_sir_simulate,              4},
+    {"_dust2_dust2_cpu_sir_state",                 (DL_FUNC) &_dust2_dust2_cpu_sir_state,                 2},
+    {"_dust2_dust2_cpu_sir_time",                  (DL_FUNC) &_dust2_dust2_cpu_sir_time,                  1},
+    {"_dust2_dust2_cpu_sir_unfilter_alloc",        (DL_FUNC) &_dust2_dust2_cpu_sir_unfilter_alloc,        8},
+    {"_dust2_dust2_cpu_sir_unfilter_last_history", (DL_FUNC) &_dust2_dust2_cpu_sir_unfilter_last_history, 2},
+    {"_dust2_dust2_cpu_sir_unfilter_run",          (DL_FUNC) &_dust2_dust2_cpu_sir_unfilter_run,          5},
+    {"_dust2_dust2_cpu_sir_update_pars",           (DL_FUNC) &_dust2_dust2_cpu_sir_update_pars,           3},
+    {"_dust2_dust2_cpu_walk_alloc",                (DL_FUNC) &_dust2_dust2_cpu_walk_alloc,                7},
+    {"_dust2_dust2_cpu_walk_reorder",              (DL_FUNC) &_dust2_dust2_cpu_walk_reorder,              2},
+    {"_dust2_dust2_cpu_walk_rng_state",            (DL_FUNC) &_dust2_dust2_cpu_walk_rng_state,            1},
+    {"_dust2_dust2_cpu_walk_run_steps",            (DL_FUNC) &_dust2_dust2_cpu_walk_run_steps,            2},
+    {"_dust2_dust2_cpu_walk_run_to_time",          (DL_FUNC) &_dust2_dust2_cpu_walk_run_to_time,          2},
+    {"_dust2_dust2_cpu_walk_set_state",            (DL_FUNC) &_dust2_dust2_cpu_walk_set_state,            3},
+    {"_dust2_dust2_cpu_walk_set_state_initial",    (DL_FUNC) &_dust2_dust2_cpu_walk_set_state_initial,    1},
+    {"_dust2_dust2_cpu_walk_set_time",             (DL_FUNC) &_dust2_dust2_cpu_walk_set_time,             2},
+    {"_dust2_dust2_cpu_walk_simulate",             (DL_FUNC) &_dust2_dust2_cpu_walk_simulate,             4},
+    {"_dust2_dust2_cpu_walk_state",                (DL_FUNC) &_dust2_dust2_cpu_walk_state,                2},
+    {"_dust2_dust2_cpu_walk_time",                 (DL_FUNC) &_dust2_dust2_cpu_walk_time,                 1},
+    {"_dust2_dust2_cpu_walk_update_pars",          (DL_FUNC) &_dust2_dust2_cpu_walk_update_pars,          3},
+    {"_dust2_test_history",                        (DL_FUNC) &_dust2_test_history,                        4},
+    {"_dust2_test_resample_weight",                (DL_FUNC) &_dust2_test_resample_weight,                2},
+    {"_dust2_test_scale_log_weights",              (DL_FUNC) &_dust2_test_scale_log_weights,              1},
     {NULL, NULL, 0}
 };
 }
