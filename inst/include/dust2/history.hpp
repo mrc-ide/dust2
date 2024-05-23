@@ -71,7 +71,7 @@ public:
   template <typename IterReal, typename IterSize>
   void add_with_index(real_type time, IterReal iter_state, IterSize iter_order,
                       IterSize iter_index, size_t n_state_total) {
-    copy_state_with_index(iter_state, iter_index, n_state_total);
+    copy_state_with_index_(iter_state, iter_index, n_state_total);
     copy_order_(iter_order);
     update_position(time, true);
   }

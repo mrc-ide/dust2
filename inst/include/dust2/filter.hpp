@@ -123,6 +123,7 @@ public:
          real_type time_start,
          std::vector<real_type> time,
          std::vector<data_type> data,
+         std::vector<size_t> history_index,
          const std::vector<rng_int_type>& seed) :
     model(model_),
     time_start_(time_start),
@@ -132,7 +133,11 @@ public:
     n_groups_(model.n_groups()),
     rng_(n_groups_, seed, false),
     ll_(n_groups_ * n_particles_, 0),
-    ll_step_(n_groups_ * n_particles_, 0) {
+    ll_step_(n_groups_ * n_particles_, 0),
+    history_index_(history_index),
+    history_(history_index_.size() > 0 ? history_index_.size() : n_state_,
+             n_particles_, n_groups_, time_.size()),
+    history_is_current_(false) {
     // TODO: duplicated with the above, can be done generically though
     // it's not a lot of code.
     const auto dt = model_.dt();
@@ -143,7 +148,7 @@ public:
     }
   }
 
-  void run(bool set_initial) {
+  void run(bool set_initial, bool save_history) {
     const auto n_times = step_.size();
 
     model.set_time(time_start_);
@@ -155,6 +160,8 @@ public:
     // Just store this here; later once we have state to save we can
     // probably use that vector instead.
     std::vector<size_t> index(n_particles_ * n_groups_);
+
+    const bool use_index = history_index_.size() > 0;
 
     auto it_data = data_.begin();
     for (size_t i = 0; i < n_times; ++i, it_data += n_groups_) {
@@ -182,7 +189,15 @@ public:
 
       model.reorder(index.begin());
 
-      // save trajectories (perhaps)
+      if (save_history) {
+        if (use_index) {
+          history_.add_with_index(time_[i], model.state().begin(), index.begin(),
+                                  history_index_.begin(), n_state_);
+        } else {
+          history_.add(time_[i], model.state().begin(), index.begin());
+        }
+      }
+
       // save snapshots (perhaps)
     }
   }
@@ -190,6 +205,20 @@ public:
   template <typename It>
   void last_log_likelihood(It it) {
     std::copy_n(ll_.begin(), n_groups_, it);
+  }
+
+  template <typename Iter>
+  void last_history(Iter iter) {
+    constexpr bool reorder = false;
+    history_.export_state(iter, reorder);
+  }
+
+  auto last_history_dims() const {
+    return history_.dims();
+  }
+
+  bool last_history_is_current() const {
+    return history_is_current_;
   }
 
   auto rng_state() { // TODO: should be const, error in mcstate2
@@ -207,6 +236,9 @@ private:
   mcstate::random::prng<rng_state_type> rng_;
   std::vector<real_type> ll_;
   std::vector<real_type> ll_step_;
+  std::vector<size_t> history_index_;
+  history<real_type> history_;
+  bool history_is_current_;
 };
 
 }

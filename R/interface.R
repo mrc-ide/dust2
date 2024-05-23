@@ -370,8 +370,6 @@ dust_model_compare_data <- function(model, data) {
 ##'   they produce the same likelihood but if you provide different
 ##'   initial conditions then you would see different likelihoods.
 ##'
-##' @inheritParams dust_model_simulate
-##'
 ##' @return A `dust_unfilter` object, which can be used with
 ##'   [dust_unfilter_run]
 ##'
@@ -408,13 +406,6 @@ dust_unfilter_create <- function(generator, pars, time_start, time, data,
 ##'
 ##' @param unfilter A `dust_unfilter` object, created by
 ##'   [dust_unfilter_create]
-##'
-##' @param save_history Logical, indicating if the simulation history
-##'   should be saved while the simulation runs; this has a small
-##'   overhead in runtime and in memory.  History (particle
-##'   trajectories) will be saved at each time in the filter.  If the
-##'   filter was constructed using a non-`NULL` `index` parameter, the
-##'   the history is restricted to these states.
 ##'
 ##' @inheritParams dust_filter_run
 ##'
@@ -482,6 +473,7 @@ dust_unfilter_last_history <- function(unfilter) {
 ##'   slowly.
 ##'
 ##' @inheritParams dust_model_create
+##' @inheritParams dust_model_simulate
 ##'
 ##' @return A `dust_unfilter` object, which can be used with
 ##'   [dust_unfilter_run]
@@ -489,7 +481,7 @@ dust_unfilter_last_history <- function(unfilter) {
 ##' @export
 dust_filter_create <- function(generator, pars, time_start, time, data,
                                n_particles, n_groups = 0, dt = 1,
-                               seed = NULL) {
+                               index = NULL, seed = NULL) {
   check_is_dust_model_generator(generator)
   if (!generator$properties$has_compare) {
     ## This moves into something general soon?
@@ -499,7 +491,7 @@ dust_filter_create <- function(generator, pars, time_start, time, data,
       arg = "generator")
   }
   res <- generator$methods$filter$alloc(pars, time_start, time, dt, data,
-                                        n_particles, n_groups, seed)
+                                        n_particles, n_groups, index, seed)
   res$name <- generator$name
   res$n_particles <- as.integer(n_particles)
   res$n_groups <- as.integer(max(n_groups), 1)
@@ -524,13 +516,22 @@ dust_filter_create <- function(generator, pars, time_start, time, data,
 ##'   particle) or 3d array (state x particle x group).  If not
 ##'   provided, the model initial conditions are used.
 ##'
+##' @param save_history Logical, indicating if the simulation history
+##'   should be saved while the simulation runs; this has a small
+##'   overhead in runtime and in memory.  History (particle
+##'   trajectories) will be saved at each time in the filter.  If the
+##'   filter was constructed using a non-`NULL` `index` parameter, the
+##'   the history is restricted to these states.
+##'
 ##' @return A vector of likelihood values, with as many elements as
 ##'   there are groups.
 ##'
 ##' @export
-dust_filter_run <- function(filter, pars = NULL, initial = NULL) {
+dust_filter_run <- function(filter, pars = NULL, initial = NULL,
+                            save_history = FALSE) {
   check_is_dust_filter(filter)
-  filter$methods$run(filter$ptr, pars, initial, filter$grouped)
+  filter$methods$run(filter$ptr, pars, initial, save_history,
+                     filter$grouped)
 }
 
 

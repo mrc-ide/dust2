@@ -118,17 +118,24 @@ extern "C" SEXP _dust2_dust2_cpu_sir_unfilter_last_history(SEXP ptr, SEXP groupe
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_cpu_sir_filter_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed);
-extern "C" SEXP _dust2_dust2_cpu_sir_filter_alloc(SEXP r_pars, SEXP r_time_start, SEXP r_time, SEXP r_dt, SEXP r_data, SEXP r_n_particles, SEXP r_n_groups, SEXP r_seed) {
+SEXP dust2_cpu_sir_filter_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_index, cpp11::sexp r_seed);
+extern "C" SEXP _dust2_dust2_cpu_sir_filter_alloc(SEXP r_pars, SEXP r_time_start, SEXP r_time, SEXP r_dt, SEXP r_data, SEXP r_n_particles, SEXP r_n_groups, SEXP r_index, SEXP r_seed) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_cpu_sir_filter_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time_start), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_dt), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_data), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_seed)));
+    return cpp11::as_sexp(dust2_cpu_sir_filter_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time_start), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_dt), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_data), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_seed)));
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_cpu_sir_filter_run(cpp11::sexp ptr, cpp11::sexp r_pars, cpp11::sexp r_initial, bool grouped);
-extern "C" SEXP _dust2_dust2_cpu_sir_filter_run(SEXP ptr, SEXP r_pars, SEXP r_initial, SEXP grouped) {
+SEXP dust2_cpu_sir_filter_run(cpp11::sexp ptr, cpp11::sexp r_pars, cpp11::sexp r_initial, bool save_history, bool grouped);
+extern "C" SEXP _dust2_dust2_cpu_sir_filter_run(SEXP ptr, SEXP r_pars, SEXP r_initial, SEXP save_history, SEXP grouped) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_cpu_sir_filter_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+    return cpp11::as_sexp(dust2_cpu_sir_filter_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(save_history), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+  END_CPP11
+}
+// sir.cpp
+SEXP dust2_cpu_sir_filter_last_history(cpp11::sexp ptr, bool grouped);
+extern "C" SEXP _dust2_dust2_cpu_sir_filter_last_history(SEXP ptr, SEXP grouped) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_cpu_sir_filter_last_history(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
   END_CPP11
 }
 // sir.cpp
@@ -248,9 +255,10 @@ extern "C" {
 static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_cpu_sir_alloc",                 (DL_FUNC) &_dust2_dust2_cpu_sir_alloc,                 7},
     {"_dust2_dust2_cpu_sir_compare_data",          (DL_FUNC) &_dust2_dust2_cpu_sir_compare_data,          3},
-    {"_dust2_dust2_cpu_sir_filter_alloc",          (DL_FUNC) &_dust2_dust2_cpu_sir_filter_alloc,          8},
+    {"_dust2_dust2_cpu_sir_filter_alloc",          (DL_FUNC) &_dust2_dust2_cpu_sir_filter_alloc,          9},
+    {"_dust2_dust2_cpu_sir_filter_last_history",   (DL_FUNC) &_dust2_dust2_cpu_sir_filter_last_history,   2},
     {"_dust2_dust2_cpu_sir_filter_rng_state",      (DL_FUNC) &_dust2_dust2_cpu_sir_filter_rng_state,      1},
-    {"_dust2_dust2_cpu_sir_filter_run",            (DL_FUNC) &_dust2_dust2_cpu_sir_filter_run,            4},
+    {"_dust2_dust2_cpu_sir_filter_run",            (DL_FUNC) &_dust2_dust2_cpu_sir_filter_run,            5},
     {"_dust2_dust2_cpu_sir_reorder",               (DL_FUNC) &_dust2_dust2_cpu_sir_reorder,               2},
     {"_dust2_dust2_cpu_sir_rng_state",             (DL_FUNC) &_dust2_dust2_cpu_sir_rng_state,             1},
     {"_dust2_dust2_cpu_sir_run_steps",             (DL_FUNC) &_dust2_dust2_cpu_sir_run_steps,             2},
