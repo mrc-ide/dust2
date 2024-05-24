@@ -179,17 +179,18 @@ SEXP dust2_cpu_compare_data(cpp11::sexp ptr,
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<dust_cpu<T>>>(ptr).get();
   const auto n_groups = obj->n_groups();
   std::vector<data_type> data;
+  auto r_data_list = cpp11::as_cpp<cpp11::list>(r_data);
   if (grouped) {
-    auto r_data_list = cpp11::as_cpp<cpp11::list>(r_data);
     check_length(r_data_list, n_groups, "data");
     for (size_t i = 0; i < n_groups; ++i) {
-      data.push_back(T::build_data(r_data_list[i]));
+      auto r_data_list_i = cpp11::as_cpp<cpp11::list>(r_data_list[i]);
+      data.push_back(T::build_data(r_data_list_i));
     }
   } else {
     if (n_groups > 1) {
       cpp11::stop("Can't compare with grouped = FALSE with more than one group");
     }
-    data.push_back(T::build_data(r_data));
+    data.push_back(T::build_data(r_data_list));
   }
 
   cpp11::writable::doubles ret(obj->n_particles() * obj->n_groups());

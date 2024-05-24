@@ -234,12 +234,14 @@ std::vector<typename T::data_type> check_data(cpp11::list r_data,
       auto r_data_i = cpp11::as_cpp<cpp11::list>(r_data[i]);
       check_length(r_data_i, n_groups, "data[i]"); // can do better with sstream
       for (size_t j = 0; j < n_groups; ++j) {
-        data.push_back(T::build_data(r_data_i[j]));
+        auto r_data_ij = cpp11::as_cpp<cpp11::list>(r_data_i[j]);
+        data.push_back(T::build_data(r_data_ij));
       }
     }
   } else {
     for (size_t i = 0; i < n_time; ++i) {
-      data.push_back(T::build_data(r_data[i]));
+      auto r_data_i = cpp11::as_cpp<cpp11::list>(r_data[i]);
+      data.push_back(T::build_data(r_data_i));
     }
   }
 
@@ -285,6 +287,62 @@ SEXP rng_state_as_raw(const std::vector<T>& state) {
   cpp11::writable::raws ret(len);
   std::memcpy(RAW(ret), state.data(), len);
   return ret;
+}
+
+inline double read_real(cpp11::list args, const char * name) {
+  cpp11::sexp value = args[name];
+  if (value == R_NilValue) {
+    cpp11::stop("A value is expected for '%s'", name);
+  }
+  return to_double(value, name);
+}
+
+inline double read_real(cpp11::list args, const char * name,
+                        double default_value) {
+  cpp11::sexp value = args[name];
+  return value == R_NilValue ? default_value : to_double(value, name);
+}
+
+inline int read_int(cpp11::list args, const char * name) {
+  cpp11::sexp value = args[name];
+  if (value == R_NilValue) {
+    cpp11::stop("A value is expected for '%s'", name);
+  }
+  return to_int(value, name);
+}
+
+inline int read_int(cpp11::list args, const char * name,
+                    int default_value) {
+  cpp11::sexp value = args[name];
+  return value == R_NilValue ? default_value : to_int(value, name);
+}
+
+inline size_t read_size(cpp11::list args, const char * name) {
+  cpp11::sexp value = args[name];
+  if (value == R_NilValue) {
+    cpp11::stop("A value is expected for '%s'", name);
+  }
+  return to_size(value, name);
+}
+
+inline size_t read_size(cpp11::list args, const char * name,
+                        size_t default_value) {
+  cpp11::sexp value = args[name];
+  return value == R_NilValue ? default_value : to_size(value, name);
+}
+
+inline bool read_bool(cpp11::list args, const char * name) {
+  cpp11::sexp value = args[name];
+  if (value == R_NilValue) {
+    cpp11::stop("A value is expected for '%s'", name);
+  }
+  return to_bool(value, name);
+}
+
+inline bool read_bool(cpp11::list args, const char * name,
+                      bool default_value) {
+  cpp11::sexp value = args[name];
+  return value == R_NilValue ? default_value : to_bool(value, name);
 }
 
 }

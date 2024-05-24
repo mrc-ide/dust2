@@ -1,5 +1,9 @@
 #include <dust2/common.hpp>
 
+// [[dust2::class(walk)]]
+// [[dust2::parameter(sd)]]
+// [[dust2::parameter(len)]]
+// [[dust2::parameter(random_initial)]]
 class walk {
 public:
   // No constructor - turning this off is optional
@@ -41,10 +45,7 @@ public:
   // This is the bit that we'll use to do fast parameter updating, and
   // we'll guarantee somewhere that the size does not change.
   static void update_shared(cpp11::list pars, shared_state& shared) {
-    const cpp11::sexp r_sd = pars["sd"];
-    if (r_sd != R_NilValue) {
-      shared.sd = cpp11::as_cpp<walk::real_type>(pars["sd"]);
-    }
+    shared.sd = dust2::r::read_real(pars, "sd", shared.sd);
   }
 
   // This is a reasonable default implementation in the no-internal
@@ -87,14 +88,10 @@ public:
 
   // Then, rather than a constructor we have some converters:
   static shared_state build_shared(cpp11::list pars) {
-    size_t len = 1;
-    const cpp11::sexp r_len = pars["len"];
-    if (r_len != R_NilValue) {
-      len = cpp11::as_cpp<int>(r_len);
-    }
-    const walk::real_type sd = cpp11::as_cpp<walk::real_type>(pars["sd"]);
-    const bool random_initial = pars["random_initial"] == R_NilValue ? false :
-      cpp11::as_cpp<bool>(pars["random_initial"]);
+    const auto len = dust2::r::read_size(pars, "len", 1);
+    const auto sd = dust2::r::read_real(pars, "sd", 1);
+    const auto random_initial =
+      dust2::r::read_bool(pars, "random_initial", false);
     return shared_state{len, sd, random_initial};
   }
 
