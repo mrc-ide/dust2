@@ -270,7 +270,7 @@ dust_model_run_to_time <- function(model, time) {
 ##' @inheritParams dust_model_state
 ##'
 ##' @param times A vector of times.  They must be increasing, and the
-##'   first time must be no greater than the current model time
+##'   first time must be no less than the current model time
 ##'   (as reported by [dust_model_time])
 ##'
 ##' @param index An optional index of states to extract.  If given,

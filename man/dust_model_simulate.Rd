@@ -10,7 +10,7 @@ dust_model_simulate(model, times, index = NULL)
 \item{model}{A \code{dust_model} object}
 
 \item{times}{A vector of times.  They must be increasing, and the
-first time must be no greater than the current model time
+first time must be no less than the current model time
 (as reported by \link{dust_model_time})}
 
 \item{index}{An optional index of states to extract.  If given,
