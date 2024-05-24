@@ -1,0 +1,5 @@
+Package: {{package}}
+LinkingTo: {{linking_to}}
+Imports: dust2
+Version: 0.0.1
+SystemRequirements: {{system_requirements}}

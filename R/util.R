@@ -27,3 +27,13 @@ data_frame <- function(...) {
 dust2_file <- function(path) {
   system.file(path, mustWork = TRUE, package = "dust2")
 }
+
+
+glue_whisker <- function(template, data) {
+  glue::glue_data(data, template, .open = "{{", .close = "}}", .trim = FALSE)
+}
+
+
+read_lines <- function(path) {
+  paste(readLines(path), collapse = "\n")
+}
