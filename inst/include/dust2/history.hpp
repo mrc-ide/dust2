@@ -36,10 +36,9 @@ public:
     position_ = 0;
   }
 
-  template <typename Iter>
-  void add(real_type time, Iter iter) {
-    // TODO: bounds check here (and in the method below)?
-    std::copy_n(iter, len_state_, state_.begin() + len_state_ * position_);
+  template <typename IterReal>
+  void add(real_type time, IterReal iter_state) {
+    copy_state_(iter_state);
     times_[position_] = time;
     reorder_[position_] = false;
     position_++;
@@ -47,13 +46,27 @@ public:
 
   template <typename IterReal, typename IterSize>
   void add(real_type time, IterReal iter_state, IterSize iter_order) {
-    // This can't easily call add(Iter, real_type) because we need
-    // read position_ and write reorder_; the duplication is minimal
-    // though.
-    std::copy_n(iter_state, len_state_,
-                state_.begin() + position_ * len_state_);
-    std::copy_n(iter_order, len_order_,
-                order_.begin() + position_ * len_order_);
+    copy_state_(iter_state);
+    copy_order_(iter_order);
+    times_[position_] = time;
+    reorder_[position_] = true;
+    position_++;
+  }
+
+  template <typename IterReal, typename IterSize>
+  void add_with_index(real_type time, IterReal iter_state, IterSize iter_index,
+                      size_t n_state_total) {
+    copy_state_with_index_(iter_state, iter_index, n_state_total);
+    times_[position_] = time;
+    reorder_[position_] = false;
+    position_++;
+  }
+
+  template <typename IterReal, typename IterSize>
+  void add_with_index(real_type time, IterReal iter_state, IterSize iter_order,
+                      IterSize iter_index, size_t n_state_total) {
+    copy_state_with_index(iter_state, iter_index, n_state_total);
+    copy_order_(iter_order);
     times_[position_] = time;
     reorder_[position_] = true;
     position_++;
@@ -136,6 +149,30 @@ private:
       if (reorder) {
         const auto index_i = index + i;
         *index_i = *(iter_order + *index_i);
+      }
+    }
+  }
+
+  template <typename IterReal>
+  void copy_state_(IterReal iter) {
+    std::copy_n(iter, len_state_, state_.begin() + len_state_ * position_);
+  }
+
+  template <typename IterSize>
+  void copy_order_(IterSize iter_order) {
+    std::copy_n(iter_order, len_order_,
+                order_.begin() + position_ * len_order_);
+  }
+
+  template <typename IterReal, typename IterSize>
+  void copy_state_with_index_(IterReal iter_state, IterSize iter_index,
+                              size_t n_state_total) {
+    auto iter_dest = state_.begin() + position_ * len_state_;
+    for (size_t i = 0; i < n_groups_ * n_particles_; ++i) {
+      const auto iter_state_i = iter_state + i * n_state_total;
+      auto iter_index_i = iter_index;
+      for (size_t k = 0; k < n_state_; ++k, ++iter_dest, ++iter_index_i) {
+        *iter_dest = *(iter_state_i + *iter_index_i);
       }
     }
   }

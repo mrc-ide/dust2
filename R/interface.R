@@ -16,7 +16,7 @@ dust_model <- function(name, env = parent.env(parent.frame())) {
                     "time", "set_time",
                     "rng_state",
                     "update_pars",
-                    "run_steps", "run_to_time",
+                    "run_steps", "run_to_time", "simulate",
                     "reorder")
   methods_compare <- "compare_data"
   methods <- get_methods(c(methods_core, methods_compare), name)
@@ -258,6 +258,39 @@ dust_model_run_to_time <- function(model, time) {
   check_is_dust_model(model)
   model$methods$run_to_time(model$ptr, time)
   invisible()
+}
+
+
+##' Simulate a model over a series of times, returning an array of
+##' output.  This output can be quite large, so you may filter states
+##' according to some index.
+##'
+##' @title Simulate model
+##'
+##' @inheritParams dust_model_state
+##'
+##' @param times A vector of times.  They must be increasing, and the
+##'   first time must be no less than the current model time
+##'   (as reported by [dust_model_time])
+##'
+##' @param index An optional index of states to extract.  If given,
+##'   then we subset the model state on return.  You can use this to
+##'   return fewer model states than the model ran with, to reorder
+##'   states, or to name them on exit (names present on the index will
+##'   be copied into the rownames of the returned array).
+##'
+##' @return An array with 3 dimensions (state x particle x time) or 4
+##'   dimensions (state x particle x group x time) for a grouped
+##'   model.
+##'
+##' @export
+dust_model_simulate <- function(model, times, index = NULL) {
+  check_is_dust_model(model)
+  ret <- model$methods$simulate(model$ptr, times, index, model$grouped)
+  if (!is.null(index) && !is.null(names(index))) {
+    rownames(ret) <- names(index)
+  }
+  ret
 }
 
 

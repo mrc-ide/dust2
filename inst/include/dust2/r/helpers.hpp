@@ -87,6 +87,19 @@ bool is_integer_like(T x, T eps) {
   return std::abs(x - std::round(x)) <= eps;
 }
 
+inline cpp11::integers as_integers(cpp11::doubles x, const char * name) {
+  const auto len = x.size();
+  cpp11::writable::integers ret(x.size());
+  for (auto i = 0; i < len; ++i) {
+    if (!cpp11::is_convertible_without_loss_to_integer(x[i])) {
+      cpp11::stop("All values of '%s' must be integer-like, but '%s[%d]' was not",
+                  name, name, i + 1);
+    }
+    ret[i] = static_cast<int>(std::round(x[i]));
+  }
+  return ret;
+}
+
 inline double check_time(cpp11::sexp r_time, const char * name) {
   const auto time = to_double(r_time, name);
   const auto eps = 1e-8;
@@ -116,6 +129,7 @@ inline double check_dt(cpp11::sexp r_dt) {
 template <typename real_type>
 std::vector<real_type> check_time_sequence(real_type time_start,
                                            cpp11::sexp r_time,
+                                           bool require_later,
                                            const char * name) {
   auto time = to_vector_real<real_type>(r_time, name);
   auto prev = time_start;
@@ -125,13 +139,42 @@ std::vector<real_type> check_time_sequence(real_type time_start,
     if (!is_integer_like(t, eps)) {
       cpp11::stop("Expected 'time[%d]' to be integer-like", i + 1);
     }
-    if (t <= prev) {
+    if (t < prev || (require_later && t == prev)) {
       cpp11::stop("Expected 'time[%d]' (%d) to be larger than the previous value (%d)",
                   i + 1, static_cast<int>(prev), static_cast<int>(t));
     }
     prev = t;
   }
   return time;
+}
+
+inline std::vector<size_t> check_index(cpp11::sexp r_index, size_t max,
+                                       const char * name) {
+  std::vector<size_t> ret;
+  if (r_index == R_NilValue) {
+    return ret;
+  }
+  if (TYPEOF(r_index) == REALSXP) {
+    cpp11::doubles r_index_real = cpp11::as_cpp<cpp11::doubles>(r_index);
+    return check_index(as_integers(r_index_real, name), max, name);
+  }
+  if (TYPEOF(r_index) != INTSXP) {
+    cpp11::stop("Expected an integer vector for '%s'", name);
+  }
+  const int len = LENGTH(r_index);
+  if (len == 0) {
+    cpp11::stop("'%s' must have nonzero length", name);
+  }
+  ret.reserve(len);
+  const auto data = INTEGER(r_index);
+  for (int i = 0; i < len; ++i) {
+    if (data[i] < 1 || data[i] > static_cast<int>(max)) {
+      cpp11::stop("All values of '%s' must be in [1, %d], but '%s[%d]' was %d",
+                  name, max, name, i + 1, data[i]);
+    }
+    ret.push_back(data[i] - 1);
+  }
+  return ret;
 }
 
 // The initializer_list is a type-safe variadic-like approach.

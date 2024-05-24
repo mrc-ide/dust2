@@ -18,6 +18,7 @@ reference:
     contents:
       - dust_model_run_steps
       - dust_model_run_to_time
+      - dust_model_simulate
   - subtitle: Other
     contents:
       - dust_model_reorder

@@ -15,14 +15,13 @@ cpp11::sexp dust2_cpu_unfilter_alloc(cpp11::list r_pars,
                                      cpp11::list r_data,
                                      cpp11::sexp r_n_particles,
                                      cpp11::sexp r_n_groups) {
-  using real_type = typename T::real_type;
   using rng_state_type = typename T::rng_state_type;
 
   auto n_particles = to_size(r_n_particles, "n_particles");
   auto n_groups = to_size(r_n_groups, "n_groups");
   const auto grouped = n_groups > 0;
   const auto time_start = check_time(r_time_start, "time_start");
-  const auto time = check_time_sequence<real_type>(time_start, r_time, "time");
+  const auto time = check_time_sequence(time_start, r_time, true, "time");
   const auto dt = check_dt(r_dt);
   const auto shared = build_shared<T>(r_pars, n_groups);
   const auto internal = build_internal<T>(shared);
@@ -92,7 +91,6 @@ cpp11::sexp dust2_cpu_filter_alloc(cpp11::list r_pars,
                                    cpp11::sexp r_n_particles,
                                    cpp11::sexp r_n_groups,
                                    cpp11::sexp r_seed) {
-  using real_type = typename T::real_type;
   using rng_state_type = typename T::rng_state_type;
   using rng_seed_type = std::vector<typename rng_state_type::int_type>;
 
@@ -100,7 +98,7 @@ cpp11::sexp dust2_cpu_filter_alloc(cpp11::list r_pars,
   const auto n_groups = to_size(r_n_groups, "n_groups");
   const auto grouped = n_groups > 0;
   const auto time_start = check_time(r_time_start, "time_start");
-  const auto time = check_time_sequence<real_type>(time_start, r_time, "time");
+  const auto time = check_time_sequence(time_start, r_time, true, "time");
   const auto dt = check_dt(r_dt);
   const auto shared = build_shared<T>(r_pars, n_groups);
   const auto internal = build_internal<T>(shared);

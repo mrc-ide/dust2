@@ -146,3 +146,53 @@ test_that("can update parameters", {
     dust_model_state(obj2),
     dust_model_state(obj1))
 })
+
+
+test_that("can run simulation", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  obj1 <- dust_model_create(sir(), pars, n_particles = 10, seed = 42)
+  obj2 <- dust_model_create(sir(), pars, n_particles = 10, seed = 42)
+  dust_model_set_state_initial(obj1)
+  dust_model_set_state_initial(obj2)
+
+  res <- dust_model_simulate(obj1, 0:20)
+  expect_equal(dim(res), c(5, 10, 21))
+
+  expect_equal(res[, , 21], dust_model_state(obj1))
+  expect_equal(dust_model_time(obj1), 20)
+
+  expect_equal(res[, , 1], dust_model_state(obj2))
+  dust_model_run_to_time(obj2, 10)
+  expect_equal(res[, , 11], dust_model_state(obj2))
+})
+
+
+test_that("can run simulation with index", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  obj1 <- dust_model_create(sir(), pars, n_particles = 10, seed = 42)
+  obj2 <- dust_model_create(sir(), pars, n_particles = 10, seed = 42)
+  dust_model_set_state_initial(obj1)
+  dust_model_set_state_initial(obj2)
+
+  index <- c(2L, 4L)
+  res1 <- dust_model_simulate(obj1, 0:20, index)
+  res2 <- dust_model_simulate(obj2, 0:20)
+
+  expect_equal(res1, res2[index, , ])
+})
+
+
+test_that("copy names with index", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  obj1 <- dust_model_create(sir(), pars, n_particles = 10, seed = 42)
+  obj2 <- dust_model_create(sir(), pars, n_particles = 10, seed = 42)
+  dust_model_set_state_initial(obj1)
+  dust_model_set_state_initial(obj2)
+
+  index <- c(I = 2L, cases = 4L)
+  res1 <- dust_model_simulate(obj1, 0:20, index)
+  res2 <- dust_model_simulate(obj2, 0:20, unname(index))
+  expect_equal(dimnames(res1), list(c("I", "cases"), NULL, NULL))
+
+  expect_equal(unname(res1), res2)
+})
