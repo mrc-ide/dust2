@@ -199,7 +199,52 @@ test_that("can run particle filter", {
 
   cmp_filter <- sir_filter_manual(
     pars, time_start, time, dt, data, n_particles, seed)
-  expect_equal(res, replicate(20, cmp_filter(NULL)))
+  expect_equal(res, replicate(20, cmp_filter(NULL)$log_likelihood))
+})
+
+
+test_that("can run particle filter and save history", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+
+  time_start <- 0
+  time <- c(4, 8, 12, 16)
+  data <- lapply(1:4, function(i) list(incidence = i))
+  dt <- 1
+  n_particles <- 100
+  seed <- 42
+
+  obj <- dust_filter_create(sir(), pars, time_start, time, data,
+                            n_particles = n_particles, seed = seed)
+  res1 <- dust_filter_run(obj)
+  expect_error(dust_filter_last_history(obj), "History is not current")
+  res2 <- dust_filter_run(obj, save_history = TRUE)
+  h2 <- dust_filter_last_history(obj)
+  expect_equal(dim(h2), c(5, 100, 4))
+  res3 <- dust_filter_run(obj)
+  expect_error(dust_filter_last_history(obj), "History is not current")
+
+  cmp_filter <- sir_filter_manual(
+    pars, time_start, time, dt, data, n_particles, seed)
+  cmp1 <- cmp_filter(NULL)
+  cmp2 <- cmp_filter(NULL, save_history = TRUE)
+  cmp3 <- cmp_filter(NULL)
+
+  ## There's an issue here in that we're not getting the right history
+  ## out; this could be just that the sequencing we have in the fake
+  ## filter is wrong, the interleaving is wrong, or the real filter
+  ## sequencing is wrong.
+  ##
+  ## We get nonmonotonic S from the real filter, so the issue is
+  ## likely there.  Add support for pulling more from history I think,
+  ## but do this when more awake.
+  expect_equal(res1, cmp1$log_likelihood)
+  expect_equal(res2, cmp2$log_likelihood)
+  expect_equal(res3, cmp3$log_likelihood)
+  expect_equal(h2, cmp2$history)
+
+  res <- replicate(20, dust_filter_run(obj))
+
+  expect_equal(res, replicate(20, cmp_filter(NULL)$log_likelihood))
 })
 
 

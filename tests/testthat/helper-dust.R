@@ -10,8 +10,10 @@ sir_filter_manual <- function(pars, time_start, time, dt, data, n_particles,
   obj <- dust_model_create(sir(), pars, n_particles,
                            time = time_start, dt = dt, seed = seed)
   n_steps <- round((time - c(time_start, time[-length(time)])) / dt)
+  n_state <- nrow(dust_model_state(obj))
+  n_time <- length(time)
 
-  function(pars, initial = NULL) {
+  function(pars, initial = NULL, save_history = FALSE) {
     if (!is.null(pars)) {
       dust_model_update_pars(obj, pars)
     }
@@ -22,6 +24,7 @@ sir_filter_manual <- function(pars, time_start, time, dt, data, n_particles,
       dust_model_set_state(obj, initial)
     }
     ll <- 0
+    history <- array(NA_real_, c(n_state, n_particles, n_time))
     for (i in seq_along(time)) {
       dust_model_run_steps(obj, n_steps[[i]])
       tmp <- dust_model_compare_data(obj, data[[i]])
@@ -30,8 +33,12 @@ sir_filter_manual <- function(pars, time_start, time, dt, data, n_particles,
       u <- r$random_real(1)
       k <- test_resample_weight(w, u) + 1L
       state <- dust_model_state(obj)
+      if (save_history) {
+        history[, , i] <- state
+        history <- history[, k, , drop = FALSE]
+      }
       dust_model_set_state(obj, state[, k])
     }
-    ll
+    list(log_likelihood = ll, history = if (save_history) history)
   }
 }

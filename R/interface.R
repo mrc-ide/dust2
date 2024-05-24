@@ -30,7 +30,7 @@ dust_model <- function(name, env = parent.env(parent.frame())) {
     methods_unfilter <- c("alloc", "run", "last_history")
     methods$unfilter <-
       get_methods(methods_unfilter, sprintf("%s_unfilter", name))
-    methods_filter <- c("alloc", "run", "rng_state")
+    methods_filter <- c("alloc", "run", "last_history", "rng_state")
     methods$filter <-
       get_methods(methods_filter, sprintf("%s_filter", name))
   }
@@ -532,6 +532,23 @@ dust_filter_run <- function(filter, pars = NULL, initial = NULL,
   check_is_dust_filter(filter)
   filter$methods$run(filter$ptr, pars, initial, save_history,
                      filter$grouped)
+}
+
+
+##' Fetch the last history created by running an filter.  This
+##' errors if the last call to [dust_filter_run] did not use
+##' `save_history = TRUE`.
+##'
+##' @title Fetch last filter history
+##'
+##' @inheritParams dust_filter_run
+##'
+##' @return An array
+##'
+##' @export
+dust_filter_last_history <- function(filter) {
+  check_is_dust_filter(filter)
+  filter$methods$last_history(filter$ptr, filter$grouped)
 }
 
 

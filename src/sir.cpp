@@ -125,7 +125,7 @@ SEXP dust2_cpu_sir_filter_alloc(cpp11::list r_pars,
   return dust2::r::dust2_cpu_filter_alloc<sir>(r_pars, r_time_start, r_time,
                                                r_dt, r_data,
                                                r_n_particles, r_n_groups,
-                                               r_seed, r_seed);
+                                               r_index, r_seed);
 }
 
 [[cpp11::register]]

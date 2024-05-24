@@ -129,6 +129,7 @@ public:
     time_start_(time_start),
     time_(time),
     data_(data),
+    n_state_(model.n_state()),
     n_particles_(model.n_particles()),
     n_groups_(model.n_groups()),
     rng_(n_groups_, seed, false),
@@ -197,9 +198,10 @@ public:
           history_.add(time_[i], model.state().begin(), index.begin());
         }
       }
-
       // save snapshots (perhaps)
     }
+
+    history_is_current_ = save_history;
   }
 
   template <typename It>
