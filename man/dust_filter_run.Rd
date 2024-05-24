@@ -4,7 +4,7 @@
 \alias{dust_filter_run}
 \title{Run particle filter}
 \usage{
-dust_filter_run(filter, pars = NULL, initial = NULL)
+dust_filter_run(filter, pars = NULL, initial = NULL, save_history = FALSE)
 }
 \arguments{
 \item{filter}{A \code{dust_filter} object, created by
@@ -16,6 +16,13 @@ provided, parameters are not updated}
 \item{initial}{Optional initial conditions, as a matrix (state x
 particle) or 3d array (state x particle x group).  If not
 provided, the model initial conditions are used.}
+
+\item{save_history}{Logical, indicating if the simulation history
+should be saved while the simulation runs; this has a small
+overhead in runtime and in memory.  History (particle
+trajectories) will be saved at each time in the filter.  If the
+filter was constructed using a non-\code{NULL} \code{index} parameter, the
+the history is restricted to these states.}
 }
 \value{
 A vector of likelihood values, with as many elements as
