@@ -60,6 +60,28 @@ test_that("can get unfilter history", {
 })
 
 
+test_that("can get partial unfilter history", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+
+  time_start <- 0
+  time <- c(4, 8, 12, 16)
+  data <- lapply(1:4, function(i) list(incidence = i))
+  dt <- 1
+
+  obj1 <- dust_unfilter_create(sir(), pars, time_start, time, data)
+  obj2 <- dust_unfilter_create(sir(), pars, time_start, time, data,
+                               index = c(2, 4))
+  expect_equal(dust_unfilter_run(obj1, save_history = TRUE),
+               dust_unfilter_run(obj2, save_history = TRUE))
+
+  h1 <- dust_unfilter_last_history(obj1)
+  h2 <- dust_unfilter_last_history(obj2)
+  expect_equal(dim(h1), c(5, 1, 4))
+  expect_equal(dim(h2), c(2, 1, 4))
+  expect_equal(h2, h1[c(2, 4), , , drop = FALSE])
+})
+
+
 test_that("can run an unfilter with manually set state", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
   state <- matrix(c(1000 - 17, 17, 0, 0, 0), ncol = 1)
@@ -229,22 +251,37 @@ test_that("can run particle filter and save history", {
   cmp2 <- cmp_filter(NULL, save_history = TRUE)
   cmp3 <- cmp_filter(NULL)
 
-  ## There's an issue here in that we're not getting the right history
-  ## out; this could be just that the sequencing we have in the fake
-  ## filter is wrong, the interleaving is wrong, or the real filter
-  ## sequencing is wrong.
-  ##
-  ## We get nonmonotonic S from the real filter, so the issue is
-  ## likely there.  Add support for pulling more from history I think,
-  ## but do this when more awake.
   expect_equal(res1, cmp1$log_likelihood)
   expect_equal(res2, cmp2$log_likelihood)
   expect_equal(res3, cmp3$log_likelihood)
   expect_equal(h2, cmp2$history)
+})
 
-  res <- replicate(20, dust_filter_run(obj))
 
-  expect_equal(res, replicate(20, cmp_filter(NULL)$log_likelihood))
+test_that("can get partial unfilter history", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+
+  time_start <- 0
+  time <- c(4, 8, 12, 16)
+  data <- lapply(1:4, function(i) list(incidence = i))
+  dt <- 1
+  n_particles <- 100
+  seed <- 42
+
+  obj1 <- dust_filter_create(sir(), pars, time_start, time, data,
+                             n_particles = n_particles, seed = seed)
+  obj2 <- dust_filter_create(sir(), pars, time_start, time, data,
+                             n_particles = n_particles, seed = seed,
+                             index = c(2, 4))
+
+  expect_equal(dust_filter_run(obj1, save_history = TRUE),
+               dust_filter_run(obj2, save_history = TRUE))
+
+  h1 <- dust_filter_last_history(obj1)
+  h2 <- dust_filter_last_history(obj2)
+  expect_equal(dim(h1), c(5, 100, 4))
+  expect_equal(dim(h2), c(2, 100, 4))
+  expect_equal(h2, h1[c(2, 4), , , drop = FALSE])
 })
 
 

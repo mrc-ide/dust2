@@ -93,7 +93,10 @@ cpp11::sexp dust2_cpu_unfilter_last_history(cpp11::sexp ptr, bool grouped) {
     cpp11::stop("History is not current");
   }
 
-  const auto& dims = obj->last_history_dims();
+  constexpr bool reorder = false; // never needed
+
+  const auto& history = obj->last_history();
+  const auto& dims = history.dims();
   // Could use destructured bind here in recent C++?
   const auto n_state = dims[0];
   const auto n_particles = dims[1];
@@ -101,7 +104,7 @@ cpp11::sexp dust2_cpu_unfilter_last_history(cpp11::sexp ptr, bool grouped) {
   const auto n_times = dims[3];
   const auto len = n_state * n_particles * n_groups * n_times;
   cpp11::sexp ret = cpp11::writable::doubles(len);
-  obj->last_history(REAL(ret));
+  history.export_state(REAL(ret), reorder);
   if (grouped) {
     set_array_dims(ret, {n_state, n_particles, n_groups, n_times});
   } else {
@@ -225,8 +228,12 @@ cpp11::sexp dust2_cpu_filter_last_history(cpp11::sexp ptr, bool grouped) {
   if (!obj->last_history_is_current()) {
     cpp11::stop("History is not current");
   }
+  // We might relax this later, but will require some tools to work
+  // with the output, really.
+  constexpr bool reorder = true;
 
-  const auto& dims = obj->last_history_dims();
+  const auto& history = obj->last_history();
+  const auto& dims = history.dims();
   // Could use destructured bind here in recent C++?
   const auto n_state = dims[0];
   const auto n_particles = dims[1];
@@ -234,7 +241,7 @@ cpp11::sexp dust2_cpu_filter_last_history(cpp11::sexp ptr, bool grouped) {
   const auto n_times = dims[3];
   const auto len = n_state * n_particles * n_groups * n_times;
   cpp11::sexp ret = cpp11::writable::doubles(len);
-  obj->last_history(REAL(ret));
+  history.export_state(REAL(ret), reorder);
   if (grouped) {
     set_array_dims(ret, {n_state, n_particles, n_groups, n_times});
   } else {

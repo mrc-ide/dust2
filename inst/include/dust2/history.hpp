@@ -86,17 +86,21 @@ public:
     return position_ * len_state_;
   }
 
+  auto size_order() const {
+    return position_ * len_order_;
+  }
+
   auto& dims() const {
     return dims_;
   }
 
   template <typename Iter>
-  void export_time(Iter iter) {
+  void export_time(Iter iter) const {
     std::copy_n(times_.begin(), position_, iter);
   }
 
   template <typename Iter>
-  void export_state(Iter iter, bool reorder) {
+  void export_state(Iter iter, bool reorder) const {
     reorder = reorder && n_particles_ > 1 && position_ > 0 &&
       std::any_of(reorder_.begin(), reorder_.end(), [](auto v) { return v; });
     if (reorder) {
@@ -129,6 +133,11 @@ public:
     }
   }
 
+  template <typename Iter>
+  void export_order(Iter iter) const {
+    std::copy_n(order_.begin(), position_ * len_order_, iter);
+  }
+
 private:
   size_t n_state_;
   size_t n_particles_;
@@ -150,7 +159,7 @@ private:
                       typename std::vector<size_t>::const_iterator iter_order,
                       bool reorder,
                       Iter iter_dest,
-                      typename std::vector<size_t>::iterator index) {
+                      typename std::vector<size_t>::iterator index) const {
     for (size_t i = 0; i < n_particles_; ++i) {
       std::copy_n(iter_state + *(index + i) * n_state_,
                   n_state_,

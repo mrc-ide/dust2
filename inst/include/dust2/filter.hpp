@@ -80,14 +80,9 @@ public:
     std::copy(ll_.begin(), ll_.end(), iter);
   }
 
-  template <typename Iter>
-  void last_history(Iter iter) {
-    constexpr bool reorder = false;
-    history_.export_state(iter, reorder);
-  }
 
-  auto last_history_dims() const {
-    return history_.dims();
+  auto& last_history() const {
+    return history_;
   }
 
   bool last_history_is_current() const {
@@ -209,14 +204,8 @@ public:
     std::copy_n(ll_.begin(), n_groups_, it);
   }
 
-  template <typename Iter>
-  void last_history(Iter iter) {
-    constexpr bool reorder = false;
-    history_.export_state(iter, reorder);
-  }
-
-  auto last_history_dims() const {
-    return history_.dims();
+  auto& last_history() const {
+    return history_;
   }
 
   bool last_history_is_current() const {
