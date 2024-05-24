@@ -5,6 +5,7 @@
 #include <mcstate/random/random.hpp>
 #include <mcstate/random/density.hpp>
 #include <dust2/tools.hpp>
+#include <cpp11/list.hpp>
 
 namespace dust2 {
 
