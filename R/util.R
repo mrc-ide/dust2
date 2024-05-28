@@ -49,3 +49,19 @@ dir_create <- function(path) {
 is_directory <- function(path) {
   file.info(path, extra_cols = FALSE)$isdir
 }
+
+
+squote <- function(x) {
+  sprintf("'%s'", x)
+}
+
+stop_unless_installed <- function(pkgs, call = NULL) {
+  err <- !vlapply(pkgs, requireNamespace, quietly = TRUE)
+  if (any(err)) {
+    msg <- pkgs[err]
+    cli::cli_abort(
+      c("Package{?s} missing for this functionality: {squote(msg)}",
+        i = "You can install these packages using 'install.packages()'"),
+      call = call)
+  }
+}
