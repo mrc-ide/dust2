@@ -55,6 +55,7 @@ squote <- function(x) {
   sprintf("'%s'", x)
 }
 
+
 stop_unless_installed <- function(pkgs, call = NULL) {
   err <- !vlapply(pkgs, requireNamespace, quietly = TRUE)
   if (any(err)) {

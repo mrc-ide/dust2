@@ -35,3 +35,11 @@ sir_filter_manual <- function(pars, time_start, time, dt, data, n_particles,
     ll
   }
 }
+
+
+skip_for_compilation <- function() {
+  skip_on_cran()
+  tryCatch(
+    stop_unless_installed(dust_compile_needs()),
+    error = function(e) testthat::skip(conditionMessage(e)))
+}

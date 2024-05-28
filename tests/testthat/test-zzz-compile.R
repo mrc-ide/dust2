@@ -1,4 +1,5 @@
 test_that("can compile simple model", {
+  skip_for_compilation()
   code <- gsub("sir", "mysir", readLines(dust2_file("examples/sir.cpp")))
   filename <- tempfile(fileext = ".cpp")
   writeLines(code, filename)
