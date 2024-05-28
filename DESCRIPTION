@@ -20,6 +20,7 @@ BugReports: https://github.com/mrc-ide/dust2/issues
 Imports:
     cli,
     decor,
+    glue,
     mcstate2,
     pkgbuild,
     pkgload,
