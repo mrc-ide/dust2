@@ -21,6 +21,8 @@ Imports:
     cli,
     decor,
     mcstate2,
+    pkgbuild,
+    pkgload,
     rlang
 LinkingTo:
     cpp11,

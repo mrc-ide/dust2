@@ -1,48 +1,134 @@
+##' Compile a dust2 model from a C++ input file.  This function will
+##' compile the dust support around your model and return an object
+##' that you can call with no arguments to make a
+##' `dust_model_generator` object, suitable for using with dust
+##' functions (starting from [dust_model_create]).
+##'
+##' @title Compile a dust2 model
+##'
+##' @param filename The path to a single C++ file
+##'
+##' @param quiet Logical, indicating if compilation messages from
+##'   `pkgbuild` should be displayed.  Error messages will be
+##'   displayed on compilation failure regardless of the value used.
+##'
+##' @param workdir Optional working directory to use.  If `NULL`, we
+##'   work in the session-specific temporary directory.  By using a
+##'   different directory of your choosing you can see the generated
+##'   code.
+##'
+##' @param linking_to Optionally, a character vector of additional
+##'   packages to add to the `DESCRIPTION`'s `LinkingTo` field. Use
+##'   this when your model pulls in C++ code that is packaged within
+##'   another package's header-only library.
+##'
+##' @param cpp_std The C++ standard to use, if you need to set one
+##'   explicitly. See the section "Using C++ code" in "Writing R
+##'   extensions" for the details of this, and how it interacts with
+##'   the R version currently being used. For R 4.0.0 and above, C++11
+##'   will be used; as dust depends on at least this version of R you
+##'   will never need to specify a version this low. Sensible options
+##'   are `C++14`, `C++17`, etc, depending on the features you need
+##'   and what your compiler supports.
+##'
+##' @param compiler_options A character vector of additional options
+##'   to pass through to the C++ compiler. These will be passed
+##'   through without any shell quoting or validation, so check the
+##'   generated commands and outputs carefully in case of error. Note
+##'   that R will apply these *before* anything in your personal
+##'   `Makevars`.
+##'
+##' @param optimisation_level A shorthand way of specifying common
+##'   compiler options that control optimisation level. By default
+##'   (`NULL`) no options are generated from this, and the
+##'   optimisation level will depend on your user `Makevars` file.
+##'   Valid options are `none` which disables optimisation (`-O0`),
+##'   which will be faster to compile but much slower, `standard`
+##'   which enables standard level of optimisation (`-O2`), useful if
+##'   your Makevars/pkgload configuration is disabling optimisation,
+##'   or `max` (`-O3` and `--fast-math`) which enables some
+##'   slower-to-compile and [potentially
+##'   unsafe](https://simonbyrne.github.io/notes/fastmath/)
+##'   optimisations.  These options are applied *after*
+##'   `compiler_options` and may override options provided there.
+##'   Note that as for `compiler_options`, R will apply these *before*
+##'   anything in your personal `Makevars`
+##'
+##' @param debug Passed to [pkgbuild::compile_dll], this will build a
+##'   debug library.
+##'
+##' @param skip_cache Logical, indicating if the cache of previously
+##'   compiled models should be skipped. If `TRUE` then your model will
+##'   not be looked for in the cache, nor will it be added to the
+##'   cache after compilation.
+##'
+##' @return A function, which can be called with no arguments to yield
+##'   a `dust_model_generator` function.
+##'
+##' @export
 dust_compile <- function(filename, quiet = FALSE, workdir = NULL,
                          linking_to = NULL, cpp_std = NULL,
-                         compiler_options = NULL, optimisation_level = NULL) {
-  # assert_file_exists(filename)
-  mangle <- TRUE
-  res <- generate_dust(filename, linking_to, cpp_std, optimisation_level,
-                       compiler_options, mangle)
+                         compiler_options = NULL, optimisation_level = NULL,
+                         debug = FALSE, skip_cache = FALSE) {
+  config <- parse_metadata(filename, call = environment())
+  mangle <- substr(rlang::hash_file(filename), 1, 8)
+  res <- dust_generate(config, filename, linking_to, cpp_std,
+                       optimisation_level, compiler_options, mangle)
 
-  config <- parse_metadata(filename)
+  ## Cache on code and all options.
+  hash <- rlang::hash(c(res, debug = debug))
+  if (!skip_cache && !is.null(cache$models[[hash]])) {
+    if (!quiet) {
+      cli::cli_alert_info("Using cached model")
+    }
+    return(cache$models[[hash]]$gen)
+  }
 
+  workdir <- dust_workdir(workdir, environment())
+  dir_create(c(workdir, file.path(workdir, c("R", "src"))))
+  writeLines(res$description, file.path(workdir, "DESCRIPTION"))
+  writeLines(res$namespace, file.path(workdir, "NAMESPACE"))
+  writeLines(res$r, file.path(workdir, "R", "dust.R"))
+  writeLines(res$cpp, file.path(workdir, "src", "dust.cpp"))
+  pkgbuild::compile_dll(workdir, compile_attributes = TRUE,
+                        quiet = quiet, debug = debug)
+  env <- load_temporary_package(workdir, res$package, quiet)
+  dll <- file.path(workdir, "src", paste0(res$package, .Platform$dynlib.ext))
+  gen <- env[[config$name]]
 
+  if (!skip_cache) {
+    cache$models[[hash]] <- list(
+      name = config$name,
+      time = Sys.time(),
+      package = res$package,
+      env = env,
+      dll = dll,
+      gen = gen)
+  }
 
-  ## dust_prepare
-  ## compile_and_load
+  gen
 }
 
 
-dust_generate <- function(filename, linking_to, cpp_std, optimisation_level,
-                          compiler_options, mangle) {
-  config <- parse_metadata(filename)
-  if (grepl("^[A-Za-z][A-Zxa-z0-9]*$", config$name)) {
-    base <- config$name
-  } else {
-    base <- "dust"
-  }
-  if (mangle) {
-    base <- paste0(base, hash_file(filename))
-  }
+dust_generate <- function(config, filename, linking_to, cpp_std,
+                          optimisation_level, compiler_options, mangle) {
   model <- read_lines(filename)
-
-  data <- dust_template_data(model, config, linking_to, cpp_std,
-                             optimisation_level, compiler_options)
-  data$path_dust_include <- dust_file("include")
+  data <- dust_template_data(config$name, config$class, linking_to, cpp_std,
+                             optimisation_level, compiler_options, mangle)
   data$system_requirements <- data$cpp_std %||% "R (>= 4.0.0)"
 
-  ret <- list(
+  list(
+    package = data$package,
+    config = config,
     description = substitute_dust_template(data, "DESCRIPTION"),
     namespace = substitute_dust_template(data, "NAMESPACE"),
     makevars = substitute_dust_template(data, "Makevars"),
     r = substitute_dust_template(data, "dust.R"),
-    cpp = generate_cpp(data))
+    cpp = dust_generate_cpp(model, config, data))
 }
 
 
-generate_cpp <- function(model, data) {
+dust_generate_cpp <- function(model, config, data) {
   includes <- c("cpp11.hpp", "dust2/r/cpu.hpp")
   code <- substitute_dust_template(data, "dust_core.cpp")
 
@@ -61,32 +147,34 @@ generate_cpp <- function(model, data) {
     "",
     model,
     "",
-    includes,
-    ""
+    sprintf("#include <%s>", includes),
+    "",
     code)
 }
 
 
-dust_template_data <- function(model, config, linking_to, cpp_std,
-                               optimisation_level, compiler_options) {
+dust_template_data <- function(name, class, linking_to, cpp_std,
+                               optimisation_level, compiler_options,
+                               mangle) {
 
   if (!is.null(linking_to)) {
     assert_is(linking_to, "character")
   }
-  linking_to <- paste(union("cpp11", linking_to), collapse = ", ")
+  linking_to <- paste(union(c("cpp11", "dust2", "mcstate2"), linking_to),
+                      collapse = ", ")
   cpp_std <- validate_cpp_std(cpp_std)
-  compiler_options <- build_compiler_options(compiler_options,
-                                             optimisation_level)
-  list(name = config$name,
-       class = config$class,
-       package = config$name,
+  compiler_options <- validate_compiler_options(compiler_options,
+                                                optimisation_level)
+  list(name = name,
+       class = class,
+       package = paste0(name, mangle %||% ""),
        linking_to = linking_to,
        cpp_std = cpp_std,
        compiler_options = compiler_options)
 }
 
 
-build_compiler_options <- function(compiler_options, optimisation_level) {
+validate_compiler_options <- function(compiler_options, optimisation_level) {
   if (!is.null(optimisation_level)) {
     opts <- switch(
       optimisation_level,
@@ -101,7 +189,59 @@ build_compiler_options <- function(compiler_options, optimisation_level) {
 }
 
 
+validate_cpp_std <- function(cpp_std, call = NULL) {
+  if (is.null(cpp_std)) {
+    return(NULL)
+  }
+  assert_scalar_character(cpp_std, call = call)
+  is_valid <- grepl("^C\\+\\+[0-9][0-9a-z]$", cpp_std, ignore.case = TRUE)
+  if (!is_valid) {
+    cli::cli_abort(
+      "'cpp_std' does not look like a valid C++ standard name (e.g., C++14)",
+      arg = "cpp_std", call = call)
+  }
+  cpp_std
+}
+
+
 substitute_dust_template <- function(data, src) {
-  template <- read_lines(dust_file(file.path("template", src)))
-  glue_whisker(template, data)
+  glue_whisker(read_lines(dust2_file(file.path("template", src))), data)
+}
+
+
+load_temporary_package <- function(path, base, quiet) {
+  pkg <- pkgload::load_all(path, compile = FALSE, recompile = FALSE,
+                           warn_conflicts = FALSE, export_all = FALSE,
+                           helpers = FALSE, attach_testthat = FALSE,
+                           quiet = quiet)
+  detach(paste0("package:", base), character.only = TRUE)
+  pkg$env
+}
+
+
+dust_workdir <- function(path, call = NULL) {
+  if (is.null(path)) {
+    path <- tempfile()
+  } else if (file.exists(path)) {
+    if (!is_directory(path)) {
+      cli::cli_abort("Path '{path}' already exists but is not a directory",
+                     call = call)
+    }
+    contents <- c(
+      dir(path, all.files = TRUE, no.. = TRUE),
+      file.path("src", dir(file.path(path, "src"),
+                           all.files = TRUE, no.. = TRUE)),
+      file.path("R", dir(file.path(path, "R"),
+                           all.files = TRUE, no.. = TRUE)))
+    contents <- contents[!grepl(".+\\.(o|so|dll)", contents)]
+    allowed <- c("DESCRIPTION", "NAMESPACE", "src", "R",
+                 "src/Makevars", "src/dust.cpp", "R/dust.R",
+                 "src/cpp11.cpp", "R/cpp11.R")
+    extra <- setdiff(contents, allowed)
+    if (length(extra)) {
+      cli::cli_abort("Path '{path}' does not look like a dust directory",
+                     call = call)
+    }
+  }
+  path
 }

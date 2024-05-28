@@ -1,2 +1,3 @@
 ##' @useDynLib dust2, .registration = TRUE
-NULL
+cache <- list2env(list(models = list()),
+                  parent = emptyenv())

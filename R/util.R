@@ -37,3 +37,15 @@ glue_whisker <- function(template, data) {
 read_lines <- function(path) {
   paste(readLines(path), collapse = "\n")
 }
+
+
+dir_create <- function(path) {
+  for (p in path) {
+    dir.create(p, showWarnings = FALSE, recursive = TRUE)
+  }
+}
+
+
+is_directory <- function(path) {
+  file.info(path, extra_cols = FALSE)$isdir
+}

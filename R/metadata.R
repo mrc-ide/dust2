@@ -16,6 +16,9 @@
 ## it might be worth looking at the GPU stuff again fairly soon
 ## actually.
 parse_metadata <- function(filename, call = NULL) {
+  if (!file.exists(filename)) {
+    cli::cli_abort("File '{filename}' does not exist", call = call)
+  }
   data <- decor::cpp_decorations(files = filename)
 
   class <- parse_metadata_class(data, call)
