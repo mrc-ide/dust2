@@ -153,12 +153,16 @@ dust_generate_cpp <- function(model, config, data) {
 }
 
 
-dust_template_data <- function(name, class, linking_to, cpp_std,
-                               optimisation_level, compiler_options,
-                               mangle) {
+dust_template_data <- function(name,
+                               class,
+                               linking_to = NULL,
+                               cpp_std = NULL,
+                               optimisation_level = NULL,
+                               compiler_options = NULL,
+                               mangle = NULL) {
 
   if (!is.null(linking_to)) {
-    assert_is(linking_to, "character")
+    assert_character(linking_to)
   }
   linking_to <- paste(union(c("cpp11", "dust2", "mcstate2"), linking_to),
                       collapse = ", ")

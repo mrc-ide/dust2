@@ -1,19 +1,88 @@
-test_that("can compile simple model", {
-  code <- gsub("sir", "mysir", readLines(dust2_file("examples/sir.cpp")))
-  filename <- tempfile(fileext = ".cpp")
-  writeLines(code, filename)
-  gen <- dust_compile(filename, quiet = TRUE, debug = TRUE)
-  expect_true(is.function(gen))
-  res <- gen()
-  expect_s3_class(res, "dust_model_generator")
-  expect_equal(res$name, "mysir")
-  expect_true(res$properties$has_compare)
+test_that("can construct template data", {
+  expect_equal(
+    dust_template_data("foo", "foo"),
+    list(name = "foo", class = "foo", package = "foo",
+         linking_to = "cpp11, dust2, mcstate2", cpp_std = NULL,
+         compiler_options = ""))
+  expect_equal(
+    dust_template_data("foo", "bar", mangle = "abc"),
+    list(name = "foo", class = "bar", package = "fooabc",
+         linking_to = "cpp11, dust2, mcstate2", cpp_std = NULL,
+         compiler_options = ""))
+  expect_equal(
+    dust_template_data("foo", "foo", linking_to = "baz"),
+    list(name = "foo", class = "foo", package = "foo",
+         linking_to = "cpp11, dust2, mcstate2, baz", cpp_std = NULL,
+         compiler_options = ""))
+  expect_equal(
+    dust_template_data("foo", "foo", linking_to = c("x", "dust2", "y")),
+    list(name = "foo", class = "foo", package = "foo",
+         linking_to = "cpp11, dust2, mcstate2, x, y", cpp_std = NULL,
+         compiler_options = ""))
+  expect_equal(
+    dust_template_data("foo", "foo", compiler_options = "-Xf"),
+    list(name = "foo", class = "foo", package = "foo",
+         linking_to = "cpp11, dust2, mcstate2", cpp_std = NULL,
+         compiler_options = "-Xf"))
+  expect_equal(
+    dust_template_data("foo", "foo", optimisation_level = "none",
+                       compiler_options = "-Xf"),
+    list(name = "foo", class = "foo", package = "foo",
+         linking_to = "cpp11, dust2, mcstate2", cpp_std = NULL,
+         compiler_options = "-Xf -O0"))
+  expect_equal(
+    dust_template_data("foo", "foo", cpp_std = "c++14"),
+    list(name = "foo", class = "foo", package = "foo",
+         linking_to = "cpp11, dust2, mcstate2", cpp_std = "c++14",
+         compiler_options = ""))
+})
 
-  obj1 <- dust_model_create(gen(), list(), n_particles = 10, seed = 1)
-  dust_model_set_state_initial(obj1)
-  res1 <- dust_model_simulate(obj1, 0:10)
 
-  obj2 <- dust_model_create(sir(), list(), n_particles = 10, seed = 1)
-  dust_model_set_state_initial(obj2)
-  expect_equal(res1, dust_model_simulate(obj2, 0:10))
+test_that("can select optimisation level", {
+  expect_equal(validate_compiler_options(NULL, NULL), "")
+  expect_equal(validate_compiler_options("-Xf", NULL), "-Xf")
+  expect_equal(validate_compiler_options(NULL, "none"), "-O0")
+  expect_equal(validate_compiler_options("-Xf", "none"), "-Xf -O0")
+  expect_equal(validate_compiler_options(NULL, "standard"), "-O2")
+  expect_equal(validate_compiler_options(NULL, "max"), "-O3 -ffast-math")
+  expect_error(validate_compiler_options(NULL, "min"),
+               "Unknown 'optimisation_level' value 'min'")
+})
+
+
+test_that("can validate C++ standard", {
+  expect_null(validate_cpp_std(NULL))
+  expect_equal(validate_cpp_std("c++14"), "c++14")
+  expect_equal(validate_cpp_std("C++20"), "C++20")
+  expect_error(
+    validate_cpp_std("verynew"),
+    "'cpp_std' does not look like a valid C++ standard name (e.g., C++14)",
+    fixed = TRUE)
+})
+
+
+test_that("validate that working directory is suitable", {
+  path <- withr::local_tempfile()
+  expect_equal(dust_workdir(path), path)
+
+  dir_create(file.path(path, c("src", "R")))
+  expect_equal(dust_workdir(path), path)
+  file.create(file.path(path, c("DESCRIPTION", "NAMESPACE",
+                                "src/Makevars", "src/cpp11.cpp", "src/dust.cpp",
+                                "R/cpp11.R", "R/dust.R")))
+  expect_equal(dust_workdir(path), path)
+  file.create(file.path(path, c("src/dust.o", "src/other.o", "src/dust.so")))
+  expect_equal(dust_workdir(path), path)
+
+  file.create(file.path(path, "other"))
+  expect_error(dust_workdir(path),
+               "Path '.+' does not look like a dust directory")
+})
+
+
+test_that("validate that working directory is suitable", {
+  path <- withr::local_tempfile()
+  file.create(path)
+  expect_error(dust_workdir(path),
+               "already exists but is not a directory")
 })
