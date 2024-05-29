@@ -137,11 +137,11 @@ std::vector<real_type> check_time_sequence(real_type time_start,
   for (size_t i = 0; i < time.size(); ++i) {
     const auto t = time[i];
     if (!is_integer_like(t, eps)) {
-      cpp11::stop("Expected 'time[%d]' to be integer-like", i + 1);
+      cpp11::stop("Expected '%s[%d]' to be integer-like", name, i + 1);
     }
     if (t < prev || (require_later && t == prev)) {
-      cpp11::stop("Expected 'time[%d]' (%d) to be larger than the previous value (%d)",
-                  i + 1, static_cast<int>(prev), static_cast<int>(t));
+      cpp11::stop("Expected '%s[%d]' (%d) to be larger than the previous value (%d)",
+                  name, i + 1, static_cast<int>(prev), static_cast<int>(t));
     }
     prev = t;
   }
