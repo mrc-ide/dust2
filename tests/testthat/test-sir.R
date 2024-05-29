@@ -60,7 +60,7 @@ test_that("can compare against multple parameter groups at once", {
   pars <- lapply(1:4, function(i) {
     list(beta = 0.1 * i, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 10^i)
   })
-  obj <- dust_model_create(sir(), pars, n_particles = 10, n_groups = 4, 
+  obj <- dust_model_create(sir(), pars, n_particles = 10, n_groups = 4,
                            seed = 42)
 
   s <- dust_model_state(obj)
