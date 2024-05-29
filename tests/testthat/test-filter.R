@@ -370,5 +370,5 @@ test_that("can run particle filter with manual initial state", {
 
   cmp_filter <- sir_filter_manual(
     pars, time_start, time, dt, data, n_particles, seed)
-  expect_equal(res, replicate(20, cmp_filter(NULL, state)))
+  expect_equal(res, replicate(20, cmp_filter(NULL, state)$log_likelihood))
 })
