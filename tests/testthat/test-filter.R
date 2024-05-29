@@ -240,3 +240,24 @@ test_that("can run filter and change parameters", {
   expect_equal(dust_filter_run(obj1, update),
                dust_filter_run(obj2))
 })
+
+
+test_that("can run particle filter with manual initial state", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  state <- matrix(c(1000 - 17, 17, 0, 0, 0), ncol = 1)
+
+  time_start <- 0
+  time <- c(4, 8, 12, 16)
+  data <- lapply(1:4, function(i) list(incidence = i))
+  dt <- 1
+  n_particles <- 100
+  seed <- 42
+
+  obj <- dust_filter_create(sir(), pars, time_start, time, data,
+                           n_particles = n_particles, seed = seed)
+  res <- replicate(20, dust_filter_run(obj, initial = state))
+
+  cmp_filter <- sir_filter_manual(
+    pars, time_start, time, dt, data, n_particles, seed)
+  expect_equal(res, replicate(20, cmp_filter(NULL, state)))
+})

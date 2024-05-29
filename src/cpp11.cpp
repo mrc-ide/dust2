@@ -118,10 +118,10 @@ extern "C" SEXP _dust2_dust2_cpu_sir_filter_alloc(SEXP r_pars, SEXP r_time_start
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_cpu_sir_filter_run(cpp11::sexp ptr, cpp11::sexp r_pars, bool grouped);
-extern "C" SEXP _dust2_dust2_cpu_sir_filter_run(SEXP ptr, SEXP r_pars, SEXP grouped) {
+SEXP dust2_cpu_sir_filter_run(cpp11::sexp ptr, cpp11::sexp r_pars, cpp11::sexp r_initial, bool grouped);
+extern "C" SEXP _dust2_dust2_cpu_sir_filter_run(SEXP ptr, SEXP r_pars, SEXP r_initial, SEXP grouped) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_cpu_sir_filter_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_pars), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+    return cpp11::as_sexp(dust2_cpu_sir_filter_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
   END_CPP11
 }
 // sir.cpp
@@ -236,7 +236,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_cpu_sir_compare_data",       (DL_FUNC) &_dust2_dust2_cpu_sir_compare_data,       3},
     {"_dust2_dust2_cpu_sir_filter_alloc",       (DL_FUNC) &_dust2_dust2_cpu_sir_filter_alloc,       8},
     {"_dust2_dust2_cpu_sir_filter_rng_state",   (DL_FUNC) &_dust2_dust2_cpu_sir_filter_rng_state,   1},
-    {"_dust2_dust2_cpu_sir_filter_run",         (DL_FUNC) &_dust2_dust2_cpu_sir_filter_run,         3},
+    {"_dust2_dust2_cpu_sir_filter_run",         (DL_FUNC) &_dust2_dust2_cpu_sir_filter_run,         4},
     {"_dust2_dust2_cpu_sir_reorder",            (DL_FUNC) &_dust2_dust2_cpu_sir_reorder,            2},
     {"_dust2_dust2_cpu_sir_rng_state",          (DL_FUNC) &_dust2_dust2_cpu_sir_rng_state,          1},
     {"_dust2_dust2_cpu_sir_run_steps",          (DL_FUNC) &_dust2_dust2_cpu_sir_run_steps,          2},

@@ -64,8 +64,8 @@ dust2_cpu_sir_filter_alloc <- function(r_pars, r_time_start, r_time, r_dt, r_dat
   .Call(`_dust2_dust2_cpu_sir_filter_alloc`, r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_seed)
 }
 
-dust2_cpu_sir_filter_run <- function(ptr, r_pars, grouped) {
-  .Call(`_dust2_dust2_cpu_sir_filter_run`, ptr, r_pars, grouped)
+dust2_cpu_sir_filter_run <- function(ptr, r_pars, r_initial, grouped) {
+  .Call(`_dust2_dust2_cpu_sir_filter_run`, ptr, r_pars, r_initial, grouped)
 }
 
 dust2_cpu_sir_filter_rng_state <- function(ptr) {
