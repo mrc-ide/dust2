@@ -188,9 +188,6 @@ SEXP dust2_cpu_compare_data(cpp11::sexp ptr,
       data.push_back(T::build_data(r_data_list_i));
     }
   } else {
-    if (n_groups > 1) {
-      cpp11::stop("Can't compare with grouped = FALSE with more than one group");
-    }
     data.push_back(T::build_data(r_data_list));
   }
 

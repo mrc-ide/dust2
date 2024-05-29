@@ -196,3 +196,15 @@ test_that("copy names with index", {
 
   expect_equal(unname(res1), res2)
 })
+
+
+test_that("can reorder state", {
+  obj <- dust_model_create(sir(), list(), n_particles = 10, seed = 42)
+  expect_null(dust_model_set_state_initial(obj))
+  dust_model_run_steps(obj, 100)
+  s1 <- dust_model_state(obj)
+  i <- sample(10, replace = TRUE)
+  expect_null(dust_model_reorder(obj, i))
+  s2 <- dust_model_state(obj)
+  expect_equal(s2, s1[, i, drop = FALSE])
+})

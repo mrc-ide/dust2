@@ -348,7 +348,7 @@ dust_model_compare_data <- function(model, data) {
   if (!model$properties$has_compare) {
     ## This moves into something general soon?
     cli::cli_abort(
-      paste("Can't compare against data, the '{model$name}' model does not",
+      paste("Can't compare against data; the '{model$name}' model does not",
             "have 'compare_data' support"),
       arg = "model")
   }
@@ -381,7 +381,7 @@ dust_unfilter_create <- function(generator, pars, time_start, time, data,
   if (!generator$properties$has_compare) {
     ## This moves into something general soon?
     cli::cli_abort(
-      paste("Can't compare against data, the '{generator$name}' model does",
+      paste("Can't create unfilter; the '{generator$name}' model does",
             "not have 'compare_data' support"),
       arg = "generator")
   }
@@ -468,7 +468,7 @@ dust_filter_create <- function(generator, pars, time_start, time, data,
   if (!generator$properties$has_compare) {
     ## This moves into something general soon?
     cli::cli_abort(
-      paste("Can't compare against data, the '{generator$name}' model does",
+      paste("Can't create filter; the '{generator$name}' model does",
             "not have 'compare_data' support"),
       arg = "generator")
   }

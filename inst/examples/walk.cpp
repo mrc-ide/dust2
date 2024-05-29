@@ -89,7 +89,7 @@ public:
   // Then, rather than a constructor we have some converters:
   static shared_state build_shared(cpp11::list pars) {
     const auto len = dust2::r::read_size(pars, "len", 1);
-    const auto sd = dust2::r::read_real(pars, "sd", 1);
+    const auto sd = dust2::r::read_real(pars, "sd");
     const auto random_initial =
       dust2::r::read_bool(pars, "random_initial", false);
     return shared_state{len, sd, random_initial};
