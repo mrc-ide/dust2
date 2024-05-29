@@ -19,8 +19,8 @@ SEXP dust2_cpu_{{name}}_filter_alloc(cpp11::list r_pars, cpp11::sexp r_time_star
 }
 
 [[cpp11::register]]
-SEXP dust2_cpu_{{name}}_filter_run(cpp11::sexp ptr, cpp11::sexp r_pars, bool grouped) {
-  return dust2::r::dust2_cpu_filter_run<{{class}}>(ptr, r_pars, grouped);
+SEXP dust2_cpu_{{name}}_filter_run(cpp11::sexp ptr, cpp11::sexp r_pars, cpp11::sexp r_initial, bool grouped) {
+  return dust2::r::dust2_cpu_filter_run<{{class}}>(ptr, r_pars, r_initial, grouped);
 }
 
 [[cpp11::register]]
