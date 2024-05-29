@@ -407,10 +407,6 @@ dust_unfilter_create <- function(generator, pars, time_start, time, data,
 ##' @param pars Optional parameters to run the filter with.  If not
 ##'   provided, parameters are not updated
 ##'
-##' @param initial Optional initial conditions, as a matrix (state x
-##'   particle) or 3d array (state x particle x group).  If not
-##'   provided, the model initial conditions are used.
-##'
 ##' @return A vector of likelihood values, with as many elements as
 ##'   there are groups.
 ##'
@@ -504,10 +500,7 @@ dust_filter_create <- function(generator, pars, time_start, time, data,
 ##' @export
 dust_filter_run <- function(filter, pars = NULL, initial = NULL) {
   check_is_dust_filter(filter)
-  if (!is.null(initial)) {
-    cli::cli_abort("Setting 'initial' not yet supported")
-  }
-  filter$methods$run(filter$ptr, pars, filter$grouped)
+  filter$methods$run(filter$ptr, pars, initial, filter$grouped)
 }
 
 

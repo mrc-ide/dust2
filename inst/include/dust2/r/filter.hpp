@@ -169,13 +169,16 @@ cpp11::sexp dust2_cpu_filter_alloc(cpp11::list r_pars,
 
 template <typename T>
 cpp11::sexp dust2_cpu_filter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
-                                 bool grouped) {
+                                 cpp11::sexp r_initial, bool grouped) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
   if (r_pars != R_NilValue) {
     update_pars(obj->model, cpp11::as_cpp<cpp11::list>(r_pars), grouped);
   }
-  obj->run();
+  if (r_initial != R_NilValue) {
+    set_state(obj->model, r_initial, grouped);
+  }
+  obj->run(r_initial == R_NilValue);
 
   cpp11::writable::doubles ret(obj->model.n_groups());
   obj->last_log_likelihood(REAL(ret));
