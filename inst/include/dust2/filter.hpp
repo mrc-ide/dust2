@@ -45,6 +45,9 @@ public:
 
   void run(bool set_initial, bool save_history) {
     history_is_current_ = false;
+    if (save_history) {
+      history_.reset();
+    }
     const auto n_times = step_.size();
 
     model.set_time(time_start_);
@@ -145,6 +148,10 @@ public:
   }
 
   void run(bool set_initial, bool save_history) {
+    history_is_current_ = false;
+    if (save_history) {
+      history_.reset();
+    }
     const auto n_times = step_.size();
 
     model.set_time(time_start_);
