@@ -13,6 +13,12 @@ test_that("Resampling works as expected", {
   expect_equal(
     test_resample_weight(w, u) + 1L,
     ref_resample_weight(w, u))
+  expect_equal(
+    test_resample_weight(w, 0) + 1L,
+    ref_resample_weight(w, 0))
+  expect_equal(
+    test_resample_weight(w, 1 - 1e-8) + 1L,
+    ref_resample_weight(w, 1 - 1e-8))
 })
 
 
@@ -35,6 +41,18 @@ test_that("can use history", {
                list(time[1:3], s_arr[, , , 1:3]))
   expect_equal(test_history(time, s, vector("list", length(time)), TRUE),
                list(time, s_arr))
+})
+
+
+test_that("can scale log weights", {
+  w <- log(abs(rcauchy(20)))
+  expect_equal(test_scale_log_weights(w[1]), list(w[1], w[1]))
+  expect_equal(test_scale_log_weights(w),
+               list(log(mean(exp(w))), exp(w - max(w))))
+  expect_equal(test_scale_log_weights(c(w, NA)),
+               list(log(mean(c(exp(w), 0))), c(exp(w - max(w)), 0)))
+  expect_equal(test_scale_log_weights(c(-Inf, -Inf)),
+               list(-Inf, c(-Inf, -Inf)))
 })
 
 

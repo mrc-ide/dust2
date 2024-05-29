@@ -139,6 +139,13 @@ extern "C" SEXP _dust2_test_resample_weight(SEXP w, SEXP u) {
   END_CPP11
 }
 // test.cpp
+cpp11::list test_scale_log_weights(std::vector<double> w);
+extern "C" SEXP _dust2_test_scale_log_weights(SEXP w) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(test_scale_log_weights(cpp11::as_cpp<cpp11::decay_t<std::vector<double>>>(w)));
+  END_CPP11
+}
+// test.cpp
 cpp11::sexp test_history(cpp11::doubles r_time, cpp11::list r_state, cpp11::sexp r_order, bool reorder);
 extern "C" SEXP _dust2_test_history(SEXP r_time, SEXP r_state, SEXP r_order, SEXP reorder) {
   BEGIN_CPP11
@@ -264,6 +271,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_cpu_walk_update_pars",       (DL_FUNC) &_dust2_dust2_cpu_walk_update_pars,       3},
     {"_dust2_test_history",                     (DL_FUNC) &_dust2_test_history,                     4},
     {"_dust2_test_resample_weight",             (DL_FUNC) &_dust2_test_resample_weight,             2},
+    {"_dust2_test_scale_log_weights",           (DL_FUNC) &_dust2_test_scale_log_weights,           1},
     {NULL, NULL, 0}
 };
 }

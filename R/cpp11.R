@@ -76,6 +76,10 @@ test_resample_weight <- function(w, u) {
   .Call(`_dust2_test_resample_weight`, w, u)
 }
 
+test_scale_log_weights <- function(w) {
+  .Call(`_dust2_test_scale_log_weights`, w)
+}
+
 test_history <- function(r_time, r_state, r_order, reorder) {
   .Call(`_dust2_test_history`, r_time, r_state, r_order, reorder)
 }

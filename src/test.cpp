@@ -15,6 +15,12 @@ cpp11::integers test_resample_weight(std::vector<double> w, double u) {
   return ret;
 }
 
+[[cpp11::register]]
+cpp11::list test_scale_log_weights(std::vector<double> w) {
+  const auto res = dust2::details::scale_log_weights<double>(w.size(), w.begin());
+  return cpp11::writable::list{cpp11::as_sexp(res), cpp11::as_sexp(w)};
+}
+
 // Simple driver for exercising the history saving outside of any
 // particle filter.
 [[cpp11::register]]
