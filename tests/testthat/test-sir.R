@@ -60,7 +60,7 @@ test_that("can compare against multple parameter groups at once", {
   pars <- lapply(1:4, function(i) {
     list(beta = 0.1 * i, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 10^i)
   })
-  obj <- dust_model_create(sir(), pars, n_particles = 10, n_groups = 4, 
+  obj <- dust_model_create(sir(), pars, n_particles = 10, n_groups = 4,
                            seed = 42)
 
   s <- dust_model_state(obj)
@@ -195,4 +195,16 @@ test_that("copy names with index", {
   expect_equal(dimnames(res1), list(c("I", "cases"), NULL, NULL))
 
   expect_equal(unname(res1), res2)
+})
+
+
+test_that("can reorder state", {
+  obj <- dust_model_create(sir(), list(), n_particles = 10, seed = 42)
+  expect_null(dust_model_set_state_initial(obj))
+  dust_model_run_steps(obj, 100)
+  s1 <- dust_model_state(obj)
+  i <- sample(10, replace = TRUE)
+  expect_null(dust_model_reorder(obj, i))
+  s2 <- dust_model_state(obj)
+  expect_equal(s2, s1[, i, drop = FALSE])
 })

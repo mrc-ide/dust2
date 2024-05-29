@@ -56,3 +56,11 @@ test_that("error if non-dust model given to dust function", {
   expect_error(dust_model_state(NULL),
                "Expected 'model' to be a 'dust_model' object")
 })
+
+
+test_that("error if non-dust model given to dust function", {
+  expect_error(dust_unfilter_run(NULL),
+               "Expected 'unfilter' to be a 'dust_unfilter' object")
+  expect_error(dust_filter_run(NULL),
+               "Expected 'filter' to be a 'dust_filter' object")
+})

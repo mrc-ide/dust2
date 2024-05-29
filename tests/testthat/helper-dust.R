@@ -11,12 +11,16 @@ sir_filter_manual <- function(pars, time_start, time, dt, data, n_particles,
                            time = time_start, dt = dt, seed = seed)
   n_steps <- round((time - c(time_start, time[-length(time)])) / dt)
 
-  function(pars) {
+  function(pars, initial = NULL) {
     if (!is.null(pars)) {
       dust_model_update_pars(obj, pars)
     }
     dust_model_set_time(obj, time_start)
-    dust_model_set_state_initial(obj)
+    if (is.null(initial)) {
+      dust_model_set_state_initial(obj)
+    } else {
+      dust_model_set_state(obj, initial)
+    }
     ll <- 0
     for (i in seq_along(time)) {
       dust_model_run_steps(obj, n_steps[[i]])

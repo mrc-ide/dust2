@@ -118,10 +118,10 @@ extern "C" SEXP _dust2_dust2_cpu_sir_filter_alloc(SEXP r_pars, SEXP r_time_start
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_cpu_sir_filter_run(cpp11::sexp ptr, cpp11::sexp r_pars, bool grouped);
-extern "C" SEXP _dust2_dust2_cpu_sir_filter_run(SEXP ptr, SEXP r_pars, SEXP grouped) {
+SEXP dust2_cpu_sir_filter_run(cpp11::sexp ptr, cpp11::sexp r_pars, cpp11::sexp r_initial, bool grouped);
+extern "C" SEXP _dust2_dust2_cpu_sir_filter_run(SEXP ptr, SEXP r_pars, SEXP r_initial, SEXP grouped) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_cpu_sir_filter_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_pars), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+    return cpp11::as_sexp(dust2_cpu_sir_filter_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
   END_CPP11
 }
 // sir.cpp
@@ -136,6 +136,13 @@ cpp11::integers test_resample_weight(std::vector<double> w, double u);
 extern "C" SEXP _dust2_test_resample_weight(SEXP w, SEXP u) {
   BEGIN_CPP11
     return cpp11::as_sexp(test_resample_weight(cpp11::as_cpp<cpp11::decay_t<std::vector<double>>>(w), cpp11::as_cpp<cpp11::decay_t<double>>(u)));
+  END_CPP11
+}
+// test.cpp
+cpp11::list test_scale_log_weights(std::vector<double> w);
+extern "C" SEXP _dust2_test_scale_log_weights(SEXP w) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(test_scale_log_weights(cpp11::as_cpp<cpp11::decay_t<std::vector<double>>>(w)));
   END_CPP11
 }
 // test.cpp
@@ -236,7 +243,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_cpu_sir_compare_data",       (DL_FUNC) &_dust2_dust2_cpu_sir_compare_data,       3},
     {"_dust2_dust2_cpu_sir_filter_alloc",       (DL_FUNC) &_dust2_dust2_cpu_sir_filter_alloc,       8},
     {"_dust2_dust2_cpu_sir_filter_rng_state",   (DL_FUNC) &_dust2_dust2_cpu_sir_filter_rng_state,   1},
-    {"_dust2_dust2_cpu_sir_filter_run",         (DL_FUNC) &_dust2_dust2_cpu_sir_filter_run,         3},
+    {"_dust2_dust2_cpu_sir_filter_run",         (DL_FUNC) &_dust2_dust2_cpu_sir_filter_run,         4},
     {"_dust2_dust2_cpu_sir_reorder",            (DL_FUNC) &_dust2_dust2_cpu_sir_reorder,            2},
     {"_dust2_dust2_cpu_sir_rng_state",          (DL_FUNC) &_dust2_dust2_cpu_sir_rng_state,          1},
     {"_dust2_dust2_cpu_sir_run_steps",          (DL_FUNC) &_dust2_dust2_cpu_sir_run_steps,          2},
@@ -264,6 +271,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_cpu_walk_update_pars",       (DL_FUNC) &_dust2_dust2_cpu_walk_update_pars,       3},
     {"_dust2_test_history",                     (DL_FUNC) &_dust2_test_history,                     4},
     {"_dust2_test_resample_weight",             (DL_FUNC) &_dust2_test_resample_weight,             2},
+    {"_dust2_test_scale_log_weights",           (DL_FUNC) &_dust2_test_scale_log_weights,           1},
     {NULL, NULL, 0}
 };
 }

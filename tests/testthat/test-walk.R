@@ -142,6 +142,10 @@ test_that("validate inputs", {
   expect_error(
     dust_model_create(walk(), pars, n_particles = 10, deterministic = 1),
     "'deterministic' must be scalar logical")
+
+  expect_error(
+    dust_model_create(walk(), list(), n_particles = 10),
+    "A value is expected for 'sd'")
 })
 
 
@@ -471,4 +475,27 @@ test_that("can validate index values", {
   expect_error(
     dust_model_simulate(obj, 0:20, integer()),
     "'index' must have nonzero length")
+})
+
+
+test_that("can't compare walk to data", {
+  pars <- list(sd = 1)
+  obj <- dust_model_create(walk(), pars, n_particles = 10, seed = 42)
+  expect_error(
+    dust_model_compare_data(obj, list()),
+    "Can't compare against data; the 'walk' model does not have 'compare_data'")
+})
+
+
+test_that("can't create filter with walk model", {
+  pars <- list(sd = 1)
+  time_start <- 0
+  time <- 1:4
+  data <- vector("list", length(time))
+  expect_error(
+    dust_unfilter_create(walk(), pars, time_start, time, data),
+    "Can't create unfilter; the 'walk' model does not have 'compare_data'")
+  expect_error(
+    dust_filter_create(walk(), pars, time_start, time, data, 10),
+    "Can't create filter; the 'walk' model does not have 'compare_data'")
 })
