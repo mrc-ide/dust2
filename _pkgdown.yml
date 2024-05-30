@@ -13,6 +13,7 @@ reference:
       - dust_model_time
       - dust_model_set_time
       - dust_model_rng_state
+      - dust_model_set_rng_state
       - dust_model_update_pars
   - subtitle: Running
     contents:
@@ -36,7 +37,7 @@ reference:
       - dust_filter_run
       - dust_filter_last_history
       - dust_filter_rng_state
+      - dust_filter_set_rng_state      
   - title: Creation
     contents:
       - dust_compile
-      
