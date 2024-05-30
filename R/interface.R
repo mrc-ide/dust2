@@ -404,8 +404,7 @@ dust_unfilter_create <- function(generator, pars, time_start, time, data,
 ##' @param unfilter A `dust_unfilter` object, created by
 ##'   [dust_unfilter_create]
 ##'
-##' @param pars Optional parameters to run the filter with.  If not
-##'   provided, parameters are not updated
+##' @inheritParams dust_filter_run
 ##'
 ##' @return A vector of likelihood values, with as many elements as
 ##'   there are groups.
