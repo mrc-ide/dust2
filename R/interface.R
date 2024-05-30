@@ -30,7 +30,8 @@ dust_model <- function(name, env = parent.env(parent.frame())) {
     methods_unfilter <- c("alloc", "run", "last_history")
     methods$unfilter <-
       get_methods(methods_unfilter, sprintf("%s_unfilter", name))
-    methods_filter <- c("alloc", "run", "last_history", "rng_state")
+    methods_filter <- c("alloc", "run", "last_history", "rng_state",
+                        "set_rng_state")
     methods$filter <-
       get_methods(methods_filter, sprintf("%s_filter", name))
   }

@@ -84,6 +84,10 @@ dust2_cpu_sir_filter_rng_state <- function(ptr) {
   .Call(`_dust2_dust2_cpu_sir_filter_rng_state`, ptr)
 }
 
+dust2_cpu_sir_filter_set_rng_state <- function(ptr, r_rng_state) {
+  .Call(`_dust2_dust2_cpu_sir_filter_set_rng_state`, ptr, r_rng_state)
+}
+
 test_resample_weight <- function(w, u) {
   .Call(`_dust2_test_resample_weight`, w, u)
 }

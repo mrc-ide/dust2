@@ -152,6 +152,13 @@ extern "C" SEXP _dust2_dust2_cpu_sir_filter_rng_state(SEXP ptr) {
     return cpp11::as_sexp(dust2_cpu_sir_filter_rng_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr)));
   END_CPP11
 }
+// sir.cpp
+SEXP dust2_cpu_sir_filter_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state);
+extern "C" SEXP _dust2_dust2_cpu_sir_filter_set_rng_state(SEXP ptr, SEXP r_rng_state) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_cpu_sir_filter_set_rng_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_rng_state)));
+  END_CPP11
+}
 // test.cpp
 cpp11::integers test_resample_weight(std::vector<double> w, double u);
 extern "C" SEXP _dust2_test_resample_weight(SEXP w, SEXP u) {
@@ -273,6 +280,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_cpu_sir_filter_last_history",   (DL_FUNC) &_dust2_dust2_cpu_sir_filter_last_history,   2},
     {"_dust2_dust2_cpu_sir_filter_rng_state",      (DL_FUNC) &_dust2_dust2_cpu_sir_filter_rng_state,      1},
     {"_dust2_dust2_cpu_sir_filter_run",            (DL_FUNC) &_dust2_dust2_cpu_sir_filter_run,            5},
+    {"_dust2_dust2_cpu_sir_filter_set_rng_state",  (DL_FUNC) &_dust2_dust2_cpu_sir_filter_set_rng_state,  2},
     {"_dust2_dust2_cpu_sir_reorder",               (DL_FUNC) &_dust2_dust2_cpu_sir_reorder,               2},
     {"_dust2_dust2_cpu_sir_rng_state",             (DL_FUNC) &_dust2_dust2_cpu_sir_rng_state,             1},
     {"_dust2_dust2_cpu_sir_run_steps",             (DL_FUNC) &_dust2_dust2_cpu_sir_run_steps,             2},
