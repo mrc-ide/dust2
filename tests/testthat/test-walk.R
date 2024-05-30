@@ -516,3 +516,14 @@ test_that("can set rng state", {
   dust_model_run_steps(obj2, 10)
   expect_identical(dust_model_state(obj1), dust_model_state(obj2))
 })
+
+
+test_that("can validate rng state on setting", {
+  pars <- list(sd = 1)
+  obj <- dust_model_create(walk(), pars, n_particles = 10, seed = 42)
+  s <- dust_model_rng_state(obj)
+  expect_error(dust_model_set_rng_state(obj, NULL),
+               "Expected a raw vector for 'rng_state'")
+  expect_error(dust_model_set_rng_state(obj, s[-1]),
+               "Incorrect length for 'rng_state'; expected 320 but given 319")
+})
