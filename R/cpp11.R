@@ -44,6 +44,10 @@ dust2_cpu_sir_rng_state <- function(ptr) {
   .Call(`_dust2_dust2_cpu_sir_rng_state`, ptr)
 }
 
+dust2_cpu_sir_set_rng_state <- function(ptr, r_rng_state) {
+  .Call(`_dust2_dust2_cpu_sir_set_rng_state`, ptr, r_rng_state)
+}
+
 dust2_cpu_sir_compare_data <- function(ptr, r_data, grouped) {
   .Call(`_dust2_dust2_cpu_sir_compare_data`, ptr, r_data, grouped)
 }
@@ -126,6 +130,10 @@ dust2_cpu_walk_reorder <- function(ptr, r_index) {
 
 dust2_cpu_walk_rng_state <- function(ptr) {
   .Call(`_dust2_dust2_cpu_walk_rng_state`, ptr)
+}
+
+dust2_cpu_walk_set_rng_state <- function(ptr, r_rng_state) {
+  .Call(`_dust2_dust2_cpu_walk_set_rng_state`, ptr, r_rng_state)
 }
 
 dust2_cpu_walk_set_time <- function(ptr, r_time) {

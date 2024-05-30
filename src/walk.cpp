@@ -59,6 +59,11 @@ SEXP dust2_cpu_walk_rng_state(cpp11::sexp ptr) {
 }
 
 [[cpp11::register]]
+SEXP dust2_cpu_walk_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
+  return dust2::r::dust2_cpu_set_rng_state<walk>(ptr, r_rng_state);
+}
+
+[[cpp11::register]]
 SEXP dust2_cpu_walk_set_time(cpp11::sexp ptr, cpp11::sexp r_time) {
   return dust2::r::dust2_cpu_set_time<walk>(ptr, r_time);
 }
