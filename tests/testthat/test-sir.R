@@ -208,3 +208,17 @@ test_that("can reorder state", {
   s2 <- dust_model_state(obj)
   expect_equal(s2, s1[, i, drop = FALSE])
 })
+
+
+test_that("can set rng state", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+
+  obj1 <- dust_model_create(sir(), pars, n_particles = 10, seed = 42)
+  obj2 <- dust_model_create(sir(), pars, n_particles = 10, seed = 43)
+
+  expect_false(identical(dust_model_rng_state(obj1),
+                         dust_model_rng_state(obj2)))
+
+  expect_null(dust_model_set_rng_state(obj2, dust_model_rng_state(obj1)))
+  expect_identical(dust_model_rng_state(obj1), dust_model_rng_state(obj2))
+})

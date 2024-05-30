@@ -346,7 +346,7 @@ inline auto check_rng_state(cpp11::sexp r_rng_state,
   const auto len = rng_state_type::size() * n_streams;
   const auto len_bytes = len * sizeof(int_type);
 
-  if (TYPEOF(r_rng_state)) {
+  if (!TYPEOF(r_rng_state)) {
     cpp11::stop("Expected a raw vector for '%s'", name);
   }
   cpp11::raws rng_state = cpp11::as_cpp<cpp11::raws>(r_rng_state);

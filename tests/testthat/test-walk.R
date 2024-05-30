@@ -499,3 +499,20 @@ test_that("can't create filter with walk model", {
     dust_filter_create(walk(), pars, time_start, time, data, 10),
     "Can't create filter; the 'walk' model does not have 'compare_data'")
 })
+
+
+test_that("can set rng state", {
+  pars <- list(sd = 1, random_initial = TRUE)
+
+  obj1 <- dust_model_create(walk(), pars, n_particles = 10, seed = 42)
+  obj2 <- dust_model_create(walk(), pars, n_particles = 10, seed = 43)
+
+  expect_false(identical(dust_model_rng_state(obj1),
+                         dust_model_rng_state(obj2)))
+
+  expect_null(dust_model_set_rng_state(obj2, dust_model_rng_state(obj1)))
+  expect_identical(dust_model_rng_state(obj1), dust_model_rng_state(obj2))
+  dust_model_run_steps(obj1, 10)
+  dust_model_run_steps(obj2, 10)
+  expect_identical(dust_model_state(obj1), dust_model_state(obj2))
+})
