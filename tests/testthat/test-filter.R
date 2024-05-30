@@ -411,3 +411,33 @@ test_that("can run particle filter with manual initial state", {
     pars, time_start, time, dt, data, n_particles, seed)
   expect_equal(res, replicate(20, cmp_filter(NULL, state)$log_likelihood))
 })
+
+
+test_that("can set rng state into the filter", {
+  pars <- list(
+    list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6),
+    list(beta = 0.2, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6))
+
+  time_start <- 0
+  time <- c(4, 8, 12, 16)
+  data <- lapply(1:4, function(i) {
+    list(list(incidence = i), list(incidence = i + 1))
+  })
+  dt <- 1
+  n_particles <- 100
+  seed <- 42
+
+  obj1 <- dust_filter_create(sir(), pars, time_start, time, data,
+                             n_particles = n_particles, n_groups = 2,
+                             seed = 42)
+  obj2 <- dust_filter_create(sir(), pars, time_start, time, data,
+                             n_particles = n_particles, n_groups = 2,
+                             seed = 43)
+  s1 <- dust_filter_rng_state(obj1)
+  s2 <- dust_filter_rng_state(obj2)
+  expect_false(identical(s1, s2))
+
+  dust_filter_set_rng_state(obj2, s1)
+  expect_identical(dust_filter_rng_state(obj2), s1)
+  expect_identical(dust_filter_run(obj1), dust_filter_run(obj2))
+})

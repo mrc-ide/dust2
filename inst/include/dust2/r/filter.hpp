@@ -293,11 +293,11 @@ cpp11::sexp dust2_cpu_filter_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_st
   std::vector<rng_int_type> state_filter(n_groups * n_state);
   std::vector<rng_int_type> state_model(n_groups * n_particles * n_state);
   for (size_t i = 0; i < n_groups; ++i) {
-    const auto it = rng_state.begin() + (1 + n_particles) * n_state;
-    std::copy_n(it,
+    const auto src = rng_state.begin() + i * (1 + n_particles) * n_state;
+    std::copy_n(src,
                 n_state,
                 state_filter.begin() + i * n_state);
-    std::copy_n(it + n_state,
+    std::copy_n(src + n_state,
                 n_state * n_particles,
                 state_model.begin() + i * n_state * n_particles);
   }

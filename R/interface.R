@@ -212,6 +212,8 @@ dust_model_rng_state <- function(model) {
 
 ##' @param rng_state A raw vector of random number generator state,
 ##'   returned by `dust_model_rng_state`
+##' @rdname dust_model_rng_state
+##' @export
 dust_model_set_rng_state <- function(model, rng_state) {
   check_is_dust_model(model)
   model$methods$set_rng_state(model$ptr, rng_state)
@@ -575,6 +577,17 @@ dust_filter_last_history <- function(filter) {
 dust_filter_rng_state <- function(filter) {
   check_is_dust_filter(filter)
   filter$methods$rng_state(filter$ptr)
+}
+
+
+##' @param rng_state A raw vector of random number generator state,
+##'   returned by `dust_filter_rng_state`
+##' @rdname dust_filter_rng_state
+##' @export
+dust_filter_set_rng_state <- function(filter, rng_state) {
+  check_is_dust_filter(filter)
+  filter$methods$set_rng_state(filter$ptr, rng_state)
+  invisible()
 }
 
 
