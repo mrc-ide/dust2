@@ -319,6 +319,23 @@ test_that("can get partial unfilter history", {
 })
 
 
+test_that("can run an unfilter via the adjoint method", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+
+  time_start <- 0
+  time <- c(4, 8, 12, 16)
+  data <- lapply(1:4, function(i) list(incidence = i))
+  dt <- 1
+
+  ## This runs, but then crashes, so I think I have an overrun -
+  ## valgrind will be able to find that nicely though
+  obj <- dust_unfilter_create(sir(), pars, time_start, time, data)
+  ll1 <- dust_unfilter_run(obj)
+  ll2 <- dust_unfilter_run(obj, adjoint = TRUE)
+  expect_identical(ll2, ll1)
+})
+
+
 test_that("can run a nested particle filter and get the same result", {
   pars <- list(
     list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6),

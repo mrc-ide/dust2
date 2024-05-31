@@ -3,6 +3,7 @@
 #include <dust2/cpu.hpp>
 #include <dust2/filter_details.hpp>
 #include <dust2/history.hpp>
+#include <dust2/adjoint.hpp>
 #include <mcstate/random/random.hpp>
 
 namespace dust2 {
@@ -34,20 +35,22 @@ public:
     history_index_(history_index),
     history_(history_index_.size() > 0 ? history_index_.size() : n_state_,
              n_particles_, n_groups_, time_.size()),
-    history_is_current_(false) {
+    adjoint_(n_state_, n_particles_ * n_groups_, time_.size()),
+    history_is_current_(false),
+    adjoint_is_current_(false),
+    gradient_is_current_(false) {
     const auto dt = model_.dt();
     for (size_t i = 0; i < time_.size(); i++) {
       const auto t0 = i == 0 ? time_start_ : time_[i - 1];
       const auto t1 = time_[i];
-      step_.push_back(static_cast<size_t>(std::round((t1 - t0) / dt)));
+      const size_t n = std::round((t1 - t0) / dt);
+      step_.push_back(n);
+      step_tot_.push_back(i == 0 ? n : step_tot_[i - 1] + n);
     }
   }
 
   void run(bool set_initial, bool save_history) {
-    history_is_current_ = false;
-    if (save_history) {
-      history_.reset();
-    }
+    reset(save_history, false);
     const auto n_times = step_.size();
 
     model.set_time(time_start_);
@@ -78,13 +81,56 @@ public:
     history_is_current_ = save_history;
   }
 
+  // This part here we can _always_ do, even if the model does not
+  // actually support adjoint methods.  It should give exactly the
+  // same answers as the normal version, so we can write some good
+  // tests and get the bookkeeping nicely worked out before starting
+  // on the backwards version.
+  void run_adjoint(bool set_initial, bool save_history) {
+    reset(save_history, true);
+    const auto n_times = step_.size();
+    if (set_initial) {
+      model.set_state_initial();
+    }
+    std::fill(ll_.begin(), ll_.end(), 0);
+
+    // Run the entire forward time simulation
+    auto state = adjoint_.state();
+    model.run_steps(step_tot_.back(), state);
+
+    // Consider dumping out a fraction of history here into our normal
+    // history saving; that's just a copy really.
+    if (save_history) {
+      throw std::runtime_error("not yet implemented");
+    }
+
+    // Then all the data comparison in one pass.
+    const auto stride_state = n_particles_ * n_groups_ * n_state_;
+    auto it_data = data_.begin();
+    for (size_t i = 0; i < n_times; ++i, it_data += n_groups_) {
+      state += step_[i] * stride_state;
+      model.compare_data(it_data, ll_step_.begin(), state);
+      for (size_t j = 0; j < ll_.size(); ++j) {
+        ll_[j] += ll_step_[j];
+      }
+    }
+
+    adjoint_is_current_ = true;
+    history_is_current_ = save_history;
+  }
+
   template <typename Iter>
   void last_log_likelihood(Iter iter) {
     std::copy(ll_.begin(), ll_.end(), iter);
   }
 
-
   auto& last_history() const {
+    // In the case where adjoint_is_current_ &&
+    // !history_is_current_, we can fairly efficiently copy the
+    // history over and then return, though that means that this is no
+    // longer a const method (but the return value should still be
+    // marked as such).  If we do that then the test below should be
+    // ||'d with adjoint_is_current_.
     return history_;
   }
 
@@ -92,10 +138,22 @@ public:
     return history_is_current_;
   }
 
+  // template <typename ITer>
+  // void last_gradient(Iter iter) {
+  //   if (!gradient_is_current_) {
+  //     if (!adjoint_is_current) {
+  //       throw std::runtime_error("history is not current...");
+  //     }
+  //     compute_gradient_();
+  //   }
+  //   std::copy(gradient_.begin(), gradient_.end(), iter);
+  // }
+
 private:
   real_type time_start_;
   std::vector<real_type> time_;
   std::vector<size_t> step_;
+  std::vector<size_t> step_tot_;
   std::vector<data_type> data_;
   size_t n_state_;
   size_t n_particles_;
@@ -104,7 +162,52 @@ private:
   std::vector<real_type> ll_step_;
   std::vector<size_t> history_index_;
   history<real_type> history_;
+  adjoint_data<real_type> adjoint_;
   bool history_is_current_;
+  bool adjoint_is_current_;
+  bool gradient_is_current_;
+
+  void reset(bool save_history, bool adjoint) {
+    history_is_current_ = false;
+    adjoint_is_current_ = false;
+    gradient_is_current_ = false;
+    if (save_history) {
+      history_.reset();
+    }
+    if (adjoint) {
+      adjoint_.init_history();
+    }
+  }
+
+  // void compute_gradient() {
+  //   const auto n_adjoint = T::size_adjoint();
+  //   // These should be stored elsewhere; all the bits of bookkeeping
+  //   // for this, ideally in something that can be zero'd before first
+  //   // use.
+  //   std::vector<real_type> adjoint_curr (n_state_adjoint * n_groups);
+  //   std::vector<real_type> adjoint_next (n_state_adjoint * n_groups);
+
+  //   auto it_data = data_.last();
+  //   auto it_state = adjoint.last();
+  //   for (size_t irev = 0; irev < n_times, ++i, it_data -= n_groups_) {
+  //     const auto i = n_times - irev - 1;
+  //     // need the current time and dt, state, data, the previous and
+  //     // next adjoint data
+  //     model.adjoint_compare_data(it_data,
+  //                                it_state,
+  //                                adjoint_curr.begin(),
+  //                                adjoint_next.begin());
+  //     std::swap(adjoint_curr, adjoint_next);
+  //     it_state = model.adjoint_run_steps(step_[i], it_state, adjoint_curr, adjoint_next);
+  //   }
+  //   model.adjoint_initial(it_state, adjoint_curr, adjoint_next);
+  //   std::swap(adjoint_curr, adjoint_next);
+
+  //   std::copy_n(adjoint_curr + n_state_,
+  //               n_adjoint,
+  //               gradient_.begin());
+  //   gradient_is_current_ = true;
+  // }
 };
 
 template <typename T>

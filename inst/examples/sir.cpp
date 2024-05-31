@@ -72,6 +72,10 @@ public:
 
   // We can put these into some adjoint class with static methods
   // initial/update/compare but that feels pretty weird too.
+  static size_t adjoint_size() {
+    return 3;
+  }
+
   static void adjoint_initial(real_type time,
                               real_type dt,
                               const real_type * state,

@@ -407,17 +407,19 @@ dust_unfilter_create <- function(generator, pars, time_start, time, data,
 ##' @param unfilter A `dust_unfilter` object, created by
 ##'   [dust_unfilter_create]
 ##'
-##' @inheritParams dust_filter_run
+##' @param adjoint Enable adjoint history saving.  This is enabled
+##'   even when your model does not support adjoints!  But you won't
+##'   be able to look up gradients still.
 ##'
 ##' @return A vector of likelihood values, with as many elements as
 ##'   there are groups.
 ##'
 ##' @export
 dust_unfilter_run <- function(unfilter, pars = NULL, initial = NULL,
-                              save_history = FALSE) {
+                              save_history = FALSE, adjoint = FALSE) {
   check_is_dust_unfilter(unfilter)
   unfilter$methods$run(unfilter$ptr, pars, initial, save_history,
-                       unfilter$grouped)
+                       adjoint, unfilter$grouped)
 }
 
 
