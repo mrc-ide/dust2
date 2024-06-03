@@ -175,7 +175,7 @@ private:
       history_.reset();
     }
     if (adjoint) {
-      adjoint_.init_history();
+      adjoint_.init_history(step_tot_.back());
     }
   }
 

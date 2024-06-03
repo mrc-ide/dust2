@@ -8,13 +8,15 @@ class adjoint_data {
 public:
   adjoint_data(size_t n_state, size_t n_particles, size_t n_steps) :
     n_state_(n_state),
+    n_adjoint_(0),
     n_particles_(n_particles),
-    n_steps_(n_steps) {
+    n_steps_(0) {
   }
 
-  void init_history() {
-    if (state_.size() == 0) {
-      state_.resize(n_state_ * n_particles_ * (n_steps_ + 1));
+  void init_history(size_t n_steps) {
+    if (n_steps_ != n_steps) {
+      state_.resize(n_state_ * n_particles_ * (n_steps + 1));
+      n_steps_ = n_steps;
     }
   }
 
