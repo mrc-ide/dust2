@@ -57,6 +57,7 @@
 <span>  <span class="va">n_particles</span>,</span>
 <span>  n_groups <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  dt <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  index <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -111,6 +112,14 @@ slowly.</p></dd>
 
 <dt>dt</dt>
 <dd><p>The time step for the model, defaults to 1</p></dd>
+
+
+<dt>index</dt>
+<dd><p>An optional index of states to extract.  If given,
+then we subset the model state on return.  You can use this to
+return fewer model states than the model ran with, to reorder
+states, or to name them on exit (names present on the index will
+be copied into the rownames of the returned array).</p></dd>
 
 
 <dt>seed</dt>

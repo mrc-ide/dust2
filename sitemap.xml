@@ -16,6 +16,9 @@
     <loc>https://mrc-ide.github.io/dust2/reference/dust_filter_create.html</loc>
   </url>
   <url>
+    <loc>https://mrc-ide.github.io/dust2/reference/dust_filter_last_history.html</loc>
+  </url>
+  <url>
     <loc>https://mrc-ide.github.io/dust2/reference/dust_filter_rng_state.html</loc>
   </url>
   <url>
@@ -59,6 +62,9 @@
   </url>
   <url>
     <loc>https://mrc-ide.github.io/dust2/reference/dust_unfilter_create.html</loc>
+  </url>
+  <url>
+    <loc>https://mrc-ide.github.io/dust2/reference/dust_unfilter_last_history.html</loc>
   </url>
   <url>
     <loc>https://mrc-ide.github.io/dust2/reference/dust_unfilter_run.html</loc>

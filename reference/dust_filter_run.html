@@ -48,7 +48,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dust_filter_run</span><span class="op">(</span><span class="va">filter</span>, pars <span class="op">=</span> <span class="cn">NULL</span>, initial <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dust_filter_run</span><span class="op">(</span><span class="va">filter</span>, pars <span class="op">=</span> <span class="cn">NULL</span>, initial <span class="op">=</span> <span class="cn">NULL</span>, save_history <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -67,6 +67,15 @@ provided, parameters are not updated</p></dd>
 <dd><p>Optional initial conditions, as a matrix (state x
 particle) or 3d array (state x particle x group).  If not
 provided, the model initial conditions are used.</p></dd>
+
+
+<dt>save_history</dt>
+<dd><p>Logical, indicating if the simulation history
+should be saved while the simulation runs; this has a small
+overhead in runtime and in memory.  History (particle
+trajectories) will be saved at each time in the filter.  If the
+filter was constructed using a non-<code>NULL</code> <code>index</code> parameter,
+the history is restricted to these states.</p></dd>
 
 </dl></div>
     <div class="section level2">
