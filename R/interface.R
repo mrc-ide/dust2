@@ -535,7 +535,7 @@ dust_filter_run <- function(filter, pars = NULL, initial = NULL,
 }
 
 
-##' Fetch the last history created by running an filter.  This
+##' Fetch the last history created by running a filter.  This
 ##' errors if the last call to [dust_filter_run] did not use
 ##' `save_history = TRUE`.
 ##'
