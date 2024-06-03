@@ -33,4 +33,3 @@ Suggests:
     withr
 Config/testthat/edition: 3
 Config/Needs/compile: decor, glue, pkgbuild, pkgload
-Remotes: mrc-ide/mcstate2
