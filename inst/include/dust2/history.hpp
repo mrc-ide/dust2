@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <vector>
 
 namespace dust2 {
@@ -22,13 +23,25 @@ public:
     times_(n_times_),
     state_(len_state_ * n_times_),
     order_(len_order_ * n_times_),
-    reorder_(n_times) {
+    reorder_(n_times),
+    dims_({n_state_, n_particles_, n_groups_, position_}) {
   }
 
-  void resize(size_t n_times) {
-    n_times_ = n_times;
-    state_.resize(len_state_ * n_times_);
-    order_.resize(len_order_ * n_times_);
+  void resize_state(size_t n_state) {
+    if (n_state_ != n_state) {
+      n_state_ = n_state;
+      len_state_ = (n_state_ * n_particles_ * n_groups_);
+      state_.resize(len_state_ * n_times_);
+    }
+    reset();
+  }
+
+  void resize_time(size_t n_times) {
+    if (n_times_ != n_times) {
+      n_times_ = n_times;
+      state_.resize(len_state_ * n_times_);
+      order_.resize(len_order_ * n_times_);
+    }
     reset();
   }
 
@@ -39,37 +52,29 @@ public:
   template <typename IterReal>
   void add(real_type time, IterReal iter_state) {
     copy_state_(iter_state);
-    times_[position_] = time;
-    reorder_[position_] = false;
-    position_++;
+    update_position(time, false);
   }
 
   template <typename IterReal, typename IterSize>
   void add(real_type time, IterReal iter_state, IterSize iter_order) {
     copy_state_(iter_state);
     copy_order_(iter_order);
-    times_[position_] = time;
-    reorder_[position_] = true;
-    position_++;
+    update_position(time, true);
   }
 
   template <typename IterReal, typename IterSize>
   void add_with_index(real_type time, IterReal iter_state, IterSize iter_index,
                       size_t n_state_total) {
     copy_state_with_index_(iter_state, iter_index, n_state_total);
-    times_[position_] = time;
-    reorder_[position_] = false;
-    position_++;
+    update_position(time, false);
   }
 
   template <typename IterReal, typename IterSize>
   void add_with_index(real_type time, IterReal iter_state, IterSize iter_order,
                       IterSize iter_index, size_t n_state_total) {
-    copy_state_with_index(iter_state, iter_index, n_state_total);
+    copy_state_with_index_(iter_state, iter_index, n_state_total);
     copy_order_(iter_order);
-    times_[position_] = time;
-    reorder_[position_] = true;
-    position_++;
+    update_position(time, true);
   }
 
   // These allow a consumer to allocate the right size structures for
@@ -82,13 +87,21 @@ public:
     return position_ * len_state_;
   }
 
+  auto size_order() const {
+    return position_ * len_order_;
+  }
+
+  auto& dims() const {
+    return dims_;
+  }
+
   template <typename Iter>
-  void export_time(Iter iter) {
+  void export_time(Iter iter) const {
     std::copy_n(times_.begin(), position_, iter);
   }
 
   template <typename Iter>
-  void export_state(Iter iter, bool reorder) {
+  void export_state(Iter iter, bool reorder) const {
     reorder = reorder && n_particles_ > 1 && position_ > 0 &&
       std::any_of(reorder_.begin(), reorder_.end(), [](auto v) { return v; });
     if (reorder) {
@@ -121,6 +134,11 @@ public:
     }
   }
 
+  template <typename Iter>
+  void export_order(Iter iter) const {
+    std::copy_n(order_.begin(), position_ * len_order_, iter);
+  }
+
 private:
   size_t n_state_;
   size_t n_particles_;
@@ -133,6 +151,7 @@ private:
   std::vector<real_type> state_;
   std::vector<size_t> order_;
   std::vector<bool> reorder_;
+  std::array<size_t, 4> dims_;
 
   // Reference implementation for this is mcstate:::history_single and
   // mcstate::history_multiple
@@ -141,7 +160,7 @@ private:
                       typename std::vector<size_t>::const_iterator iter_order,
                       bool reorder,
                       Iter iter_dest,
-                      typename std::vector<size_t>::iterator index) {
+                      typename std::vector<size_t>::iterator index) const {
     for (size_t i = 0; i < n_particles_; ++i) {
       std::copy_n(iter_state + *(index + i) * n_state_,
                   n_state_,
@@ -151,6 +170,13 @@ private:
         *index_i = *(iter_order + *index_i);
       }
     }
+  }
+
+  void update_position(real_type time, bool reorder) {
+    times_[position_] = time;
+    reorder_[position_] = reorder;
+    position_++;
+    dims_[3] = position_;
   }
 
   template <typename IterReal>

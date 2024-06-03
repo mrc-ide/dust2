@@ -14,7 +14,8 @@ cpp11::sexp dust2_cpu_unfilter_alloc(cpp11::list r_pars,
                                      cpp11::sexp r_dt,
                                      cpp11::list r_data,
                                      cpp11::sexp r_n_particles,
-                                     cpp11::sexp r_n_groups) {
+                                     cpp11::sexp r_n_groups,
+                                     cpp11::sexp r_index) {
   using rng_state_type = typename T::rng_state_type;
 
   auto n_particles = to_size(r_n_particles, "n_particles");
@@ -40,8 +41,9 @@ cpp11::sexp dust2_cpu_unfilter_alloc(cpp11::list r_pars,
   // going to feel weirder overall.
   const auto model = dust2::dust_cpu<T>(shared, internal, time_start, dt, n_particles,
                                  seed, deterministic);
+  const auto index = check_index(r_index, model.n_state(), "index");
 
-  auto obj = new unfilter<T>(model, time_start, time, data);
+  auto obj = new unfilter<T>(model, time_start, time, data, index);
   cpp11::external_pointer<unfilter<T>> ptr(obj, true, false);
 
   cpp11::sexp r_n_state = cpp11::as_sexp(obj->model.n_state());
@@ -61,7 +63,8 @@ cpp11::sexp dust2_cpu_unfilter_alloc(cpp11::list r_pars,
 
 template <typename T>
 cpp11::sexp dust2_cpu_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
-                                   cpp11::sexp r_initial, bool grouped) {
+                                   cpp11::sexp r_initial, bool save_history,
+                                   bool grouped) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
   if (r_pars != R_NilValue) {
@@ -70,7 +73,7 @@ cpp11::sexp dust2_cpu_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
   if (r_initial != R_NilValue) {
     set_state(obj->model, r_initial, grouped);
   }
-  obj->run(r_initial == R_NilValue);
+  obj->run(r_initial == R_NilValue, save_history);
 
   const auto n_groups = obj->model.n_groups();
   const auto n_particles = obj->model.n_particles();
@@ -83,6 +86,34 @@ cpp11::sexp dust2_cpu_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
 }
 
 template <typename T>
+cpp11::sexp dust2_cpu_unfilter_last_history(cpp11::sexp ptr, bool grouped) {
+  auto *obj =
+    cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
+  if (!obj->last_history_is_current()) {
+    cpp11::stop("History is not current");
+  }
+
+  constexpr bool reorder = false; // never needed
+
+  const auto& history = obj->last_history();
+  const auto& dims = history.dims();
+  // Could use destructured bind here in recent C++?
+  const auto n_state = dims[0];
+  const auto n_particles = dims[1];
+  const auto n_groups = dims[2];
+  const auto n_times = dims[3];
+  const auto len = n_state * n_particles * n_groups * n_times;
+  cpp11::sexp ret = cpp11::writable::doubles(len);
+  history.export_state(REAL(ret), reorder);
+  if (grouped) {
+    set_array_dims(ret, {n_state, n_particles, n_groups, n_times});
+  } else {
+    set_array_dims(ret, {n_state, n_particles * n_groups, n_times});
+  }
+  return ret;
+}
+
+template <typename T>
 cpp11::sexp dust2_cpu_filter_alloc(cpp11::list r_pars,
                                    cpp11::sexp r_time_start,
                                    cpp11::sexp r_time,
@@ -90,6 +121,7 @@ cpp11::sexp dust2_cpu_filter_alloc(cpp11::list r_pars,
                                    cpp11::list r_data,
                                    cpp11::sexp r_n_particles,
                                    cpp11::sexp r_n_groups,
+                                   cpp11::sexp r_index,
                                    cpp11::sexp r_seed) {
   using rng_state_type = typename T::rng_state_type;
   using rng_seed_type = std::vector<typename rng_state_type::int_type>;
@@ -149,7 +181,9 @@ cpp11::sexp dust2_cpu_filter_alloc(cpp11::list r_pars,
   const auto model = dust2::dust_cpu<T>(shared, internal, time_start, dt, n_particles,
                                         seed_model, deterministic);
 
-  auto obj = new filter<T>(model, time_start, time, data, seed_filter);
+  const auto index = check_index(r_index, model.n_state(), "index");
+
+  auto obj = new filter<T>(model, time_start, time, data, index, seed_filter);
   cpp11::external_pointer<filter<T>> ptr(obj, true, false);
 
   cpp11::sexp r_n_state = cpp11::as_sexp(obj->model.n_state());
@@ -169,7 +203,8 @@ cpp11::sexp dust2_cpu_filter_alloc(cpp11::list r_pars,
 
 template <typename T>
 cpp11::sexp dust2_cpu_filter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
-                                 cpp11::sexp r_initial, bool grouped) {
+                                 cpp11::sexp r_initial, bool save_history,
+                                 bool grouped) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
   if (r_pars != R_NilValue) {
@@ -178,10 +213,40 @@ cpp11::sexp dust2_cpu_filter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
   if (r_initial != R_NilValue) {
     set_state(obj->model, r_initial, grouped);
   }
-  obj->run(r_initial == R_NilValue);
+  obj->run(r_initial == R_NilValue, save_history);
 
   cpp11::writable::doubles ret(obj->model.n_groups());
   obj->last_log_likelihood(REAL(ret));
+  return ret;
+}
+
+// Can collapse with above
+template <typename T>
+cpp11::sexp dust2_cpu_filter_last_history(cpp11::sexp ptr, bool grouped) {
+  auto *obj =
+    cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
+  if (!obj->last_history_is_current()) {
+    cpp11::stop("History is not current");
+  }
+  // We might relax this later, but will require some tools to work
+  // with the output, really.
+  constexpr bool reorder = true;
+
+  const auto& history = obj->last_history();
+  const auto& dims = history.dims();
+  // Could use destructured bind here in recent C++?
+  const auto n_state = dims[0];
+  const auto n_particles = dims[1];
+  const auto n_groups = dims[2];
+  const auto n_times = dims[3];
+  const auto len = n_state * n_particles * n_groups * n_times;
+  cpp11::sexp ret = cpp11::writable::doubles(len);
+  history.export_state(REAL(ret), reorder);
+  if (grouped) {
+    set_array_dims(ret, {n_state, n_particles, n_groups, n_times});
+  } else {
+    set_array_dims(ret, {n_state, n_particles * n_groups, n_times});
+  }
   return ret;
 }
 

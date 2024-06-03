@@ -12,7 +12,8 @@ dust_unfilter_create(
   data,
   n_particles = 1,
   n_groups = 0,
-  dt = 1
+  dt = 1,
+  index = NULL
 )
 }
 \arguments{
@@ -50,6 +51,12 @@ initial conditions then you would see different likelihoods.}
 \item{n_groups}{Optionally, the number of parameter groups}
 
 \item{dt}{The time step for the model, defaults to 1}
+
+\item{index}{An optional index of states to extract.  If given,
+then we subset the model state on return.  You can use this to
+return fewer model states than the model ran with, to reorder
+states, or to name them on exit (names present on the index will
+be copied into the rownames of the returned array).}
 }
 \value{
 A \code{dust_unfilter} object, which can be used with

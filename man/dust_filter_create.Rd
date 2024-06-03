@@ -13,6 +13,7 @@ dust_filter_create(
   n_particles,
   n_groups = 0,
   dt = 1,
+  index = NULL,
   seed = NULL
 )
 }
@@ -50,6 +51,12 @@ slowly.}
 \item{n_groups}{Optionally, the number of parameter groups}
 
 \item{dt}{The time step for the model, defaults to 1}
+
+\item{index}{An optional index of states to extract.  If given,
+then we subset the model state on return.  You can use this to
+return fewer model states than the model ran with, to reorder
+states, or to name them on exit (names present on the index will
+be copied into the rownames of the returned array).}
 
 \item{seed}{Optionally, a seed.  Otherwise we respond to R's RNG
 seed on initialisation.}

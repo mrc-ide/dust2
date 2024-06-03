@@ -29,10 +29,12 @@ reference:
     contents:
       - dust_unfilter_create
       - dust_unfilter_run
+      - dust_unfilter_last_history
   - subtitle: Particle filter
     contents:
       - dust_filter_create
       - dust_filter_run
+      - dust_filter_last_history
       - dust_filter_rng_state
     
       
