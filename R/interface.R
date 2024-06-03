@@ -520,7 +520,7 @@ dust_filter_create <- function(generator, pars, time_start, time, data,
 ##'   should be saved while the simulation runs; this has a small
 ##'   overhead in runtime and in memory.  History (particle
 ##'   trajectories) will be saved at each time in the filter.  If the
-##'   filter was constructed using a non-`NULL` `index` parameter, the
+##'   filter was constructed using a non-`NULL` `index` parameter,
 ##'   the history is restricted to these states.
 ##'
 ##' @return A vector of likelihood values, with as many elements as
