@@ -4,7 +4,13 @@
 \alias{dust_unfilter_run}
 \title{Run unfilter}
 \usage{
-dust_unfilter_run(unfilter, pars = NULL, initial = NULL, save_history = FALSE)
+dust_unfilter_run(
+  unfilter,
+  pars = NULL,
+  initial = NULL,
+  save_history = FALSE,
+  adjoint = FALSE
+)
 }
 \arguments{
 \item{unfilter}{A \code{dust_unfilter} object, created by
@@ -23,6 +29,10 @@ overhead in runtime and in memory.  History (particle
 trajectories) will be saved at each time in the filter.  If the
 filter was constructed using a non-\code{NULL} \code{index} parameter, the
 the history is restricted to these states.}
+
+\item{adjoint}{Enable adjoint history saving.  This is enabled
+even when your model does not support adjoints!  But you won't
+be able to look up gradients still.}
 }
 \value{
 A vector of likelihood values, with as many elements as
