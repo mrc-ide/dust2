@@ -14,7 +14,7 @@ dust_filter_last_history(filter)
 An array
 }
 \description{
-Fetch the last history created by running an filter.  This
+Fetch the last history created by running a filter.  This
 errors if the last call to \link{dust_filter_run} did not use
 \code{save_history = TRUE}.
 }

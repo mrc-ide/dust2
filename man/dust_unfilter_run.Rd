@@ -21,7 +21,7 @@ provided, the model initial conditions are used.}
 should be saved while the simulation runs; this has a small
 overhead in runtime and in memory.  History (particle
 trajectories) will be saved at each time in the filter.  If the
-filter was constructed using a non-\code{NULL} \code{index} parameter, the
+filter was constructed using a non-\code{NULL} \code{index} parameter,
 the history is restricted to these states.}
 }
 \value{
