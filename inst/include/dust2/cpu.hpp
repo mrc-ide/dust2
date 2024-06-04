@@ -196,14 +196,73 @@ public:
     compare_data(data, output, state_.data());
   }
 
+  // TODO: The argument order here is incorrect, move state ahead of
+  // output
   template <typename IterData, typename IterOutput>
-  void compare_data(IterData data, IterOutput output, real_type * state) {
+  void compare_data(IterData data, IterOutput output, const real_type * state) {
     for (size_t i = 0; i < n_groups_; ++i, ++data) {
       for (size_t j = 0; j < n_particles_; ++j, ++output) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
         *output = T::compare_data(time_, dt_, state + offset, *data,
                                   shared_[i], internal_[i], rng_.state(k));
+      }
+    }
+  }
+
+  template <typename IterData>
+  void adjoint_compare_data(IterData data,
+                            const real_type * state,
+                            const real_type * adjoint_curr,
+                            real_type * adjoint_next) {
+    for (size_t i = 0; i < n_groups_; ++i, ++data) {
+      for (size_t j = 0; j < n_particles_; ++j) {
+        const auto k = n_particles_ * i + j;
+        const auto offset = k * n_state_;
+        T::adjoint_compare_data(time_, dt_,
+                                state + offset, adjoint_curr, *data,
+                                shared_[i], internal_[i],
+                                adjoint_next);
+      }
+    }
+  }
+
+  // Note that this does affect anything (except internal_) within the
+  // model; not time and not state, as we want those to reflect the
+  // state of the forwards model.
+  //
+  // I don't like the two args here requiring a swap at all!  Let's
+  // get it moving and then think about what we can do.  Probably the
+  // solution is to pass in adjoint state generally here?
+  void adjoint_run_steps(size_t n_steps, real_type time,
+                         const real_type* state,
+                         real_type* adjoint_curr,
+                         real_type* adjoint_next) {
+    const auto stride = n_state_ * n_particles_ * n_groups_;
+    for (size_t i = 0; i < n_groups_; ++i) {
+      for (size_t j = 0; j < n_particles_; ++j) {
+        const auto k = n_particles_ * i + j;
+        const auto offset = k * n_state_;
+        auto state_ij = state + offset;
+        adjoint_run_particle(time, dt_, n_steps, stride,
+                             shared_[i], internal_[i],
+                             state_ij, adjoint_curr, adjoint_next);
+      }
+    }
+  }
+
+  void adjoint_initial(real_type time, const real_type * state,
+                       const real_type * adjoint_curr,
+                       real_type * adjoint_next) {
+    for (size_t i = 0; i < n_groups_; ++i) {
+      for (size_t j = 0; j < n_particles_; ++j) {
+        const auto k = n_particles_ * i + j;
+        const auto offset = k * n_state_;
+        T::adjoint_initial(time, dt_,
+                           shared_[i], internal_[i],
+                           state + offset,
+                           adjoint_curr + offset,
+                           adjoint_next + offset);
       }
     }
   }
@@ -243,6 +302,24 @@ private:
       T::update(time + i * dt, dt, state_curr, shared, internal, rng_state,
                 state_next);
       state_curr = state_next;
+    }
+  }
+
+  static void adjoint_run_particle(const real_type time,
+                                   const real_type dt,
+                                   const size_t n_steps,
+                                   const size_t stride,
+                                   const shared_state& shared,
+                                   internal_state& internal,
+                                   const real_type* state,
+                                   real_type* adjoint_curr,
+                                   real_type* adjoint_next) {
+    for (size_t i = 0; i < n_steps; ++i) {
+      const auto time_i = time - i * dt;
+      const auto state_i = state - i * stride;
+      T::adjoint_update(time_i, dt, state_i, shared, internal,
+                        adjoint_curr, adjoint_next);
+      std::swap(adjoint_curr, adjoint_next);
     }
   }
 };

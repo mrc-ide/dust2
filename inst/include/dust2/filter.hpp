@@ -83,9 +83,7 @@ public:
 
   // This part here we can _always_ do, even if the model does not
   // actually support adjoint methods.  It should give exactly the
-  // same answers as the normal version, so we can write some good
-  // tests and get the bookkeeping nicely worked out before starting
-  // on the backwards version.
+  // same answers as the normal version, at the cost of more memory.
   void run_adjoint(bool set_initial, bool save_history) {
     reset(save_history, true);
     const auto n_times = step_.size();
@@ -138,16 +136,13 @@ public:
     return history_is_current_;
   }
 
-  // template <typename ITer>
-  // void last_gradient(Iter iter) {
-  //   if (!gradient_is_current_) {
-  //     if (!adjoint_is_current) {
-  //       throw std::runtime_error("history is not current...");
-  //     }
-  //     compute_gradient_();
-  //   }
-  //   std::copy(gradient_.begin(), gradient_.end(), iter);
-  // }
+  template <typename Iter>
+  void last_gradient(Iter iter) {
+    if (!gradient_is_current_) {
+      compute_gradient_();
+    }
+    adjoint_.gradient(iter);
+  }
 
 private:
   real_type time_start_;
@@ -179,35 +174,48 @@ private:
     }
   }
 
-  // void compute_gradient() {
-  //   const auto n_adjoint = T::size_adjoint();
-  //   // These should be stored elsewhere; all the bits of bookkeeping
-  //   // for this, ideally in something that can be zero'd before first
-  //   // use.
-  //   std::vector<real_type> adjoint_curr (n_state_adjoint * n_groups);
-  //   std::vector<real_type> adjoint_next (n_state_adjoint * n_groups);
+  void compute_gradient_() {
+    // Probably we just need this on the R interface? We don't need to
+    // expose the gradient_is_current part though.
+    if (!adjoint_is_current_) {
+      throw std::runtime_error("adjoint is not current");
+    }
 
-  //   auto it_data = data_.last();
-  //   auto it_state = adjoint.last();
-  //   for (size_t irev = 0; irev < n_times, ++i, it_data -= n_groups_) {
-  //     const auto i = n_times - irev - 1;
-  //     // need the current time and dt, state, data, the previous and
-  //     // next adjoint data
-  //     model.adjoint_compare_data(it_data,
-  //                                it_state,
-  //                                adjoint_curr.begin(),
-  //                                adjoint_next.begin());
-  //     std::swap(adjoint_curr, adjoint_next);
-  //     it_state = model.adjoint_run_steps(step_[i], it_state, adjoint_curr, adjoint_next);
-  //   }
-  //   model.adjoint_initial(it_state, adjoint_curr, adjoint_next);
-  //   std::swap(adjoint_curr, adjoint_next);
+    const auto n_times = time_.size();
+    const auto n_adjoint = T::size_adjoint();
+    const auto adjoint_curr = adjoint_.curr();
+    const auto adjoint_next = adjoint_.next();
+    auto it_data = data_.last();
+    
+    const auto stride_state = n_particles_ * n_groups_ * n_state_;
+    const auto state = adjoint_.state();
+    const auto dt = model.dt();
 
-  //   std::copy_n(adjoint_curr + n_state_,
-  //               n_adjoint,
-  //               gradient_.begin());
-  //   gradient_is_current_ = true;
-  // }
+    // We do need the time here, and there are a couple of ways of
+    // getting it.
+    for (size_t irev = 0; irev < n_times; ++irev, it_data -= n_groups_) {
+      const auto i = n_times - irev - 1;
+      const auto time = time_start_ + step_tot_[i] * dt;
+      const auto n_steps = step_[i];
+      const auto state_i = state + step_tot_[i] * stride_state;
+      // Compare data
+      model.adjoint_compare_data(it_data, state_i, adjoint_curr, adjoint_next);
+      std::swap(adjoint_curr, adjoint_next);
+      // Then run the model backwards
+      model.adjoint_run_steps(n_steps, time,
+                              state, adjoint_curr, adjoint_next);
+      // Bookkeeping chore
+      if (n_steps % 2 == 1) {
+        std::swap(adjoint_curr, adjoint_next);
+      }
+    }
+
+    // Initial conditions go right at the end, and are surprisingly
+    // hard to work out.
+    model.adjoint_initial(time_start_, state, adjoint_curr, adjoint_next);
+    std::swap(adjoint_curr, adjoint_next);
+    gradient_is_current_ = true;
+  }
 };
 
 template <typename T>

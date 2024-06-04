@@ -132,12 +132,14 @@ public:
     adjoint_next[7] = adj_I0;
   }
 
-  static void adjoint_compare(real_type time,
-                              real_type dt,
-                              const real_type * state,
-                              const data_type& data,
-                              const real_type * adjoint,
-                              real_type * adjoint_next) {
+  static void adjoint_compare_data(real_type time,
+                                   real_type dt,
+                                   const real_type * state,
+                                   const real_type * adjoint,
+                                   const data_type& data,
+                                   const shared_state& shared,
+                                   internal_state& internal,
+                                   real_type * adjoint_next) {
     const real_type cases_inc = state[4];
     adjoint_next[0] = adjoint[0];
     adjoint_next[1] = adjoint[1];

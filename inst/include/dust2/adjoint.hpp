@@ -2,9 +2,15 @@
 
 #include <vector>
 
+// This class looks after all the bookkeeping for running an adjoint.
+// It is unconditionally included within an unfilter, but because it
+// can be quite large the memory is not allocated until it is actually
+// used the first time.  There are two points of initialisation -
+// setting up the history memory (which is large as it is all states
+// by all times) and then the adjoint memory (which is quite small but
+// requires the model to actually support adjoint running).
 template <typename real_type>
 class adjoint_data {
-
 public:
   adjoint_data(size_t n_state, size_t n_particles, size_t n_steps) :
     n_state_(n_state),
@@ -30,7 +36,8 @@ public:
 
   // TODO: it would be nicer to use iterators throughout I think,
   // though the end result will be identical?  Probably best to do
-  // this throughout really.
+  // this throughout really and try and remove as many raw pointers as
+  // possible.
   auto state() {
     return state_.data();
   }
