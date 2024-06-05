@@ -27,3 +27,42 @@ data_frame <- function(...) {
 dust2_file <- function(path) {
   system.file(path, mustWork = TRUE, package = "dust2")
 }
+
+
+glue_whisker <- function(template, data) {
+  glue::glue_data(data, template, .open = "{{", .close = "}}", .trim = FALSE)
+}
+
+
+read_lines <- function(path) {
+  paste(readLines(path), collapse = "\n")
+}
+
+
+dir_create <- function(path) {
+  for (p in path) {
+    dir.create(p, showWarnings = FALSE, recursive = TRUE)
+  }
+}
+
+
+is_directory <- function(path) {
+  file.info(path, extra_cols = FALSE)$isdir
+}
+
+
+squote <- function(x) {
+  sprintf("'%s'", x)
+}
+
+
+stop_unless_installed <- function(pkgs, call = NULL) {
+  err <- !vlapply(pkgs, requireNamespace, quietly = TRUE)
+  if (any(err)) {
+    msg <- pkgs[err]
+    cli::cli_abort(
+      c("Package{?s} missing for this functionality: {squote(msg)}",
+        i = "You can install these packages using 'install.packages()'"),
+      call = call)
+  }
+}

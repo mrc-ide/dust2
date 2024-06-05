@@ -36,5 +36,7 @@ reference:
       - dust_filter_run
       - dust_filter_last_history
       - dust_filter_rng_state
-    
+  - title: Creation
+    contents:
+      - dust_compile
       

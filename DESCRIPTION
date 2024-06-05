@@ -14,18 +14,23 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
 Language: en-GB
-Config/testthat/edition: 3
 URL: https://github.com/mrc-ide/dust2, https://mrc-ide.github.io/dust2
 BugReports: https://github.com/mrc-ide/dust2/issues
 Imports:
     cli,
-    decor,
     mcstate2,
     rlang
 LinkingTo:
     cpp11,
     mcstate2
 Suggests:
+    decor,
+    glue,
+    pkgbuild,
+    pkgload,
+    mockery,
     testthat (>= 3.0.0),
     withr
+Config/testthat/edition: 3
+Config/Needs/compile: decor, glue, pkgbuild, pkgload
 Remotes: mrc-ide/mcstate2

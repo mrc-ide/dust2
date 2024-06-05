@@ -3,6 +3,7 @@
 S3method(dim,dust_model)
 S3method(print,dust_model)
 S3method(print,dust_model_generator)
+export(dust_compile)
 export(dust_filter_create)
 export(dust_filter_last_history)
 export(dust_filter_rng_state)

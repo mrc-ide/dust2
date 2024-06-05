@@ -87,3 +87,10 @@ test_that("can validate parameter metdata", {
     "Expected an unnamed unquoted string argument to",
     fixed = TRUE)
 })
+
+
+test_that("require that file exists", {
+  expect_error(
+    parse_metadata(tempfile()),
+    "File '.+' does not exist")
+})
