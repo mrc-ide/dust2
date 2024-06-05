@@ -388,5 +388,69 @@ inline bool read_bool(cpp11::list args, const char * name,
   return value == R_NilValue ? default_value : to_bool(value, name);
 }
 
+inline void check_rank(cpp11::sexp r_dim, size_t rank, const char * name) {
+  const int len = R_NilValue ? 1 : LENGTH(r_dim);
+  if (len != static_cast<int>(rank)) {
+    if (rank == 1) {
+      cpp11::stop("Expected a vector for '%s'", name);
+    } else if (rank == 2) {
+      cpp11::stop("Expected a matrix for '%s'", name);
+    } else {
+      cpp11::stop("Expected a %d-dimensional array for '%s'", rank, name);
+    }
+  }
+}
+
+// We'll need an integer version of this later, but that's much rarer.
+inline double * read_real_array(cpp11::list pars,
+                                const std::vector<size_t>& len,
+                                const char * name) {
+  cpp11::sexp value = pars[name];
+  if (value == R_NilValue) {
+    cpp11::stop("A value is expected for '%s'", name);
+  }
+  if (TYPEOF(value) == INTSXP) {
+    value = cpp11::as_cpp<cpp11::doubles>(value);
+  }
+  if (TYPEOF(value) != REALSXP) {
+    cpp11::stop("Expected '%s' to be a real vector", name);
+  }
+  cpp11::sexp r_dim = cpp11::as_cpp<cpp11::sexp>(value.attr("dim"));
+  const auto rank = len.size();
+  check_rank(r_dim, rank, name);  
+  if (rank == 1) {
+    if (LENGTH(value) != static_cast<int>(len[0])) {
+        cpp11::stop("Expected '%s' to have length %d, but was %d",
+                    name, static_cast<int>(len[0]), LENGTH(value));
+    }
+  } else {
+    const int * dim = INTEGER(r_dim);
+    for (size_t i = 0; i < rank; ++i) {
+      if (dim[i] != static_cast<int>(len[i])) {
+        cpp11::stop("Expected dimension %d of '%s' to have length %d, but was %d",
+                    i + 1, name, static_cast<int>(len[i]), dim[i]);
+      }
+    }
+  }
+  return REAL(value);
+}
+
+inline std::vector<size_t> read_array_size(cpp11::list pars,
+                                           size_t rank,
+                                           const char * name) {
+  cpp11::sexp value = pars[name];
+  if (value == R_NilValue) {
+    cpp11::stop("A value is expected for '%s'", name);
+  }
+  cpp11::sexp r_dim = cpp11::as_cpp<cpp11::sexp>(value.attr("dim"));
+  check_rank(r_dim, rank, name);
+  if (rank == 1) {
+    const size_t len = LENGTH(value);
+    return std::vector<size_t>{len};
+  } else {
+    return std::vector<size_t>(INTEGER(r_dim), INTEGER(r_dim) + rank);
+  }
+}
+
 }
 }

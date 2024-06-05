@@ -33,6 +33,11 @@ inline bool read_bool(cpp11::list pars, const char * name);
 inline bool read_bool(cpp11::list pars, const char * name,
                       bool default_value);
 
+inline double* real_real_array(cpp11::list pars,
+                               const std::vector<size_t>& len,
+                               const char * name);
+
+
 }
 
 }
