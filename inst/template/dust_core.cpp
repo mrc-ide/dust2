@@ -44,6 +44,11 @@ SEXP dust2_cpu_{{name}}_rng_state(cpp11::sexp ptr) {
 }
 
 [[cpp11::register]]
+SEXP dust2_cpu_{{name}}_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
+  return dust2::r::dust2_cpu_set_rng_state<{{class}}>(ptr, r_rng_state);
+}
+
+[[cpp11::register]]
 SEXP dust2_cpu_{{name}}_set_time(cpp11::sexp ptr, cpp11::sexp r_time) {
   return dust2::r::dust2_cpu_set_time<{{class}}>(ptr, r_time);
 }
