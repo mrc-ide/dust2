@@ -1,5 +1,5 @@
 dust_model <- function(name, env = parent.env(parent.frame())) {
-  prefix <- sprintf("dust2_cpu_%s", name)
+  prefix <- sprintf("dust2_discrete_%s", name)
   ## I don't love that this requires running through sprintf() each
   ## time we create a model, but using a function for the model (see
   ## sir()), rather than an object, means that it's easier to think
@@ -7,7 +7,8 @@ dust_model <- function(name, env = parent.env(parent.frame())) {
   ## how DBI works.
   get_methods <- function(nms, prefix) {
     set_names(
-      lapply(sprintf("dust2_cpu_%s_%s", prefix, nms), function(x) env[[x]]),
+      lapply(sprintf("dust2_discrete_%s_%s", prefix, nms),
+             function(x) env[[x]]),
       nms)
   }
 

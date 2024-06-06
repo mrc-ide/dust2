@@ -8,14 +8,14 @@ namespace r {
 
 // TODO: this name must be changed!
 template <typename T>
-cpp11::sexp dust2_cpu_unfilter_alloc(cpp11::list r_pars,
-                                     cpp11::sexp r_time_start,
-                                     cpp11::sexp r_time,
-                                     cpp11::sexp r_dt,
-                                     cpp11::list r_data,
-                                     cpp11::sexp r_n_particles,
-                                     cpp11::sexp r_n_groups,
-                                     cpp11::sexp r_index) {
+cpp11::sexp dust2_discrete_unfilter_alloc(cpp11::list r_pars,
+                                          cpp11::sexp r_time_start,
+                                          cpp11::sexp r_time,
+                                          cpp11::sexp r_dt,
+                                          cpp11::list r_data,
+                                          cpp11::sexp r_n_particles,
+                                          cpp11::sexp r_n_groups,
+                                          cpp11::sexp r_index) {
   using rng_state_type = typename T::rng_state_type;
 
   auto n_particles = to_size(r_n_particles, "n_particles");
@@ -39,8 +39,8 @@ cpp11::sexp dust2_cpu_unfilter_alloc(cpp11::list r_pars,
   // we need.  At this point we could have constructed the model out
   // of one that exists already on the R side, but I think that's
   // going to feel weirder overall.
-  const auto model = dust2::dust_cpu<T>(shared, internal, time_start, dt, n_particles,
-                                 seed, deterministic);
+  const auto model = dust2::dust_discrete<T>(shared, internal, time_start, dt, n_particles,
+                                             seed, deterministic);
   const auto index = check_index(r_index, model.n_state(), "index");
 
   auto obj = new unfilter<T>(model, time_start, time, data, index);
@@ -62,9 +62,9 @@ cpp11::sexp dust2_cpu_unfilter_alloc(cpp11::list r_pars,
 }
 
 template <typename T>
-cpp11::sexp dust2_cpu_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
-                                   cpp11::sexp r_initial, bool save_history,
-                                   bool grouped) {
+cpp11::sexp dust2_discrete_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
+                                        cpp11::sexp r_initial, bool save_history,
+                                        bool grouped) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
   if (r_pars != R_NilValue) {
@@ -86,7 +86,7 @@ cpp11::sexp dust2_cpu_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
 }
 
 template <typename T>
-cpp11::sexp dust2_cpu_unfilter_last_history(cpp11::sexp ptr, bool grouped) {
+cpp11::sexp dust2_discrete_unfilter_last_history(cpp11::sexp ptr, bool grouped) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
   if (!obj->last_history_is_current()) {
@@ -114,15 +114,15 @@ cpp11::sexp dust2_cpu_unfilter_last_history(cpp11::sexp ptr, bool grouped) {
 }
 
 template <typename T>
-cpp11::sexp dust2_cpu_filter_alloc(cpp11::list r_pars,
-                                   cpp11::sexp r_time_start,
-                                   cpp11::sexp r_time,
-                                   cpp11::sexp r_dt,
-                                   cpp11::list r_data,
-                                   cpp11::sexp r_n_particles,
-                                   cpp11::sexp r_n_groups,
-                                   cpp11::sexp r_index,
-                                   cpp11::sexp r_seed) {
+cpp11::sexp dust2_discrete_filter_alloc(cpp11::list r_pars,
+                                        cpp11::sexp r_time_start,
+                                        cpp11::sexp r_time,
+                                        cpp11::sexp r_dt,
+                                        cpp11::list r_data,
+                                        cpp11::sexp r_n_particles,
+                                        cpp11::sexp r_n_groups,
+                                        cpp11::sexp r_index,
+                                        cpp11::sexp r_seed) {
   using rng_state_type = typename T::rng_state_type;
   using rng_seed_type = std::vector<typename rng_state_type::int_type>;
 
@@ -178,8 +178,8 @@ cpp11::sexp dust2_cpu_filter_alloc(cpp11::list r_pars,
                       it + rng_len, it + rng_len * (n_particles + 1));
   }
 
-  const auto model = dust2::dust_cpu<T>(shared, internal, time_start, dt, n_particles,
-                                        seed_model, deterministic);
+  const auto model = dust2::dust_discrete<T>(shared, internal, time_start, dt, n_particles,
+                                             seed_model, deterministic);
 
   const auto index = check_index(r_index, model.n_state(), "index");
 
@@ -202,9 +202,9 @@ cpp11::sexp dust2_cpu_filter_alloc(cpp11::list r_pars,
 }
 
 template <typename T>
-cpp11::sexp dust2_cpu_filter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
-                                 cpp11::sexp r_initial, bool save_history,
-                                 bool grouped) {
+cpp11::sexp dust2_discrete_filter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
+                                      cpp11::sexp r_initial, bool save_history,
+                                      bool grouped) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
   if (r_pars != R_NilValue) {
@@ -222,7 +222,7 @@ cpp11::sexp dust2_cpu_filter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
 
 // Can collapse with above
 template <typename T>
-cpp11::sexp dust2_cpu_filter_last_history(cpp11::sexp ptr, bool grouped) {
+cpp11::sexp dust2_discrete_filter_last_history(cpp11::sexp ptr, bool grouped) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
   if (!obj->last_history_is_current()) {
@@ -251,7 +251,7 @@ cpp11::sexp dust2_cpu_filter_last_history(cpp11::sexp ptr, bool grouped) {
 }
 
 template <typename T>
-cpp11::sexp dust2_cpu_filter_rng_state(cpp11::sexp ptr) {
+cpp11::sexp dust2_discrete_filter_rng_state(cpp11::sexp ptr) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
   using rng_state_type = typename T::rng_state_type;
 
@@ -278,7 +278,7 @@ cpp11::sexp dust2_cpu_filter_rng_state(cpp11::sexp ptr) {
 }
 
 template <typename T>
-cpp11::sexp dust2_cpu_filter_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
+cpp11::sexp dust2_discrete_filter_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
   using rng_state_type = typename T::rng_state_type;
   using rng_int_type = typename rng_state_type::int_type;
