@@ -4,6 +4,7 @@
 #include <cpp11.hpp>
 #include <dust2/r/discrete.hpp>
 #include <dust2/r/filter.hpp>
+#include <dust2/r/unfilter.hpp>
 
 [[cpp11::register]]
 SEXP dust2_discrete_sir_alloc(cpp11::list r_pars,

@@ -138,7 +138,7 @@ dust_generate_cpp <- function(system, config, data) {
     data$dust_version)
 
   if (config$has_compare) {
-    includes <- c(includes, "dust2/r/filter.hpp")
+    includes <- c(includes, "dust2/r/filter.hpp", "dust2/r/unfilter.hpp")
     code <- c(code,
               "",
               substitute_dust_template(data, "dust_compare.cpp"))

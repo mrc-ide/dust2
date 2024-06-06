@@ -34,8 +34,8 @@ system.  If \code{n_groups} is 1 or more, then this must be a list of length
 \item{seed}{Optionally, a seed.  Otherwise we respond to R's RNG seed on
 initialisation.}
 
-\item{deterministic}{Logical, indicating if the system should be allocated in
-deterministic mode.}
+\item{deterministic}{Logical, indicating if the system should be
+allocated in deterministic mode.}
 }
 \value{
 A \code{dust_system} object, with opaque format.
