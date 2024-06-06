@@ -65,15 +65,15 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>generator</dt>
-<dd><p>A model generator object, with class
-<code>dust_model_generator</code>.  The model must support <code>compare_data</code>
+<dd><p>A system generator object, with class
+<code>dust_system_generator</code>.  The system must support <code>compare_data</code>
 to be used with this function.</p></dd>
 
 
 <dt>pars</dt>
-<dd><p>Initial parameters for the model.  This should be the
+<dd><p>Initial parameters for the system.  This should be the
 <em>full</em> set of parameters; running the filter may update subsets
-using the model's underlying <code>update_pars</code> method.</p></dd>
+using the system's underlying <code>update_pars</code> method.</p></dd>
 
 
 <dt>time_start</dt>
@@ -84,18 +84,18 @@ value.</p></dd>
 
 <dt>time</dt>
 <dd><p>A vector of times, each of which has a corresponding
-entry in <code>data</code>.  The model will stop at each of these times to
+entry in <code>data</code>.  The system will stop at each of these times to
 compute the likelihood using the compare function.</p></dd>
 
 
 <dt>data</dt>
 <dd><p>The data to compare against.  This must be a list with
 the same length as <code>time</code>, each element of which corresponds to
-the data required for the model.  If the model is ungrouped then
+the data required for the system.  If the system is ungrouped then
 each element of <code>data</code> is a list with elements corresponding to
-whatever your model requires.  If your model is grouped, this
-should be a list with as many elements as your model has groups,
-with each element corresponding to the data your model requires.
+whatever your system requires.  If your system is grouped, this
+should be a list with as many elements as your system has groups,
+with each element corresponding to the data your system requires.
 We will likely introduce a friendlier data.frame based input
 soon.</p></dd>
 
@@ -111,20 +111,20 @@ slowly.</p></dd>
 
 
 <dt>dt</dt>
-<dd><p>The time step for the model, defaults to 1</p></dd>
+<dd><p>The time step for the system, defaults to 1</p></dd>
 
 
 <dt>index</dt>
 <dd><p>An optional index of states to extract.  If given,
-then we subset the model state on return.  You can use this to
-return fewer model states than the model ran with, to reorder
+then we subset the system state on return.  You can use this to
+return fewer system states than the system ran with, to reorder
 states, or to name them on exit (names present on the index will
 be copied into the rownames of the returned array).</p></dd>
 
 
 <dt>seed</dt>
-<dd><p>Optionally, a seed.  Otherwise we respond to R's RNG
-seed on initialisation.</p></dd>
+<dd><p>Optionally, a seed.  Otherwise we respond to R's RNG seed on
+initialisation.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -28,40 +28,40 @@
     <loc>https://mrc-ide.github.io/dust2/reference/dust_filter_run.html</loc>
   </url>
   <url>
-    <loc>https://mrc-ide.github.io/dust2/reference/dust_model_compare_data.html</loc>
+    <loc>https://mrc-ide.github.io/dust2/reference/dust_system_compare_data.html</loc>
   </url>
   <url>
-    <loc>https://mrc-ide.github.io/dust2/reference/dust_model_create.html</loc>
+    <loc>https://mrc-ide.github.io/dust2/reference/dust_system_create.html</loc>
   </url>
   <url>
-    <loc>https://mrc-ide.github.io/dust2/reference/dust_model_reorder.html</loc>
+    <loc>https://mrc-ide.github.io/dust2/reference/dust_system_reorder.html</loc>
   </url>
   <url>
-    <loc>https://mrc-ide.github.io/dust2/reference/dust_model_rng_state.html</loc>
+    <loc>https://mrc-ide.github.io/dust2/reference/dust_system_rng_state.html</loc>
   </url>
   <url>
-    <loc>https://mrc-ide.github.io/dust2/reference/dust_model_run.html</loc>
+    <loc>https://mrc-ide.github.io/dust2/reference/dust_system_run.html</loc>
   </url>
   <url>
-    <loc>https://mrc-ide.github.io/dust2/reference/dust_model_set_state.html</loc>
+    <loc>https://mrc-ide.github.io/dust2/reference/dust_system_set_state.html</loc>
   </url>
   <url>
-    <loc>https://mrc-ide.github.io/dust2/reference/dust_model_set_state_initial.html</loc>
+    <loc>https://mrc-ide.github.io/dust2/reference/dust_system_set_state_initial.html</loc>
   </url>
   <url>
-    <loc>https://mrc-ide.github.io/dust2/reference/dust_model_set_time.html</loc>
+    <loc>https://mrc-ide.github.io/dust2/reference/dust_system_set_time.html</loc>
   </url>
   <url>
-    <loc>https://mrc-ide.github.io/dust2/reference/dust_model_simulate.html</loc>
+    <loc>https://mrc-ide.github.io/dust2/reference/dust_system_simulate.html</loc>
   </url>
   <url>
-    <loc>https://mrc-ide.github.io/dust2/reference/dust_model_state.html</loc>
+    <loc>https://mrc-ide.github.io/dust2/reference/dust_system_state.html</loc>
   </url>
   <url>
-    <loc>https://mrc-ide.github.io/dust2/reference/dust_model_time.html</loc>
+    <loc>https://mrc-ide.github.io/dust2/reference/dust_system_time.html</loc>
   </url>
   <url>
-    <loc>https://mrc-ide.github.io/dust2/reference/dust_model_update_pars.html</loc>
+    <loc>https://mrc-ide.github.io/dust2/reference/dust_system_update_pars.html</loc>
   </url>
   <url>
     <loc>https://mrc-ide.github.io/dust2/reference/dust_unfilter_create.html</loc>
