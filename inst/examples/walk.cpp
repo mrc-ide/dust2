@@ -31,7 +31,7 @@ public:
   // than internal really.
   using internal_state = dust2::no_internal_state;
 
-  // This model cannot be used with a particle filter; it has no
+  // This system cannot be used with a particle filter; it has no
   // internal data type.
   using data_type = dust2::no_data;
 

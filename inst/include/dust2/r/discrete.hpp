@@ -36,9 +36,9 @@ SEXP dust2_discrete_alloc(cpp11::list r_pars,
                                   seed, deterministic);
   cpp11::external_pointer<dust_discrete<T>> ptr(obj, true, false);
 
-  // Later, we'll export a bit more back from the model (in particular
-  // models need to provide information about how they organise
-  // variables, ode models report computed control, etc.
+  // Later, we'll export a bit more back from the system (in particular
+  // systems need to provide information about how they organise
+  // variables, ode systems report computed control, etc.
   const auto grouped = n_groups > 0;
   cpp11::sexp r_group_names = R_NilValue;
   if (grouped) {
@@ -69,7 +69,7 @@ SEXP dust2_discrete_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {
   const auto time = check_time(r_time, "time");
   const auto curr = obj->time();
   if (time < curr) {
-    cpp11::stop("Can't run to time %f, model already at time %f",
+    cpp11::stop("Can't run to time %f, system already at time %f",
                 time, curr);
   }
   obj->run_to_time(time);
@@ -97,7 +97,7 @@ SEXP dust2_discrete_time(cpp11::sexp ptr) {
   return cpp11::as_sexp(obj->time());
 }
 
-// If this is a grouped model then we will return a matrix with
+// If this is a grouped system then we will return a matrix with
 // dimensions )(state x particle x group) and if we are ungrouped
 // (state x particle); the difference is really only apparent in the
 // case where we have a single group to drop.  In dust1 we had the

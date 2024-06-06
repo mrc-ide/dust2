@@ -16,7 +16,7 @@ struct no_shared_state {};
 namespace r {
 
 // The actual definitions of these are elsewhere, but these are
-// functions that models may use so we declare them here.
+// functions that systems may use so we declare them here.
 inline double read_real(cpp11::list pars, const char * name);
 inline double read_real(cpp11::list pars, const char * name,
                         double default_value);

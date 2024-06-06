@@ -13,29 +13,29 @@ public:
   using real_type = typename T::real_type;
   using data_type = typename T::data_type;
 
-  // We need to provide direct access to the model, because the user
+  // We need to provide direct access to the system, because the user
   // will want to set parameters in, and pull out state, etc.
-  dust_discrete<T> model;
+  dust_discrete<T> sys;
 
-  unfilter(dust_discrete<T> model_,
+  unfilter(dust_discrete<T> sys_,
            real_type time_start,
            std::vector<real_type> time,
            std::vector<data_type> data,
            std::vector<size_t> history_index) :
-    model(model_),
+    sys(sys_),
     time_start_(time_start),
     time_(time),
     data_(data),
-    n_state_(model.n_state()),
-    n_particles_(model.n_particles()),
-    n_groups_(model.n_groups()),
+    n_state_(sys.n_state()),
+    n_particles_(sys.n_particles()),
+    n_groups_(sys.n_groups()),
     ll_(n_particles_ * n_groups_, 0),
     ll_step_(n_particles_ * n_groups_, 0),
     history_index_(history_index),
     history_(history_index_.size() > 0 ? history_index_.size() : n_state_,
              n_particles_, n_groups_, time_.size()),
     history_is_current_(false) {
-    const auto dt = model_.dt();
+    const auto dt = sys_.dt();
     for (size_t i = 0; i < time_.size(); i++) {
       const auto t0 = i == 0 ? time_start_ : time_[i - 1];
       const auto t1 = time_[i];
@@ -50,9 +50,9 @@ public:
     }
     const auto n_times = step_.size();
 
-    model.set_time(time_start_);
+    sys.set_time(time_start_);
     if (set_initial) {
-      model.set_state_initial();
+      sys.set_state_initial();
     }
     std::fill(ll_.begin(), ll_.end(), 0);
 
@@ -60,17 +60,17 @@ public:
 
     auto it_data = data_.begin();
     for (size_t i = 0; i < n_times; ++i, it_data += n_groups_) {
-      model.run_steps(step_[i]); // just compute this at point of use?
-      model.compare_data(it_data, ll_step_.begin());
+      sys.run_steps(step_[i]); // just compute this at point of use?
+      sys.compare_data(it_data, ll_step_.begin());
       for (size_t j = 0; j < ll_.size(); ++j) {
         ll_[j] += ll_step_[j];
       }
       if (save_history) {
         if (use_index) {
-          history_.add_with_index(time_[i], model.state().begin(),
+          history_.add_with_index(time_[i], sys.state().begin(),
                                   history_index_.begin(), n_state_);
         } else {
-          history_.add(time_[i], model.state().begin());
+          history_.add(time_[i], sys.state().begin());
         }
       }
     }
@@ -115,21 +115,21 @@ public:
   using rng_state_type = typename T::rng_state_type;
   using rng_int_type = typename rng_state_type::int_type;
 
-  dust_discrete<T> model;
+  dust_discrete<T> sys;
 
-  filter(dust_discrete<T> model_,
+  filter(dust_discrete<T> sys_,
          real_type time_start,
          std::vector<real_type> time,
          std::vector<data_type> data,
          std::vector<size_t> history_index,
          const std::vector<rng_int_type>& seed) :
-    model(model_),
+    sys(sys_),
     time_start_(time_start),
     time_(time),
     data_(data),
-    n_state_(model.n_state()),
-    n_particles_(model.n_particles()),
-    n_groups_(model.n_groups()),
+    n_state_(sys.n_state()),
+    n_particles_(sys.n_particles()),
+    n_groups_(sys.n_groups()),
     rng_(n_groups_, seed, false),
     ll_(n_groups_ * n_particles_, 0),
     ll_step_(n_groups_ * n_particles_, 0),
@@ -139,7 +139,7 @@ public:
     history_is_current_(false) {
     // TODO: duplicated with the above, can be done generically though
     // it's not a lot of code.
-    const auto dt = model_.dt();
+    const auto dt = sys_.dt();
     for (size_t i = 0; i < time_.size(); i++) {
       const auto t0 = i == 0 ? time_start_ : time_[i - 1];
       const auto t1 = time_[i];
@@ -154,9 +154,9 @@ public:
     }
     const auto n_times = step_.size();
 
-    model.set_time(time_start_);
+    sys.set_time(time_start_);
     if (set_initial) {
-      model.set_state_initial();
+      sys.set_state_initial();
     }
     std::fill(ll_.begin(), ll_.end(), 0);
 
@@ -168,8 +168,8 @@ public:
 
     auto it_data = data_.begin();
     for (size_t i = 0; i < n_times; ++i, it_data += n_groups_) {
-      model.run_steps(step_[i]);
-      model.compare_data(it_data, ll_step_.begin());
+      sys.run_steps(step_[i]);
+      sys.compare_data(it_data, ll_step_.begin());
 
       for (size_t i = 0; i < n_groups_; ++i) {
         const auto offset = i * n_particles_;
@@ -190,14 +190,14 @@ public:
         details::resample_weight(n_particles_, w, u, idx);
       }
 
-      model.reorder(index.begin());
+      sys.reorder(index.begin());
 
       if (save_history) {
         if (use_index) {
-          history_.add_with_index(time_[i], model.state().begin(), index.begin(),
+          history_.add_with_index(time_[i], sys.state().begin(), index.begin(),
                                   history_index_.begin(), n_state_);
         } else {
-          history_.add(time_[i], model.state().begin(), index.begin());
+          history_.add(time_[i], sys.state().begin(), index.begin());
         }
       }
       // save snapshots (perhaps)

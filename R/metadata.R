@@ -1,13 +1,13 @@
-## Each model will be marked up with decor-style comments, this allows
-## us to describe a model without needing to try and parse anything,
+## Each system will be marked up with decor-style comments, this allows
+## us to describe a system without needing to try and parse anything,
 ## which is fraught at best with C++.
 ##
 ## The main things we need to know are:
 ##
 ## * what is the name of the class we are wrapping?
-## * what should the name be of the model exported to R (if different)
+## * what should the name be of the system exported to R (if different)
 ## * what parameters does it accept (optional?)
-## * does the model support comparison with data?
+## * does the system support comparison with data?
 ## * what data entries does it accept (optional?)
 ##
 ## Later, we'll want to do the same thing with GPU support if that
@@ -31,7 +31,7 @@ parse_metadata <- function(filename, call = NULL) {
 
 ## All of the errors here could benefit from line number and context
 ## information, but it's not that important as users should never see
-## these errors - models will mostly be written by odin
+## these errors - systems will mostly be written by odin
 parse_metadata_class <- function(data, call = NULL) {
   data <- find_attribute_value_single(data, "dust2::class", required = TRUE,
                                       call = call)

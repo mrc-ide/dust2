@@ -1,8 +1,8 @@
 sir <- function() {
-  dust_model("sir")
+  dust_system_generator("sir")
 }
 
 
 walk <- function() {
-  dust_model("walk")
+  dust_system_generator("walk")
 }
