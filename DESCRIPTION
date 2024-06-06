@@ -24,6 +24,7 @@ LinkingTo:
     cpp11,
     mcstate2
 Suggests:
+    cpp11,
     decor,
     glue,
     pkgbuild,
@@ -32,5 +33,5 @@ Suggests:
     testthat (>= 3.0.0),
     withr
 Config/testthat/edition: 3
-Config/Needs/compile: decor, glue, pkgbuild, pkgload
+Config/Needs/compile: cpp11, decor, glue, pkgbuild, pkgload
 Remotes: mrc-ide/mcstate2
