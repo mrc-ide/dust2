@@ -210,7 +210,7 @@ validate_cpp_std <- function(cpp_std, call = NULL) {
 
 
 dust_compile_needs <- function() {
-  strsplit(packageDescription("dust2")[["Config/Needs/compile"]],
+  strsplit(utils::packageDescription("dust2")[["Config/Needs/compile"]],
            ",\\s+")[[1]]
 }
 
