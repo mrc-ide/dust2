@@ -20,14 +20,6 @@ dust2_discrete_sir_time <- function(ptr) {
   .Call(`_dust2_dust2_discrete_sir_time`, ptr)
 }
 
-dust2_discrete_sir_set_time <- function(ptr, r_time) {
-  .Call(`_dust2_dust2_discrete_sir_set_time`, ptr, r_time)
-}
-
-dust2_discrete_sir_update_pars <- function(ptr, pars, grouped) {
-  .Call(`_dust2_dust2_discrete_sir_update_pars`, ptr, pars, grouped)
-}
-
 dust2_discrete_sir_set_state_initial <- function(ptr) {
   .Call(`_dust2_dust2_discrete_sir_set_state_initial`, ptr)
 }
@@ -48,12 +40,20 @@ dust2_discrete_sir_set_rng_state <- function(ptr, r_rng_state) {
   .Call(`_dust2_dust2_discrete_sir_set_rng_state`, ptr, r_rng_state)
 }
 
-dust2_discrete_sir_compare_data <- function(ptr, r_data, grouped) {
-  .Call(`_dust2_dust2_discrete_sir_compare_data`, ptr, r_data, grouped)
+dust2_discrete_sir_set_time <- function(ptr, r_time) {
+  .Call(`_dust2_dust2_discrete_sir_set_time`, ptr, r_time)
+}
+
+dust2_discrete_sir_update_pars <- function(ptr, pars, grouped) {
+  .Call(`_dust2_dust2_discrete_sir_update_pars`, ptr, pars, grouped)
 }
 
 dust2_discrete_sir_simulate <- function(ptr, r_times, r_index, grouped) {
   .Call(`_dust2_dust2_discrete_sir_simulate`, ptr, r_times, r_index, grouped)
+}
+
+dust2_discrete_sir_compare_data <- function(ptr, r_data, grouped) {
+  .Call(`_dust2_dust2_discrete_sir_compare_data`, ptr, r_data, grouped)
 }
 
 dust2_discrete_sir_unfilter_alloc <- function(r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_index) {

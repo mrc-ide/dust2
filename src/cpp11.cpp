@@ -41,20 +41,6 @@ extern "C" SEXP _dust2_dust2_discrete_sir_time(SEXP ptr) {
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_discrete_sir_set_time(cpp11::sexp ptr, cpp11::sexp r_time);
-extern "C" SEXP _dust2_dust2_discrete_sir_set_time(SEXP ptr, SEXP r_time) {
-  BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_sir_set_time(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time)));
-  END_CPP11
-}
-// sir.cpp
-SEXP dust2_discrete_sir_update_pars(cpp11::sexp ptr, cpp11::list pars, bool grouped);
-extern "C" SEXP _dust2_dust2_discrete_sir_update_pars(SEXP ptr, SEXP pars, SEXP grouped) {
-  BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_sir_update_pars(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(pars), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
-  END_CPP11
-}
-// sir.cpp
 SEXP dust2_discrete_sir_set_state_initial(cpp11::sexp ptr);
 extern "C" SEXP _dust2_dust2_discrete_sir_set_state_initial(SEXP ptr) {
   BEGIN_CPP11
@@ -90,10 +76,17 @@ extern "C" SEXP _dust2_dust2_discrete_sir_set_rng_state(SEXP ptr, SEXP r_rng_sta
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_discrete_sir_compare_data(cpp11::sexp ptr, cpp11::sexp r_data, bool grouped);
-extern "C" SEXP _dust2_dust2_discrete_sir_compare_data(SEXP ptr, SEXP r_data, SEXP grouped) {
+SEXP dust2_discrete_sir_set_time(cpp11::sexp ptr, cpp11::sexp r_time);
+extern "C" SEXP _dust2_dust2_discrete_sir_set_time(SEXP ptr, SEXP r_time) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_sir_compare_data(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_data), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+    return cpp11::as_sexp(dust2_discrete_sir_set_time(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time)));
+  END_CPP11
+}
+// sir.cpp
+SEXP dust2_discrete_sir_update_pars(cpp11::sexp ptr, cpp11::list pars, bool grouped);
+extern "C" SEXP _dust2_dust2_discrete_sir_update_pars(SEXP ptr, SEXP pars, SEXP grouped) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_discrete_sir_update_pars(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(pars), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
   END_CPP11
 }
 // sir.cpp
@@ -101,6 +94,13 @@ SEXP dust2_discrete_sir_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::se
 extern "C" SEXP _dust2_dust2_discrete_sir_simulate(SEXP ptr, SEXP r_times, SEXP r_index, SEXP grouped) {
   BEGIN_CPP11
     return cpp11::as_sexp(dust2_discrete_sir_simulate(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_times), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+  END_CPP11
+}
+// sir.cpp
+SEXP dust2_discrete_sir_compare_data(cpp11::sexp ptr, cpp11::sexp r_data, bool grouped);
+extern "C" SEXP _dust2_dust2_discrete_sir_compare_data(SEXP ptr, SEXP r_data, SEXP grouped) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_discrete_sir_compare_data(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_data), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
   END_CPP11
 }
 // sir.cpp

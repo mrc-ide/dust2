@@ -25,3 +25,4 @@
 ^\.Rproj\.user$
 ^_pkgdown\.yml$
 ^\.gitattributes$
+^inst/dust$

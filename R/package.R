@@ -49,12 +49,11 @@
 dust_package <- function(path, quiet = FALSE) {
   call <- environment()
   ## 1. check that the package is legit
-  desc <- package_validate_root(path, call)
+  pkg <- package_validate_root(path, call)
   path_dust <- file.path(path, "inst/dust")
   path_src <- file.path(path, "src")
   path_r <- file.path(path, "R")
 
-  pkg <- desc$get_field("Package")
   if (!quiet) {
     cli::cli_alert_info("Working in package '{pkg}' at '{path}'")
   }
@@ -112,9 +111,12 @@ package_validate_root <- function(path, call) {
   }
 
   desc <- pkgload::pkg_desc(path)
-  package_validate_has_dep(desc, "dust2", "Imports")
+  pkg <- desc$get_field("Package")
+  if (pkg != "dust2") {
+    package_validate_has_dep(desc, "dust2", "Imports")
+    package_validate_has_dep(desc, "dust2", "LinkingTo")
+  }
   package_validate_has_dep(desc, "cpp11", "LinkingTo")
-  package_validate_has_dep(desc, "dust2", "LinkingTo")
   package_validate_has_dep(desc, "mcstate2", "LinkingTo")
 
   name <- desc$get_field("Package")
@@ -125,7 +127,7 @@ package_validate_root <- function(path, call) {
   }
   package_validate_namespace(file.path(path, "NAMESPACE"), name)
 
-  desc
+  pkg
 }
 
 
