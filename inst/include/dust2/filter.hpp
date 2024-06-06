@@ -1,6 +1,6 @@
 #pragma once
 
-#include <dust2/cpu.hpp>
+#include <dust2/discrete.hpp>
 #include <dust2/filter_details.hpp>
 #include <dust2/history.hpp>
 #include <mcstate/random/random.hpp>
@@ -15,9 +15,9 @@ public:
 
   // We need to provide direct access to the model, because the user
   // will want to set parameters in, and pull out state, etc.
-  dust_cpu<T> model;
+  dust_discrete<T> model;
 
-  unfilter(dust_cpu<T> model_,
+  unfilter(dust_discrete<T> model_,
            real_type time_start,
            std::vector<real_type> time,
            std::vector<data_type> data,
@@ -115,9 +115,9 @@ public:
   using rng_state_type = typename T::rng_state_type;
   using rng_int_type = typename rng_state_type::int_type;
 
-  dust_cpu<T> model;
+  dust_discrete<T> model;
 
-  filter(dust_cpu<T> model_,
+  filter(dust_discrete<T> model_,
          real_type time_start,
          std::vector<real_type> time,
          std::vector<data_type> data,

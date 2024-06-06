@@ -130,7 +130,7 @@ dust_generate <- function(config, filename, linking_to, cpp_std,
 
 
 dust_generate_cpp <- function(model, config, data) {
-  includes <- c("cpp11.hpp", "dust2/r/cpu.hpp")
+  includes <- c("cpp11.hpp", "dust2/r/discrete.hpp")
   code <- substitute_dust_template(data, "dust_core.cpp")
 
   header <- sprintf(

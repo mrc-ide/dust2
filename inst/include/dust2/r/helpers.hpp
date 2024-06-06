@@ -4,7 +4,7 @@
 #include <numeric>
 #include <vector>
 #include <dust2/common.hpp>
-#include <dust2/cpu.hpp>
+#include <dust2/discrete.hpp>
 #include <cpp11.hpp>
 
 namespace dust2 {
@@ -236,8 +236,10 @@ std::vector<typename T::internal_state> build_internal(std::vector<typename T::s
   return internal;
 }
 
+// TODO: Probably move this elsewhere so that we can drop the include of
+// discrete.hpp here
 template <typename T>
-void update_pars(dust_cpu<T>& obj, cpp11::list r_pars, bool grouped) {
+void update_pars(dust_discrete<T>& obj, cpp11::list r_pars, bool grouped) {
   if (grouped) {
     const auto n_groups = obj.n_groups();
     if (r_pars.size() != static_cast<int>(n_groups)) {
@@ -292,7 +294,7 @@ std::vector<typename T::data_type> check_data(cpp11::list r_data,
 }
 
 template <typename T>
-void set_state(dust_cpu<T>& obj, cpp11::sexp r_state, bool grouped) {
+void set_state(dust_discrete<T>& obj, cpp11::sexp r_state, bool grouped) {
   // Suppose that we have a n_state x n_particles x n_groups grouped
   // system, we then require that we have a state array with rank 3;
   // for an ungrouped system this will be rank 2 array.

@@ -5,7 +5,7 @@
 namespace dust2 {
 
 template <typename T>
-class dust_cpu {
+class dust_discrete {
 public:
   using model_type = T;
   using real_type = typename T::real_type;
@@ -16,13 +16,13 @@ public:
 
   using rng_int_type = typename rng_state_type::int_type;
 
-  dust_cpu(std::vector<shared_state> shared,
-           std::vector<internal_state> internal,
-           real_type time,
-           real_type dt,
-           size_t n_particles, // per group
-           const std::vector<rng_int_type>& seed,
-           bool deterministic) :
+  dust_discrete(std::vector<shared_state> shared,
+                std::vector<internal_state> internal,
+                real_type time,
+                real_type dt,
+                size_t n_particles, // per group
+                const std::vector<rng_int_type>& seed,
+                bool deterministic) :
     n_state_(T::size(shared[0])),
     n_particles_(n_particles),
     n_groups_(shared.size()),
