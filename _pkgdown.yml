@@ -4,28 +4,28 @@ template:
   bootstrap: 5
 
 reference:
-  - title: Models
+  - title: Systems
     contents:
-      - dust_model_create
-      - dust_model_state
-      - dust_model_set_state
-      - dust_model_set_state_initial
-      - dust_model_time
-      - dust_model_set_time
-      - dust_model_rng_state
-      - dust_model_set_rng_state
-      - dust_model_update_pars
+      - dust_system_create
+      - dust_system_state
+      - dust_system_set_state
+      - dust_system_set_state_initial
+      - dust_system_time
+      - dust_system_set_time
+      - dust_system_rng_state
+      - dust_system_set_rng_state
+      - dust_system_update_pars
   - subtitle: Running
     contents:
-      - dust_model_run_steps
-      - dust_model_run_to_time
-      - dust_model_simulate
+      - dust_system_run_steps
+      - dust_system_run_to_time
+      - dust_system_simulate
   - subtitle: Other
     contents:
-      - dust_model_reorder
+      - dust_system_reorder
   - title: Likelihood
     contents:
-      - dust_model_compare_data
+      - dust_system_compare_data
   - subtitle: Deterministic unfilter
     contents:
       - dust_unfilter_create

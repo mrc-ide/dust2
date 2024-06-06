@@ -15,7 +15,7 @@ provided, parameters are not updated}
 
 \item{initial}{Optional initial conditions, as a matrix (state x
 particle) or 3d array (state x particle x group).  If not
-provided, the model initial conditions are used.}
+provided, the system initial conditions are used.}
 
 \item{save_history}{Logical, indicating if the simulation history
 should be saved while the simulation runs; this has a small

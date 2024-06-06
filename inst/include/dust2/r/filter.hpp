@@ -35,18 +35,18 @@ cpp11::sexp dust2_discrete_unfilter_alloc(cpp11::list r_pars,
   auto seed = mcstate::random::r::as_rng_seed<rng_state_type>(R_NilValue);
   const auto deterministic = true;
 
-  // Then allocate the model; this pulls together almost all the data
-  // we need.  At this point we could have constructed the model out
+  // Then allocate the system; this pulls together almost all the data
+  // we need.  At this point we could have constructed the system out
   // of one that exists already on the R side, but I think that's
   // going to feel weirder overall.
-  const auto model = dust2::dust_discrete<T>(shared, internal, time_start, dt, n_particles,
+  const auto system = dust2::dust_discrete<T>(shared, internal, time_start, dt, n_particles,
                                              seed, deterministic);
-  const auto index = check_index(r_index, model.n_state(), "index");
+  const auto index = check_index(r_index, system.n_state(), "index");
 
-  auto obj = new unfilter<T>(model, time_start, time, data, index);
+  auto obj = new unfilter<T>(system, time_start, time, data, index);
   cpp11::external_pointer<unfilter<T>> ptr(obj, true, false);
 
-  cpp11::sexp r_n_state = cpp11::as_sexp(obj->model.n_state());
+  cpp11::sexp r_n_state = cpp11::as_sexp(obj->sys.n_state());
   cpp11::sexp r_group_names = R_NilValue;
   if (grouped) {
     r_group_names = r_pars.attr("names");
@@ -68,15 +68,15 @@ cpp11::sexp dust2_discrete_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
   if (r_pars != R_NilValue) {
-    update_pars(obj->model, cpp11::as_cpp<cpp11::list>(r_pars), grouped);
+    update_pars(obj->sys, cpp11::as_cpp<cpp11::list>(r_pars), grouped);
   }
   if (r_initial != R_NilValue) {
-    set_state(obj->model, r_initial, grouped);
+    set_state(obj->sys, r_initial, grouped);
   }
   obj->run(r_initial == R_NilValue, save_history);
 
-  const auto n_groups = obj->model.n_groups();
-  const auto n_particles = obj->model.n_particles();
+  const auto n_groups = obj->sys.n_groups();
+  const auto n_particles = obj->sys.n_particles();
   cpp11::writable::doubles ret(n_groups * n_particles);
   obj->last_log_likelihood(REAL(ret));
   if (grouped && n_particles > 1) {
@@ -144,23 +144,23 @@ cpp11::sexp dust2_discrete_filter_alloc(cpp11::list r_pars,
   const auto deterministic = false;
 
   // Create all the required rng states across the filter and the
-  // model, in a reasonable way.  We need to make this slightly easier
+  // system, in a reasonable way.  We need to make this slightly easier
   // to do from mcstate really.  Expand the state to give all the
   // state required by the filter (n_groups streams worth) and the
-  // model (n_groups * n_particles worth, though the last bit of
-  // expansion could be done by the model itself instead?)
+  // system (n_groups * n_particles worth, though the last bit of
+  // expansion could be done by the system itself instead?)
   //
   // There are two ways of sorting out the state here:
   //
   // 1. we could take the first n_groups states for the filter and the
-  // remaining for the models.  This has the nice property that we can
-  // expand the model state later if we support growing models
+  // remaining for the systems.  This has the nice property that we can
+  // expand the system state later if we support growing systems
   // (mrc-5355).  However, it has the undesirable consequence that a
   // filter with multiple groups will stream differently to a filter
   // containing a the first group only.
   //
   // 2. we take each block of (1+n_particles) states for each group,
-  // giving the first to the filter and the rest to the model.  This
+  // giving the first to the filter and the rest to the system.  This
   // means that we can change the number of groups without affecting
   // the results, though we can't change the number of particles as
   // easily.
@@ -169,24 +169,24 @@ cpp11::sexp dust2_discrete_filter_alloc(cpp11::list r_pars,
   const auto rng_state = mcstate::random::prng<rng_state_type>(n_streams, seed, deterministic).export_state();
   const auto rng_len = rng_state_type::size();
   rng_seed_type seed_filter;
-  rng_seed_type seed_model;
+  rng_seed_type seed_system;
   for (size_t i = 0; i < n_groups_effective; ++i) {
     const auto it = rng_state.begin() + i * rng_len * (n_particles + 1);
     seed_filter.insert(seed_filter.end(),
                        it, it + rng_len);
-    seed_model.insert(seed_model.end(),
+    seed_system.insert(seed_system.end(),
                       it + rng_len, it + rng_len * (n_particles + 1));
   }
 
-  const auto model = dust2::dust_discrete<T>(shared, internal, time_start, dt, n_particles,
-                                             seed_model, deterministic);
+  const auto system = dust2::dust_discrete<T>(shared, internal, time_start, dt, n_particles,
+                                             seed_system, deterministic);
 
-  const auto index = check_index(r_index, model.n_state(), "index");
+  const auto index = check_index(r_index, system.n_state(), "index");
 
-  auto obj = new filter<T>(model, time_start, time, data, index, seed_filter);
+  auto obj = new filter<T>(system, time_start, time, data, index, seed_filter);
   cpp11::external_pointer<filter<T>> ptr(obj, true, false);
 
-  cpp11::sexp r_n_state = cpp11::as_sexp(obj->model.n_state());
+  cpp11::sexp r_n_state = cpp11::as_sexp(obj->sys.n_state());
   cpp11::sexp r_group_names = R_NilValue;
   if (grouped) {
     r_group_names = r_pars.attr("names");
@@ -208,14 +208,14 @@ cpp11::sexp dust2_discrete_filter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
   if (r_pars != R_NilValue) {
-    update_pars(obj->model, cpp11::as_cpp<cpp11::list>(r_pars), grouped);
+    update_pars(obj->sys, cpp11::as_cpp<cpp11::list>(r_pars), grouped);
   }
   if (r_initial != R_NilValue) {
-    set_state(obj->model, r_initial, grouped);
+    set_state(obj->sys, r_initial, grouped);
   }
   obj->run(r_initial == R_NilValue, save_history);
 
-  cpp11::writable::doubles ret(obj->model.n_groups());
+  cpp11::writable::doubles ret(obj->sys.n_groups());
   obj->last_log_likelihood(REAL(ret));
   return ret;
 }
@@ -258,19 +258,19 @@ cpp11::sexp dust2_discrete_filter_rng_state(cpp11::sexp ptr) {
   // Undo the construction as above so that the rng state comes out in
   // the same format it goes in, as a single raw vector.
   const auto& state_filter = obj->rng_state();
-  const auto& state_model = obj->model.rng_state();
-  const auto n_particles = obj->model.n_particles();
-  const auto n_groups = obj->model.n_groups();
+  const auto& state_system = obj->sys.rng_state();
+  const auto n_particles = obj->sys.n_particles();
+  const auto n_groups = obj->sys.n_groups();
   const auto n_state = rng_state_type::size();
   const auto n_bytes = sizeof(typename rng_state_type::int_type);
   const auto n_bytes_state = n_bytes * n_state;
-  cpp11::writable::raws ret(n_bytes * (state_filter.size() + state_model.size()));
+  cpp11::writable::raws ret(n_bytes * (state_filter.size() + state_system.size()));
   for (size_t i = 0; i < n_groups; ++i) {
     std::memcpy(RAW(ret) + i * n_bytes_state * (n_particles + 1),
                 state_filter.data() + i * n_state,
                 n_bytes_state);
     std::memcpy(RAW(ret) + i * n_bytes_state * (n_particles + 1) + n_bytes_state,
-                state_model.data() + i * n_state * n_particles,
+                state_system.data() + i * n_state * n_particles,
                 n_bytes_state * n_particles);
   }
 
@@ -283,15 +283,15 @@ cpp11::sexp dust2_discrete_filter_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_r
   using rng_state_type = typename T::rng_state_type;
   using rng_int_type = typename rng_state_type::int_type;
 
-  const auto n_particles = obj->model.n_particles();
-  const auto n_groups = obj->model.n_groups();
+  const auto n_particles = obj->sys.n_particles();
+  const auto n_groups = obj->sys.n_groups();
   const auto n_streams = n_groups * (1 + n_particles);
   const auto n_state = rng_state_type::size();
   const auto rng_state =
     check_rng_state<rng_state_type>(r_rng_state, n_streams, "rng_state");
 
   std::vector<rng_int_type> state_filter(n_groups * n_state);
-  std::vector<rng_int_type> state_model(n_groups * n_particles * n_state);
+  std::vector<rng_int_type> state_system(n_groups * n_particles * n_state);
   for (size_t i = 0; i < n_groups; ++i) {
     const auto src = rng_state.begin() + i * (1 + n_particles) * n_state;
     std::copy_n(src,
@@ -299,11 +299,11 @@ cpp11::sexp dust2_discrete_filter_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_r
                 state_filter.begin() + i * n_state);
     std::copy_n(src + n_state,
                 n_state * n_particles,
-                state_model.begin() + i * n_state * n_particles);
+                state_system.begin() + i * n_state * n_particles);
   }
 
   obj->set_rng_state(state_filter);
-  obj->model.set_rng_state(state_model);
+  obj->sys.set_rng_state(state_system);
 
   return R_NilValue;
 }

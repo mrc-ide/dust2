@@ -1,7 +1,7 @@
-dust_model <- function(name, env = parent.env(parent.frame())) {
+dust_system_generator <- function(name, env = parent.env(parent.frame())) {
   prefix <- sprintf("dust2_discrete_%s", name)
   ## I don't love that this requires running through sprintf() each
-  ## time we create a model, but using a function for the model (see
+  ## time we create a generator, but using a function for the generator (see
   ## sir()), rather than an object, means that it's easier to think
   ## about the dependencies among packages.  This is also essentially
   ## how DBI works.
@@ -42,24 +42,23 @@ dust_model <- function(name, env = parent.env(parent.frame())) {
               properties = properties)
   ## TODO: check that alloc exists, then go through and add
   ## properties.
-  class(ret) <- "dust_model_generator"
+  class(ret) <- "dust_system_generator"
   ret
 }
 
 
-##' Create a dust object from a model generator.  This allocates a
-##' model and sets an initial set of parameters.  Once created you can
-##' use other dust functions to interact with it.
+##' Create a dust system object from a system generator.  This allocates a
+##' system and sets an initial set of parameters.  Once created you can use
+##' other dust functions to interact with it.
 ##'
 ##' @title Create a dust object
 ##'
-##' @param generator A model generator object, with class
-##'   `dust_model_generator`
+##' @param generator A system generator object, with class
+##'   `dust_system_generator`
 ##'
-##' @param pars A list of parameters.  The format of this will depend
-##'   on the model.  If `n_groups` is 1 or more, then this must be a
-##'   list of length `n_groups` where each element
-##'   is a list of parameters for your model.
+##' @param pars A list of parameters.  The format of this will depend on the
+##'   system.  If `n_groups` is 1 or more, then this must be a list of length
+##'   `n_groups` where each element is a list of parameters for your system.
 ##'
 ##' @param n_particles The number of particles to create.
 ##'
@@ -67,21 +66,21 @@ dust_model <- function(name, env = parent.env(parent.frame())) {
 ##'
 ##' @param time The initial time, defaults to 0
 ##'
-##' @param dt The time step for the model, defaults to 1
+##' @param dt The time step for the system, defaults to 1
 ##'
-##' @param seed Optionally, a seed.  Otherwise we respond to R's RNG
-##'   seed on initialisation.
+##' @param seed Optionally, a seed.  Otherwise we respond to R's RNG seed on
+##'   initialisation.
 ##'
-##' @param deterministic Logical, indicating if the model should be
+##' @param deterministic Logical, indicating if the system should be
 ##'   allocated in deterministic mode.
 ##'
-##' @return A `dust_model` object, with opaque format.
+##' @return A `dust_system` object, with opaque format.
 ##'
 ##' @export
-dust_model_create <- function(generator, pars, n_particles, n_groups = 0,
-                              time = 0, dt = 1,
-                              seed = NULL, deterministic = FALSE) {
-  check_is_dust_model_generator(generator, substitute(generator))
+dust_system_create <- function(generator, pars, n_particles, n_groups = 0,
+                               time = 0, dt = 1,
+                               seed = NULL, deterministic = FALSE) {
+  check_is_dust_system_generator(generator, substitute(generator))
   res <- generator$methods$alloc(pars, time, dt, n_particles, n_groups,
                                  seed, deterministic)
   ## Here, we augment things slightly
@@ -91,39 +90,39 @@ dust_model_create <- function(generator, pars, n_particles, n_groups = 0,
   res$deterministic <- deterministic
   res$methods <- generator$methods
   res$properties <- generator$properties
-  class(res) <- "dust_model"
+  class(res) <- "dust_system"
   res
 }
 
 
-##' Extract model state
+##' Extract system state
 ##'
-##' @title Extract model state
+##' @title Extract system state
 ##'
-##' @param model A `dust_model` object
+##' @param sys A `dust_system` object
 ##'
-##' @return An array of model state.  If your model is ungrouped, then
+##' @return An array of system state.  If your system is ungrouped, then
 ##'   this has two dimensions (state, particle).  If grouped, this has
 ##'   three dimensions (state, particle, group)
 ##'
-##' @seealso [dust_model_set_state()] for setting state and
-##'   [dust_model_set_state_initial()] for setting state to the
-##'   model-specific initial conditions.
+##' @seealso [dust_system_set_state()] for setting state and
+##'   [dust_system_set_state_initial()] for setting state to the
+##'   system-specific initial conditions.
 ##'
 ##' @export
-dust_model_state <- function(model) {
-  check_is_dust_model(model)
-  model$methods$state(model$ptr, model$grouped)
+dust_system_state <- function(sys) {
+  check_is_dust_system(sys)
+  sys$methods$state(sys$ptr, sys$grouped)
 }
 
 
-##' Set model state.  Takes a multidimensional array (2- or 3d
-##' depending on if the model is grouped or not).  Dimensions of
+##' Set system state.  Takes a multidimensional array (2- or 3d
+##' depending on if the system is grouped or not).  Dimensions of
 ##' length 1 will be recycled as appropriate.
 ##'
-##' @title Set model state
+##' @title Set system state
 ##'
-##' @inheritParams dust_model_state
+##' @inheritParams dust_system_state
 ##'
 ##' @param state A matrix or array of state.  If ungrouped, the
 ##'   dimension order expected is state x particle.  If grouped the
@@ -131,52 +130,52 @@ dust_model_state <- function(model) {
 ##'
 ##' @return Nothing, called for side effects only
 ##' @export
-dust_model_set_state <- function(model, state) {
-  check_is_dust_model(model)
-  model$methods$set_state(model$ptr, state, model$grouped)
+dust_system_set_state <- function(sys, state) {
+  check_is_dust_system(sys)
+  sys$methods$set_state(sys$ptr, state, sys$grouped)
   invisible()
 }
 
 
-##' Set model state from a model's initial conditions.  This may depend
+##' Set system state from a system's initial conditions.  This may depend
 ##' on the current time.
 ##'
-##' @title Set model state to initial conditions
+##' @title Set system state to initial conditions
 ##'
-##' @inheritParams dust_model_state
+##' @inheritParams dust_system_state
 ##'
 ##' @return Nothing, called for side effects only
 ##' @export
-dust_model_set_state_initial <- function(model) {
-  check_is_dust_model(model)
-  model$methods$set_state_initial(model$ptr)
+dust_system_set_state_initial <- function(sys) {
+  check_is_dust_system(sys)
+  sys$methods$set_state_initial(sys$ptr)
   invisible()
 }
 
 
-##' Fetch the current time from the model.
+##' Fetch the current time from the system.
 ##'
-##' @title Fetch model time
+##' @title Fetch system time
 ##'
-##' @inheritParams dust_model_state
+##' @inheritParams dust_system_state
 ##'
 ##' @return A single numeric value
-##' @seealso [dust_model_set_time]
+##' @seealso [dust_system_set_time]
 ##' @export
-dust_model_time <- function(model) {
-  check_is_dust_model(model)
-  model$methods$time(model$ptr)
+dust_system_time <- function(sys) {
+  check_is_dust_system(sys)
+  sys$methods$time(sys$ptr)
 }
 
 
-##' Set time into the model.  This updates the time to the provided
+##' Set time into the system.  This updates the time to the provided
 ##' value but does not affect the state.  You may want to call
-##' [dust_model_set_state] or [dust_model_set_state_initial] after
+##' [dust_system_set_state] or [dust_system_set_state_initial] after
 ##' calling this.
 ##'
-##' @title Set model time
+##' @title Set system time
 ##'
-##' @inheritParams dust_model_time
+##' @inheritParams dust_system_time
 ##'
 ##' @param time The time to set.  Currently this must be an
 ##'   integer-like value, but in future we will allow setting to any
@@ -184,71 +183,71 @@ dust_model_time <- function(model) {
 ##'
 ##' @return Nothing, called for side effects only
 ##' @export
-dust_model_set_time <- function(model, time) {
-  check_is_dust_model(model)
-  model$methods$set_time(model$ptr, time)
+dust_system_set_time <- function(sys, time) {
+  check_is_dust_system(sys)
+  sys$methods$set_time(sys$ptr, time)
   invisible()
 }
 
 
 ##' Fetch, and set, the random number generator (RNG) state from the
-##' model.
+##' system.
 ##'
 ##' @title Fetch and set rng state
 ##'
-##' @inheritParams dust_model_state
+##' @inheritParams dust_system_state
 ##'
 ##' @return A raw vector, this could be quite long.
 ##'
 ##' @seealso You can pass the state you get back from this function as
-##'   the seed object to `dust_model_create` and
-##'   `dust_model_set_rng_state`
+##'   the seed object to `dust_system_create` and
+##'   `dust_system_set_rng_state`
 ##'
 ##' @export
-dust_model_rng_state <- function(model) {
-  check_is_dust_model(model)
-  model$methods$rng_state(model$ptr)
+dust_system_rng_state <- function(sys) {
+  check_is_dust_system(sys)
+  sys$methods$rng_state(sys$ptr)
 }
 
 
 ##' @param rng_state A raw vector of random number generator state,
-##'   returned by `dust_model_rng_state`
-##' @rdname dust_model_rng_state
+##'   returned by `dust_system_rng_state`
+##' @rdname dust_system_rng_state
 ##' @export
-dust_model_set_rng_state <- function(model, rng_state) {
-  check_is_dust_model(model)
-  model$methods$set_rng_state(model$ptr, rng_state)
+dust_system_set_rng_state <- function(sys, rng_state) {
+  check_is_dust_system(sys)
+  sys$methods$set_rng_state(sys$ptr, rng_state)
   invisible()
 }
 
 
-##' Update parameters used by the model.  This can be used to update a
-##' subset of parameters that do not change the extent of the model,
-##' and will be potentially faster than creating a new model object.
+##' Update parameters used by the system.  This can be used to update a
+##' subset of parameters that do not change the extent of the system,
+##' and will be potentially faster than creating a new system object.
 ##'
 ##' @title Update parameters
 ##'
-##' @inheritParams dust_model_state
+##' @inheritParams dust_system_state
 ##'
-##' @param pars Parameters to set into the model.
+##' @param pars Parameters to set into the system.
 ##'
 ##' @return Nothing, called for side effects only
 ##' @export
-dust_model_update_pars <- function(model, pars) {
-  check_is_dust_model(model)
-  model$methods$update_pars(model$ptr, pars, model$grouped)
+dust_system_update_pars <- function(sys, pars) {
+  check_is_dust_system(sys)
+  sys$methods$update_pars(sys$ptr, pars, sys$grouped)
   invisible()
 }
 
 
-##' Run a model, advancing time and the state by repeatedly running
-##' its `update` method.  You can advance a model either a fixed
+##' Run a system, advancing time and the state by repeatedly running
+##' its `update` method.  You can advance a system either a fixed
 ##' (positive) number of steps, or up to a time (which must be in the
 ##' future).
 ##'
-##' @title Run model
+##' @title Run system
 ##'
-##' @inheritParams dust_model_state
+##' @inheritParams dust_system_state
 ##'
 ##' @param steps The number of steps to run forward
 ##'
@@ -256,50 +255,50 @@ dust_model_update_pars <- function(model, pars) {
 ##'
 ##' @export
 ##'
-##' @rdname dust_model_run
-dust_model_run_steps <- function(model, steps) {
-  check_is_dust_model(model)
-  model$methods$run_steps(model$ptr, steps)
+##' @rdname dust_system_run
+dust_system_run_steps <- function(sys, steps) {
+  check_is_dust_system(sys)
+  sys$methods$run_steps(sys$ptr, steps)
   invisible()
 }
 
 
 ##' @param time Time to run to
 ##' @export
-##' @rdname dust_model_run
-dust_model_run_to_time <- function(model, time) {
-  check_is_dust_model(model)
-  model$methods$run_to_time(model$ptr, time)
+##' @rdname dust_system_run
+dust_system_run_to_time <- function(sys, time) {
+  check_is_dust_system(sys)
+  sys$methods$run_to_time(sys$ptr, time)
   invisible()
 }
 
 
-##' Simulate a model over a series of times, returning an array of
+##' Simulate a system over a series of times, returning an array of
 ##' output.  This output can be quite large, so you may filter states
 ##' according to some index.
 ##'
-##' @title Simulate model
+##' @title Simulate system
 ##'
-##' @inheritParams dust_model_state
+##' @inheritParams dust_system_state
 ##'
 ##' @param times A vector of times.  They must be increasing, and the
-##'   first time must be no less than the current model time
-##'   (as reported by [dust_model_time])
+##'   first time must be no less than the current system time
+##'   (as reported by [dust_system_time])
 ##'
 ##' @param index An optional index of states to extract.  If given,
-##'   then we subset the model state on return.  You can use this to
-##'   return fewer model states than the model ran with, to reorder
+##'   then we subset the system state on return.  You can use this to
+##'   return fewer system states than the system ran with, to reorder
 ##'   states, or to name them on exit (names present on the index will
 ##'   be copied into the rownames of the returned array).
 ##'
 ##' @return An array with 3 dimensions (state x particle x time) or 4
 ##'   dimensions (state x particle x group x time) for a grouped
-##'   model.
+##'   system.
 ##'
 ##' @export
-dust_model_simulate <- function(model, times, index = NULL) {
-  check_is_dust_model(model)
-  ret <- model$methods$simulate(model$ptr, times, index, model$grouped)
+dust_system_simulate <- function(sys, times, index = NULL) {
+  check_is_dust_system(sys)
+  ret <- sys$methods$simulate(sys$ptr, times, index, sys$grouped)
   if (!is.null(index) && !is.null(names(index))) {
     rownames(ret) <- names(index)
   }
@@ -307,65 +306,65 @@ dust_model_simulate <- function(model, times, index = NULL) {
 }
 
 
-##' Reorder states within a model.  This function is primarily used
+##' Reorder states within a system.  This function is primarily used
 ##' for debugging and may be removed from the interface if it is not
 ##' generally useful.
 ##'
 ##' @title Reorder states
 ##'
-##' @inheritParams dust_model_state
+##' @inheritParams dust_system_state
 ##'
-##' @param index The parameter ordering.  For an ungrouped model this
+##' @param index The parameter ordering.  For an ungrouped system this
 ##'   is a vector where each element is the parameter index (if
 ##'   element `i` is `j` then after reordering the `i`th particle will
 ##'   have the state previously used by `j`).  All elements must lie
 ##'   in `[1, n_particles]`, repetition of an index is allowed (so
 ##'   that many new particles may have the state as one old particle).
-##'   If the model is grouped, `index` must be a matrix with
+##'   If the system is grouped, `index` must be a matrix with
 ##'   `n_particles` rows and `n_groups` columns, with each column
 ##'   corresponding to the reordering for a group.
 ##'
 ##' @return Nothing, called for side effects only.
 ##'
 ##' @export
-dust_model_reorder <- function(model, index) {
-  check_is_dust_model(model)
-  model$methods$reorder(model$ptr, index)
+dust_system_reorder <- function(sys, index) {
+  check_is_dust_system(sys)
+  sys$methods$reorder(sys$ptr, index)
   invisible()
 }
 
 
-##' Compare current model state against data.  This is only supported
-##' for models that have 'compare_data' support (i.e., the model
+##' Compare current system state against data.  This is only supported
+##' for systems that have 'compare_data' support (i.e., the system
 ##' definition includes a `compare_data` method).  The current state
-##' in the model ([dust_model_state]) is compared against the data
+##' in the system ([dust_system_state]) is compared against the data
 ##' provided as `data`.
 ##'
-##' @title Compare model state against data
+##' @title Compare system state against data
 ##'
-##' @inheritParams dust_model_state
+##' @inheritParams dust_system_state
 ##'
-##' @param data The data to compare against. If the model is ungrouped
+##' @param data The data to compare against. If the system is ungrouped
 ##'   then `data` is a list with elements corresponding to whatever
-##'   your model requires.  If your model is grouped, this should be a
-##'   list with as many elements as your model has groups, with each
-##'   element corresponding to the data your model requires.
+##'   your system requires.  If your system is grouped, this should be a
+##'   list with as many elements as your system has groups, with each
+##'   element corresponding to the data your system requires.
 ##'
-##' @return A numeric vector with as many elements as your model has
+##' @return A numeric vector with as many elements as your system has
 ##'   groups, corresponding to the log-likelihood of the data for each
 ##'   group.
 ##'
 ##' @export
-dust_model_compare_data <- function(model, data) {
-  check_is_dust_model(model)
-  if (!model$properties$has_compare) {
+dust_system_compare_data <- function(sys, data) {
+  check_is_dust_system(sys)
+  if (!sys$properties$has_compare) {
     ## This moves into something general soon?
     cli::cli_abort(
-      paste("Can't compare against data; the '{model$name}' model does not",
+      paste("Can't compare against data; the '{sys$name}' system does not",
             "have 'compare_data' support"),
-      arg = "model")
+      arg = "system")
   }
-  model$methods$compare_data(model$ptr, data, model$grouped)
+  sys$methods$compare_data(sys$ptr, data, sys$grouped)
 }
 
 
@@ -390,11 +389,11 @@ dust_model_compare_data <- function(model, data) {
 dust_unfilter_create <- function(generator, pars, time_start, time, data,
                                  n_particles = 1, n_groups = 0,
                                  dt = 1, index = NULL) {
-  check_is_dust_model_generator(generator)
+  check_is_dust_system_generator(generator)
   if (!generator$properties$has_compare) {
     ## This moves into something general soon?
     cli::cli_abort(
-      paste("Can't create unfilter; the '{generator$name}' model does",
+      paste("Can't create unfilter; the '{generator$name}' system does",
             "not have 'compare_data' support"),
       arg = "generator")
   }
@@ -455,29 +454,29 @@ dust_unfilter_last_history <- function(unfilter) {
 ##'
 ##' @title Create a particle filter
 ##'
-##' @param generator A model generator object, with class
-##'   `dust_model_generator`.  The model must support `compare_data`
+##' @param generator A system generator object, with class
+##'   `dust_system_generator`.  The system must support `compare_data`
 ##'   to be used with this function.
 ##'
-##' @param pars Initial parameters for the model.  This should be the
+##' @param pars Initial parameters for the system.  This should be the
 ##'   *full* set of parameters; running the filter may update subsets
-##'   using the model's underlying `update_pars` method.
+##'   using the system's underlying `update_pars` method.
 ##'
 ##' @param time_start The start time for the simulation - this is
 ##'   typically before the first data point.  Must be an integer-like
 ##'   value.
 ##'
 ##' @param time A vector of times, each of which has a corresponding
-##'   entry in `data`.  The model will stop at each of these times to
+##'   entry in `data`.  The system will stop at each of these times to
 ##'   compute the likelihood using the compare function.
 ##'
 ##' @param data The data to compare against.  This must be a list with
 ##'   the same length as `time`, each element of which corresponds to
-##'   the data required for the model.  If the model is ungrouped then
+##'   the data required for the system.  If the system is ungrouped then
 ##'   each element of `data` is a list with elements corresponding to
-##'   whatever your model requires.  If your model is grouped, this
-##'   should be a list with as many elements as your model has groups,
-##'   with each element corresponding to the data your model requires.
+##'   whatever your system requires.  If your system is grouped, this
+##'   should be a list with as many elements as your system has groups,
+##'   with each element corresponding to the data your system requires.
 ##'   We will likely introduce a friendlier data.frame based input
 ##'   soon.
 ##'
@@ -485,8 +484,8 @@ dust_unfilter_last_history <- function(unfilter) {
 ##'   will give lower variance in the likelihood estimate but run more
 ##'   slowly.
 ##'
-##' @inheritParams dust_model_create
-##' @inheritParams dust_model_simulate
+##' @inheritParams dust_system_create
+##' @inheritParams dust_system_simulate
 ##'
 ##' @return A `dust_unfilter` object, which can be used with
 ##'   [dust_unfilter_run]
@@ -495,11 +494,11 @@ dust_unfilter_last_history <- function(unfilter) {
 dust_filter_create <- function(generator, pars, time_start, time, data,
                                n_particles, n_groups = 0, dt = 1,
                                index = NULL, seed = NULL) {
-  check_is_dust_model_generator(generator)
+  check_is_dust_system_generator(generator)
   if (!generator$properties$has_compare) {
     ## This moves into something general soon?
     cli::cli_abort(
-      paste("Can't create filter; the '{generator$name}' model does",
+      paste("Can't create filter; the '{generator$name}' system does",
             "not have 'compare_data' support"),
       arg = "generator")
   }
@@ -527,7 +526,7 @@ dust_filter_create <- function(generator, pars, time_start, time, data,
 ##'
 ##' @param initial Optional initial conditions, as a matrix (state x
 ##'   particle) or 3d array (state x particle x group).  If not
-##'   provided, the model initial conditions are used.
+##'   provided, the system initial conditions are used.
 ##'
 ##' @param save_history Logical, indicating if the simulation history
 ##'   should be saved while the simulation runs; this has a small
@@ -572,7 +571,7 @@ dust_filter_last_history <- function(filter) {
 ##' @inheritParams dust_filter_run
 ##'
 ##' @return A raw vector, this could be quite long.  Later we will
-##'   describe how you might reseed a filter or model with this state.
+##'   describe how you might reseed a filter or system with this state.
 ##'
 ##' @export
 dust_filter_rng_state <- function(filter) {
@@ -593,20 +592,20 @@ dust_filter_set_rng_state <- function(filter, rng_state) {
 
 
 ##' @export
-print.dust_model_generator <- function(x, ...) {
-  cli::cli_h1("<dust_model_generator: {x$name}>")
-  ## Later, we might print some additional capabilities of the model
+print.dust_system_generator <- function(x, ...) {
+  cli::cli_h1("<dust_system_generator: {x$name}>")
+  ## Later, we might print some additional capabilities of the system
   ## here, such as if it can be used with a filter, a summary of its
   ## parameters (once we know how to access that), etc.
   cli::cli_alert_info(
-    "Use 'dust2::dust_model_create()' to create a model with this generator")
+    "Use 'dust2::dust_system_create()' to create a system with this generator")
   invisible(x)
 }
 
 
 ##' @export
-print.dust_model <- function(x, ...) {
-  cli::cli_h1("<dust_model: {x$name}>")
+print.dust_system <- function(x, ...) {
+  cli::cli_h1("<dust_system: {x$name}>")
   if (x$grouped) {
     cli::cli_alert_info(paste(
       "{x$n_state} state x {x$n_particles} particle{?s} x",
@@ -616,13 +615,13 @@ print.dust_model <- function(x, ...) {
   }
   if (x$deterministic) {
     cli::cli_bullets(c(
-      i = "This model is deterministic"))
+      i = "This system is deterministic"))
   }
   if (x$properties$has_compare) {
     cli::cli_bullets(c(
-      i = "This model has 'compare_data' support"))
+      i = "This system has 'compare_data' support"))
   }
-  ## Later, we might print some additional capabilities of the model
+  ## Later, we might print some additional capabilities of the system
   ## here, such as if it can be used with a filter, a summary of its
   ## parameters (once we know how to access that), etc.
   invisible(x)
@@ -630,31 +629,31 @@ print.dust_model <- function(x, ...) {
 
 
 ##' @export
-dim.dust_model <- function(x, ...) {
+dim.dust_system <- function(x, ...) {
   c(x$n_state, x$n_particles, if (x$grouped) x$n_groups)
 }
 
 
-check_is_dust_model_generator <- function(generator, called_as,
-                                          call = parent.frame()) {
-  if (!inherits(generator, "dust_model_generator")) {
+check_is_dust_system_generator <- function(generator, called_as,
+                                           call = parent.frame()) {
+  if (!inherits(generator, "dust_system_generator")) {
     hint <- NULL
     if (is_uncalled_generator(generator) && is.symbol(called_as)) {
       hint <- c(
         i = "Did you mean '{deparse(called_as)}()' (i.e., with parentheses)")
     }
     cli::cli_abort(
-      c("Expected 'generator' to be a 'dust_model_generator' object",
+      c("Expected 'generator' to be a 'dust_system_generator' object",
         hint),
       arg = "generator")
   }
 }
 
 
-check_is_dust_model <- function(model, call = parent.frame()) {
-  if (!inherits(model, "dust_model")) {
-    cli::cli_abort("Expected 'model' to be a 'dust_model' object",
-                   arg = "model", call = call)
+check_is_dust_system <- function(sys, call = parent.frame()) {
+  if (!inherits(sys, "dust_system")) {
+    cli::cli_abort("Expected 'sys' to be a 'dust_system' object",
+                   arg = "sys", call = call)
   }
 }
 
@@ -674,12 +673,12 @@ check_is_dust_filter <- function(filter, call = parent.frame()) {
   }
 }
 
-is_uncalled_generator <- function(model) {
-  if (!is.function(model)) {
+is_uncalled_generator <- function(sys) {
+  if (!is.function(sys)) {
     return(FALSE)
   }
-  code <- body(model)
+  code <- body(sys)
   rlang::is_call(code, "{") &&
     length(code) == 2 &&
-    rlang::is_call(code[[2]], "dust_model")
+    rlang::is_call(code[[2]], "dust_system")
 }

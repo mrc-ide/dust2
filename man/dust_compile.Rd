@@ -2,7 +2,7 @@
 % Please edit documentation in R/compile.R
 \name{dust_compile}
 \alias{dust_compile}
-\title{Compile a dust2 model}
+\title{Compile a dust2 system}
 \usage{
 dust_compile(
   filename,
@@ -30,7 +30,7 @@ code.}
 
 \item{linking_to}{Optionally, a character vector of additional
 packages to add to the \code{DESCRIPTION}'s \code{LinkingTo} field. Use
-this when your model pulls in C++ code that is packaged within
+this when your system pulls in C++ code that is packaged within
 another package's header-only library.}
 
 \item{cpp_std}{The C++ standard to use, if you need to set one
@@ -68,18 +68,18 @@ anything in your personal \code{Makevars}}
 debug library.}
 
 \item{skip_cache}{Logical, indicating if the cache of previously
-compiled models should be skipped. If \code{TRUE} then your model will
+compiled systems should be skipped. If \code{TRUE} then your system will
 not be looked for in the cache, nor will it be added to the
 cache after compilation.}
 }
 \value{
 A function, which can be called with no arguments to yield
-a \code{dust_model_generator} function.
+a \code{dust_system_generator} function.
 }
 \description{
-Compile a dust2 model from a C++ input file.  This function will
-compile the dust support around your model and return an object
+Compile a dust2 system from a C++ input file.  This function will
+compile the dust support around your system and return an object
 that you can call with no arguments to make a
-\code{dust_model_generator} object, suitable for using with dust
-functions (starting from \link{dust_model_create}).
+\code{dust_system_generator} object, suitable for using with dust
+functions (starting from \link{dust_system_create}).
 }

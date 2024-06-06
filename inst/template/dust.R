@@ -1,3 +1,3 @@
 {{name}} <- function() {
-  dust2:::dust_model("{{name}}")
+  dust2:::dust_system_generator("{{name}}")
 }

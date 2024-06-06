@@ -11,14 +11,14 @@ test_that("can run an unfilter", {
   ## Manually compute likelihood:
   f <- function(pars) {
     base[names(pars)] <- pars
-    obj <- dust_model_create(sir(), base, time = time_start, dt = dt,
-                             n_particles = 1, deterministic = TRUE)
-    dust_model_set_state_initial(obj)
+    obj <- dust_system_create(sir(), base, time = time_start, dt = dt,
+                              n_particles = 1, deterministic = TRUE)
+    dust_system_set_state_initial(obj)
     incidence <- numeric(length(time))
     time0 <- c(time_start, time)
     for (i in seq_along(time)) {
-      dust_model_run_steps(obj, round((time[i] - time0[i]) / dt))
-      incidence[i] <- dust_model_state(obj)[5, , drop = TRUE]
+      dust_system_run_steps(obj, round((time[i] - time0[i]) / dt))
+      incidence[i] <- dust_system_state(obj)[5, , drop = TRUE]
     }
     sum(dpois(1:4, incidence + 1e-6, log = TRUE))
   }
@@ -52,10 +52,10 @@ test_that("can get unfilter history", {
     dust_unfilter_last_history(obj),
     "History is not current")
 
-  m <- dust_model_create(sir(), pars, time = time_start, n_particles = 1,
-                         deterministic = TRUE)
-  dust_model_set_state_initial(m)
-  cmp <- dust_model_simulate(m, time)
+  m <- dust_system_create(sir(), pars, time = time_start, n_particles = 1,
+                          deterministic = TRUE)
+  dust_system_set_state_initial(m)
+  cmp <- dust_system_simulate(m, time)
   expect_equal(h, cmp)
 })
 
@@ -93,14 +93,14 @@ test_that("can run an unfilter with manually set state", {
 
   ## Manually compute likelihood:
   f <- function(pars) {
-    obj <- dust_model_create(sir(), pars, time = time_start, dt = dt,
-                             n_particles = 1, deterministic = TRUE)
-    dust_model_set_state(obj, state)
+    obj <- dust_system_create(sir(), pars, time = time_start, dt = dt,
+                              n_particles = 1, deterministic = TRUE)
+    dust_system_set_state(obj, state)
     incidence <- numeric(length(time))
     time0 <- c(time_start, time)
     for (i in seq_along(time)) {
-      dust_model_run_steps(obj, round((time[i] - time0[i]) / dt))
-      incidence[i] <- dust_model_state(obj)[5, , drop = TRUE]
+      dust_system_run_steps(obj, round((time[i] - time0[i]) / dt))
+      incidence[i] <- dust_system_state(obj)[5, , drop = TRUE]
     }
     sum(dpois(1:4, incidence + 1e-6, log = TRUE))
   }
@@ -110,7 +110,7 @@ test_that("can run an unfilter with manually set state", {
 })
 
 
-test_that("can run unfilter on structured model", {
+test_that("can run unfilter on structured system", {
   base <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
   n_groups <- 3
   pars <- lapply(seq_len(n_groups),
@@ -125,15 +125,15 @@ test_that("can run unfilter on structured model", {
 
   ## Manually compute likelihood:
   f <- function(pars) {
-    obj <- dust_model_create(sir(), pars, time = time_start, dt = dt,
-                             n_particles = 1, n_groups = n_groups,
-                             deterministic = TRUE)
-    dust_model_set_state_initial(obj)
+    obj <- dust_system_create(sir(), pars, time = time_start, dt = dt,
+                              n_particles = 1, n_groups = n_groups,
+                              deterministic = TRUE)
+    dust_system_set_state_initial(obj)
     incidence <- matrix(0, n_groups, length(time))
     time0 <- c(time_start, time)
     for (i in seq_along(time)) {
-      dust_model_run_steps(obj, round((time[i] - time0[i]) / dt))
-      incidence[, i] <- dust_model_state(obj)[5, , , drop = TRUE]
+      dust_system_run_steps(obj, round((time[i] - time0[i]) / dt))
+      incidence[, i] <- dust_system_state(obj)[5, , , drop = TRUE]
     }
     observed <- matrix(unlist(data, use.names = FALSE), n_groups)
     rowSums(dpois(observed, incidence + 1e-6, log = TRUE))
@@ -250,7 +250,7 @@ test_that("can run particle filter", {
   seed <- 42
 
   obj <- dust_filter_create(sir(), pars, time_start, time, data,
-                           n_particles = n_particles, seed = seed)
+                            n_particles = n_particles, seed = seed)
   res <- replicate(20, dust_filter_run(obj))
 
   cmp_filter <- sir_filter_manual(
@@ -337,7 +337,7 @@ test_that("can run a nested particle filter and get the same result", {
                             n_particles = n_particles, n_groups = 2,
                             seed = seed)
 
-  ## Here, we can check the layout of the rng within the filter and model:
+  ## Here, we can check the layout of the rng within the filter and system:
   n_streams <- (n_particles + 1) * 2
   r <- mcstate2::mcstate_rng$new(n_streams = n_streams, seed = seed)$state()
   s <- dust_filter_rng_state(obj)
@@ -404,7 +404,7 @@ test_that("can run particle filter with manual initial state", {
   seed <- 42
 
   obj <- dust_filter_create(sir(), pars, time_start, time, data,
-                           n_particles = n_particles, seed = seed)
+                            n_particles = n_particles, seed = seed)
   res <- replicate(20, dust_filter_run(obj, initial = state))
 
   cmp_filter <- sir_filter_manual(

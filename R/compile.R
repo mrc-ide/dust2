@@ -1,10 +1,10 @@
-##' Compile a dust2 model from a C++ input file.  This function will
-##' compile the dust support around your model and return an object
+##' Compile a dust2 system from a C++ input file.  This function will
+##' compile the dust support around your system and return an object
 ##' that you can call with no arguments to make a
-##' `dust_model_generator` object, suitable for using with dust
-##' functions (starting from [dust_model_create]).
+##' `dust_system_generator` object, suitable for using with dust
+##' functions (starting from [dust_system_create]).
 ##'
-##' @title Compile a dust2 model
+##' @title Compile a dust2 system
 ##'
 ##' @param filename The path to a single C++ file
 ##'
@@ -19,7 +19,7 @@
 ##'
 ##' @param linking_to Optionally, a character vector of additional
 ##'   packages to add to the `DESCRIPTION`'s `LinkingTo` field. Use
-##'   this when your model pulls in C++ code that is packaged within
+##'   this when your system pulls in C++ code that is packaged within
 ##'   another package's header-only library.
 ##'
 ##' @param cpp_std The C++ standard to use, if you need to set one
@@ -58,12 +58,12 @@
 ##'   debug library.
 ##'
 ##' @param skip_cache Logical, indicating if the cache of previously
-##'   compiled models should be skipped. If `TRUE` then your model will
+##'   compiled systems should be skipped. If `TRUE` then your system will
 ##'   not be looked for in the cache, nor will it be added to the
 ##'   cache after compilation.
 ##'
 ##' @return A function, which can be called with no arguments to yield
-##'   a `dust_model_generator` function.
+##'   a `dust_system_generator` function.
 ##'
 ##' @export
 dust_compile <- function(filename, quiet = FALSE, workdir = NULL,
@@ -78,11 +78,11 @@ dust_compile <- function(filename, quiet = FALSE, workdir = NULL,
 
   ## Cache on code and all options.
   hash <- rlang::hash(c(res, debug = debug))
-  if (!skip_cache && !is.null(cache$models[[hash]])) {
+  if (!skip_cache && !is.null(cache$generators[[hash]])) {
     if (!quiet) {
-      cli::cli_alert_info("Using cached model")
+      cli::cli_alert_info("Using cached generator")
     }
-    return(cache$models[[hash]]$gen)
+    return(cache$generators[[hash]]$gen)
   }
 
   workdir <- dust_workdir(workdir, environment())
@@ -98,7 +98,7 @@ dust_compile <- function(filename, quiet = FALSE, workdir = NULL,
   gen <- env[[config$name]]
 
   if (!skip_cache) {
-    cache$models[[hash]] <- list(
+    cache$generators[[hash]] <- list(
       name = config$name,
       time = Sys.time(),
       package = res$package,
@@ -113,7 +113,7 @@ dust_compile <- function(filename, quiet = FALSE, workdir = NULL,
 
 dust_generate <- function(config, filename, linking_to, cpp_std,
                           optimisation_level, compiler_options, mangle) {
-  model <- read_lines(filename)
+  system <- read_lines(filename)
   data <- dust_template_data(config$name, config$class, linking_to, cpp_std,
                              optimisation_level, compiler_options, mangle)
   data$system_requirements <- data$cpp_std %||% "R (>= 4.0.0)"
@@ -125,11 +125,11 @@ dust_generate <- function(config, filename, linking_to, cpp_std,
     namespace = substitute_dust_template(data, "NAMESPACE"),
     makevars = substitute_dust_template(data, "Makevars"),
     r = substitute_dust_template(data, "dust.R"),
-    cpp = dust_generate_cpp(model, config, data))
+    cpp = dust_generate_cpp(system, config, data))
 }
 
 
-dust_generate_cpp <- function(model, config, data) {
+dust_generate_cpp <- function(system, config, data) {
   includes <- c("cpp11.hpp", "dust2/r/discrete.hpp")
   code <- substitute_dust_template(data, "dust_core.cpp")
 
@@ -146,7 +146,7 @@ dust_generate_cpp <- function(model, config, data) {
 
   c(header,
     "",
-    model,
+    system,
     "",
     sprintf("#include <%s>", includes),
     "",

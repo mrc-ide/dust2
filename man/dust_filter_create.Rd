@@ -18,29 +18,29 @@ dust_filter_create(
 )
 }
 \arguments{
-\item{generator}{A model generator object, with class
-\code{dust_model_generator}.  The model must support \code{compare_data}
+\item{generator}{A system generator object, with class
+\code{dust_system_generator}.  The system must support \code{compare_data}
 to be used with this function.}
 
-\item{pars}{Initial parameters for the model.  This should be the
+\item{pars}{Initial parameters for the system.  This should be the
 \emph{full} set of parameters; running the filter may update subsets
-using the model's underlying \code{update_pars} method.}
+using the system's underlying \code{update_pars} method.}
 
 \item{time_start}{The start time for the simulation - this is
 typically before the first data point.  Must be an integer-like
 value.}
 
 \item{time}{A vector of times, each of which has a corresponding
-entry in \code{data}.  The model will stop at each of these times to
+entry in \code{data}.  The system will stop at each of these times to
 compute the likelihood using the compare function.}
 
 \item{data}{The data to compare against.  This must be a list with
 the same length as \code{time}, each element of which corresponds to
-the data required for the model.  If the model is ungrouped then
+the data required for the system.  If the system is ungrouped then
 each element of \code{data} is a list with elements corresponding to
-whatever your model requires.  If your model is grouped, this
-should be a list with as many elements as your model has groups,
-with each element corresponding to the data your model requires.
+whatever your system requires.  If your system is grouped, this
+should be a list with as many elements as your system has groups,
+with each element corresponding to the data your system requires.
 We will likely introduce a friendlier data.frame based input
 soon.}
 
@@ -50,16 +50,16 @@ slowly.}
 
 \item{n_groups}{Optionally, the number of parameter groups}
 
-\item{dt}{The time step for the model, defaults to 1}
+\item{dt}{The time step for the system, defaults to 1}
 
 \item{index}{An optional index of states to extract.  If given,
-then we subset the model state on return.  You can use this to
-return fewer model states than the model ran with, to reorder
+then we subset the system state on return.  You can use this to
+return fewer system states than the system ran with, to reorder
 states, or to name them on exit (names present on the index will
 be copied into the rownames of the returned array).}
 
-\item{seed}{Optionally, a seed.  Otherwise we respond to R's RNG
-seed on initialisation.}
+\item{seed}{Optionally, a seed.  Otherwise we respond to R's RNG seed on
+initialisation.}
 }
 \value{
 A \code{dust_unfilter} object, which can be used with

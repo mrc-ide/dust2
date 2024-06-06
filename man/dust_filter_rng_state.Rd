@@ -18,7 +18,7 @@ returned by \code{dust_filter_rng_state}}
 }
 \value{
 A raw vector, this could be quite long.  Later we will
-describe how you might reseed a filter or model with this state.
+describe how you might reseed a filter or system with this state.
 }
 \description{
 Get random number generator (RNG) state from the particle filter.
