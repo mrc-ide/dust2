@@ -70,6 +70,11 @@ SEXP dust2_cpu_sir_rng_state(cpp11::sexp ptr) {
 }
 
 [[cpp11::register]]
+SEXP dust2_cpu_sir_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
+  return dust2::r::dust2_cpu_set_rng_state<sir>(ptr, r_rng_state);
+}
+
+[[cpp11::register]]
 SEXP dust2_cpu_sir_compare_data(cpp11::sexp ptr,
                                 cpp11::sexp r_data,
                                 bool grouped) {
@@ -141,4 +146,9 @@ SEXP dust2_cpu_sir_filter_last_history(cpp11::sexp ptr, bool grouped) {
 [[cpp11::register]]
 SEXP dust2_cpu_sir_filter_rng_state(cpp11::sexp ptr) {
   return dust2::r::dust2_cpu_filter_rng_state<sir>(ptr);
+}
+
+[[cpp11::register]]
+SEXP dust2_cpu_sir_filter_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
+  return dust2::r::dust2_cpu_filter_set_rng_state<sir>(ptr, r_rng_state);
 }

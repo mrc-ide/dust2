@@ -277,5 +277,36 @@ cpp11::sexp dust2_cpu_filter_rng_state(cpp11::sexp ptr) {
   return ret;
 }
 
+template <typename T>
+cpp11::sexp dust2_cpu_filter_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
+  auto *obj = cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
+  using rng_state_type = typename T::rng_state_type;
+  using rng_int_type = typename rng_state_type::int_type;
+
+  const auto n_particles = obj->model.n_particles();
+  const auto n_groups = obj->model.n_groups();
+  const auto n_streams = n_groups * (1 + n_particles);
+  const auto n_state = rng_state_type::size();
+  const auto rng_state =
+    check_rng_state<rng_state_type>(r_rng_state, n_streams, "rng_state");
+
+  std::vector<rng_int_type> state_filter(n_groups * n_state);
+  std::vector<rng_int_type> state_model(n_groups * n_particles * n_state);
+  for (size_t i = 0; i < n_groups; ++i) {
+    const auto src = rng_state.begin() + i * (1 + n_particles) * n_state;
+    std::copy_n(src,
+                n_state,
+                state_filter.begin() + i * n_state);
+    std::copy_n(src + n_state,
+                n_state * n_particles,
+                state_model.begin() + i * n_state * n_particles);
+  }
+
+  obj->set_rng_state(state_filter);
+  obj->model.set_rng_state(state_model);
+
+  return R_NilValue;
+}
+
 }
 }

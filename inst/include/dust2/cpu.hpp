@@ -152,12 +152,12 @@ public:
     time_ = time;
   }
 
-  auto rng_state() { // TODO: should be const, error in mcstate2
+  auto rng_state() const {
     return rng_.export_state();
   }
 
-  void set_rng_state(const std::vector<rng_int_type> & rng_state) {
-    rng_.import_state();
+  void set_rng_state(const std::vector<rng_int_type>& rng_state) {
+    rng_.import_state(rng_state);
   }
 
   template<typename Fn>

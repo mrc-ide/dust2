@@ -332,6 +332,33 @@ SEXP rng_state_as_raw(const std::vector<T>& state) {
   return ret;
 }
 
+// TODO: this will change later if we make state setting a bit more
+// efficient.  Currently we accept a raw vector and copy that into an
+// integer vetor, then copy that into chunks into the random number
+// state. However, working with the direct raw vector is annoying, and
+// we'll need to do some sort of reinterpret_cast on the pointer that
+// RAW() returns I think?
+template <typename rng_state_type>
+inline auto check_rng_state(cpp11::sexp r_rng_state,
+                            size_t n_streams,
+                            const char * name) {
+  using int_type = typename rng_state_type::int_type;
+  const auto len = rng_state_type::size() * n_streams;
+  const auto len_bytes = len * sizeof(int_type);
+
+  if (!TYPEOF(r_rng_state)) {
+    cpp11::stop("Expected a raw vector for '%s'", name);
+  }
+  cpp11::raws rng_state = cpp11::as_cpp<cpp11::raws>(r_rng_state);
+  if (static_cast<size_t>(rng_state.size()) != len_bytes) {
+    cpp11::stop("Incorrect length for '%s'; expected %d but given %d",
+                name, static_cast<int>(len_bytes), rng_state.size());
+  }
+  std::vector<int_type> state(len);
+  std::memcpy(state.data(), RAW(rng_state), len_bytes);
+  return state;
+}
+
 inline double read_real(cpp11::list args, const char * name) {
   cpp11::sexp value = args[name];
   if (value == R_NilValue) {

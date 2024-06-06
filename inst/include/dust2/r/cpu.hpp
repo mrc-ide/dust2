@@ -155,6 +155,17 @@ SEXP dust2_cpu_rng_state(cpp11::sexp ptr) {
 }
 
 template <typename T>
+SEXP dust2_cpu_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
+  auto *obj = cpp11::as_cpp<cpp11::external_pointer<dust_cpu<T>>>(ptr).get();
+  using rng_state_type = typename T::rng_state_type;
+  const auto n_streams = obj->n_particles();
+  const auto rng_state =
+    check_rng_state<rng_state_type>(r_rng_state, n_streams, "rng_state");
+  obj->set_rng_state(rng_state);
+  return R_NilValue;
+}
+
+template <typename T>
 SEXP dust2_cpu_set_time(cpp11::sexp ptr, cpp11::sexp r_time) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<dust_cpu<T>>>(ptr).get();
   const auto time = check_time(r_time, "time");

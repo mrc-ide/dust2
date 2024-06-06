@@ -2,22 +2,28 @@
 % Please edit documentation in R/interface.R
 \name{dust_model_rng_state}
 \alias{dust_model_rng_state}
-\title{Fetch rng state}
+\alias{dust_model_set_rng_state}
+\title{Fetch and set rng state}
 \usage{
 dust_model_rng_state(model)
+
+dust_model_set_rng_state(model, rng_state)
 }
 \arguments{
 \item{model}{A \code{dust_model} object}
+
+\item{rng_state}{A raw vector of random number generator state,
+returned by \code{dust_model_rng_state}}
 }
 \value{
 A raw vector, this could be quite long.
 }
 \description{
-Fetch the random number generator (RNG) state from the model.
+Fetch, and set, the random number generator (RNG) state from the
+model.
 }
 \seealso{
 You can pass the state you get back from this function as
-the seed object to \code{dust_model_create}.  In future,
-\code{dust_model_set_rng_state} will also let you set state into an
-existing model.
+the seed object to \code{dust_model_create} and
+\code{dust_model_set_rng_state}
 }

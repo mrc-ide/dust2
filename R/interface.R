@@ -14,7 +14,7 @@ dust_model <- function(name, env = parent.env(parent.frame())) {
   methods_core <- c("alloc",
                     "state", "set_state", "set_state_initial",
                     "time", "set_time",
-                    "rng_state",
+                    "rng_state", "set_rng_state",
                     "update_pars",
                     "run_steps", "run_to_time", "simulate",
                     "reorder")
@@ -30,7 +30,8 @@ dust_model <- function(name, env = parent.env(parent.frame())) {
     methods_unfilter <- c("alloc", "run", "last_history")
     methods$unfilter <-
       get_methods(methods_unfilter, sprintf("%s_unfilter", name))
-    methods_filter <- c("alloc", "run", "last_history", "rng_state")
+    methods_filter <- c("alloc", "run", "last_history", "rng_state",
+                        "set_rng_state")
     methods$filter <-
       get_methods(methods_filter, sprintf("%s_filter", name))
   }
@@ -189,23 +190,34 @@ dust_model_set_time <- function(model, time) {
 }
 
 
-##' Fetch the random number generator (RNG) state from the model.
+##' Fetch, and set, the random number generator (RNG) state from the
+##' model.
 ##'
-##' @title Fetch rng state
+##' @title Fetch and set rng state
 ##'
 ##' @inheritParams dust_model_state
 ##'
 ##' @return A raw vector, this could be quite long.
 ##'
 ##' @seealso You can pass the state you get back from this function as
-##'   the seed object to `dust_model_create`.  In future,
-##'   `dust_model_set_rng_state` will also let you set state into an
-##'   existing model.
+##'   the seed object to `dust_model_create` and
+##'   `dust_model_set_rng_state`
 ##'
 ##' @export
 dust_model_rng_state <- function(model) {
   check_is_dust_model(model)
   model$methods$rng_state(model$ptr)
+}
+
+
+##' @param rng_state A raw vector of random number generator state,
+##'   returned by `dust_model_rng_state`
+##' @rdname dust_model_rng_state
+##' @export
+dust_model_set_rng_state <- function(model, rng_state) {
+  check_is_dust_model(model)
+  model$methods$set_rng_state(model$ptr, rng_state)
+  invisible()
 }
 
 
@@ -565,6 +577,17 @@ dust_filter_last_history <- function(filter) {
 dust_filter_rng_state <- function(filter) {
   check_is_dust_filter(filter)
   filter$methods$rng_state(filter$ptr)
+}
+
+
+##' @param rng_state A raw vector of random number generator state,
+##'   returned by `dust_filter_rng_state`
+##' @rdname dust_filter_rng_state
+##' @export
+dust_filter_set_rng_state <- function(filter, rng_state) {
+  check_is_dust_filter(filter)
+  filter$methods$set_rng_state(filter$ptr, rng_state)
+  invisible()
 }
 
 

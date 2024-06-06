@@ -2,13 +2,19 @@
 % Please edit documentation in R/interface.R
 \name{dust_filter_rng_state}
 \alias{dust_filter_rng_state}
+\alias{dust_filter_set_rng_state}
 \title{Get filter RNG state}
 \usage{
 dust_filter_rng_state(filter)
+
+dust_filter_set_rng_state(filter, rng_state)
 }
 \arguments{
 \item{filter}{A \code{dust_filter} object, created by
 \link{dust_filter_create}}
+
+\item{rng_state}{A raw vector of random number generator state,
+returned by \code{dust_filter_rng_state}}
 }
 \value{
 A raw vector, this could be quite long.  Later we will

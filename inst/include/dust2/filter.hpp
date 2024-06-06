@@ -219,8 +219,12 @@ public:
     return history_is_current_;
   }
 
-  auto rng_state() { // TODO: should be const, error in mcstate2
+  auto rng_state() const {
     return rng_.export_state();
+  }
+
+  auto set_rng_state(const std::vector<rng_int_type>& rng_state) {
+    return rng_.import_state(rng_state);
   }
 
 private:
