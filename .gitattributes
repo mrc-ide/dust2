@@ -1,2 +1,5 @@
 R/cpp11.R linguist-generated=true
+R/dust.R linguist-generated=true
 src/cpp11.cpp linguist-generated=true
+src/sir.cpp linguist-generated=true
+src/walk.cpp linguist-generated=true

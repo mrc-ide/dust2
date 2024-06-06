@@ -48,17 +48,13 @@
 ##' @export
 dust_package <- function(path, quiet = FALSE) {
   call <- environment()
-  ## 1. check that the package is legit
   pkg <- package_validate_root(path, call)
   path_dust <- file.path(path, "inst/dust")
-  path_src <- file.path(path, "src")
-  path_r <- file.path(path, "R")
 
   if (!quiet) {
     cli::cli_alert_info("Working in package '{pkg}' at '{path}'")
   }
 
-  ## 2. find target files
   files <- dir(path_dust, pattern = "\\.cpp$")
   if (length(files) == 0L) {
     cli::cli_abort("No dust files found in 'inst/dust'")
@@ -67,13 +63,11 @@ dust_package <- function(path, quiet = FALSE) {
     cli::cli_alert_info("Found {length(files)} system{?s}")
   }
 
-  ## 3. identify destination src files, validate signature
   package_validate_destination(path, files, call)
 
-  ## 4. generate code
   data <- lapply(file.path(path_dust, files), package_generate)
 
-  dir_create(c(path_src, path_r))
+  dir_create(file.path(path, c("src", "R")))
   for (i in seq_along(files)) {
     writelines_if_changed(
       c(dust_header("//"), data[[i]]$cpp),
@@ -93,11 +87,9 @@ dust_package <- function(path, quiet = FALSE) {
     writelines_if_changed(makevars, path, "src/Makevars", quiet)
   }
 
-  ## 5. compile attributes
   cpp11::cpp_register(path, quiet = quiet)
 
-  ## 6. return path, invisibly
-  invisible(path)
+  invisible()
 }
 
 
