@@ -92,6 +92,11 @@ dust_unfilter_run <- function(unfilter, pars, initial = NULL,
 ##' @export
 dust_unfilter_last_history <- function(unfilter) {
   check_is_dust_unfilter(unfilter)
+  if (is.null(unfilter$ptr)) {
+    cli::cli_abort(c(
+      "History is not current",
+      i = "Unfilter has not yet been run"))
+  }
   unfilter$methods$last_history(unfilter$ptr, unfilter$grouped)
 }
 

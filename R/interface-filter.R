@@ -124,6 +124,11 @@ dust_filter_run <- function(filter, pars, initial = NULL,
 ##' @export
 dust_filter_last_history <- function(filter) {
   check_is_dust_filter(filter)
+  if (is.null(filter$ptr)) {
+    cli::cli_abort(c(
+      "History is not current",
+      i = "Filter has not yet been run"))
+  }
   filter$methods$last_history(filter$ptr, filter$grouped)
 }
 

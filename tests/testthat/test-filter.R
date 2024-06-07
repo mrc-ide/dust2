@@ -50,6 +50,7 @@ test_that("can run particle filter and save history", {
 
   obj <- dust_filter_create(sir(), time_start, time, data,
                             n_particles = n_particles, seed = seed)
+  expect_error(dust_filter_last_history(obj), "History is not current")
   res1 <- dust_filter_run(obj, pars)
   expect_error(dust_filter_last_history(obj), "History is not current")
   res2 <- dust_filter_run(obj, NULL, save_history = TRUE)

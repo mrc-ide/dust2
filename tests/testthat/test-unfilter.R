@@ -55,7 +55,10 @@ test_that("can get unfilter history", {
   dt <- 1
 
   obj <- dust_unfilter_create(sir(), time_start, time, data)
-  dust_unfilter_run(obj, pars)
+  expect_error(
+    dust_unfilter_last_history(obj),
+    "History is not current")
+ dust_unfilter_run(obj, pars)
   expect_error(
     dust_unfilter_last_history(obj),
     "History is not current")
