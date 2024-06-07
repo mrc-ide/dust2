@@ -38,29 +38,27 @@
 dust_filter_create <- function(generator, time_start, time, data,
                                n_particles, n_groups = 0, dt = 1,
                                index = NULL, seed = NULL) {
-  check_is_dust_system_generator(generator)
-  if (!generator$properties$has_compare) {
-    ## This moves into something general soon?
-    cli::cli_abort(
-      paste("Can't create filter; the '{generator$name}' system does",
-            "not have 'compare_data' support"),
-      arg = "generator")
-  }
+  call <- environment()
+  check_generator_for_filter(generator, "filter", call = call)
+  assert_scalar_size(n_particles, call = call)
+  assert_scalar_size(n_groups, allow_zero = TRUE, call = call)
+  check_time_sequence(time_start, time, call = call)
+  check_dt(dt, call = call)
+  check_data(data, length(time), n_groups, call = call)
+  check_index(index, call = call)
 
-  ## TODO: We will be best if we do some validation here of inputs so
-  ## that there is little chance of this failing.  That said,
-  ## validation from R will be nicer anyway as we can throw cli-based
-  ## errors.
   create <- function(filter, pars) {
     list2env(
       generator$methods$filter$alloc(pars, time_start, time, dt, data,
-                                     n_particles, n_groups, index, seed),
+                                     n_particles, n_groups, index,
+                                     filter$initial_rng_state),
       filter)
+    filter$create <- NULL
+    filter$initial_rng_state <- NULL
   }
-  ## There are two ways of doing this; we can be optional at the C++
-  ## level or at the R level.  I prefer the latter I think.
   res <- list2env(
     list(create = create,
+         initial_rng_state = filter_rng_state(n_particles, n_groups, seed),
          n_particles = as.integer(n_particles),
          n_groups = as.integer(max(n_groups), 1),
          deterministic = FALSE,
@@ -109,8 +107,7 @@ dust_filter_run <- function(filter, pars, initial = NULL,
   } else if (!is.null(pars)) {
     filter$methods$update_pars(filter$ptr, pars, filter$grouped)
   }
-  filter$methods$run(filter$ptr, pars, initial, save_history,
-                     filter$grouped)
+  filter$methods$run(filter$ptr, initial, save_history, filter$grouped)
 }
 
 
@@ -143,7 +140,11 @@ dust_filter_last_history <- function(filter) {
 ##' @export
 dust_filter_rng_state <- function(filter) {
   check_is_dust_filter(filter)
-  filter$methods$rng_state(filter$ptr)
+  if (is.null(filter$ptr)) {
+    filter$initial_rng_state
+  } else {
+    filter$methods$rng_state(filter$ptr)
+  }
 }
 
 
@@ -153,7 +154,12 @@ dust_filter_rng_state <- function(filter) {
 ##' @export
 dust_filter_set_rng_state <- function(filter, rng_state) {
   check_is_dust_filter(filter)
-  filter$methods$set_rng_state(filter$ptr, rng_state)
+  if (is.null(filter$ptr)) {
+    assert_raw_vector(rng_state, length(filter$initial_rng_state))
+    filter$initial_rng_state <- rng_state
+  } else {
+    filter$methods$set_rng_state(filter$ptr, rng_state)
+  }
   invisible()
 }
 
@@ -163,4 +169,10 @@ check_is_dust_filter <- function(filter, call = parent.frame()) {
     cli::cli_abort("Expected 'filter' to be a 'dust_filter' object",
                    arg = "filter", call = call)
   }
+}
+
+
+filter_rng_state <- function(n_particles, n_groups, seed) {
+  n_streams <- max(n_groups, 1) * (1 + n_particles)
+  mcstate2::mcstate_rng$new(n_streams = n_streams, seed = seed)$state()
 }

@@ -19,19 +19,21 @@
 dust_unfilter_create <- function(generator, time_start, time, data,
                                  n_particles = 1, n_groups = 0,
                                  dt = 1, index = NULL) {
-  check_is_dust_system_generator(generator)
-  if (!generator$properties$has_compare) {
-    ## This moves into something general soon?
-    cli::cli_abort(
-      paste("Can't create unfilter; the '{generator$name}' system does",
-            "not have 'compare_data' support"),
-      arg = "generator")
-  }
-  create <- function(filter, pars) {
+  call <- environment()
+  check_generator_for_filter(generator, "unfilter", call = call)
+  assert_scalar_size(n_particles, call = call)
+  assert_scalar_size(n_groups, allow_zero = TRUE, call = call)
+  check_time_sequence(time_start, time, call = call)
+  check_dt(dt, call = call)
+  check_data(data, length(time), n_groups, call = call)
+  check_index(index, call = call)
+
+  create <- function(unfilter, pars) {
     list2env(
       generator$methods$unfilter$alloc(pars, time_start, time, dt, data,
                                        n_particles, n_groups, index),
-      filter)
+      unfilter)
+    unfilter$create <- NULL
   }
   res <- list2env(
     list(create = create,
@@ -73,8 +75,7 @@ dust_unfilter_run <- function(unfilter, pars, initial = NULL,
   } else if (!is.null(pars)) {
     unfilter$methods$update_pars(unfilter$ptr, pars, unfilter$grouped)
   }
-  unfilter$methods$run(unfilter$ptr, pars, initial, save_history,
-                       unfilter$grouped)
+  unfilter$methods$run(unfilter$ptr, initial, save_history, unfilter$grouped)
 }
 
 

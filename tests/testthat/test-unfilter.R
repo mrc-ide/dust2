@@ -151,20 +151,46 @@ test_that("validate time for unfilter", {
   data <- lapply(1:4, function(i) list(incidence = i))
   dt <- 1
 
-  expect_error(
+  err <- expect_error(
     dust_unfilter_create(sir(), time_start = 5, time = time, data = data),
-    "Expected 'time[1]' (5) to be larger than the previous value (4)",
+    "Time sequence is not strictly increasing",
     fixed = TRUE)
+  expect_equal(
+    err$body,
+    c(x = "'time[1]' (4) must be greater than 'time_start' (5)"))
+
+  err <- expect_error(
+    dust_unfilter_create(sir(), time_start = 5, time = rev(time), data = data),
+    "Time sequence is not strictly increasing",
+    fixed = TRUE)
+  expect_equal(
+    err$body,
+    c(x = "'time[2]' (12) must be greater than 'time[1]' (16)",
+      x = "'time[3]' (8) must be greater than 'time[2]' (12)",
+      x = "'time[4]' (4) must be greater than 'time[3]' (8)"))
+
+  err <- expect_error(
+    dust_unfilter_create(sir(), time_start = 5, time = 10:1, data = data),
+    "Time sequence is not strictly increasing",
+    fixed = TRUE)
+  expect_equal(
+    err$body,
+    c(x = "'time[2]' (9) must be greater than 'time[1]' (10)",
+      x = "'time[3]' (8) must be greater than 'time[2]' (9)",
+      x = "'time[4]' (7) must be greater than 'time[3]' (8)",
+      x = "'time[5]' (6) must be greater than 'time[4]' (7)",
+      x = "...and 5 other errors"))
+
   time2 <- time + c(0, 0, .1, 0)
   expect_error(
     dust_unfilter_create(sir(), time_start = 0, time = time2,
                          data = data),
-    "Expected 'time[3]' to be integer-like",
+    "Expected 'time' to be integer",
     fixed = TRUE)
   expect_error(
     dust_unfilter_create(sir(), time_start = 0, time = as.character(time),
                          data = data),
-    "'time' must be a numeric vector",
+    "Expected 'time' to be integer",
     fixed = TRUE)
 })
 

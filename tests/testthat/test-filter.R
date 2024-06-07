@@ -32,10 +32,10 @@ test_that("can run particle filter and save history", {
                             n_particles = n_particles, seed = seed)
   res1 <- dust_filter_run(obj, pars)
   expect_error(dust_filter_last_history(obj), "History is not current")
-  res2 <- dust_filter_run(obj, save_history = TRUE)
+  res2 <- dust_filter_run(obj, NULL, save_history = TRUE)
   h2 <- dust_filter_last_history(obj)
   expect_equal(dim(h2), c(5, 100, 4))
-  res3 <- dust_filter_run(obj)
+  res3 <- dust_filter_run(obj, NULL)
   expect_error(dust_filter_last_history(obj), "History is not current")
 
   cmp_filter <- sir_filter_manual(
