@@ -14,8 +14,8 @@ SEXP dust2_discrete_{{name}}_unfilter_update_pars(cpp11::sexp ptr, cpp11::list r
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_{{name}}_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool grouped) {
-  return dust2::r::dust2_discrete_unfilter_run<{{class}}>(ptr, r_initial, save_history, grouped);
+SEXP dust2_discrete_{{name}}_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, bool grouped) {
+  return dust2::r::dust2_discrete_unfilter_run<{{class}}>(ptr, r_initial, save_history, adjoint, grouped);
 }
 
 [[cpp11::register]]

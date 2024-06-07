@@ -73,14 +73,19 @@ cpp11::sexp dust2_discrete_unfilter_update_pars(cpp11::sexp ptr,
 
 template <typename T>
 cpp11::sexp dust2_discrete_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
-                                        bool save_history, bool grouped) {
+                                        bool save_history, bool adjoint,
+                                        bool grouped) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
   if (r_initial != R_NilValue) {
     set_state(obj->sys, r_initial, grouped);
   }
-  obj->run(r_initial == R_NilValue, save_history);
-
+  const auto set_initial = r_initial == R_NilValue;
+  if (adjoint) {
+    obj->run_adjoint(set_initial, save_history);
+  } else {
+    obj->run(set_initial, save_history);
+  }
   const auto n_groups = obj->sys.n_groups();
   const auto n_particles = obj->sys.n_particles();
   cpp11::writable::doubles ret(n_groups * n_particles);
@@ -115,6 +120,28 @@ cpp11::sexp dust2_discrete_unfilter_last_history(cpp11::sexp ptr, bool grouped) 
     set_array_dims(ret, {n_state, n_particles, n_groups, n_times});
   } else {
     set_array_dims(ret, {n_state, n_particles * n_groups, n_times});
+  }
+  return ret;
+}
+
+template <typename T>
+cpp11::sexp dust2_discrete_unfilter_last_gradient(cpp11::sexp ptr, bool grouped) {
+  auto *obj =
+    cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
+  if (!obj->adjoint_is_current()) {
+    cpp11::stop("Model was not run with 'adjoint = TRUE'");
+  }
+  if (grouped) {
+    cpp11::stop("Need to sort this out still");
+  }
+  const auto n_gradient = obj->sys.n_adjoint();
+  const auto n_particles = 1;
+  const auto n_groups = 1;
+  const auto len = n_gradient * n_particles * n_groups;
+  cpp11::sexp ret = cpp11::writable::doubles(len);
+  obj->last_gradient(REAL(ret));
+  if (grouped) {
+    set_array_dims(ret, {n_gradient, n_groups});
   }
   return ret;
 }

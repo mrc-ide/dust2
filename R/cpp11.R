@@ -64,8 +64,8 @@ dust2_discrete_sir_unfilter_update_pars <- function(ptr, r_pars, grouped) {
   .Call(`_dust2_dust2_discrete_sir_unfilter_update_pars`, ptr, r_pars, grouped)
 }
 
-dust2_discrete_sir_unfilter_run <- function(ptr, r_initial, save_history, grouped) {
-  .Call(`_dust2_dust2_discrete_sir_unfilter_run`, ptr, r_initial, save_history, grouped)
+dust2_discrete_sir_unfilter_run <- function(ptr, r_initial, save_history, adjoint, grouped) {
+  .Call(`_dust2_dust2_discrete_sir_unfilter_run`, ptr, r_initial, save_history, adjoint, grouped)
 }
 
 dust2_discrete_sir_unfilter_last_history <- function(ptr, grouped) {
@@ -94,6 +94,10 @@ dust2_discrete_sir_filter_rng_state <- function(ptr) {
 
 dust2_discrete_sir_filter_set_rng_state <- function(ptr, r_rng_state) {
   .Call(`_dust2_dust2_discrete_sir_filter_set_rng_state`, ptr, r_rng_state)
+}
+
+dust2_discrete_sir_unfilter_last_gradient <- function(ptr, grouped) {
+  .Call(`_dust2_dust2_discrete_sir_unfilter_last_gradient`, ptr, grouped)
 }
 
 test_resample_weight <- function(w, u) {

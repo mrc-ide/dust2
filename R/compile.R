@@ -144,6 +144,12 @@ dust_generate_cpp <- function(system, config, data) {
               substitute_dust_template(data, "dust_compare.cpp"))
   }
 
+  if (config$has_adjoint) {
+    code <- c(code,
+              "",
+              substitute_dust_template(data, "dust_adjoint.cpp"))
+  }
+
   c(header,
     "",
     system,

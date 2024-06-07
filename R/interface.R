@@ -24,11 +24,11 @@ dust_system_generator <- function(name, env = parent.env(parent.frame())) {
   ok <- !vapply(methods[methods_core], is.null, TRUE)
   stopifnot(all(ok))
 
-  properties <- list(
-    has_compare = !is.null(methods$compare_data))
+  has_compare <- !is.null(methods$compare_data)
 
-  if (properties$has_compare) {
-    methods_unfilter <- c("alloc", "run", "update_pars", "last_history")
+  if (has_compare) {
+    methods_unfilter <- c("alloc", "run", "update_pars", "last_history",
+                          "last_gradient")
     methods$unfilter <-
       get_methods(methods_unfilter, sprintf("%s_unfilter", name))
     methods_filter <- c("alloc", "run", "update_pars", "last_history",
@@ -36,6 +36,10 @@ dust_system_generator <- function(name, env = parent.env(parent.frame())) {
     methods$filter <-
       get_methods(methods_filter, sprintf("%s_filter", name))
   }
+
+  properties <- list(
+    has_compare = has_compare,
+    has_adjoint = !is.null(methods$unfilter$last_gradient))
 
   ret <- list(name = name,
               methods = methods,

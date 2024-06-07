@@ -25,6 +25,7 @@ parse_metadata <- function(filename, call = NULL) {
   list(class = class,
        name = parse_metadata_name(data, call) %||% class,
        has_compare = parse_metadata_has_compare(data, call),
+       has_adjoint = parse_metadata_has_adjoint(data, call),
        parameters = parse_metadata_parameters(data, call))
 }
 
@@ -78,6 +79,21 @@ parse_metadata_has_compare <- function(data, call = NULL) {
   if (length(data) != 0) {
     cli::cli_abort(
       "Expected no arguments to '[[dust2::has_compare()]]'",
+      call = call)
+  }
+  TRUE
+}
+
+
+parse_metadata_has_adjoint <- function(data, call = NULL) {
+  data <- find_attribute_value_single(data, "dust2::has_adjoint",
+                                      required = FALSE, call = call)
+  if (is.null(data)) {
+    return(FALSE)
+  }
+  if (length(data) != 0) {
+    cli::cli_abort(
+      "Expected no arguments to '[[dust2::has_adjoint()]]'",
       call = call)
   }
   TRUE
