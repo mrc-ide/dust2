@@ -28,11 +28,11 @@ dust_system_generator <- function(name, env = parent.env(parent.frame())) {
     has_compare = !is.null(methods$compare_data))
 
   if (properties$has_compare) {
-    methods_unfilter <- c("alloc", "run", "last_history")
+    methods_unfilter <- c("alloc", "run", "update_pars", "last_history")
     methods$unfilter <-
       get_methods(methods_unfilter, sprintf("%s_unfilter", name))
-    methods_filter <- c("alloc", "run", "last_history", "rng_state",
-                        "set_rng_state")
+    methods_filter <- c("alloc", "run", "update_pars", "last_history",
+                        "rng_state", "set_rng_state")
     methods$filter <-
       get_methods(methods_filter, sprintf("%s_filter", name))
   }

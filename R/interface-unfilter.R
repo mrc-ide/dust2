@@ -16,7 +16,7 @@
 ##'   [dust_unfilter_run]
 ##'
 ##' @export
-dust_unfilter_create <- function(generator, pars, time_start, time, data,
+dust_unfilter_create <- function(generator, time_start, time, data,
                                  n_particles = 1, n_groups = 0,
                                  dt = 1, index = NULL) {
   check_is_dust_system_generator(generator)
@@ -27,14 +27,20 @@ dust_unfilter_create <- function(generator, pars, time_start, time, data,
             "not have 'compare_data' support"),
       arg = "generator")
   }
-  res <- generator$methods$unfilter$alloc(pars, time_start, time, dt, data,
-                                          n_particles, n_groups, index)
-  res$name <- generator$name
-  res$n_particles <- as.integer(n_particles)
-  res$n_groups <- as.integer(max(n_groups), 1)
-  res$deterministic <- TRUE
-  res$methods <- generator$methods$unfilter
-  res$index <- index
+  create <- function(filter, pars) {
+    list2env(
+      generator$methods$unfilter$alloc(pars, time_start, time, dt, data,
+                                       n_particles, n_groups, index),
+      filter)
+  }
+  res <- list2env(
+    list(create = create,
+         n_particles = as.integer(n_particles),
+         n_groups = as.integer(max(n_groups), 1),
+         deterministic = TRUE,
+         methods = generator$methods$unfilter,
+         index = index),
+    parent = emptyenv())
   class(res) <- "dust_unfilter"
   res
 }
@@ -55,9 +61,18 @@ dust_unfilter_create <- function(generator, pars, time_start, time, data,
 ##'   there are groups.
 ##'
 ##' @export
-dust_unfilter_run <- function(unfilter, pars = NULL, initial = NULL,
+dust_unfilter_run <- function(unfilter, pars, initial = NULL,
                               save_history = FALSE) {
   check_is_dust_unfilter(unfilter)
+  if (is.null(unfilter$ptr)) {
+    if (is.null(pars)) {
+      cli::cli_abort("'pars' cannot be NULL, as unfilter is not initialised",
+                     arg = "pars", call = call)
+    }
+    unfilter$create(unfilter, pars)
+  } else if (!is.null(pars)) {
+    unfilter$methods$update_pars(unfilter$ptr, pars, unfilter$grouped)
+  }
   unfilter$methods$run(unfilter$ptr, pars, initial, save_history,
                        unfilter$grouped)
 }

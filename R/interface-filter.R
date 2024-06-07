@@ -6,10 +6,6 @@
 ##'   `dust_system_generator`.  The system must support `compare_data`
 ##'   to be used with this function.
 ##'
-##' @param pars Initial parameters for the system.  This should be the
-##'   *full* set of parameters; running the filter may update subsets
-##'   using the system's underlying `update_pars` method.
-##'
 ##' @param time_start The start time for the simulation - this is
 ##'   typically before the first data point.  Must be an integer-like
 ##'   value.
@@ -39,7 +35,7 @@
 ##'   [dust_unfilter_run]
 ##'
 ##' @export
-dust_filter_create <- function(generator, pars, time_start, time, data,
+dust_filter_create <- function(generator, time_start, time, data,
                                n_particles, n_groups = 0, dt = 1,
                                index = NULL, seed = NULL) {
   check_is_dust_system_generator(generator)
@@ -50,13 +46,27 @@ dust_filter_create <- function(generator, pars, time_start, time, data,
             "not have 'compare_data' support"),
       arg = "generator")
   }
-  res <- generator$methods$filter$alloc(pars, time_start, time, dt, data,
-                                        n_particles, n_groups, index, seed)
-  res$name <- generator$name
-  res$n_particles <- as.integer(n_particles)
-  res$n_groups <- as.integer(max(n_groups), 1)
-  res$deterministic <- FALSE
-  res$methods <- generator$methods$filter
+
+  ## TODO: We will be best if we do some validation here of inputs so
+  ## that there is little chance of this failing.  That said,
+  ## validation from R will be nicer anyway as we can throw cli-based
+  ## errors.
+  create <- function(filter, pars) {
+    list2env(
+      generator$methods$filter$alloc(pars, time_start, time, dt, data,
+                                     n_particles, n_groups, index, seed),
+      filter)
+  }
+  ## There are two ways of doing this; we can be optional at the C++
+  ## level or at the R level.  I prefer the latter I think.
+  res <- list2env(
+    list(create = create,
+         n_particles = as.integer(n_particles),
+         n_groups = as.integer(max(n_groups), 1),
+         deterministic = FALSE,
+         methods = generator$methods$filter,
+         index = index),
+    parent = emptyenv())
   class(res) <- "dust_filter"
   res
 }
@@ -87,9 +97,18 @@ dust_filter_create <- function(generator, pars, time_start, time, data,
 ##'   there are groups.
 ##'
 ##' @export
-dust_filter_run <- function(filter, pars = NULL, initial = NULL,
+dust_filter_run <- function(filter, pars, initial = NULL,
                             save_history = FALSE) {
   check_is_dust_filter(filter)
+  if (is.null(filter$ptr)) {
+    if (is.null(pars)) {
+      cli::cli_abort("'pars' cannot be NULL, as filter is not initialised",
+                     arg = "pars", call = call)
+    }
+    filter$create(filter, pars)
+  } else if (!is.null(pars)) {
+    filter$methods$update_pars(filter$ptr, pars, filter$grouped)
+  }
   filter$methods$run(filter$ptr, pars, initial, save_history,
                      filter$grouped)
 }
