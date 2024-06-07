@@ -2,6 +2,7 @@
 
 // [[dust2::class(sir)]]
 // [[dust2::has_compare()]]
+// [[dust2::has_adjoint()]]
 // [[dust2::parameter(I0)]]
 // [[dust2::parameter(N)]]
 // [[dust2::parameter(beta)]]
@@ -68,6 +69,87 @@ public:
     state_next[2] = R + n_IR;
     state_next[3] = cases_cumul + n_SI;
     state_next[4] = dust2::tools::accumulate_periodic(time, static_cast<real_type>(1), cases_inc, n_SI);
+  }
+
+  // We can put these into some adjoint class with static methods
+  // initial/update/compare but that feels pretty weird too.
+  static size_t adjoint_size(const shared_state& shared) {
+    return 3;
+  }
+
+  static void adjoint_initial(real_type time,
+                              real_type dt,
+                              const real_type * state,
+                              const real_type * adjoint,
+                              const shared_state& shared,
+                              internal_state& internal,
+                              real_type * adjoint_next) {
+    const real_type adj_I = adjoint[1];
+    adjoint_next[0] = adjoint[0];
+    adjoint_next[1] = adjoint[1];
+    adjoint_next[2] = adjoint[2];
+    adjoint_next[3] = adjoint[3];
+    adjoint_next[4] = adjoint[4];
+    adjoint_next[5] = adjoint[5];
+    adjoint_next[6] = adjoint[6];
+    adjoint_next[7] = adjoint[7] + adj_I;
+  }
+
+  static void adjoint_update(real_type time,
+                             real_type dt,
+                             const real_type * state,
+                             const real_type * adjoint,
+                             const shared_state& shared,
+                             internal_state& internal,
+                             real_type * adjoint_next) {
+    const auto S = state[0];
+    const auto I = state[1];
+
+    const auto p_SI = 1 - mcstate::math::exp(-shared.beta * I / shared.N * dt);
+    const auto p_IR = 1 - mcstate::math::exp(-shared.gamma * dt);
+
+    const auto adj_S = adjoint[0];
+    const auto adj_I = adjoint[1];
+    const auto adj_R = adjoint[2];
+    const auto adj_cases_cumul = adjoint[3];
+    const auto adj_cases_inc = adjoint[4];
+    const auto adj_beta = adjoint[5];
+    const auto adj_gamma = adjoint[6];
+    const auto adj_I0 = adjoint[7];
+
+    const auto adj_lambda = 0;
+    const auto adj_n_IR = -adj_I + adj_R;
+    const auto adj_n_SI = adj_cases_inc + adj_cases_cumul + adj_I + -adj_S;
+    const auto adj_p_IR = adj_n_IR * I;
+    const auto adj_p_SI = adj_n_SI * S;
+
+    adjoint_next[0] = adj_n_SI * p_SI + adj_S;
+    adjoint_next[1] = adj_n_IR * p_IR + adj_p_SI * (shared.beta * dt) * mcstate::math::exp(-shared.beta * I * dt / shared.N) / shared.N + adj_I;
+    adjoint_next[2] = adj_R;
+    adjoint_next[3] = adj_cases_cumul;
+    adjoint_next[4] = adj_lambda + adj_cases_inc * (dust2::tools::is_evenly_divisible_by(time, static_cast<real_type>(1)) ? 0 : 1);
+    adjoint_next[5] = adj_beta + adj_p_SI * (I * dt) * mcstate::math::exp(-shared.beta * I * dt / shared.N) / shared.N;
+    adjoint_next[6] = adj_gamma + adj_p_IR * mcstate::math::exp(-shared.gamma);
+    adjoint_next[7] = adj_I0;
+  }
+
+  static void adjoint_compare_data(real_type time,
+                                   real_type dt,
+                                   const real_type * state,
+                                   const real_type * adjoint,
+                                   const data_type& data,
+                                   const shared_state& shared,
+                                   internal_state& internal,
+                                   real_type * adjoint_next) {
+    const real_type cases_inc = state[4];
+    adjoint_next[0] = adjoint[0];
+    adjoint_next[1] = adjoint[1];
+    adjoint_next[2] = adjoint[2];
+    adjoint_next[3] = adjoint[3];
+    adjoint_next[4] = adjoint[4] + data.incidence / cases_inc - 1;
+    adjoint_next[5] = adjoint[5];
+    adjoint_next[6] = adjoint[6];
+    adjoint_next[7] = adjoint[7];
   }
 
   static shared_state build_shared(cpp11::list pars) {

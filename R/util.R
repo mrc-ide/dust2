@@ -4,6 +4,12 @@
 
 
 set_names <- function(x, nms) {
+  if (length(nms) == 1 && length(x) != 1) {
+    if (is.null(x)) {
+      return(x)
+    }
+    nms <- rep_len(nms, length(x))
+  }
   names(x) <- nms
   x
 }

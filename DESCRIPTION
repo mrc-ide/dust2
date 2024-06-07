@@ -30,6 +30,7 @@ Suggests:
     pkgbuild,
     pkgload,
     mockery,
+    numDeriv,
     testthat (>= 3.0.0),
     withr
 Config/testthat/edition: 3

@@ -4,7 +4,7 @@
 \alias{dust_filter_run}
 \title{Run particle filter}
 \usage{
-dust_filter_run(filter, pars = NULL, initial = NULL, save_history = FALSE)
+dust_filter_run(filter, pars, initial = NULL, save_history = FALSE)
 }
 \arguments{
 \item{filter}{A \code{dust_filter} object, created by

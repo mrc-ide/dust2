@@ -63,3 +63,11 @@ test_that("tell user about changes to files", {
     writelines_if_changed(text2, workdir, "myfile", FALSE),
     "Wrote 'myfile'")
 })
+
+
+test_that("can set names onto things", {
+  expect_null(set_names(NULL, "x"))
+  expect_equal(set_names("a", "x"), c(x = "a"))
+  expect_equal(set_names(c("a", "b"), "x"), c(x = "a", x = "b"))
+  expect_equal(set_names(c("a", "b"), c("x", "i")), c(x = "a", i = "b"))
+})

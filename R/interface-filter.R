@@ -6,10 +6,6 @@
 ##'   `dust_system_generator`.  The system must support `compare_data`
 ##'   to be used with this function.
 ##'
-##' @param pars Initial parameters for the system.  This should be the
-##'   *full* set of parameters; running the filter may update subsets
-##'   using the system's underlying `update_pars` method.
-##'
 ##' @param time_start The start time for the simulation - this is
 ##'   typically before the first data point.  Must be an integer-like
 ##'   value.
@@ -39,24 +35,36 @@
 ##'   [dust_unfilter_run]
 ##'
 ##' @export
-dust_filter_create <- function(generator, pars, time_start, time, data,
+dust_filter_create <- function(generator, time_start, time, data,
                                n_particles, n_groups = 0, dt = 1,
                                index = NULL, seed = NULL) {
-  check_is_dust_system_generator(generator)
-  if (!generator$properties$has_compare) {
-    ## This moves into something general soon?
-    cli::cli_abort(
-      paste("Can't create filter; the '{generator$name}' system does",
-            "not have 'compare_data' support"),
-      arg = "generator")
+  call <- environment()
+  check_generator_for_filter(generator, "filter", call = call)
+  assert_scalar_size(n_particles, call = call)
+  assert_scalar_size(n_groups, allow_zero = TRUE, call = call)
+  check_time_sequence(time_start, time, call = call)
+  check_dt(dt, call = call)
+  check_data(data, length(time), n_groups, call = call)
+  check_index(index, call = call)
+
+  create <- function(filter, pars) {
+    list2env(
+      generator$methods$filter$alloc(pars, time_start, time, dt, data,
+                                     n_particles, n_groups, index,
+                                     filter$initial_rng_state),
+      filter)
+    filter$create <- NULL
+    filter$initial_rng_state <- NULL
   }
-  res <- generator$methods$filter$alloc(pars, time_start, time, dt, data,
-                                        n_particles, n_groups, index, seed)
-  res$name <- generator$name
-  res$n_particles <- as.integer(n_particles)
-  res$n_groups <- as.integer(max(n_groups), 1)
-  res$deterministic <- FALSE
-  res$methods <- generator$methods$filter
+  res <- list2env(
+    list(create = create,
+         initial_rng_state = filter_rng_state(n_particles, n_groups, seed),
+         n_particles = as.integer(n_particles),
+         n_groups = as.integer(max(n_groups), 1),
+         deterministic = FALSE,
+         methods = generator$methods$filter,
+         index = index),
+    parent = emptyenv())
   class(res) <- "dust_filter"
   res
 }
@@ -87,11 +95,19 @@ dust_filter_create <- function(generator, pars, time_start, time, data,
 ##'   there are groups.
 ##'
 ##' @export
-dust_filter_run <- function(filter, pars = NULL, initial = NULL,
+dust_filter_run <- function(filter, pars, initial = NULL,
                             save_history = FALSE) {
   check_is_dust_filter(filter)
-  filter$methods$run(filter$ptr, pars, initial, save_history,
-                     filter$grouped)
+  if (is.null(filter$ptr)) {
+    if (is.null(pars)) {
+      cli::cli_abort("'pars' cannot be NULL, as filter is not initialised",
+                     arg = "pars")
+    }
+    filter$create(filter, pars)
+  } else if (!is.null(pars)) {
+    filter$methods$update_pars(filter$ptr, pars, filter$grouped)
+  }
+  filter$methods$run(filter$ptr, initial, save_history, filter$grouped)
 }
 
 
@@ -108,6 +124,11 @@ dust_filter_run <- function(filter, pars = NULL, initial = NULL,
 ##' @export
 dust_filter_last_history <- function(filter) {
   check_is_dust_filter(filter)
+  if (is.null(filter$ptr)) {
+    cli::cli_abort(c(
+      "History is not current",
+      i = "Filter has not yet been run"))
+  }
   filter$methods$last_history(filter$ptr, filter$grouped)
 }
 
@@ -124,7 +145,11 @@ dust_filter_last_history <- function(filter) {
 ##' @export
 dust_filter_rng_state <- function(filter) {
   check_is_dust_filter(filter)
-  filter$methods$rng_state(filter$ptr)
+  if (is.null(filter$ptr)) {
+    filter$initial_rng_state
+  } else {
+    filter$methods$rng_state(filter$ptr)
+  }
 }
 
 
@@ -134,7 +159,12 @@ dust_filter_rng_state <- function(filter) {
 ##' @export
 dust_filter_set_rng_state <- function(filter, rng_state) {
   check_is_dust_filter(filter)
-  filter$methods$set_rng_state(filter$ptr, rng_state)
+  if (is.null(filter$ptr)) {
+    assert_raw_vector(rng_state, length(filter$initial_rng_state))
+    filter$initial_rng_state <- rng_state
+  } else {
+    filter$methods$set_rng_state(filter$ptr, rng_state)
+  }
   invisible()
 }
 
@@ -144,4 +174,10 @@ check_is_dust_filter <- function(filter, call = parent.frame()) {
     cli::cli_abort("Expected 'filter' to be a 'dust_filter' object",
                    arg = "filter", call = call)
   }
+}
+
+
+filter_rng_state <- function(n_particles, n_groups, seed) {
+  n_streams <- max(n_groups, 1) * (1 + n_particles)
+  mcstate2::mcstate_rng$new(n_streams = n_streams, seed = seed)$state()
 }
