@@ -104,3 +104,13 @@ assert_raw_vector <- function(x, len, name = deparse(substitute(x)),
   assert_length(x, len)
   invisible(x)
 }
+
+
+assert_list <- function(x, name = deparse(substitute(x)), arg = name,
+                        call = NULL) {
+  if (!is.list(x)) {
+    cli::cli_abort("Expected '{name}' to be a list",
+                   arg = arg, call = call)
+  }
+  invisible(x)
+}

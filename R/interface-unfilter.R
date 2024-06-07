@@ -69,7 +69,7 @@ dust_unfilter_run <- function(unfilter, pars, initial = NULL,
   if (is.null(unfilter$ptr)) {
     if (is.null(pars)) {
       cli::cli_abort("'pars' cannot be NULL, as unfilter is not initialised",
-                     arg = "pars", call = call)
+                     arg = "pars")
     }
     unfilter$create(unfilter, pars)
   } else if (!is.null(pars)) {

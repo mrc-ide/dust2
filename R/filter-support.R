@@ -50,10 +50,8 @@ check_time_sequence <- function(time_start, time, call = NULL) {
 
 
 check_data <- function(data, n_time, n_groups, call = NULL) {
-  if (length(data) != n_time) {
-    cli::cli_abort("Expected 'data' to have length {n_time}",
-                   arg = "data", call = call)
-  }
+  assert_list(data, call = call)
+  assert_length(data, n_time, call = call)
   grouped <- n_groups > 0
   if (grouped) {
     len <- lengths(data)
