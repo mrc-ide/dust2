@@ -6,7 +6,6 @@
 \usage{
 dust_unfilter_create(
   generator,
-  pars,
   time_start,
   time,
   data,
@@ -20,10 +19,6 @@ dust_unfilter_create(
 \item{generator}{A system generator object, with class
 \code{dust_system_generator}.  The system must support \code{compare_data}
 to be used with this function.}
-
-\item{pars}{Initial parameters for the system.  This should be the
-\emph{full} set of parameters; running the filter may update subsets
-using the system's underlying \code{update_pars} method.}
 
 \item{time_start}{The start time for the simulation - this is
 typically before the first data point.  Must be an integer-like

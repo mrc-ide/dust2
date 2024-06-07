@@ -4,7 +4,7 @@
 \alias{dust_unfilter_run}
 \title{Run unfilter}
 \usage{
-dust_unfilter_run(unfilter, pars = NULL, initial = NULL, save_history = FALSE)
+dust_unfilter_run(unfilter, pars, initial = NULL, save_history = FALSE)
 }
 \arguments{
 \item{unfilter}{A \code{dust_unfilter} object, created by
