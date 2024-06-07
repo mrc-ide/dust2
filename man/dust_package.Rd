@@ -17,7 +17,7 @@ Nothing, this function is called for its side effects
 }
 \description{
 Creates or updates the generated code for a set of dust systems in
-a package. The user-provided code is assumed to the in \code{inst/dust}
+a package. The user-provided code is assumed to be in \code{inst/dust}
 as a series of C++ files; a file \code{inst/dust/x.cpp} will be
 transformed into a file \code{src/x.cpp}.
 }
