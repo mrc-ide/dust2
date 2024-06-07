@@ -41,3 +41,4 @@ reference:
   - title: Creation
     contents:
       - dust_compile
+      - dust_package

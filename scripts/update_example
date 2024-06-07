@@ -1,0 +1,17 @@
+#!/usr/bin/env Rscript
+examples <- c("sir.cpp", "walk.cpp")
+
+setwd(here::here())
+unlink(file.path("src", basename(examples)))
+
+unlink("inst/dust", recursive = TRUE)
+dir.create("inst/dust", FALSE)
+stopifnot(all(
+  file.copy(file.path("inst/examples", examples), "inst/dust",
+            overwrite = TRUE)))
+pkgload::load_all()
+dust_package(".")
+code <- readLines("R/dust.R")
+writeLines(sub("dust2::+", "", code), "R/dust.R")
+
+unlink("inst/dust", recursive = TRUE)
