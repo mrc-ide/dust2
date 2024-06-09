@@ -455,6 +455,25 @@ test_that("can simulate walk system with index", {
 })
 
 
+## This will likely move to use the R version soon, but save that move
+## till later and test this here.
+test_that("can validate times", {
+  pars <- list(sd = 1)
+  obj <- dust_system_create(walk(), pars, n_particles = 10, seed = 42)
+  expect_error(
+    dust_system_simulate(obj, c(1, 2, 3.5)),
+    "Expected 'time[3]' to be integer-like",
+    fixed = TRUE)
+  expect_error(
+    dust_system_simulate(obj, c(1, 2, 1)),
+    "Expected 'time[3]' (2) to be larger than the previous value (1)",
+    fixed = TRUE)
+  expect_error(
+    dust_system_simulate(obj, NULL),
+    "'time' must be a numeric vector")
+})
+
+
 test_that("can validate index values", {
   pars <- list(len = 3, sd = 1)
   obj <- dust_system_create(walk(), pars, n_particles = 10, seed = 42)

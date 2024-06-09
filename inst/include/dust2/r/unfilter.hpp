@@ -62,14 +62,20 @@ cpp11::sexp dust2_discrete_unfilter_alloc(cpp11::list r_pars,
 }
 
 template <typename T>
-cpp11::sexp dust2_discrete_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_pars,
-                                        cpp11::sexp r_initial, bool save_history,
-                                        bool grouped) {
+cpp11::sexp dust2_discrete_unfilter_update_pars(cpp11::sexp ptr,
+                                                cpp11::list r_pars,
+                                                bool grouped) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
-  if (r_pars != R_NilValue) {
-    update_pars(obj->sys, cpp11::as_cpp<cpp11::list>(r_pars), grouped);
-  }
+  update_pars(obj->sys, cpp11::as_cpp<cpp11::list>(r_pars), grouped);
+  return R_NilValue;
+}
+
+template <typename T>
+cpp11::sexp dust2_discrete_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
+                                        bool save_history, bool grouped) {
+  auto *obj =
+    cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
   if (r_initial != R_NilValue) {
     set_state(obj->sys, r_initial, grouped);
   }

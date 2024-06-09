@@ -23,11 +23,26 @@ test_that("can run an unfilter", {
     sum(dpois(1:4, incidence + 1e-6, log = TRUE))
   }
 
-  obj <- dust_unfilter_create(sir(), base, time_start, time, data)
-  expect_equal(dust_unfilter_run(obj), f(pars1))
+  obj <- dust_unfilter_create(sir(), time_start, time, data)
+  expect_equal(dust_unfilter_run(obj, base), f(pars1))
 
   expect_equal(dust_unfilter_run(obj, pars = pars1), f(pars1))
   expect_equal(dust_unfilter_run(obj, pars = pars2), f(pars2))
+})
+
+
+test_that("can only use pars = NULL on initialised unfilter", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  time_start <- 0
+  time <- c(4, 8, 12, 16)
+  data <- lapply(1:4, function(i) list(incidence = i))
+  dt <- 1
+
+  obj <- dust_unfilter_create(sir(), time_start, time, data)
+  expect_error(dust_unfilter_run(obj, NULL),
+               "'pars' cannot be NULL, as unfilter is not initialised")
+  ll <- dust_unfilter_run(obj, pars)
+  expect_identical(dust_unfilter_run(obj, NULL), ll)
 })
 
 
@@ -39,15 +54,18 @@ test_that("can get unfilter history", {
   data <- lapply(1:4, function(i) list(incidence = i))
   dt <- 1
 
-  obj <- dust_unfilter_create(sir(), pars, time_start, time, data)
-  dust_unfilter_run(obj)
+  obj <- dust_unfilter_create(sir(), time_start, time, data)
   expect_error(
     dust_unfilter_last_history(obj),
     "History is not current")
-  dust_unfilter_run(obj, save_history = TRUE)
+ dust_unfilter_run(obj, pars)
+  expect_error(
+    dust_unfilter_last_history(obj),
+    "History is not current")
+  dust_unfilter_run(obj, NULL, save_history = TRUE)
   h <- dust_unfilter_last_history(obj)
   expect_equal(dust_unfilter_last_history(obj), h)
-  dust_unfilter_run(obj, save_history = FALSE)
+  dust_unfilter_run(obj, NULL, save_history = FALSE)
   expect_error(
     dust_unfilter_last_history(obj),
     "History is not current")
@@ -68,11 +86,11 @@ test_that("can get partial unfilter history", {
   data <- lapply(1:4, function(i) list(incidence = i))
   dt <- 1
 
-  obj1 <- dust_unfilter_create(sir(), pars, time_start, time, data)
-  obj2 <- dust_unfilter_create(sir(), pars, time_start, time, data,
+  obj1 <- dust_unfilter_create(sir(), time_start, time, data)
+  obj2 <- dust_unfilter_create(sir(), time_start, time, data,
                                index = c(2, 4))
-  expect_equal(dust_unfilter_run(obj1, save_history = TRUE),
-               dust_unfilter_run(obj2, save_history = TRUE))
+  expect_equal(dust_unfilter_run(obj1, pars, save_history = TRUE),
+               dust_unfilter_run(obj2, pars, save_history = TRUE))
 
   h1 <- dust_unfilter_last_history(obj1)
   h2 <- dust_unfilter_last_history(obj2)
@@ -105,8 +123,8 @@ test_that("can run an unfilter with manually set state", {
     sum(dpois(1:4, incidence + 1e-6, log = TRUE))
   }
 
-  obj <- dust_unfilter_create(sir(), pars, time_start, time, data)
-  expect_equal(dust_unfilter_run(obj, initial = state), f(pars))
+  obj <- dust_unfilter_create(sir(), time_start, time, data)
+  expect_equal(dust_unfilter_run(obj, pars, initial = state), f(pars))
 })
 
 
@@ -139,33 +157,8 @@ test_that("can run unfilter on structured system", {
     rowSums(dpois(observed, incidence + 1e-6, log = TRUE))
   }
 
-  obj <- dust_unfilter_create(sir(), pars, time_start, time, data, n_groups = 3)
-  expect_equal(dust_unfilter_run(obj), f(pars))
-})
-
-
-test_that("validate time for unfilter", {
-  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
-  time_start <- 0
-  time <- as.integer(c(4, 8, 12, 16))
-  data <- lapply(1:4, function(i) list(incidence = i))
-  dt <- 1
-
-  expect_error(
-    dust_unfilter_create(sir(), pars, time_start = 5, time = time, data = data),
-    "Expected 'time[1]' (5) to be larger than the previous value (4)",
-    fixed = TRUE)
-  time2 <- time + c(0, 0, .1, 0)
-  expect_error(
-    dust_unfilter_create(sir(), pars, time_start = 0, time = time2,
-                         data = data),
-    "Expected 'time[3]' to be integer-like",
-    fixed = TRUE)
-  expect_error(
-    dust_unfilter_create(sir(), pars, time_start = 0, time = as.character(time),
-                         data = data),
-    "'time' must be a numeric vector",
-    fixed = TRUE)
+  obj <- dust_unfilter_create(sir(), time_start, time, data, n_groups = 3)
+  expect_equal(dust_unfilter_run(obj, pars), f(pars))
 })
 
 
@@ -175,13 +168,11 @@ test_that("can run replicated unfilter", {
   time <- c(4, 8, 12, 16)
   data <- lapply(1:4, function(i) list(incidence = i))
   dt <- 1
-  obj1 <- dust_unfilter_create(sir(), pars, time_start, time, data,
-                               n_particles = 5)
-  obj2 <- dust_unfilter_create(sir(), pars, time_start, time, data,
-                               n_particles = 1)
+  obj1 <- dust_unfilter_create(sir(), time_start, time, data, n_particles = 5)
+  obj2 <- dust_unfilter_create(sir(), time_start, time, data, n_particles = 1)
   expect_equal(
-    dust_unfilter_run(obj1),
-    rep(dust_unfilter_run(obj2), 5))
+    dust_unfilter_run(obj1, pars),
+    rep(dust_unfilter_run(obj2, pars), 5))
 })
 
 
@@ -195,13 +186,13 @@ test_that("can run replicated structured unfilter", {
     lapply(seq_len(2), function(j) list(incidence = 2 * (i - 1) + j))
   })
   dt <- 1
-  obj1 <- dust_unfilter_create(sir(), pars, time_start, time, data,
+  obj1 <- dust_unfilter_create(sir(), time_start, time, data,
                                n_particles = 5, n_groups = 2)
-  obj2 <- dust_unfilter_create(sir(), pars, time_start, time, data,
+  obj2 <- dust_unfilter_create(sir(), time_start, time, data,
                                n_particles = 1, n_groups = 2)
   expect_equal(
-    dust_unfilter_run(obj1),
-    matrix(rep(dust_unfilter_run(obj2), each = 5), 5))
+    dust_unfilter_run(obj1, pars),
+    matrix(rep(dust_unfilter_run(obj2, pars), each = 5), 5))
 })
 
 
@@ -217,14 +208,14 @@ test_that("can save history from structured unfilter", {
   data1 <- lapply(data, function(x) x[[1]])
   data2 <- lapply(data, function(x) x[[2]])
   dt <- 1
-  obj <- dust_unfilter_create(sir(), pars, time_start, time, data,
+  obj <- dust_unfilter_create(sir(), time_start, time, data,
                               n_groups = 2)
-  obj1 <- dust_unfilter_create(sir(), pars[[1]], time_start, time, data1)
-  obj2 <- dust_unfilter_create(sir(), pars[[2]], time_start, time, data2)
+  obj1 <- dust_unfilter_create(sir(), time_start, time, data1)
+  obj2 <- dust_unfilter_create(sir(), time_start, time, data2)
 
-  ll <- dust_unfilter_run(obj, save_history = TRUE)
-  ll1 <- dust_unfilter_run(obj1, save_history = TRUE)
-  ll2 <- dust_unfilter_run(obj2, save_history = TRUE)
+  ll <- dust_unfilter_run(obj, pars, save_history = TRUE)
+  ll1 <- dust_unfilter_run(obj1, pars[[1]], save_history = TRUE)
+  ll2 <- dust_unfilter_run(obj2, pars[[2]], save_history = TRUE)
 
   expect_equal(ll, c(ll1, ll2))
   h <- dust_unfilter_last_history(obj)
