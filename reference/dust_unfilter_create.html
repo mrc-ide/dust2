@@ -59,7 +59,6 @@ this method will change in future.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dust_unfilter_create</span><span class="op">(</span></span>
 <span>  <span class="va">generator</span>,</span>
-<span>  <span class="va">pars</span>,</span>
 <span>  <span class="va">time_start</span>,</span>
 <span>  <span class="va">time</span>,</span>
 <span>  <span class="va">data</span>,</span>
@@ -76,12 +75,6 @@ this method will change in future.</p>
 <dd><p>A system generator object, with class
 <code>dust_system_generator</code>.  The system must support <code>compare_data</code>
 to be used with this function.</p></dd>
-
-
-<dt>pars</dt>
-<dd><p>Initial parameters for the system.  This should be the
-<em>full</em> set of parameters; running the filter may update subsets
-using the system's underlying <code>update_pars</code> method.</p></dd>
 
 
 <dt>time_start</dt>
