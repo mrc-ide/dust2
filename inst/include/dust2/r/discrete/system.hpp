@@ -3,7 +3,7 @@
 #include <dust2/r/helpers.hpp>
 #include <mcstate/r/random.hpp>
 
-#include <dust2/discrete.hpp>
+#include <dust2/discrete/system.hpp>
 #include <dust2/history.hpp>
 
 namespace dust2 {

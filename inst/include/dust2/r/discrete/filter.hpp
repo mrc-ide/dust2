@@ -2,7 +2,7 @@
 
 #include <mcstate/r/random.hpp>
 #include <dust2/r/helpers.hpp>
-#include <dust2/filter.hpp>
+#include <dust2/discrete/filter.hpp>
 
 namespace dust2 {
 namespace r {
