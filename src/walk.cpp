@@ -104,7 +104,7 @@ public:
 };
 
 #include <cpp11.hpp>
-#include <dust2/r/discrete.hpp>
+#include <dust2/r/discrete/system.hpp>
 
 [[cpp11::register]]
 SEXP dust2_discrete_walk_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic) {

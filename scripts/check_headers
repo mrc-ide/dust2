@@ -1,0 +1,49 @@
+#!/usr/bin/env Rscript
+if (requireNamespace("here", quietly = TRUE)) {
+  root <- here::here()
+} else if (file.exists("DESCRIPTION")) {
+  root <- getwd()
+} else {
+  stop("Could not determine package root")
+}
+
+path_dust <- file.path(root, "inst/include")
+path_cpp <- system.file("include", package = "cpp11", mustWork = TRUE)
+path_mcstate2 <- system.file("include", package = "mcstate2", mustWork = TRUE)
+
+cxx <- strsplit(trimws(callr::rcmd_safe("config", "CXX")$stdout), " +")[[1]]
+cc <- cxx[[1]]
+cc_flags <- cxx[[2]]
+include_r <- trimws(callr::rcmd_safe("config", "--cppflags")$stdout)
+include_dust <- paste0("-I", path_dust)
+include_cpp <- paste0("-I", path_cpp)
+include_mcstate2 <- paste0("-I", path_mcstate2)
+
+files <- dir(path_dust, "\\.hpp$", recursive = TRUE)
+
+check <- function(f) {
+  message(crayon::bold(sprintf("%s...", f)), appendLF = FALSE)
+  include <- c(include_r, include_dust, include_mcstate2, include_cpp)
+  ans <- suppressWarnings(
+    system2(cc, c(cc_flags, "-O0", "-o/dev/null", "-c", include,
+                  file.path(path_dust, f)),
+            stderr = TRUE, stdout = TRUE))
+  ok <- is.null(attr(ans, "status"))
+  if (ok) {
+    message(crayon::bold(crayon::green("OK")))
+  } else {
+    message(crayon::bold(crayon::red("FAIL")))
+    writeLines(ans)
+  }
+  list(success = ok,
+       output = as.character(ans))
+}
+
+result <- lapply(files, check)
+ok <- all(vapply(result, "[[", TRUE, "success"))
+
+if (ok) {
+  message("All headers passed")
+} else {
+  stop("Some headers failed")
+}

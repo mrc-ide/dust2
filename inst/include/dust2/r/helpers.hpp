@@ -4,7 +4,7 @@
 #include <numeric>
 #include <vector>
 #include <dust2/common.hpp>
-#include <dust2/discrete.hpp>
+#include <dust2/discrete/system.hpp> // TODO: remove
 #include <cpp11.hpp>
 
 namespace dust2 {
@@ -237,7 +237,7 @@ std::vector<typename T::internal_state> build_internal(std::vector<typename T::s
 }
 
 // TODO: Probably move this elsewhere so that we can drop the include of
-// discrete.hpp here
+// discrete/system.hpp here
 template <typename T>
 void update_pars(dust_discrete<T>& obj, cpp11::list r_pars, bool grouped) {
   if (grouped) {

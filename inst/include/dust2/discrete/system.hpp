@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <mcstate/random/random.hpp>
 
 namespace dust2 {
 

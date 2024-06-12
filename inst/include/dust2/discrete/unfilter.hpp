@@ -1,6 +1,6 @@
 #pragma once
 
-#include <dust2/discrete.hpp>
+#include <dust2/discrete/system.hpp>
 #include <dust2/filter_details.hpp>
 #include <dust2/history.hpp>
 #include <mcstate/random/random.hpp>
