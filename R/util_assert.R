@@ -1,3 +1,13 @@
+assert_is <- function(x, what, name = deparse(substitute(x)), arg = name,
+                      call = NULL) {
+  if (!inherits(x, what)) {
+    cli::cli_abort("Expected '{name}' to be a '{what}' object",
+                   arg = name, call = call)
+  }
+  invisible(x)
+}
+
+
 assert_scalar <- function(x, name = deparse(substitute(x)), arg = name,
                           call = NULL)  {
   if (length(x) != 1) {
