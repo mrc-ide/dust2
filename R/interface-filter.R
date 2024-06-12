@@ -220,6 +220,8 @@ check_is_dust_filter <- function(filter, call = parent.frame()) {
 }
 
 
+## This is something that we should tidy up within mcstate itself,
+## there are lots of little utilities we could benefit from.
 filter_rng_state <- function(n_particles, n_groups, seed) {
   n_streams <- max(n_groups, 1) * (1 + n_particles)
   mcstate2::mcstate_rng$new(n_streams = n_streams, seed = seed)$state()
