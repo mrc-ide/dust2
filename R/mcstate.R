@@ -46,21 +46,25 @@
 ##' @param initial Optionally, a function to create initial conditions
 ##'   from unpacked parameters.
 ##'
+##' @param domain Optionally, domain information to pass into the
+##'   model.  The format here is similar to that required by
+##'   [mcstate_model], with a two-colummn matrix named with your
+##'   parameter names.  At present you must use the parameter names
+##'   implied by your `packer`.
+##'
 ##' @return A [mcstate::mcstate_model] object
 ##'
 ##' @export
-dust_filter_mcstate <- function(filter, packer, initial = NULL) {
-  check_is_dust_filter(filter)
-  assert_is(packer, "mcstate_packer")
+dust_filter_mcstate <- function(filter, packer, initial = NULL,
+                                domain = NULL) {
+  call <- environment()
+  check_is_dust_filter(filter, call = call)
+  assert_is(packer, "mcstate_packer", call = call)
 
   ## We configure saving trajectories on creation I think, which then
   ## affects density.  Start without trajectories?  Realistically
   ## people don't change this much afterwards?  This will be easiest
   ## to think about once we sort out how models know about their variables.
-
-  ## TODO: Also accept information about domain to add here?  This
-  ## should be in terms of the packed vector.
-  domain <- NULL
 
   ## Supporting parameter groups requires some effort with packers,
   ## movement there will come from mcstate, and probably we'll end up
