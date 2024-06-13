@@ -29,7 +29,7 @@ public:
 
   using rng_state_type = mcstate::random::generator<real_type>;
 
-  static size_t size(const shared_state& shared) {
+  static size_t size_state(const shared_state& shared) {
     return 5;
   }
 

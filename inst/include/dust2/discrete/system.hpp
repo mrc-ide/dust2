@@ -24,7 +24,7 @@ public:
                 size_t n_particles, // per group
                 const std::vector<rng_int_type>& seed,
                 bool deterministic) :
-    n_state_(T::size(shared[0])),
+    n_state_(T::size_state(shared[0])),
     n_particles_(n_particles),
     n_groups_(shared.size()),
     n_particles_total_(n_particles_ * n_groups_),
