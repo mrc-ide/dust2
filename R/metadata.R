@@ -24,6 +24,7 @@ parse_metadata <- function(filename, call = NULL) {
   class <- parse_metadata_class(data, call)
   list(class = class,
        name = parse_metadata_name(data, call) %||% class,
+       time_type = parse_metadata_time_type(data, call),
        has_compare = parse_metadata_has_compare(data, call),
        parameters = parse_metadata_parameters(data, call))
 }
@@ -66,6 +67,30 @@ parse_metadata_name <- function(data, call = NULL) {
       call = call)
   }
   deparse(data[[1]])
+}
+
+
+parse_metadata_time_type <- function(data, call = NULL) {
+  data <- find_attribute_value_single(data, "dust2::time_type",
+                                      required = TRUE, call = call)
+  if (length(data) != 1 || nzchar(names(data))) {
+    cli::cli_abort(
+      "Expected a single unnamed argument to '[[dust2::time_type()]]'",
+      call = call)
+  }
+  if (!is.symbol(data[[1]])) {
+    cli::cli_abort(
+      "Expected an unquoted string argument to '[[dust2::time_type()]]'",
+      call = call)
+  }
+  value <- deparse(data[[1]])
+  if (!(value %in% c("discrete", "continuous"))) {
+    cli::cli_abort(
+      paste("Expected argument to '[[dust2::time_type()]]' to be one of",
+            "'discrete' or 'continuous'"),
+      call = call)
+  }
+  value
 }
 
 
