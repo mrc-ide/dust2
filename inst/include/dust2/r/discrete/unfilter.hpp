@@ -3,6 +3,8 @@
 #include <mcstate/r/random.hpp>
 #include <dust2/r/helpers.hpp>
 #include <dust2/r/unfilter.hpp>
+#include <dust2/unfilter.hpp>
+#include <dust2/discrete/system.hpp>
 
 namespace dust2 {
 namespace r {
