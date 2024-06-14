@@ -23,6 +23,7 @@ reference:
   - subtitle: Other
     contents:
       - dust_system_reorder
+      - dust_ode_control
   - title: Likelihood
     contents:
       - dust_system_compare_data

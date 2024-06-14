@@ -45,7 +45,9 @@ initial conditions then you would see different likelihoods.}
 
 \item{n_groups}{Optionally, the number of parameter groups}
 
-\item{dt}{The time step for the system, defaults to 1}
+\item{dt}{The time step for discrete time systems, defaults to 1
+if not given.  It is an error to provide a non-NULL argument
+with continuous-time systems.}
 
 \item{index}{An optional index of states to extract.  If given,
 then we subset the system state on return.  You can use this to

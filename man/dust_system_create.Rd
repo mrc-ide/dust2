@@ -10,7 +10,8 @@ dust_system_create(
   n_particles,
   n_groups = 0,
   time = 0,
-  dt = 1,
+  dt = NULL,
+  ode_control = NULL,
   seed = NULL,
   deterministic = FALSE
 )
@@ -29,7 +30,13 @@ system.  If \code{n_groups} is 1 or more, then this must be a list of length
 
 \item{time}{The initial time, defaults to 0}
 
-\item{dt}{The time step for the system, defaults to 1}
+\item{dt}{The time step for discrete time systems, defaults to 1
+if not given.  It is an error to provide a non-NULL argument
+with continuous-time systems.}
+
+\item{ode_control}{The ODE integration control for continuous time
+systems.  Defaults to the default return of \link{dust_ode_control}.
+It is an error to provide this with discrete-time systems.}
 
 \item{seed}{Optionally, a seed.  Otherwise we respond to R's RNG seed on
 initialisation.}
