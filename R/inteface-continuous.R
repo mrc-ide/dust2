@@ -34,23 +34,6 @@
 ##'
 ##' @return A named list of class "dust_ode_control".  Do not modify
 ##'   this after creation.
-##'
-##' @examples
-##'
-##' # We include an example of logistic growth with the package
-##' gen <- dust::dust_example("logistic")
-##'
-##' # Create a control object, then pass it through as the ode_control
-##' # parameter to the constructor:
-##' ctrl <- dust::dust_ode_control(atol = 1e-3, rtol = 1e-3)
-##' mod <- gen$new(list(r = 0.1, K = 100), 0, 1, ode_control = ctrl)
-##'
-##' # When the model runs, the control parameters passed in to the
-##' # constructor are used in the solution
-##' mod$run(10)
-##'
-##' # The full set of control parameters can be extracted:
-##' mod$ode_control()
 dust_ode_control <- function(max_steps = 10000, atol = 1e-6, rtol = 1e-6,
                              step_size_min = 0, step_size_max = Inf) {
   call <- environment()
