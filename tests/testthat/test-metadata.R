@@ -82,14 +82,14 @@ test_that("can validate time type metadata", {
     "Expected an unquoted string argument to '[[dust2::time_type()]]'",
     fixed = TRUE)
 
-  writeLines(c(base, '// [[dust2::time_type(bouncy)]]'),
+  writeLines(c(base, "// [[dust2::time_type(bouncy)]]"),
              tmp)
   expect_error(
     parse_metadata(tmp),
     "Expected argument to '[[dust2::time_type()]]' to be one of 'discrete'",
     fixed = TRUE)
 
-  writeLines(c(base, '// [[dust2::time_type(discrete)]]'),
+  writeLines(c(base, "// [[dust2::time_type(discrete)]]"),
              tmp)
   expect_equal(parse_metadata(tmp)$time_type, "discrete")
 })
