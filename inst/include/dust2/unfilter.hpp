@@ -35,15 +35,6 @@ public:
     history_(history_index_.size() > 0 ? history_index_.size() : n_state_,
              n_particles_, n_groups_, time_.size()),
     history_is_current_(false) {
-    // TODO: this will need relaxing soon to support continuous time
-    // models, we just need to move over away from run_steps and to
-    // run_to_time
-    const auto dt = sys_.dt();
-    for (size_t i = 0; i < time_.size(); i++) {
-      const auto t0 = i == 0 ? time_start_ : time_[i - 1];
-      const auto t1 = time_[i];
-      step_.push_back(static_cast<size_t>(std::round((t1 - t0) / dt)));
-    }
   }
 
   void run(bool set_initial, bool save_history) {
@@ -51,7 +42,7 @@ public:
     if (save_history) {
       history_.reset();
     }
-    const auto n_times = step_.size();
+    const auto n_times = time_.size();
 
     sys.set_time(time_start_);
     if (set_initial) {
@@ -63,7 +54,7 @@ public:
 
     auto it_data = data_.begin();
     for (size_t i = 0; i < n_times; ++i, it_data += n_groups_) {
-      sys.run_steps(step_[i]); // just compute this at point of use?
+      sys.run_to_time(time_[i]);
       sys.compare_data(it_data, ll_step_.begin());
       for (size_t j = 0; j < ll_.size(); ++j) {
         ll_[j] += ll_step_[j];
@@ -98,7 +89,6 @@ public:
 private:
   real_type time_start_;
   std::vector<real_type> time_;
-  std::vector<size_t> step_;
   std::vector<data_type> data_;
   size_t n_state_;
   size_t n_particles_;
