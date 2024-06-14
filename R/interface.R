@@ -1,13 +1,13 @@
-dust_system_generator <- function(name, env = parent.env(parent.frame())) {
-  prefix <- sprintf("dust2_discrete_%s", name)
+dust_system_generator <- function(name, time_type,
+                                  env = parent.env(parent.frame())) {
   ## I don't love that this requires running through sprintf() each
   ## time we create a generator, but using a function for the generator (see
   ## sir()), rather than an object, means that it's easier to think
   ## about the dependencies among packages.  This is also essentially
   ## how DBI works.
-  get_methods <- function(nms, prefix) {
+  get_methods <- function(nms, component, name) {
     set_names(
-      lapply(sprintf("dust2_discrete_%s_%s", prefix, nms),
+      lapply(sprintf("dust2_%s_%s_%s", component, name, nms),
              function(x) env[[x]]),
       nms)
   }
@@ -20,28 +20,26 @@ dust_system_generator <- function(name, env = parent.env(parent.frame())) {
                     "run_steps", "run_to_time", "simulate",
                     "reorder")
   methods_compare <- "compare_data"
-  methods <- get_methods(c(methods_core, methods_compare), name)
+  methods <- get_methods(c(methods_core, methods_compare), "system", name)
   ok <- !vapply(methods[methods_core], is.null, TRUE)
   stopifnot(all(ok))
 
   properties <- list(
+    time_type = time_type,
     has_compare = !is.null(methods$compare_data))
 
   if (properties$has_compare) {
     methods_unfilter <- c("alloc", "run", "update_pars", "last_history")
-    methods$unfilter <-
-      get_methods(methods_unfilter, sprintf("%s_unfilter", name))
+    methods$unfilter <- get_methods(methods_unfilter, "unfilter", name)
     methods_filter <- c("alloc", "run", "update_pars", "last_history",
                         "rng_state", "set_rng_state")
-    methods$filter <-
-      get_methods(methods_filter, sprintf("%s_filter", name))
+    methods$filter <- get_methods(methods_filter, "filter", name)
   }
 
   ret <- list(name = name,
               methods = methods,
               properties = properties)
-  ## TODO: check that alloc exists, then go through and add
-  ## properties.
+
   class(ret) <- "dust_system_generator"
   ret
 }
@@ -386,6 +384,8 @@ print.dust_system <- function(x, ...) {
     cli::cli_bullets(c(
       i = "This system has 'compare_data' support"))
   }
+  cli::cli_bullets(c(
+    i = "This system runs in {x$properties$time_type} time"))
   ## Later, we might print some additional capabilities of the system
   ## here, such as if it can be used with a filter, a summary of its
   ## parameters (once we know how to access that), etc.
@@ -401,6 +401,12 @@ print.dust_system_generator <- function(x, ...) {
   ## parameters (once we know how to access that), etc.
   cli::cli_alert_info(
     "Use 'dust2::dust_system_create()' to create a system with this generator")
+  if (x$properties$has_compare) {
+    cli::cli_bullets(c(
+      i = "This system has 'compare_data' support"))
+  }
+  cli::cli_bullets(c(
+    i = "This system runs in {x$properties$time_type} time"))
   invisible(x)
 }
 

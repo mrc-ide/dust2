@@ -3,6 +3,7 @@
 #include <dust2/common.hpp>
 
 // [[dust2::class(walk)]]
+// [[dust2::time_type(discrete)]]
 // [[dust2::parameter(sd)]]
 // [[dust2::parameter(len)]]
 // [[dust2::parameter(random_initial)]]
@@ -99,7 +100,7 @@ public:
 
   // This one could be optional
   static internal_state build_internal(const shared_state& shared) {
-    return walk::internal_state{};
+    return internal_state{};
   }
 };
 
@@ -107,66 +108,65 @@ public:
 #include <dust2/r/discrete/system.hpp>
 
 [[cpp11::register]]
-SEXP dust2_discrete_walk_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic) {
+SEXP dust2_system_walk_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic) {
   return dust2::r::dust2_discrete_alloc<walk>(r_pars, r_time, r_dt, r_n_particles, r_n_groups, r_seed, r_deterministic);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_walk_run_steps(cpp11::sexp ptr, cpp11::sexp r_n_steps) {
+SEXP dust2_system_walk_run_steps(cpp11::sexp ptr, cpp11::sexp r_n_steps) {
   return dust2::r::dust2_discrete_run_steps<walk>(ptr, r_n_steps);
 }
-
 [[cpp11::register]]
-SEXP dust2_discrete_walk_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {
-  return dust2::r::dust2_discrete_run_to_time<walk>(ptr, r_time);
+SEXP dust2_system_walk_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {
+  return dust2::r::dust2_system_run_to_time<dust2::dust_discrete<walk>>(ptr, r_time);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_walk_state(cpp11::sexp ptr, bool grouped) {
-  return dust2::r::dust2_discrete_state<walk>(ptr, grouped);
+SEXP dust2_system_walk_state(cpp11::sexp ptr, bool grouped) {
+  return dust2::r::dust2_system_state<dust2::dust_discrete<walk>>(ptr, grouped);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_walk_time(cpp11::sexp ptr) {
-  return dust2::r::dust2_discrete_time<walk>(ptr);
+SEXP dust2_system_walk_time(cpp11::sexp ptr) {
+  return dust2::r::dust2_system_time<dust2::dust_discrete<walk>>(ptr);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_walk_set_state_initial(cpp11::sexp ptr) {
-  return dust2::r::dust2_discrete_set_state_initial<walk>(ptr);
+SEXP dust2_system_walk_set_state_initial(cpp11::sexp ptr) {
+  return dust2::r::dust2_system_set_state_initial<dust2::dust_discrete<walk>>(ptr);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_walk_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool grouped) {
-  return dust2::r::dust2_discrete_set_state<walk>(ptr, r_state, grouped);
+SEXP dust2_system_walk_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool grouped) {
+  return dust2::r::dust2_system_set_state<dust2::dust_discrete<walk>>(ptr, r_state, grouped);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_walk_reorder(cpp11::sexp ptr, cpp11::integers r_index) {
-  return dust2::r::dust2_discrete_reorder<walk>(ptr, r_index);
+SEXP dust2_system_walk_reorder(cpp11::sexp ptr, cpp11::integers r_index) {
+  return dust2::r::dust2_system_reorder<dust2::dust_discrete<walk>>(ptr, r_index);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_walk_rng_state(cpp11::sexp ptr) {
-  return dust2::r::dust2_discrete_rng_state<walk>(ptr);
+SEXP dust2_system_walk_rng_state(cpp11::sexp ptr) {
+  return dust2::r::dust2_system_rng_state<dust2::dust_discrete<walk>>(ptr);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_walk_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
-  return dust2::r::dust2_discrete_set_rng_state<walk>(ptr, r_rng_state);
+SEXP dust2_system_walk_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
+  return dust2::r::dust2_system_set_rng_state<dust2::dust_discrete<walk>>(ptr, r_rng_state);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_walk_set_time(cpp11::sexp ptr, cpp11::sexp r_time) {
-  return dust2::r::dust2_discrete_set_time<walk>(ptr, r_time);
+SEXP dust2_system_walk_set_time(cpp11::sexp ptr, cpp11::sexp r_time) {
+  return dust2::r::dust2_system_set_time<dust2::dust_discrete<walk>>(ptr, r_time);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_walk_update_pars(cpp11::sexp ptr, cpp11::list pars, bool grouped) {
-  return dust2::r::dust2_discrete_update_pars<walk>(ptr, pars, grouped);
+SEXP dust2_system_walk_update_pars(cpp11::sexp ptr, cpp11::list pars, bool grouped) {
+  return dust2::r::dust2_system_update_pars<dust2::dust_discrete<walk>>(ptr, pars, grouped);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_walk_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::sexp r_index, bool grouped) {
-  return dust2::r::dust2_discrete_simulate<walk>(ptr, r_times, r_index, grouped);
+SEXP dust2_system_walk_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::sexp r_index, bool grouped) {
+  return dust2::r::dust2_system_simulate<dust2::dust_discrete<walk>>(ptr, r_times, r_index, grouped);
 }

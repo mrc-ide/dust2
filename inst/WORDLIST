@@ -1,7 +1,13 @@
 CMD
-codecov
-io
+Makevars
+OpenMP
 R's
+codecov
+cpp
+etc
+io
+pkgload
 rng
+roxygen
 th
 unfilter

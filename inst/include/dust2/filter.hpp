@@ -1,6 +1,5 @@
 #pragma once
 
-#include <dust2/discrete/system.hpp>
 #include <dust2/filter_details.hpp>
 #include <dust2/history.hpp>
 #include <mcstate/random/random.hpp>
@@ -12,12 +11,13 @@ class filter {
 public:
   using real_type = typename T::real_type;
   using data_type = typename T::data_type;
+  using system_type = typename T::system_type;
   using rng_state_type = typename T::rng_state_type;
   using rng_int_type = typename rng_state_type::int_type;
 
-  dust_discrete<T> sys;
+  T sys;
 
-  filter(dust_discrete<T> sys_,
+  filter(T sys_,
          real_type time_start,
          std::vector<real_type> time,
          std::vector<data_type> data,

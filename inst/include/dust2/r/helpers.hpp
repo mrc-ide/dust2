@@ -4,7 +4,6 @@
 #include <numeric>
 #include <vector>
 #include <dust2/common.hpp>
-#include <dust2/discrete/system.hpp> // TODO: remove
 #include <cpp11.hpp>
 
 namespace dust2 {
@@ -236,10 +235,9 @@ std::vector<typename T::internal_state> build_internal(std::vector<typename T::s
   return internal;
 }
 
-// TODO: Probably move this elsewhere so that we can drop the include of
-// discrete/system.hpp here
 template <typename T>
-void update_pars(dust_discrete<T>& obj, cpp11::list r_pars, bool grouped) {
+void update_pars(T& obj, cpp11::list r_pars, bool grouped) {
+  using system_type = typename T::system_type;
   if (grouped) {
     const auto n_groups = obj.n_groups();
     if (r_pars.size() != static_cast<int>(n_groups)) {
@@ -249,12 +247,12 @@ void update_pars(dust_discrete<T>& obj, cpp11::list r_pars, bool grouped) {
     for (size_t i = 0; i < n_groups; ++i) {
       cpp11::list r_pars_i = r_pars[i];
       obj.update_shared(i, [&] (auto& shared) {
-                             T::update_shared(r_pars_i, shared);
+                             system_type::update_shared(r_pars_i, shared);
                             });
     }
   } else {
     obj.update_shared(0, [&] (auto& shared) {
-                           T::update_shared(r_pars, shared);
+                           system_type::update_shared(r_pars, shared);
                           });
   }
 }
@@ -294,7 +292,7 @@ std::vector<typename T::data_type> check_data(cpp11::list r_data,
 }
 
 template <typename T>
-void set_state(dust_discrete<T>& obj, cpp11::sexp r_state, bool grouped) {
+void set_state(T& obj, cpp11::sexp r_state, bool grouped) {
   // Suppose that we have a n_state x n_particles x n_groups grouped
   // system, we then require that we have a state array with rank 3;
   // for an ungrouped system this will be rank 2 array.
