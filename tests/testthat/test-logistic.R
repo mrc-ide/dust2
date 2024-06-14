@@ -138,3 +138,72 @@ test_that("can reorder particles", {
   s2 <- dust_system_state(obj2)
   expect_identical(s2, s1[, 10:1])
 })
+
+
+## Later, we might change simulate to take advantage of dense output,
+## but for now we stop at every time exactly.
+test_that("can simulate", {
+  pars <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
+  obj1 <- dust_system_create(logistic(), pars, n_particles = 10,
+                             deterministic = TRUE)
+  obj2 <- dust_system_create(logistic(), pars, n_particles = 10,
+                             deterministic = TRUE)
+  s <- matrix(runif(30), 3, 10)
+  dust_system_set_state(obj1, s)
+  dust_system_set_state(obj2, s)
+
+  t <- 1:4
+  y <- dust_system_simulate(obj1, t)
+  expect_equal(dim(y), c(3, 10, 4))
+
+  dust_system_run_to_time(obj2, 1)
+  expect_identical(dust_system_state(obj2), y[, , 1])
+  dust_system_run_to_time(obj2, 2)
+  expect_identical(dust_system_state(obj2), y[, , 2])
+})
+
+
+test_that("can create grouped system", {
+  pars <- list(
+    list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3)),
+    list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(200, 3)))
+
+  obj <- dust_system_create(logistic(), pars, n_particles = 10, n_groups = 2)
+  dust_system_set_state_initial(obj)
+  dust_system_run_to_time(obj, 10)
+  s <- dust_system_state(obj)
+
+  expect_equal(
+    s[, , 1],
+    matrix(logistic_analytic(pars[[1]]$r, pars[[1]]$K, 10, rep(1, 3)), 3, 10),
+    tolerance = 1e-6)
+  expect_equal(
+    s[, , 2],
+    matrix(logistic_analytic(pars[[2]]$r, pars[[2]]$K, 10, rep(1, 3)), 3, 10),
+    tolerance = 1e-6)
+})
+
+
+test_that("can set state into grouped system", {
+  pars <- list(
+    list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3)),
+    list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(200, 3)))
+
+  obj <- dust_system_create(logistic(), pars, n_particles = 10, n_groups = 2)
+
+  s <- array(runif(3 * 10 * 2), c(3, 10, 2))
+  dust_system_set_state(obj, s)
+  expect_equal(dust_system_state(obj), s)
+
+  s <- array(runif(3 * 2), c(3, 1, 2))
+  dust_system_set_state(obj, s)
+  expect_equal(dust_system_state(obj), s[, rep(1, 10), ])
+
+  s <- array(runif(3 * 10), c(3, 10, 1))
+  dust_system_set_state(obj, s)
+  expect_equal(dust_system_state(obj), s[, , c(1, 1)])
+
+  s <- array(runif(3), c(3, 1, 1))
+  dust_system_set_state(obj, s)
+  expect_equal(dust_system_state(obj), s[, rep(1, 10), c(1, 1)])
+})
