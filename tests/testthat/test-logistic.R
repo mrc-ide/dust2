@@ -41,6 +41,13 @@ test_that("can set system state from a vector", {
 })
 
 
+test_that("require an integer value", {
+  expect_error(
+    dust_system_create(logistic(), list(r = 1, K = 1), n_particles = 1),
+    "A value is expected for 'n'")
+})
+
+
 test_that("can set time", {
   pars <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
   obj <- dust_system_create(logistic(), pars, n_particles = 10)
@@ -215,4 +222,62 @@ test_that("reject dt as an argument when creating logistic model", {
   expect_error(
     dust_system_create(logistic(), pars, dt = 1, n_particles = 1),
     "Can't use 'dt' with continuous-time systems")
+})
+
+
+test_that("can set ode control", {
+  pars <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
+  ctl1 <- dust_ode_control(atol = 1e-8, rtol = 1e-8)
+  ctl2 <- dust_ode_control(atol = 1e-3, rtol = 1e-3)
+  obj1 <- dust_system_create(logistic(), pars, n_particles = 1,
+                             ode_control = ctl1)
+  obj2 <- dust_system_create(logistic(), pars, n_particles = 1,
+                             ode_control = ctl2)
+  dust_system_set_state_initial(obj1)
+  dust_system_set_state_initial(obj2)
+  dust_system_run_to_time(obj1, 10)
+  dust_system_run_to_time(obj2, 10)
+  s1 <- dust_system_state(obj1)
+  s2 <- dust_system_state(obj2)
+  expect_false(identical(s1, s2))
+
+  cmp <- logistic_analytic(pars$r, pars$K, 10, rep(1, 3))
+  expect_equal(s1, cmp, tolerance = 1e-7)
+  expect_equal(s2, cmp, tolerance = 1e-3)
+  expect_true(all(abs(s1 - cmp) < abs(s2 - cmp)))
+
+  expect_equal(obj1$ode_control, ctl1)
+  expect_equal(obj2$ode_control, ctl2)
+})
+
+
+test_that("can error if too many steps taken", {
+  pars <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
+  ctl <- dust_ode_control(max_steps = 2)
+  obj <- dust_system_create(logistic(), pars, n_particles = 1,
+                             ode_control = ctl)
+  dust_system_set_state_initial(obj)
+  expect_error(dust_system_run_to_time(obj, 10),
+               "too many steps")
+})
+
+
+test_that("can error if steps are too small", {
+  pars <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
+  ctl <- dust_ode_control(step_size_min = 10)
+  obj <- dust_system_create(logistic(), pars, n_particles = 1,
+                             ode_control = ctl)
+  dust_system_set_state_initial(obj)
+  expect_error(dust_system_run_to_time(obj, 10),
+               "step too small")
+})
+
+
+test_that("can error if initial step size calculation fails", {
+  pars <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
+  obj <- dust_system_create(logistic(), pars, n_particles = 1,
+                            deterministic = TRUE)
+  y0 <- matrix(NA_real_, 3, 1)
+  expect_error(dust_system_set_state(obj, y0),
+               "Initial step size was not finite")
 })

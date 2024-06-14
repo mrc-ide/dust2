@@ -63,7 +63,7 @@ public:
   }
 
   static shared_state build_shared(cpp11::list pars) {
-    const auto n = dust2::r::read_size(pars, "n", 1);
+    const auto n = dust2::r::read_size(pars, "n");
     std::vector<real_type> r(n);
     std::vector<real_type> K(n);
     dust2::r::read_real_vector(pars, n, r.data(), "r", true);

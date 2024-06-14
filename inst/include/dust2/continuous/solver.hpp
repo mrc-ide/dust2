@@ -141,6 +141,7 @@ public:
       }
 
       const auto err = try_step(t, h, y, internals.dydt.data(), rhs);
+      internals.n_steps++;
       const auto fac11 = std::pow(err, control_.constant);
 
       if (err <= 1) {
@@ -224,10 +225,12 @@ public:
     const real_type h1 = (der12 <= 1e-15) ?
       std::max(1e-6, std::abs(h) * 1e-3) :
       std::pow(0.01 / der12, 1.0 / order);
-    h = std::min(std::min(100 * std::abs(h), h1), control_.step_size_max);
+    h = std::min(100 * std::abs(h), h1);
     if (!std::isfinite(h)) {
       throw std::runtime_error("Initial step size was not finite");
     }
+    h = std::max(h, control_.step_size_min * 100);
+    h = std::min(h, control_.step_size_max);
     internals.step_size = h;
   }
 
