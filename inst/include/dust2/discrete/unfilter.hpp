@@ -1,6 +1,5 @@
 #pragma once
 
-#include <dust2/discrete/system.hpp>
 #include <dust2/filter_details.hpp>
 #include <dust2/history.hpp>
 #include <mcstate/random/random.hpp>
@@ -12,12 +11,13 @@ class unfilter {
 public:
   using real_type = typename T::real_type;
   using data_type = typename T::data_type;
+  using system_type = typename T::system_type;
 
   // We need to provide direct access to the system, because the user
   // will want to set parameters in, and pull out state, etc.
-  dust_discrete<T> sys;
+  T sys;
 
-  unfilter(dust_discrete<T> sys_,
+  unfilter(T sys_,
            real_type time_start,
            std::vector<real_type> time,
            std::vector<data_type> data,
@@ -35,6 +35,9 @@ public:
     history_(history_index_.size() > 0 ? history_index_.size() : n_state_,
              n_particles_, n_groups_, time_.size()),
     history_is_current_(false) {
+    // TODO: this will need relaxing soon to support continuous time
+    // models, we just need to move over away from run_steps and to
+    // run_to_time
     const auto dt = sys_.dt();
     for (size_t i = 0; i < time_.size(); i++) {
       const auto t0 = i == 0 ? time_start_ : time_[i - 1];
