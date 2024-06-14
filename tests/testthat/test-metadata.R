@@ -34,7 +34,7 @@ test_that("can validate class metadata", {
     "More than one '[[dust2::class()]]' attribute found",
     fixed = TRUE)
 
-  writeLines(c("// [[dust2::class(a)]]", "// [[dust2::time_type(discrete)]]"), 
+  writeLines(c("// [[dust2::class(a)]]", "// [[dust2::time_type(discrete)]]"),
              tmp)
   expect_equal(parse_metadata(tmp)$class, "a")
 })
@@ -61,6 +61,37 @@ test_that("can validate name metadata", {
   expect_equal(parse_metadata(tmp)$name, "a")
   writeLines(c(base, "// [[dust2::name(b)]]"), tmp)
   expect_equal(parse_metadata(tmp)$name, "b")
+})
+
+
+test_that("can validate time type metadata", {
+  base <- "// [[dust2::class(a)]]"
+  tmp <- withr::local_tempfile()
+
+  writeLines(c(base, "// [[dust2::time_type()]]"),
+             tmp)
+  expect_error(
+    parse_metadata(tmp),
+    "Expected a single unnamed argument to '[[dust2::time_type()]]'",
+    fixed = TRUE)
+
+  writeLines(c(base, '// [[dust2::time_type("discrete")]]'),
+             tmp)
+  expect_error(
+    parse_metadata(tmp),
+    "Expected an unquoted string argument to '[[dust2::time_type()]]'",
+    fixed = TRUE)
+
+  writeLines(c(base, '// [[dust2::time_type(bouncy)]]'),
+             tmp)
+  expect_error(
+    parse_metadata(tmp),
+    "Expected argument to '[[dust2::time_type()]]' to be one of 'discrete'",
+    fixed = TRUE)
+
+  writeLines(c(base, '// [[dust2::time_type(discrete)]]'),
+             tmp)
+  expect_equal(parse_metadata(tmp)$time_type, "discrete")
 })
 
 

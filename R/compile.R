@@ -140,11 +140,6 @@ dust_generate_cpp <- function(system, config, data) {
     data$dust_version)
 
   if (config$has_compare) {
-    if (time_type == "continuous") {
-      cli::cli_abort(
-        paste("Models with 'compare_data()' not yet supported for continuous",
-              "time models"))
-    }
     includes <- c(includes,
                   sprintf("dust2/r/%s/filter.hpp", time_type),
                   sprintf("dust2/r/%s/unfilter.hpp", time_type))
