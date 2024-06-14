@@ -86,3 +86,55 @@ test_that("can update parameters", {
   expect_equal(s2, logistic_analytic(pars2$r, pars1$K, 3, s1),
                tolerance = 1e-4)
 })
+
+
+test_that("can accept a vector of parameters", {
+  expect_error(
+    dust_system_create(logistic(), list(n = 1, r = 1), n_particles = 1),
+    "A value is expected for 'K'")
+  expect_error(
+    dust_system_create(logistic(), list(n = 1, r = 1, K = c(1, 2)),
+                       n_particles = 1),
+    "'K' must have length 1")
+  expect_error(
+    dust_system_create(logistic(), list(n = 1, r = 1, K = "a"),
+                       n_particles = 1),
+    "'K' must be numeric")
+})
+
+
+test_that("can convert integer vectors to numeric", {
+  pars1 <- list(n = 3, r = c(0.1, 0.2, 0.3), K = c(100L, 200L, 300L))
+  pars2 <- list(n = 3, r = c(0.1, 0.2, 0.3), K = c(100, 200, 300))
+  obj1 <- dust_system_create(logistic(), pars1, n_particles = 1)
+  obj2 <- dust_system_create(logistic(), pars2, n_particles = 1)
+  dust_system_set_state_initial(obj1)
+  dust_system_set_state_initial(obj2)
+  dust_system_run_to_time(obj1, 10)
+  dust_system_run_to_time(obj2, 10)
+  expect_identical(dust_system_state(obj1), dust_system_state(obj2))
+})
+
+
+test_that("can reorder particles", {
+  pars <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
+  s <- matrix(runif(30), 3, 10)
+
+  obj1 <- dust_system_create(logistic(), pars, n_particles = 10,
+                             deterministic = TRUE)
+  obj2 <- dust_system_create(logistic(), pars, n_particles = 10,
+                             deterministic = TRUE)
+  dust_system_set_state_initial(obj1)
+  dust_system_set_state_initial(obj2)
+
+  dust_system_run_to_time(obj1, 3)
+  dust_system_run_to_time(obj1, 10)
+
+  dust_system_run_to_time(obj2, 3)
+  dust_system_reorder(obj2, 10:1)
+  dust_system_run_to_time(obj2, 10)
+
+  s1 <- dust_system_state(obj1)
+  s2 <- dust_system_state(obj2)
+  expect_identical(s2, s1[, 10:1])
+})
