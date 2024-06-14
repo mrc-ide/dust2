@@ -17,7 +17,8 @@ dust_system_generator <- function(name, time_type,
                     "time", "set_time",
                     "rng_state", "set_rng_state",
                     "update_pars",
-                    "run_steps", "run_to_time", "simulate",
+                    if (time_type == "discrete") "run_steps",
+                    "run_to_time", "simulate",
                     "reorder")
   methods_compare <- "compare_data"
   methods <- get_methods(c(methods_core, methods_compare), "system", name)
