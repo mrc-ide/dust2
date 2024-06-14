@@ -65,7 +65,13 @@ dust_system_generator <- function(name, time_type,
 ##'
 ##' @param time The initial time, defaults to 0
 ##'
-##' @param dt The time step for the system, defaults to 1
+##' @param dt The time step for discrete time systems, defaults to 1
+##'   if not given.  It is an error to provide a non-NULL argument
+##'   with continuous-time systems.
+##'
+##' @param ode_control The ODE integration control for continuous time
+##'   systems.  Defaults to the default return of [dust_ode_control].
+##'   It is an error to provide this with discrete-time systems.
 ##'
 ##' @param seed Optionally, a seed.  Otherwise we respond to R's RNG seed on
 ##'   initialisation.
@@ -77,11 +83,27 @@ dust_system_generator <- function(name, time_type,
 ##'
 ##' @export
 dust_system_create <- function(generator, pars, n_particles, n_groups = 0,
-                               time = 0, dt = 1,
+                               time = 0, dt = NULL, ode_control = NULL,
                                seed = NULL, deterministic = FALSE) {
   check_is_dust_system_generator(generator, substitute(generator))
-  res <- generator$methods$alloc(pars, time, dt, n_particles, n_groups,
-                                 seed, deterministic)
+  if (generator$properties$time_type == "discrete") {
+    if (!is.null(ode_control)) {
+      cli::cli_abort("Can't use 'ode_control' with discrete-time systems")
+    }
+    res <- generator$methods$alloc(pars, time, dt %||% 1, n_particles,
+                                   n_groups, seed, deterministic)
+  } else {
+    if (!is.null(dt)) {
+      cli::cli_abort("Can't use 'dt' with continuous-time systems")
+    }
+    if (is.null(ode_control)) {
+      ode_control <- dust_ode_control()
+    } else {
+      assert_is(ode_control, "dust_ode_control", call = environment())
+    }
+    res <- generator$methods$alloc(pars, time, ode_control, n_particles,
+                                   n_groups, seed, deterministic)
+  }
   ## Here, we augment things slightly
   res$name <- generator$name
   res$n_particles <- as.integer(n_particles)
@@ -89,6 +111,8 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 0,
   res$deterministic <- deterministic
   res$methods <- generator$methods
   res$properties <- generator$properties
+  res$ode_control <- ode_control
+  res$dt <- dt
   class(res) <- "dust_system"
   res
 }

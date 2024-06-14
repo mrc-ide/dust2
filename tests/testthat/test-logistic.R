@@ -18,6 +18,7 @@ test_that("can run simple logistic system", {
     tolerance = 1e-6)
 
   expect_identical(dim(obj), c(3L, 1L))
+  expect_equal(obj$ode_control, dust_ode_control())
 })
 
 
@@ -206,4 +207,12 @@ test_that("can set state into grouped system", {
   s <- array(runif(3), c(3, 1, 1))
   dust_system_set_state(obj, s)
   expect_equal(dust_system_state(obj), s[, rep(1, 10), c(1, 1)])
+})
+
+
+test_that("reject dt as an argument when creating logistic model", {
+  pars <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
+  expect_error(
+    dust_system_create(logistic(), pars, dt = 1, n_particles = 1),
+    "Can't use 'dt' with continuous-time systems")
 })

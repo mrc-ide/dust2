@@ -3,6 +3,7 @@
 #include <dust2/r/helpers.hpp>
 #include <mcstate/r/random.hpp>
 #include <dust2/r/system.hpp>
+#include <dust2/r/continuous/control.hpp>
 
 #include <dust2/continuous/system.hpp>
 
@@ -12,7 +13,7 @@ namespace r {
 template <typename T>
 SEXP dust2_continuous_alloc(cpp11::list r_pars,
                             cpp11::sexp r_time,
-                            cpp11::sexp r_control,
+                            cpp11::list r_ode_control,
                             cpp11::sexp r_n_particles,
                             cpp11::sexp r_n_groups,
                             cpp11::sexp r_seed,
@@ -31,15 +32,15 @@ SEXP dust2_continuous_alloc(cpp11::list r_pars,
 
   auto seed = mcstate::random::r::as_rng_seed<rng_state_type>(r_seed);
   auto deterministic = to_bool(r_deterministic, "deterministic");
-  auto control = dust2::ode::control<real_type>();
+  auto ode_control = validate_ode_control<real_type>(r_ode_control);
 
-  auto obj = new dust_continuous<T>(shared, internal, time, control,
+  auto obj = new dust_continuous<T>(shared, internal, time, ode_control,
                                     n_particles, seed, deterministic);
   cpp11::external_pointer<dust_continuous<T>> ptr(obj, true, false);
 
   // Later, we'll export a bit more back from the system (in particular
   // systems need to provide information about how they organise
-  // variables, ode systems report computed control, etc.
+  // variables.
   const auto grouped = n_groups > 0;
   cpp11::sexp r_group_names = R_NilValue;
   if (grouped) {
