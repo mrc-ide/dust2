@@ -34,9 +34,6 @@ no maximum step size (\code{Inf}) so the solver can take as large a
 step as it wants to.  If you have short-lived fluctuations in
 your rhs that the solver may skip over by accident, then specify
 a smaller maximum step size here.}
-
-\item{debug_record_step_times}{Logical, indicating if we should
-record the steps taken. This is currently ignored.}
 }
 \value{
 A named list of class "dust_ode_control".  Do not modify

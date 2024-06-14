@@ -27,9 +27,6 @@
 ##'   your rhs that the solver may skip over by accident, then specify
 ##'   a smaller maximum step size here.
 ##'
-##' @param debug_record_step_times Logical, indicating if we should
-##'   record the steps taken. This is currently ignored.
-##'
 ##' @export
 ##'
 ##' @return A named list of class "dust_ode_control".  Do not modify
