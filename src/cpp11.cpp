@@ -111,6 +111,34 @@ extern "C" SEXP _dust2_dust2_filter_sir_alloc(SEXP r_pars, SEXP r_time_start, SE
   END_CPP11
 }
 // sir.cpp
+SEXP dust2_system_sir_compare_data(cpp11::sexp ptr, cpp11::sexp r_data, bool grouped);
+extern "C" SEXP _dust2_dust2_system_sir_compare_data(SEXP ptr, SEXP r_data, SEXP grouped) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_system_sir_compare_data(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_data), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+  END_CPP11
+}
+// sir.cpp
+SEXP dust2_unfilter_sir_update_pars(cpp11::sexp ptr, cpp11::list r_pars, bool grouped);
+extern "C" SEXP _dust2_dust2_unfilter_sir_update_pars(SEXP ptr, SEXP r_pars, SEXP grouped) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_unfilter_sir_update_pars(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+  END_CPP11
+}
+// sir.cpp
+SEXP dust2_unfilter_sir_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool grouped);
+extern "C" SEXP _dust2_dust2_unfilter_sir_run(SEXP ptr, SEXP r_initial, SEXP save_history, SEXP grouped) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_unfilter_sir_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(save_history), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+  END_CPP11
+}
+// sir.cpp
+SEXP dust2_unfilter_sir_last_history(cpp11::sexp ptr, bool grouped);
+extern "C" SEXP _dust2_dust2_unfilter_sir_last_history(SEXP ptr, SEXP grouped) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_unfilter_sir_last_history(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+  END_CPP11
+}
+// sir.cpp
 SEXP dust2_filter_sir_update_pars(cpp11::sexp ptr, cpp11::list r_pars, bool grouped);
 extern "C" SEXP _dust2_dust2_filter_sir_update_pars(SEXP ptr, SEXP r_pars, SEXP grouped) {
   BEGIN_CPP11
@@ -143,34 +171,6 @@ SEXP dust2_filter_sir_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state);
 extern "C" SEXP _dust2_dust2_filter_sir_set_rng_state(SEXP ptr, SEXP r_rng_state) {
   BEGIN_CPP11
     return cpp11::as_sexp(dust2_filter_sir_set_rng_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_rng_state)));
-  END_CPP11
-}
-// sir.cpp
-SEXP dust2_system_sir_compare_data(cpp11::sexp ptr, cpp11::sexp r_data, bool grouped);
-extern "C" SEXP _dust2_dust2_system_sir_compare_data(SEXP ptr, SEXP r_data, SEXP grouped) {
-  BEGIN_CPP11
-    return cpp11::as_sexp(dust2_system_sir_compare_data(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_data), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
-  END_CPP11
-}
-// sir.cpp
-SEXP dust2_unfilter_sir_update_pars(cpp11::sexp ptr, cpp11::list r_pars, bool grouped);
-extern "C" SEXP _dust2_dust2_unfilter_sir_update_pars(SEXP ptr, SEXP r_pars, SEXP grouped) {
-  BEGIN_CPP11
-    return cpp11::as_sexp(dust2_unfilter_sir_update_pars(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
-  END_CPP11
-}
-// sir.cpp
-SEXP dust2_unfilter_sir_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool grouped);
-extern "C" SEXP _dust2_dust2_unfilter_sir_run(SEXP ptr, SEXP r_initial, SEXP save_history, SEXP grouped) {
-  BEGIN_CPP11
-    return cpp11::as_sexp(dust2_unfilter_sir_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(save_history), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
-  END_CPP11
-}
-// sir.cpp
-SEXP dust2_unfilter_sir_last_history(cpp11::sexp ptr, bool grouped);
-extern "C" SEXP _dust2_dust2_unfilter_sir_last_history(SEXP ptr, SEXP grouped) {
-  BEGIN_CPP11
-    return cpp11::as_sexp(dust2_unfilter_sir_last_history(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
   END_CPP11
 }
 // test.cpp
