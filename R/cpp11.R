@@ -8,52 +8,48 @@ dust2_discrete_sir_run_steps <- function(ptr, r_n_steps) {
   .Call(`_dust2_dust2_discrete_sir_run_steps`, ptr, r_n_steps)
 }
 
-dust2_discrete_sir_run_to_time <- function(ptr, r_time) {
-  .Call(`_dust2_dust2_discrete_sir_run_to_time`, ptr, r_time)
+dust2_system_sir_run_to_time <- function(ptr, r_time) {
+  .Call(`_dust2_dust2_system_sir_run_to_time`, ptr, r_time)
 }
 
-dust2_discrete_sir_state <- function(ptr, grouped) {
-  .Call(`_dust2_dust2_discrete_sir_state`, ptr, grouped)
+dust2_system_sir_state <- function(ptr, grouped) {
+  .Call(`_dust2_dust2_system_sir_state`, ptr, grouped)
 }
 
-dust2_discrete_sir_time <- function(ptr) {
-  .Call(`_dust2_dust2_discrete_sir_time`, ptr)
+dust2_system_sir_time <- function(ptr) {
+  .Call(`_dust2_dust2_system_sir_time`, ptr)
 }
 
-dust2_discrete_sir_set_state_initial <- function(ptr) {
-  .Call(`_dust2_dust2_discrete_sir_set_state_initial`, ptr)
+dust2_system_sir_set_state_initial <- function(ptr) {
+  .Call(`_dust2_dust2_system_sir_set_state_initial`, ptr)
 }
 
-dust2_discrete_sir_set_state <- function(ptr, r_state, grouped) {
-  .Call(`_dust2_dust2_discrete_sir_set_state`, ptr, r_state, grouped)
+dust2_system_sir_set_state <- function(ptr, r_state, grouped) {
+  .Call(`_dust2_dust2_system_sir_set_state`, ptr, r_state, grouped)
 }
 
-dust2_discrete_sir_reorder <- function(ptr, r_index) {
-  .Call(`_dust2_dust2_discrete_sir_reorder`, ptr, r_index)
+dust2_system_sir_reorder <- function(ptr, r_index) {
+  .Call(`_dust2_dust2_system_sir_reorder`, ptr, r_index)
 }
 
-dust2_discrete_sir_rng_state <- function(ptr) {
-  .Call(`_dust2_dust2_discrete_sir_rng_state`, ptr)
+dust2_system_sir_rng_state <- function(ptr) {
+  .Call(`_dust2_dust2_system_sir_rng_state`, ptr)
 }
 
-dust2_discrete_sir_set_rng_state <- function(ptr, r_rng_state) {
-  .Call(`_dust2_dust2_discrete_sir_set_rng_state`, ptr, r_rng_state)
+dust2_system_sir_set_rng_state <- function(ptr, r_rng_state) {
+  .Call(`_dust2_dust2_system_sir_set_rng_state`, ptr, r_rng_state)
 }
 
-dust2_discrete_sir_set_time <- function(ptr, r_time) {
-  .Call(`_dust2_dust2_discrete_sir_set_time`, ptr, r_time)
+dust2_system_sir_set_time <- function(ptr, r_time) {
+  .Call(`_dust2_dust2_system_sir_set_time`, ptr, r_time)
 }
 
-dust2_discrete_sir_update_pars <- function(ptr, pars, grouped) {
-  .Call(`_dust2_dust2_discrete_sir_update_pars`, ptr, pars, grouped)
+dust2_system_sir_update_pars <- function(ptr, pars, grouped) {
+  .Call(`_dust2_dust2_system_sir_update_pars`, ptr, pars, grouped)
 }
 
-dust2_discrete_sir_simulate <- function(ptr, r_times, r_index, grouped) {
-  .Call(`_dust2_dust2_discrete_sir_simulate`, ptr, r_times, r_index, grouped)
-}
-
-dust2_discrete_sir_compare_data <- function(ptr, r_data, grouped) {
-  .Call(`_dust2_dust2_discrete_sir_compare_data`, ptr, r_data, grouped)
+dust2_system_sir_simulate <- function(ptr, r_times, r_index, grouped) {
+  .Call(`_dust2_dust2_system_sir_simulate`, ptr, r_times, r_index, grouped)
 }
 
 dust2_discrete_sir_unfilter_alloc <- function(r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_index) {
@@ -96,6 +92,10 @@ dust2_discrete_sir_filter_set_rng_state <- function(ptr, r_rng_state) {
   .Call(`_dust2_dust2_discrete_sir_filter_set_rng_state`, ptr, r_rng_state)
 }
 
+dust2_system_sir_compare_data <- function(ptr, r_data, grouped) {
+  .Call(`_dust2_dust2_system_sir_compare_data`, ptr, r_data, grouped)
+}
+
 test_resample_weight <- function(w, u) {
   .Call(`_dust2_test_resample_weight`, w, u)
 }
@@ -116,46 +116,46 @@ dust2_discrete_walk_run_steps <- function(ptr, r_n_steps) {
   .Call(`_dust2_dust2_discrete_walk_run_steps`, ptr, r_n_steps)
 }
 
-dust2_discrete_walk_run_to_time <- function(ptr, r_time) {
-  .Call(`_dust2_dust2_discrete_walk_run_to_time`, ptr, r_time)
+dust2_system_walk_run_to_time <- function(ptr, r_time) {
+  .Call(`_dust2_dust2_system_walk_run_to_time`, ptr, r_time)
 }
 
-dust2_discrete_walk_state <- function(ptr, grouped) {
-  .Call(`_dust2_dust2_discrete_walk_state`, ptr, grouped)
+dust2_system_walk_state <- function(ptr, grouped) {
+  .Call(`_dust2_dust2_system_walk_state`, ptr, grouped)
 }
 
-dust2_discrete_walk_time <- function(ptr) {
-  .Call(`_dust2_dust2_discrete_walk_time`, ptr)
+dust2_system_walk_time <- function(ptr) {
+  .Call(`_dust2_dust2_system_walk_time`, ptr)
 }
 
-dust2_discrete_walk_set_state_initial <- function(ptr) {
-  .Call(`_dust2_dust2_discrete_walk_set_state_initial`, ptr)
+dust2_system_walk_set_state_initial <- function(ptr) {
+  .Call(`_dust2_dust2_system_walk_set_state_initial`, ptr)
 }
 
-dust2_discrete_walk_set_state <- function(ptr, r_state, grouped) {
-  .Call(`_dust2_dust2_discrete_walk_set_state`, ptr, r_state, grouped)
+dust2_system_walk_set_state <- function(ptr, r_state, grouped) {
+  .Call(`_dust2_dust2_system_walk_set_state`, ptr, r_state, grouped)
 }
 
-dust2_discrete_walk_reorder <- function(ptr, r_index) {
-  .Call(`_dust2_dust2_discrete_walk_reorder`, ptr, r_index)
+dust2_system_walk_reorder <- function(ptr, r_index) {
+  .Call(`_dust2_dust2_system_walk_reorder`, ptr, r_index)
 }
 
-dust2_discrete_walk_rng_state <- function(ptr) {
-  .Call(`_dust2_dust2_discrete_walk_rng_state`, ptr)
+dust2_system_walk_rng_state <- function(ptr) {
+  .Call(`_dust2_dust2_system_walk_rng_state`, ptr)
 }
 
-dust2_discrete_walk_set_rng_state <- function(ptr, r_rng_state) {
-  .Call(`_dust2_dust2_discrete_walk_set_rng_state`, ptr, r_rng_state)
+dust2_system_walk_set_rng_state <- function(ptr, r_rng_state) {
+  .Call(`_dust2_dust2_system_walk_set_rng_state`, ptr, r_rng_state)
 }
 
-dust2_discrete_walk_set_time <- function(ptr, r_time) {
-  .Call(`_dust2_dust2_discrete_walk_set_time`, ptr, r_time)
+dust2_system_walk_set_time <- function(ptr, r_time) {
+  .Call(`_dust2_dust2_system_walk_set_time`, ptr, r_time)
 }
 
-dust2_discrete_walk_update_pars <- function(ptr, pars, grouped) {
-  .Call(`_dust2_dust2_discrete_walk_update_pars`, ptr, pars, grouped)
+dust2_system_walk_update_pars <- function(ptr, pars, grouped) {
+  .Call(`_dust2_dust2_system_walk_update_pars`, ptr, pars, grouped)
 }
 
-dust2_discrete_walk_simulate <- function(ptr, r_times, r_index, grouped) {
-  .Call(`_dust2_dust2_discrete_walk_simulate`, ptr, r_times, r_index, grouped)
+dust2_system_walk_simulate <- function(ptr, r_times, r_index, grouped) {
+  .Call(`_dust2_dust2_system_walk_simulate`, ptr, r_times, r_index, grouped)
 }

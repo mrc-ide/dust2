@@ -33,6 +33,11 @@ inline bool read_bool(cpp11::list pars, const char * name);
 inline bool read_bool(cpp11::list pars, const char * name,
                       bool default_value);
 
+// Read a vector into allocated storage, if it is found
+template <typename real_type>
+void read_real_vector(cpp11::list pars, size_t len, real_type * dest,
+                             const char *name, bool required);
+
 }
 
 }

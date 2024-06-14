@@ -20,87 +20,80 @@ extern "C" SEXP _dust2_dust2_discrete_sir_run_steps(SEXP ptr, SEXP r_n_steps) {
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_discrete_sir_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time);
-extern "C" SEXP _dust2_dust2_discrete_sir_run_to_time(SEXP ptr, SEXP r_time) {
+SEXP dust2_system_sir_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time);
+extern "C" SEXP _dust2_dust2_system_sir_run_to_time(SEXP ptr, SEXP r_time) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_sir_run_to_time(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time)));
+    return cpp11::as_sexp(dust2_system_sir_run_to_time(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time)));
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_discrete_sir_state(cpp11::sexp ptr, bool grouped);
-extern "C" SEXP _dust2_dust2_discrete_sir_state(SEXP ptr, SEXP grouped) {
+SEXP dust2_system_sir_state(cpp11::sexp ptr, bool grouped);
+extern "C" SEXP _dust2_dust2_system_sir_state(SEXP ptr, SEXP grouped) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_sir_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+    return cpp11::as_sexp(dust2_system_sir_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_discrete_sir_time(cpp11::sexp ptr);
-extern "C" SEXP _dust2_dust2_discrete_sir_time(SEXP ptr) {
+SEXP dust2_system_sir_time(cpp11::sexp ptr);
+extern "C" SEXP _dust2_dust2_system_sir_time(SEXP ptr) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_sir_time(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr)));
+    return cpp11::as_sexp(dust2_system_sir_time(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr)));
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_discrete_sir_set_state_initial(cpp11::sexp ptr);
-extern "C" SEXP _dust2_dust2_discrete_sir_set_state_initial(SEXP ptr) {
+SEXP dust2_system_sir_set_state_initial(cpp11::sexp ptr);
+extern "C" SEXP _dust2_dust2_system_sir_set_state_initial(SEXP ptr) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_sir_set_state_initial(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr)));
+    return cpp11::as_sexp(dust2_system_sir_set_state_initial(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr)));
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_discrete_sir_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool grouped);
-extern "C" SEXP _dust2_dust2_discrete_sir_set_state(SEXP ptr, SEXP r_state, SEXP grouped) {
+SEXP dust2_system_sir_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool grouped);
+extern "C" SEXP _dust2_dust2_system_sir_set_state(SEXP ptr, SEXP r_state, SEXP grouped) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_sir_set_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_state), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+    return cpp11::as_sexp(dust2_system_sir_set_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_state), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_discrete_sir_reorder(cpp11::sexp ptr, cpp11::integers r_index);
-extern "C" SEXP _dust2_dust2_discrete_sir_reorder(SEXP ptr, SEXP r_index) {
+SEXP dust2_system_sir_reorder(cpp11::sexp ptr, cpp11::integers r_index);
+extern "C" SEXP _dust2_dust2_system_sir_reorder(SEXP ptr, SEXP r_index) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_sir_reorder(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(r_index)));
+    return cpp11::as_sexp(dust2_system_sir_reorder(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(r_index)));
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_discrete_sir_rng_state(cpp11::sexp ptr);
-extern "C" SEXP _dust2_dust2_discrete_sir_rng_state(SEXP ptr) {
+SEXP dust2_system_sir_rng_state(cpp11::sexp ptr);
+extern "C" SEXP _dust2_dust2_system_sir_rng_state(SEXP ptr) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_sir_rng_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr)));
+    return cpp11::as_sexp(dust2_system_sir_rng_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr)));
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_discrete_sir_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state);
-extern "C" SEXP _dust2_dust2_discrete_sir_set_rng_state(SEXP ptr, SEXP r_rng_state) {
+SEXP dust2_system_sir_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state);
+extern "C" SEXP _dust2_dust2_system_sir_set_rng_state(SEXP ptr, SEXP r_rng_state) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_sir_set_rng_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_rng_state)));
+    return cpp11::as_sexp(dust2_system_sir_set_rng_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_rng_state)));
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_discrete_sir_set_time(cpp11::sexp ptr, cpp11::sexp r_time);
-extern "C" SEXP _dust2_dust2_discrete_sir_set_time(SEXP ptr, SEXP r_time) {
+SEXP dust2_system_sir_set_time(cpp11::sexp ptr, cpp11::sexp r_time);
+extern "C" SEXP _dust2_dust2_system_sir_set_time(SEXP ptr, SEXP r_time) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_sir_set_time(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time)));
+    return cpp11::as_sexp(dust2_system_sir_set_time(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time)));
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_discrete_sir_update_pars(cpp11::sexp ptr, cpp11::list pars, bool grouped);
-extern "C" SEXP _dust2_dust2_discrete_sir_update_pars(SEXP ptr, SEXP pars, SEXP grouped) {
+SEXP dust2_system_sir_update_pars(cpp11::sexp ptr, cpp11::list pars, bool grouped);
+extern "C" SEXP _dust2_dust2_system_sir_update_pars(SEXP ptr, SEXP pars, SEXP grouped) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_sir_update_pars(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(pars), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+    return cpp11::as_sexp(dust2_system_sir_update_pars(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(pars), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_discrete_sir_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::sexp r_index, bool grouped);
-extern "C" SEXP _dust2_dust2_discrete_sir_simulate(SEXP ptr, SEXP r_times, SEXP r_index, SEXP grouped) {
+SEXP dust2_system_sir_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::sexp r_index, bool grouped);
+extern "C" SEXP _dust2_dust2_system_sir_simulate(SEXP ptr, SEXP r_times, SEXP r_index, SEXP grouped) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_sir_simulate(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_times), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
-  END_CPP11
-}
-// sir.cpp
-SEXP dust2_discrete_sir_compare_data(cpp11::sexp ptr, cpp11::sexp r_data, bool grouped);
-extern "C" SEXP _dust2_dust2_discrete_sir_compare_data(SEXP ptr, SEXP r_data, SEXP grouped) {
-  BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_sir_compare_data(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_data), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+    return cpp11::as_sexp(dust2_system_sir_simulate(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_times), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
   END_CPP11
 }
 // sir.cpp
@@ -173,6 +166,13 @@ extern "C" SEXP _dust2_dust2_discrete_sir_filter_set_rng_state(SEXP ptr, SEXP r_
     return cpp11::as_sexp(dust2_discrete_sir_filter_set_rng_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_rng_state)));
   END_CPP11
 }
+// sir.cpp
+SEXP dust2_system_sir_compare_data(cpp11::sexp ptr, cpp11::sexp r_data, bool grouped);
+extern "C" SEXP _dust2_dust2_system_sir_compare_data(SEXP ptr, SEXP r_data, SEXP grouped) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_system_sir_compare_data(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_data), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+  END_CPP11
+}
 // test.cpp
 cpp11::integers test_resample_weight(std::vector<double> w, double u);
 extern "C" SEXP _dust2_test_resample_weight(SEXP w, SEXP u) {
@@ -209,122 +209,122 @@ extern "C" SEXP _dust2_dust2_discrete_walk_run_steps(SEXP ptr, SEXP r_n_steps) {
   END_CPP11
 }
 // walk.cpp
-SEXP dust2_discrete_walk_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time);
-extern "C" SEXP _dust2_dust2_discrete_walk_run_to_time(SEXP ptr, SEXP r_time) {
+SEXP dust2_system_walk_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time);
+extern "C" SEXP _dust2_dust2_system_walk_run_to_time(SEXP ptr, SEXP r_time) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_walk_run_to_time(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time)));
+    return cpp11::as_sexp(dust2_system_walk_run_to_time(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time)));
   END_CPP11
 }
 // walk.cpp
-SEXP dust2_discrete_walk_state(cpp11::sexp ptr, bool grouped);
-extern "C" SEXP _dust2_dust2_discrete_walk_state(SEXP ptr, SEXP grouped) {
+SEXP dust2_system_walk_state(cpp11::sexp ptr, bool grouped);
+extern "C" SEXP _dust2_dust2_system_walk_state(SEXP ptr, SEXP grouped) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_walk_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+    return cpp11::as_sexp(dust2_system_walk_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
   END_CPP11
 }
 // walk.cpp
-SEXP dust2_discrete_walk_time(cpp11::sexp ptr);
-extern "C" SEXP _dust2_dust2_discrete_walk_time(SEXP ptr) {
+SEXP dust2_system_walk_time(cpp11::sexp ptr);
+extern "C" SEXP _dust2_dust2_system_walk_time(SEXP ptr) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_walk_time(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr)));
+    return cpp11::as_sexp(dust2_system_walk_time(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr)));
   END_CPP11
 }
 // walk.cpp
-SEXP dust2_discrete_walk_set_state_initial(cpp11::sexp ptr);
-extern "C" SEXP _dust2_dust2_discrete_walk_set_state_initial(SEXP ptr) {
+SEXP dust2_system_walk_set_state_initial(cpp11::sexp ptr);
+extern "C" SEXP _dust2_dust2_system_walk_set_state_initial(SEXP ptr) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_walk_set_state_initial(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr)));
+    return cpp11::as_sexp(dust2_system_walk_set_state_initial(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr)));
   END_CPP11
 }
 // walk.cpp
-SEXP dust2_discrete_walk_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool grouped);
-extern "C" SEXP _dust2_dust2_discrete_walk_set_state(SEXP ptr, SEXP r_state, SEXP grouped) {
+SEXP dust2_system_walk_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool grouped);
+extern "C" SEXP _dust2_dust2_system_walk_set_state(SEXP ptr, SEXP r_state, SEXP grouped) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_walk_set_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_state), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+    return cpp11::as_sexp(dust2_system_walk_set_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_state), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
   END_CPP11
 }
 // walk.cpp
-SEXP dust2_discrete_walk_reorder(cpp11::sexp ptr, cpp11::integers r_index);
-extern "C" SEXP _dust2_dust2_discrete_walk_reorder(SEXP ptr, SEXP r_index) {
+SEXP dust2_system_walk_reorder(cpp11::sexp ptr, cpp11::integers r_index);
+extern "C" SEXP _dust2_dust2_system_walk_reorder(SEXP ptr, SEXP r_index) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_walk_reorder(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(r_index)));
+    return cpp11::as_sexp(dust2_system_walk_reorder(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(r_index)));
   END_CPP11
 }
 // walk.cpp
-SEXP dust2_discrete_walk_rng_state(cpp11::sexp ptr);
-extern "C" SEXP _dust2_dust2_discrete_walk_rng_state(SEXP ptr) {
+SEXP dust2_system_walk_rng_state(cpp11::sexp ptr);
+extern "C" SEXP _dust2_dust2_system_walk_rng_state(SEXP ptr) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_walk_rng_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr)));
+    return cpp11::as_sexp(dust2_system_walk_rng_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr)));
   END_CPP11
 }
 // walk.cpp
-SEXP dust2_discrete_walk_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state);
-extern "C" SEXP _dust2_dust2_discrete_walk_set_rng_state(SEXP ptr, SEXP r_rng_state) {
+SEXP dust2_system_walk_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state);
+extern "C" SEXP _dust2_dust2_system_walk_set_rng_state(SEXP ptr, SEXP r_rng_state) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_walk_set_rng_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_rng_state)));
+    return cpp11::as_sexp(dust2_system_walk_set_rng_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_rng_state)));
   END_CPP11
 }
 // walk.cpp
-SEXP dust2_discrete_walk_set_time(cpp11::sexp ptr, cpp11::sexp r_time);
-extern "C" SEXP _dust2_dust2_discrete_walk_set_time(SEXP ptr, SEXP r_time) {
+SEXP dust2_system_walk_set_time(cpp11::sexp ptr, cpp11::sexp r_time);
+extern "C" SEXP _dust2_dust2_system_walk_set_time(SEXP ptr, SEXP r_time) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_walk_set_time(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time)));
+    return cpp11::as_sexp(dust2_system_walk_set_time(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time)));
   END_CPP11
 }
 // walk.cpp
-SEXP dust2_discrete_walk_update_pars(cpp11::sexp ptr, cpp11::list pars, bool grouped);
-extern "C" SEXP _dust2_dust2_discrete_walk_update_pars(SEXP ptr, SEXP pars, SEXP grouped) {
+SEXP dust2_system_walk_update_pars(cpp11::sexp ptr, cpp11::list pars, bool grouped);
+extern "C" SEXP _dust2_dust2_system_walk_update_pars(SEXP ptr, SEXP pars, SEXP grouped) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_walk_update_pars(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(pars), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+    return cpp11::as_sexp(dust2_system_walk_update_pars(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(pars), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
   END_CPP11
 }
 // walk.cpp
-SEXP dust2_discrete_walk_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::sexp r_index, bool grouped);
-extern "C" SEXP _dust2_dust2_discrete_walk_simulate(SEXP ptr, SEXP r_times, SEXP r_index, SEXP grouped) {
+SEXP dust2_system_walk_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::sexp r_index, bool grouped);
+extern "C" SEXP _dust2_dust2_system_walk_simulate(SEXP ptr, SEXP r_times, SEXP r_index, SEXP grouped) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_discrete_walk_simulate(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_times), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+    return cpp11::as_sexp(dust2_system_walk_simulate(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_times), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
   END_CPP11
 }
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_discrete_sir_alloc",                 (DL_FUNC) &_dust2_dust2_discrete_sir_alloc,                 7},
-    {"_dust2_dust2_discrete_sir_compare_data",          (DL_FUNC) &_dust2_dust2_discrete_sir_compare_data,          3},
     {"_dust2_dust2_discrete_sir_filter_alloc",          (DL_FUNC) &_dust2_dust2_discrete_sir_filter_alloc,          9},
     {"_dust2_dust2_discrete_sir_filter_last_history",   (DL_FUNC) &_dust2_dust2_discrete_sir_filter_last_history,   2},
     {"_dust2_dust2_discrete_sir_filter_rng_state",      (DL_FUNC) &_dust2_dust2_discrete_sir_filter_rng_state,      1},
     {"_dust2_dust2_discrete_sir_filter_run",            (DL_FUNC) &_dust2_dust2_discrete_sir_filter_run,            4},
     {"_dust2_dust2_discrete_sir_filter_set_rng_state",  (DL_FUNC) &_dust2_dust2_discrete_sir_filter_set_rng_state,  2},
     {"_dust2_dust2_discrete_sir_filter_update_pars",    (DL_FUNC) &_dust2_dust2_discrete_sir_filter_update_pars,    3},
-    {"_dust2_dust2_discrete_sir_reorder",               (DL_FUNC) &_dust2_dust2_discrete_sir_reorder,               2},
-    {"_dust2_dust2_discrete_sir_rng_state",             (DL_FUNC) &_dust2_dust2_discrete_sir_rng_state,             1},
     {"_dust2_dust2_discrete_sir_run_steps",             (DL_FUNC) &_dust2_dust2_discrete_sir_run_steps,             2},
-    {"_dust2_dust2_discrete_sir_run_to_time",           (DL_FUNC) &_dust2_dust2_discrete_sir_run_to_time,           2},
-    {"_dust2_dust2_discrete_sir_set_rng_state",         (DL_FUNC) &_dust2_dust2_discrete_sir_set_rng_state,         2},
-    {"_dust2_dust2_discrete_sir_set_state",             (DL_FUNC) &_dust2_dust2_discrete_sir_set_state,             3},
-    {"_dust2_dust2_discrete_sir_set_state_initial",     (DL_FUNC) &_dust2_dust2_discrete_sir_set_state_initial,     1},
-    {"_dust2_dust2_discrete_sir_set_time",              (DL_FUNC) &_dust2_dust2_discrete_sir_set_time,              2},
-    {"_dust2_dust2_discrete_sir_simulate",              (DL_FUNC) &_dust2_dust2_discrete_sir_simulate,              4},
-    {"_dust2_dust2_discrete_sir_state",                 (DL_FUNC) &_dust2_dust2_discrete_sir_state,                 2},
-    {"_dust2_dust2_discrete_sir_time",                  (DL_FUNC) &_dust2_dust2_discrete_sir_time,                  1},
     {"_dust2_dust2_discrete_sir_unfilter_alloc",        (DL_FUNC) &_dust2_dust2_discrete_sir_unfilter_alloc,        8},
     {"_dust2_dust2_discrete_sir_unfilter_last_history", (DL_FUNC) &_dust2_dust2_discrete_sir_unfilter_last_history, 2},
     {"_dust2_dust2_discrete_sir_unfilter_run",          (DL_FUNC) &_dust2_dust2_discrete_sir_unfilter_run,          4},
     {"_dust2_dust2_discrete_sir_unfilter_update_pars",  (DL_FUNC) &_dust2_dust2_discrete_sir_unfilter_update_pars,  3},
-    {"_dust2_dust2_discrete_sir_update_pars",           (DL_FUNC) &_dust2_dust2_discrete_sir_update_pars,           3},
     {"_dust2_dust2_discrete_walk_alloc",                (DL_FUNC) &_dust2_dust2_discrete_walk_alloc,                7},
-    {"_dust2_dust2_discrete_walk_reorder",              (DL_FUNC) &_dust2_dust2_discrete_walk_reorder,              2},
-    {"_dust2_dust2_discrete_walk_rng_state",            (DL_FUNC) &_dust2_dust2_discrete_walk_rng_state,            1},
     {"_dust2_dust2_discrete_walk_run_steps",            (DL_FUNC) &_dust2_dust2_discrete_walk_run_steps,            2},
-    {"_dust2_dust2_discrete_walk_run_to_time",          (DL_FUNC) &_dust2_dust2_discrete_walk_run_to_time,          2},
-    {"_dust2_dust2_discrete_walk_set_rng_state",        (DL_FUNC) &_dust2_dust2_discrete_walk_set_rng_state,        2},
-    {"_dust2_dust2_discrete_walk_set_state",            (DL_FUNC) &_dust2_dust2_discrete_walk_set_state,            3},
-    {"_dust2_dust2_discrete_walk_set_state_initial",    (DL_FUNC) &_dust2_dust2_discrete_walk_set_state_initial,    1},
-    {"_dust2_dust2_discrete_walk_set_time",             (DL_FUNC) &_dust2_dust2_discrete_walk_set_time,             2},
-    {"_dust2_dust2_discrete_walk_simulate",             (DL_FUNC) &_dust2_dust2_discrete_walk_simulate,             4},
-    {"_dust2_dust2_discrete_walk_state",                (DL_FUNC) &_dust2_dust2_discrete_walk_state,                2},
-    {"_dust2_dust2_discrete_walk_time",                 (DL_FUNC) &_dust2_dust2_discrete_walk_time,                 1},
-    {"_dust2_dust2_discrete_walk_update_pars",          (DL_FUNC) &_dust2_dust2_discrete_walk_update_pars,          3},
+    {"_dust2_dust2_system_sir_compare_data",            (DL_FUNC) &_dust2_dust2_system_sir_compare_data,            3},
+    {"_dust2_dust2_system_sir_reorder",                 (DL_FUNC) &_dust2_dust2_system_sir_reorder,                 2},
+    {"_dust2_dust2_system_sir_rng_state",               (DL_FUNC) &_dust2_dust2_system_sir_rng_state,               1},
+    {"_dust2_dust2_system_sir_run_to_time",             (DL_FUNC) &_dust2_dust2_system_sir_run_to_time,             2},
+    {"_dust2_dust2_system_sir_set_rng_state",           (DL_FUNC) &_dust2_dust2_system_sir_set_rng_state,           2},
+    {"_dust2_dust2_system_sir_set_state",               (DL_FUNC) &_dust2_dust2_system_sir_set_state,               3},
+    {"_dust2_dust2_system_sir_set_state_initial",       (DL_FUNC) &_dust2_dust2_system_sir_set_state_initial,       1},
+    {"_dust2_dust2_system_sir_set_time",                (DL_FUNC) &_dust2_dust2_system_sir_set_time,                2},
+    {"_dust2_dust2_system_sir_simulate",                (DL_FUNC) &_dust2_dust2_system_sir_simulate,                4},
+    {"_dust2_dust2_system_sir_state",                   (DL_FUNC) &_dust2_dust2_system_sir_state,                   2},
+    {"_dust2_dust2_system_sir_time",                    (DL_FUNC) &_dust2_dust2_system_sir_time,                    1},
+    {"_dust2_dust2_system_sir_update_pars",             (DL_FUNC) &_dust2_dust2_system_sir_update_pars,             3},
+    {"_dust2_dust2_system_walk_reorder",                (DL_FUNC) &_dust2_dust2_system_walk_reorder,                2},
+    {"_dust2_dust2_system_walk_rng_state",              (DL_FUNC) &_dust2_dust2_system_walk_rng_state,              1},
+    {"_dust2_dust2_system_walk_run_to_time",            (DL_FUNC) &_dust2_dust2_system_walk_run_to_time,            2},
+    {"_dust2_dust2_system_walk_set_rng_state",          (DL_FUNC) &_dust2_dust2_system_walk_set_rng_state,          2},
+    {"_dust2_dust2_system_walk_set_state",              (DL_FUNC) &_dust2_dust2_system_walk_set_state,              3},
+    {"_dust2_dust2_system_walk_set_state_initial",      (DL_FUNC) &_dust2_dust2_system_walk_set_state_initial,      1},
+    {"_dust2_dust2_system_walk_set_time",               (DL_FUNC) &_dust2_dust2_system_walk_set_time,               2},
+    {"_dust2_dust2_system_walk_simulate",               (DL_FUNC) &_dust2_dust2_system_walk_simulate,               4},
+    {"_dust2_dust2_system_walk_state",                  (DL_FUNC) &_dust2_dust2_system_walk_state,                  2},
+    {"_dust2_dust2_system_walk_time",                   (DL_FUNC) &_dust2_dust2_system_walk_time,                   1},
+    {"_dust2_dust2_system_walk_update_pars",            (DL_FUNC) &_dust2_dust2_system_walk_update_pars,            3},
     {"_dust2_test_history",                             (DL_FUNC) &_dust2_test_history,                             4},
     {"_dust2_test_resample_weight",                     (DL_FUNC) &_dust2_test_resample_weight,                     2},
     {"_dust2_test_scale_log_weights",                   (DL_FUNC) &_dust2_test_scale_log_weights,                   1},

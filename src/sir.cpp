@@ -139,65 +139,59 @@ SEXP dust2_discrete_sir_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::sex
 SEXP dust2_discrete_sir_run_steps(cpp11::sexp ptr, cpp11::sexp r_n_steps) {
   return dust2::r::dust2_discrete_run_steps<sir>(ptr, r_n_steps);
 }
-
 [[cpp11::register]]
-SEXP dust2_discrete_sir_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {
-  return dust2::r::dust2_discrete_run_to_time<sir>(ptr, r_time);
+SEXP dust2_system_sir_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {
+  return dust2::r::dust2_system_run_to_time<dust2::dust_discrete<sir>>(ptr, r_time);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_state(cpp11::sexp ptr, bool grouped) {
-  return dust2::r::dust2_discrete_state<sir>(ptr, grouped);
+SEXP dust2_system_sir_state(cpp11::sexp ptr, bool grouped) {
+  return dust2::r::dust2_system_state<dust2::dust_discrete<sir>>(ptr, grouped);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_time(cpp11::sexp ptr) {
-  return dust2::r::dust2_discrete_time<sir>(ptr);
+SEXP dust2_system_sir_time(cpp11::sexp ptr) {
+  return dust2::r::dust2_system_time<dust2::dust_discrete<sir>>(ptr);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_set_state_initial(cpp11::sexp ptr) {
-  return dust2::r::dust2_discrete_set_state_initial<sir>(ptr);
+SEXP dust2_system_sir_set_state_initial(cpp11::sexp ptr) {
+  return dust2::r::dust2_system_set_state_initial<dust2::dust_discrete<sir>>(ptr);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool grouped) {
-  return dust2::r::dust2_discrete_set_state<sir>(ptr, r_state, grouped);
+SEXP dust2_system_sir_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool grouped) {
+  return dust2::r::dust2_system_set_state<dust2::dust_discrete<sir>>(ptr, r_state, grouped);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_reorder(cpp11::sexp ptr, cpp11::integers r_index) {
-  return dust2::r::dust2_discrete_reorder<sir>(ptr, r_index);
+SEXP dust2_system_sir_reorder(cpp11::sexp ptr, cpp11::integers r_index) {
+  return dust2::r::dust2_system_reorder<dust2::dust_discrete<sir>>(ptr, r_index);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_rng_state(cpp11::sexp ptr) {
-  return dust2::r::dust2_discrete_rng_state<sir>(ptr);
+SEXP dust2_system_sir_rng_state(cpp11::sexp ptr) {
+  return dust2::r::dust2_system_rng_state<dust2::dust_discrete<sir>>(ptr);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
-  return dust2::r::dust2_discrete_set_rng_state<sir>(ptr, r_rng_state);
+SEXP dust2_system_sir_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
+  return dust2::r::dust2_system_set_rng_state<dust2::dust_discrete<sir>>(ptr, r_rng_state);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_set_time(cpp11::sexp ptr, cpp11::sexp r_time) {
-  return dust2::r::dust2_discrete_set_time<sir>(ptr, r_time);
+SEXP dust2_system_sir_set_time(cpp11::sexp ptr, cpp11::sexp r_time) {
+  return dust2::r::dust2_system_set_time<dust2::dust_discrete<sir>>(ptr, r_time);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_update_pars(cpp11::sexp ptr, cpp11::list pars, bool grouped) {
-  return dust2::r::dust2_discrete_update_pars<sir>(ptr, pars, grouped);
+SEXP dust2_system_sir_update_pars(cpp11::sexp ptr, cpp11::list pars, bool grouped) {
+  return dust2::r::dust2_system_update_pars<dust2::dust_discrete<sir>>(ptr, pars, grouped);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::sexp r_index, bool grouped) {
-  return dust2::r::dust2_discrete_simulate<sir>(ptr, r_times, r_index, grouped);
-}
-
-[[cpp11::register]]
-SEXP dust2_discrete_sir_compare_data(cpp11::sexp ptr, cpp11::sexp r_data, bool grouped) {
-  return dust2::r::dust2_discrete_compare_data<sir>(ptr, r_data, grouped);
+SEXP dust2_system_sir_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::sexp r_index, bool grouped) {
+  return dust2::r::dust2_system_simulate<dust2::dust_discrete<sir>>(ptr, r_times, r_index, grouped);
 }
 
 [[cpp11::register]]
@@ -248,4 +242,8 @@ SEXP dust2_discrete_sir_filter_rng_state(cpp11::sexp ptr) {
 [[cpp11::register]]
 SEXP dust2_discrete_sir_filter_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
   return dust2::r::dust2_discrete_filter_set_rng_state<sir>(ptr, r_rng_state);
+}
+[[cpp11::register]]
+SEXP dust2_system_sir_compare_data(cpp11::sexp ptr, cpp11::sexp r_data, bool grouped) {
+  return dust2::r::dust2_system_compare_data<dust2::dust_discrete<sir>>(ptr, r_data, grouped);
 }
