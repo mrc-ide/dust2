@@ -3,6 +3,7 @@
 #include <dust2/common.hpp>
 
 // [[dust2::class(walk)]]
+// [[dust2::time_type(discrete)]]
 // [[dust2::parameter(sd)]]
 // [[dust2::parameter(len)]]
 // [[dust2::parameter(random_initial)]]
@@ -99,7 +100,7 @@ public:
 
   // This one could be optional
   static internal_state build_internal(const shared_state& shared) {
-    return walk::internal_state{};
+    return internal_state{};
   }
 };
 
