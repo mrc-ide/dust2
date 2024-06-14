@@ -5,9 +5,9 @@ dust_system_generator <- function(name, time_type,
   ## sir()), rather than an object, means that it's easier to think
   ## about the dependencies among packages.  This is also essentially
   ## how DBI works.
-  get_methods <- function(nms, name) {
+  get_methods <- function(nms, component, name) {
     set_names(
-      lapply(sprintf("dust2_%s_%s_%s", time_type, name, nms),
+      lapply(sprintf("dust2_%s_%s_%s", component, name, nms),
              function(x) env[[x]]),
       nms)
   }
@@ -20,9 +20,9 @@ dust_system_generator <- function(name, time_type,
                     "run_steps", "run_to_time", "simulate",
                     "reorder")
   methods_compare <- "compare_data"
-  methods <- get_methods(c(methods_core, methods_compare), name)
-  ## ok <- !vapply(methods[methods_core], is.null, TRUE)
-  ## stopifnot(all(ok))
+  methods <- get_methods(c(methods_core, methods_compare), "system", name)
+  ok <- !vapply(methods[methods_core], is.null, TRUE)
+  stopifnot(all(ok))
 
   properties <- list(
     time_type = time_type,
@@ -30,19 +30,16 @@ dust_system_generator <- function(name, time_type,
 
   if (properties$has_compare) {
     methods_unfilter <- c("alloc", "run", "update_pars", "last_history")
-    methods$unfilter <-
-      get_methods(methods_unfilter, sprintf("%s_unfilter", name))
+    methods$unfilter <- get_methods(methods_unfilter, "unfilter", name)
     methods_filter <- c("alloc", "run", "update_pars", "last_history",
                         "rng_state", "set_rng_state")
-    methods$filter <-
-      get_methods(methods_filter, sprintf("%s_filter", name))
+    methods$filter <- get_methods(methods_filter, "filter", name)
   }
 
   ret <- list(name = name,
               methods = methods,
               properties = properties)
-  ## TODO: check that alloc exists, then go through and add
-  ## properties.
+
   class(ret) <- "dust_system_generator"
   ret
 }

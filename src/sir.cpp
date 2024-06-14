@@ -131,12 +131,12 @@ public:
 #include <dust2/r/discrete/unfilter.hpp>
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic) {
+SEXP dust2_system_sir_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic) {
   return dust2::r::dust2_discrete_alloc<sir>(r_pars, r_time, r_dt, r_n_particles, r_n_groups, r_seed, r_deterministic);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_run_steps(cpp11::sexp ptr, cpp11::sexp r_n_steps) {
+SEXP dust2_system_sir_run_steps(cpp11::sexp ptr, cpp11::sexp r_n_steps) {
   return dust2::r::dust2_discrete_run_steps<sir>(ptr, r_n_steps);
 }
 [[cpp11::register]]
@@ -195,52 +195,52 @@ SEXP dust2_system_sir_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::sexp
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_unfilter_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_index) {
+SEXP dust2_unfilter_sir_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_index) {
   return dust2::r::dust2_discrete_unfilter_alloc<sir>(r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_index);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_unfilter_update_pars(cpp11::sexp ptr, cpp11::list r_pars, bool grouped) {
+SEXP dust2_unfilter_sir_update_pars(cpp11::sexp ptr, cpp11::list r_pars, bool grouped) {
   return dust2::r::dust2_discrete_unfilter_update_pars<sir>(ptr, r_pars, grouped);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool grouped) {
+SEXP dust2_unfilter_sir_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool grouped) {
   return dust2::r::dust2_discrete_unfilter_run<sir>(ptr, r_initial, save_history, grouped);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_unfilter_last_history(cpp11::sexp ptr, bool grouped) {
+SEXP dust2_unfilter_sir_last_history(cpp11::sexp ptr, bool grouped) {
   return dust2::r::dust2_discrete_unfilter_last_history<sir>(ptr, grouped);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_filter_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_index, cpp11::sexp r_seed) {
+SEXP dust2_filter_sir_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_index, cpp11::sexp r_seed) {
   return dust2::r::dust2_discrete_filter_alloc<sir>(r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_index, r_seed);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_filter_update_pars(cpp11::sexp ptr, cpp11::list r_pars, bool grouped) {
+SEXP dust2_filter_sir_update_pars(cpp11::sexp ptr, cpp11::list r_pars, bool grouped) {
   return dust2::r::dust2_discrete_filter_update_pars<sir>(ptr, r_pars, grouped);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_filter_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool grouped) {
+SEXP dust2_filter_sir_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool grouped) {
   return dust2::r::dust2_discrete_filter_run<sir>(ptr, r_initial, save_history, grouped);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_filter_last_history(cpp11::sexp ptr, bool grouped) {
+SEXP dust2_filter_sir_last_history(cpp11::sexp ptr, bool grouped) {
   return dust2::r::dust2_discrete_filter_last_history<sir>(ptr, grouped);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_filter_rng_state(cpp11::sexp ptr) {
+SEXP dust2_filter_sir_rng_state(cpp11::sexp ptr) {
   return dust2::r::dust2_discrete_filter_rng_state<sir>(ptr);
 }
 
 [[cpp11::register]]
-SEXP dust2_discrete_sir_filter_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
+SEXP dust2_filter_sir_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
   return dust2::r::dust2_discrete_filter_set_rng_state<sir>(ptr, r_rng_state);
 }
 [[cpp11::register]]
