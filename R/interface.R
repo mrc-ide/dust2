@@ -17,7 +17,6 @@ dust_system_generator <- function(name, time_type,
                     "time", "set_time",
                     "rng_state", "set_rng_state",
                     "update_pars",
-                    if (time_type == "discrete") "run_steps",
                     "run_to_time", "simulate",
                     "reorder")
   methods_compare <- "compare_data"
@@ -263,32 +262,19 @@ dust_system_update_pars <- function(sys, pars) {
 }
 
 
-##' Run a system, advancing time and the state by repeatedly running
-##' its `update` method.  You can advance a system either a fixed
-##' (positive) number of steps, or up to a time (which must be in the
-##' future).
+##' Run a system, advancing time and the state by repeatedly running its
+##' `update` method.  You can advance a system up to a time (which must be in
+##' the future).
 ##'
 ##' @title Run system
 ##'
 ##' @inheritParams dust_system_state
 ##'
-##' @param steps The number of steps to run forward
+##' @param time Time to run to
 ##'
 ##' @return Nothing, called for side effects only
 ##'
 ##' @export
-##'
-##' @rdname dust_system_run
-dust_system_run_steps <- function(sys, steps) {
-  check_is_dust_system(sys)
-  sys$methods$run_steps(sys$ptr, steps)
-  invisible()
-}
-
-
-##' @param time Time to run to
-##' @export
-##' @rdname dust_system_run
 dust_system_run_to_time <- function(sys, time) {
   check_is_dust_system(sys)
   sys$methods$run_to_time(sys$ptr, time)

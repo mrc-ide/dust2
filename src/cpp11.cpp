@@ -97,13 +97,6 @@ extern "C" SEXP _dust2_dust2_system_sir_alloc(SEXP r_pars, SEXP r_time, SEXP r_d
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_system_sir_run_steps(cpp11::sexp ptr, cpp11::sexp r_n_steps);
-extern "C" SEXP _dust2_dust2_system_sir_run_steps(SEXP ptr, SEXP r_n_steps) {
-  BEGIN_CPP11
-    return cpp11::as_sexp(dust2_system_sir_run_steps(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_steps)));
-  END_CPP11
-}
-// sir.cpp
 SEXP dust2_system_sir_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time);
 extern "C" SEXP _dust2_dust2_system_sir_run_to_time(SEXP ptr, SEXP r_time) {
   BEGIN_CPP11
@@ -286,13 +279,6 @@ extern "C" SEXP _dust2_dust2_system_walk_alloc(SEXP r_pars, SEXP r_time, SEXP r_
   END_CPP11
 }
 // walk.cpp
-SEXP dust2_system_walk_run_steps(cpp11::sexp ptr, cpp11::sexp r_n_steps);
-extern "C" SEXP _dust2_dust2_system_walk_run_steps(SEXP ptr, SEXP r_n_steps) {
-  BEGIN_CPP11
-    return cpp11::as_sexp(dust2_system_walk_run_steps(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_steps)));
-  END_CPP11
-}
-// walk.cpp
 SEXP dust2_system_walk_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time);
 extern "C" SEXP _dust2_dust2_system_walk_run_to_time(SEXP ptr, SEXP r_time) {
   BEGIN_CPP11
@@ -394,7 +380,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_system_sir_compare_data",           (DL_FUNC) &_dust2_dust2_system_sir_compare_data,           3},
     {"_dust2_dust2_system_sir_reorder",                (DL_FUNC) &_dust2_dust2_system_sir_reorder,                2},
     {"_dust2_dust2_system_sir_rng_state",              (DL_FUNC) &_dust2_dust2_system_sir_rng_state,              1},
-    {"_dust2_dust2_system_sir_run_steps",              (DL_FUNC) &_dust2_dust2_system_sir_run_steps,              2},
     {"_dust2_dust2_system_sir_run_to_time",            (DL_FUNC) &_dust2_dust2_system_sir_run_to_time,            2},
     {"_dust2_dust2_system_sir_set_rng_state",          (DL_FUNC) &_dust2_dust2_system_sir_set_rng_state,          2},
     {"_dust2_dust2_system_sir_set_state",              (DL_FUNC) &_dust2_dust2_system_sir_set_state,              3},
@@ -407,7 +392,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_system_walk_alloc",                 (DL_FUNC) &_dust2_dust2_system_walk_alloc,                 7},
     {"_dust2_dust2_system_walk_reorder",               (DL_FUNC) &_dust2_dust2_system_walk_reorder,               2},
     {"_dust2_dust2_system_walk_rng_state",             (DL_FUNC) &_dust2_dust2_system_walk_rng_state,             1},
-    {"_dust2_dust2_system_walk_run_steps",             (DL_FUNC) &_dust2_dust2_system_walk_run_steps,             2},
     {"_dust2_dust2_system_walk_run_to_time",           (DL_FUNC) &_dust2_dust2_system_walk_run_to_time,           2},
     {"_dust2_dust2_system_walk_set_rng_state",         (DL_FUNC) &_dust2_dust2_system_walk_set_rng_state,         2},
     {"_dust2_dust2_system_walk_set_state",             (DL_FUNC) &_dust2_dust2_system_walk_set_state,             3},
