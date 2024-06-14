@@ -9,7 +9,7 @@ test_that("can run simple walk system", {
   expect_equal(dust_system_state(obj), matrix(0, 1, 10))
   expect_equal(dust_system_time(obj), 0)
 
-  expect_null(dust_system_run_steps(obj, 3))
+  expect_null(dust_system_run_to_time(obj, 3))
   s <- dust_system_state(obj)
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
@@ -27,7 +27,7 @@ test_that("can set system state from a vector", {
   expect_null(dust_system_set_state(obj, s))
   expect_equal(dust_system_state(obj), s)
 
-  expect_null(dust_system_run_steps(obj, 3))
+  expect_null(dust_system_run_to_time(obj, 3))
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
   expect_equal(dust_system_state(obj),
@@ -60,20 +60,18 @@ test_that("can run deterministically", {
   pars <- list(sd = 1)
   obj <- dust_system_create(walk(), pars, n_particles = 10,
                             deterministic = TRUE)
-  expect_null(dust_system_run_steps(obj, 3))
+  expect_null(dust_system_run_to_time(obj, 3))
   expect_equal(dust_system_state(obj),
                matrix(0, 1, 10))
 })
 
 
-test_that("Allow fractional dt", {
+test_that("Allow running with dt", {
   pars <- list(sd = 1, random_initial = TRUE)
   obj <- dust_system_create(walk(), pars, dt = 0.5, n_particles = 10, seed = 42)
   expect_equal(dust_system_time(obj), 0)
-  expect_null(dust_system_run_steps(obj, 3))
-  expect_equal(dust_system_time(obj), 1.5)
-  expect_null(dust_system_run_steps(obj, 5))
-  expect_equal(dust_system_time(obj), 4)
+  expect_null(dust_system_run_to_time(obj, 2))
+  expect_equal(dust_system_time(obj), 2)
 })
 
 
@@ -156,7 +154,7 @@ test_that("can initialise multiple groups with different parameter sets", {
                            seed = 42)
   expect_equal(dust_system_state(obj), array(0, c(1, 10, 4)))
 
-  expect_null(dust_system_run_steps(obj, 3))
+  expect_null(dust_system_run_to_time(obj, 3))
   s <- dust_system_state(obj)
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 40)
@@ -190,7 +188,7 @@ test_that("can create multi-state walk system", {
   s0 <- dust_system_state(obj)
   expect_equal(s0, r$normal(3, 0, 1))
 
-  expect_null(dust_system_run_steps(obj, 5))
+  expect_null(dust_system_run_to_time(obj, 5))
   s1 <- dust_system_state(obj)
 
   cmp <- r$normal(3 * 5, 0, 1)
@@ -235,11 +233,11 @@ test_that("can update parameters", {
   pars2 <- list(sd = 10)
   obj <- dust_system_create(walk(), pars1, n_particles = 10, seed = 42)
 
-  expect_null(dust_system_run_steps(obj, 1))
+  expect_null(dust_system_run_to_time(obj, 1))
   s1 <- dust_system_state(obj)
 
   expect_null(dust_system_update_pars(obj, pars2))
-  expect_null(dust_system_run_steps(obj, 1))
+  expect_null(dust_system_run_to_time(obj, 2))
   s2 <- dust_system_state(obj)
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
@@ -255,11 +253,11 @@ test_that("can update parameters for grouped systems", {
   obj <- dust_system_create(walk(), pars1, n_particles = 10, n_groups = 4,
                            seed = 42)
 
-  expect_null(dust_system_run_steps(obj, 1))
+  expect_null(dust_system_run_to_time(obj, 1))
   s1 <- dust_system_state(obj)
 
   expect_null(dust_system_update_pars(obj, pars2))
-  expect_null(dust_system_run_steps(obj, 1))
+  expect_null(dust_system_run_to_time(obj, 2))
   s2 <- dust_system_state(obj)
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 40)
@@ -393,25 +391,6 @@ test_that("validate inputs for reordering", {
 })
 
 
-test_that("can run walk system to time", {
-  pars <- list(sd = 1)
-  obj1 <- dust_system_create(walk(), pars, n_particles = 10, dt = 0.25,
-                            seed = 42)
-  obj2 <- dust_system_create(walk(), pars, n_particles = 10, dt = 0.25,
-                            seed = 42)
-
-  dust_system_set_state_initial(obj1)
-  expect_null(dust_system_run_steps(obj1, 40))
-  expect_equal(dust_system_time(obj1), 10)
-  s1 <- dust_system_state(obj1)
-
-  dust_system_set_state_initial(obj2)
-  expect_null(dust_system_run_to_time(obj2, 10))
-  expect_equal(dust_system_time(obj2), 10)
-  expect_equal(dust_system_state(obj2), s1)
-})
-
-
 test_that("time must not be in the past", {
   pars <- list(sd = 1)
   obj <- dust_system_create(walk(), pars, dt = 0.25, n_particles = 10)
@@ -533,8 +512,8 @@ test_that("can set rng state", {
 
   expect_null(dust_system_set_rng_state(obj2, dust_system_rng_state(obj1)))
   expect_identical(dust_system_rng_state(obj1), dust_system_rng_state(obj2))
-  dust_system_run_steps(obj1, 10)
-  dust_system_run_steps(obj2, 10)
+  dust_system_run_to_time(obj1, 10)
+  dust_system_run_to_time(obj2, 10)
   expect_identical(dust_system_state(obj1), dust_system_state(obj2))
 })
 

@@ -17,7 +17,7 @@ test_that("can run an unfilter", {
     incidence <- numeric(length(time))
     time0 <- c(time_start, time)
     for (i in seq_along(time)) {
-      dust_system_run_steps(obj, round((time[i] - time0[i]) / dt))
+      dust_system_run_to_time(obj, time[i])
       incidence[i] <- dust_system_state(obj)[5, , drop = TRUE]
     }
     sum(dpois(1:4, incidence + 1e-6, log = TRUE))
@@ -117,7 +117,7 @@ test_that("can run an unfilter with manually set state", {
     incidence <- numeric(length(time))
     time0 <- c(time_start, time)
     for (i in seq_along(time)) {
-      dust_system_run_steps(obj, round((time[i] - time0[i]) / dt))
+      dust_system_run_to_time(obj, time[i])
       incidence[i] <- dust_system_state(obj)[5, , drop = TRUE]
     }
     sum(dpois(1:4, incidence + 1e-6, log = TRUE))
@@ -150,7 +150,7 @@ test_that("can run unfilter on structured system", {
     incidence <- matrix(0, n_groups, length(time))
     time0 <- c(time_start, time)
     for (i in seq_along(time)) {
-      dust_system_run_steps(obj, round((time[i] - time0[i]) / dt))
+      dust_system_run_to_time(obj, time[i])
       incidence[, i] <- dust_system_state(obj)[5, , , drop = TRUE]
     }
     observed <- matrix(unlist(data, use.names = FALSE), n_groups)
