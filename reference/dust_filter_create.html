@@ -104,7 +104,9 @@ slowly.</p></dd>
 
 
 <dt>dt</dt>
-<dd><p>The time step for the system, defaults to 1</p></dd>
+<dd><p>The time step for discrete time systems, defaults to 1
+if not given.  It is an error to provide a non-NULL argument
+with continuous-time systems.</p></dd>
 
 
 <dt>index</dt>

@@ -60,7 +60,8 @@ other dust functions to interact with it.</p>
 <span>  <span class="va">n_particles</span>,</span>
 <span>  n_groups <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  time <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  dt <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  dt <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ode_control <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  deterministic <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -92,7 +93,15 @@ system.  If <code>n_groups</code> is 1 or more, then this must be a list of leng
 
 
 <dt>dt</dt>
-<dd><p>The time step for the system, defaults to 1</p></dd>
+<dd><p>The time step for discrete time systems, defaults to 1
+if not given.  It is an error to provide a non-NULL argument
+with continuous-time systems.</p></dd>
+
+
+<dt>ode_control</dt>
+<dd><p>The ODE integration control for continuous time
+systems.  Defaults to the default return of <a href="dust_ode_control.html">dust_ode_control</a>.
+It is an error to provide this with discrete-time systems.</p></dd>
 
 
 <dt>seed</dt>
