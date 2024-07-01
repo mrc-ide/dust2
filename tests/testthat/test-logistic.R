@@ -132,8 +132,8 @@ test_that("can reorder particles", {
                              deterministic = TRUE)
   obj2 <- dust_system_create(logistic(), pars, n_particles = 10,
                              deterministic = TRUE)
-  dust_system_set_state_initial(obj1)
-  dust_system_set_state_initial(obj2)
+  dust_system_set_state(obj1, s)
+  dust_system_set_state(obj2, s)
 
   dust_system_run_to_time(obj1, 3)
   dust_system_run_to_time(obj1, 10)
