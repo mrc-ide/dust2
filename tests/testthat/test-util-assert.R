@@ -1,3 +1,11 @@
+test_that("assert_is", {
+  x <- structure(list(), class = "foo")
+  expect_silent(assert_is(x, "foo"))
+  expect_error(assert_is(x, "bar"),
+               "Expected 'x' to be a 'bar'")
+})
+
+
 test_that("assert_scalar", {
   expect_error(assert_scalar(NULL), "must be a scalar")
   expect_error(assert_scalar(numeric(0)), "must be a scalar")
@@ -46,6 +54,22 @@ test_that("assert_scalar_size", {
   expect_silent(assert_scalar_size(x))
   expect_error(assert_scalar_size(x, allow_zero = FALSE),
                "'x' must be at least 1")
+})
+
+
+test_that("assert_scalar_positive numeric", {
+  x <- 1
+  expect_silent(assert_scalar_positive_numeric(x))
+  expect_silent(assert_scalar_positive_numeric(x, allow_zero = FALSE))
+  x <- 0
+  expect_silent(assert_scalar_positive_numeric(x))
+  expect_error(assert_scalar_positive_numeric(x, allow_zero = FALSE),
+               "'x' must be greater than 0")
+  x <- -2
+  expect_error(assert_scalar_positive_numeric(x),
+               "'x' must be at least 0")
+  expect_error(assert_scalar_positive_numeric(x, allow_zero = FALSE),
+               "'x' must be greater than 0")
 })
 
 

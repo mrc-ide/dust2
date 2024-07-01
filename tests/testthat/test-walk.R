@@ -548,3 +548,13 @@ test_that("can validate rng state on setting", {
   expect_error(dust_system_set_rng_state(obj, s[-1]),
                "Incorrect length for 'rng_state'; expected 320 but given 319")
 })
+
+
+test_that("reject ode_control as an argument when creating walk model", {
+  pars <- list(sd = 1, random_initial = TRUE)
+  obj <- dust_system_create(walk(), pars, n_particles = 10, seed = 42)
+  expect_error(
+    dust_system_create(walk(), pars, ode_control = dust_ode_control(),
+                       n_particles = 1),
+    "Can't use 'ode_control' with discrete-time systems")
+})

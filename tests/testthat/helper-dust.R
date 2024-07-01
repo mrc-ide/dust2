@@ -50,3 +50,10 @@ skip_for_compilation <- function() {
     stop_unless_installed(dust_compile_needs()),
     error = function(e) testthat::skip(conditionMessage(e)))
 }
+
+
+logistic_analytic <- function(r, k, times, y0) {
+  len <- max(length(r), length(k), length(y0))
+  vapply(times, function(t) k / (1 + (k / y0 - 1) * exp(-r * t)),
+         numeric(len))
+}

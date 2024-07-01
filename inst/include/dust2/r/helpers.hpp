@@ -415,5 +415,27 @@ inline bool read_bool(cpp11::list args, const char * name,
   return value == R_NilValue ? default_value : to_bool(value, name);
 }
 
+template <typename real_type>
+void read_real_vector(cpp11::list args, size_t len, real_type * dest,
+                      const char *name, bool required) {
+  cpp11::sexp value = args[name];
+  if (value == R_NilValue) {
+    if (required) {
+      cpp11::stop("A value is expected for '%s'", name);
+    }
+  } else {
+    check_length(value, len, name);
+    if (TYPEOF(value) == REALSXP) {
+      auto value_dbl = cpp11::as_cpp<cpp11::doubles>(value);
+      std::copy(value_dbl.begin(), value_dbl.end(), dest);
+    } else if (TYPEOF(value) == INTSXP) {
+      auto value_int = cpp11::as_cpp<cpp11::integers>(value);
+      std::copy(value_int.begin(), value_int.end(), dest);
+    } else {
+      cpp11::stop("'%s' must be numeric", name);
+    }
+  }
+}
+
 }
 }

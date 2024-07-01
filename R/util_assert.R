@@ -1,3 +1,12 @@
+assert_is <- function(x, what, name = deparse(substitute(x)), arg = name,
+                      call = call) {
+  if (!inherits(x, what)) {
+    cli::cli_abort("Expected '{name}' to be a '{what}'",
+                   arg = arg, call = call)
+  }
+  invisible(x)
+}
+
 assert_scalar <- function(x, name = deparse(substitute(x)), arg = name,
                           call = NULL)  {
   if (length(x) != 1) {
@@ -59,10 +68,27 @@ assert_scalar_character <- function(x, name = deparse(substitute(x)),
 
 
 assert_scalar_numeric <- function(x, name = deparse(substitute(x)),
-                                    arg = name, call = NULL) {
+                                  arg = name, call = NULL) {
   assert_scalar(x, name, arg = arg, call = call)
   assert_numeric(x, name, arg = arg, call = call)
   assert_nonmissing(x, name, arg = arg, call = call)
+}
+
+
+assert_scalar_positive_numeric <- function(x, allow_zero = TRUE,
+                                           name = deparse(substitute(x)),
+                                           arg = name, call = NULL) {
+  assert_scalar_numeric(x)
+  if (allow_zero) {
+    if (x < 0) {
+      cli::cli_abort("'{name}' must be at least 0", call = call)
+    }
+  } else {
+    if (x <= 0) {
+      cli::cli_abort("'{name}' must be greater than 0", call = call)
+    }
+  }
+  invisible(x)
 }
 
 
@@ -80,8 +106,9 @@ assert_scalar_size <- function(x, allow_zero = TRUE,
   assert_scalar_integer(x, name = name, arg = arg, call = call)
   min <- if (allow_zero) 0 else 1
   if (x < min) {
-    cli::cli_abort("'{name}' must be at least {min}")
+    cli::cli_abort("'{name}' must be at least {min}", call = call)
   }
+  invisible(x)
 }
 
 
