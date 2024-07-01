@@ -9,7 +9,6 @@ sir_filter_manual <- function(pars, time_start, time, dt, data, n_particles,
 
   obj <- dust_system_create(sir(), pars, n_particles,
                             time = time_start, dt = dt, seed = seed)
-  n_steps <- round((time - c(time_start, time[-length(time)])) / dt)
   n_state <- nrow(dust_system_state(obj))
   n_time <- length(time)
 
@@ -26,7 +25,7 @@ sir_filter_manual <- function(pars, time_start, time, dt, data, n_particles,
     ll <- 0
     history <- array(NA_real_, c(n_state, n_particles, n_time))
     for (i in seq_along(time)) {
-      dust_system_run_steps(obj, n_steps[[i]])
+      dust_system_run_to_time(obj, time[[i]])
       tmp <- dust_system_compare_data(obj, data[[i]])
       w <- exp(tmp - max(tmp))
       ll <- ll + log(mean(w)) + max(tmp)

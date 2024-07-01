@@ -17,7 +17,6 @@ reference:
       - dust_system_update_pars
   - subtitle: Running
     contents:
-      - dust_system_run_steps
       - dust_system_run_to_time
       - dust_system_simulate
   - subtitle: Other

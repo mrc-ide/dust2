@@ -55,13 +55,5 @@ SEXP dust2_discrete_alloc(cpp11::list r_pars,
       };
 }
 
-template <typename T>
-SEXP dust2_discrete_run_steps(cpp11::sexp ptr, cpp11::sexp r_n_steps) {
-  auto *obj = cpp11::as_cpp<cpp11::external_pointer<dust_discrete<T>>>(ptr).get();
-  auto n_steps = to_size(r_n_steps, "n_steps");
-  obj->run_steps(n_steps);
-  return R_NilValue;
-}
-
 }
 }

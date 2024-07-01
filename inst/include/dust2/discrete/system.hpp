@@ -46,10 +46,6 @@ public:
 
   auto run_to_time(real_type time) {
     const size_t n_steps = std::round(std::max(0.0, time - time_) / dt_);
-    return run_steps(n_steps);
-  }
-
-  auto run_steps(size_t n_steps) {
     // Ignore errors for now.
     real_type * state_data = state_.data();
     real_type * state_next_data = state_next_.data();

@@ -15,7 +15,7 @@ test_that("can run simple sir system", {
   s0 <- dust_system_state(obj)
   expect_equal(s0, matrix(c(990, 10, 0, 0, 0), 5, 10))
 
-  expect_null(dust_system_run_steps(obj, 30))
+  expect_null(dust_system_run_to_time(obj, 30))
   s1 <- dust_system_state(obj)
   expect_true(all(s1[1, ] < 990))
   expect_true(all(s1[3, ] > 0))
@@ -98,18 +98,13 @@ test_that("can reset cases daily", {
   obj <- dust_system_create(sir(), pars, n_particles = n_particles,
                            dt = 0.25, seed = 42)
   dust_system_set_state_initial(obj)
-  res <- array(NA_real_, c(5, n_particles, n_time))
-  for (i in seq_len(n_time)) {
-    dust_system_run_steps(obj, 1)
-    res[, , i] <- dust_system_state(obj)
-  }
+  res <- dust_system_simulate(obj, 0:5)
 
   ## Cumulative cases never decrease:
   expect_true(all(diff(t(res[4, , ])) >= 0))
 
-  ## Incidence resets every four steps:
-  expect_equal(which(apply(diff(t(res[5, , ])) < 0, 1, any)),
-               c(4, 8, 12, 16))
+  ## Incidence resets somtimes:
+  expect_true(any(diff(t(res[5, , ])) < 0))
 })
 
 
@@ -121,7 +116,7 @@ test_that("can run sir system to time", {
                              seed = 42)
 
   dust_system_set_state_initial(obj1)
-  expect_null(dust_system_run_steps(obj1, 40))
+  expect_null(dust_system_run_to_time(obj1, 10))
   expect_equal(dust_system_time(obj1), 10)
   s1 <- dust_system_state(obj1)
 
@@ -139,10 +134,10 @@ test_that("can update parameters", {
 
   obj1 <- dust_system_create(sir(), base, n_particles = 10, seed = 42)
   expect_null(dust_system_update_pars(obj1, update))
-  expect_null(dust_system_run_steps(obj1, 10))
+  expect_null(dust_system_run_to_time(obj1, 10))
 
   obj2 <- dust_system_create(sir(), combined, n_particles = 10, seed = 42)
-  expect_null(dust_system_run_steps(obj2, 10))
+  expect_null(dust_system_run_to_time(obj2, 10))
 
   expect_equal(
     dust_system_state(obj2),
@@ -203,7 +198,7 @@ test_that("copy names with index", {
 test_that("can reorder state", {
   obj <- dust_system_create(sir(), list(), n_particles = 10, seed = 42)
   expect_null(dust_system_set_state_initial(obj))
-  dust_system_run_steps(obj, 100)
+  dust_system_run_to_time(obj, 100)
   s1 <- dust_system_state(obj)
   i <- sample(10, replace = TRUE)
   expect_null(dust_system_reorder(obj, i))
