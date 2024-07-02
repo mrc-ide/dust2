@@ -4,6 +4,7 @@
 #include <vector>
 #include <dust2/continuous/control.hpp>
 #include <dust2/continuous/solver.hpp>
+#include <dust2/zero.hpp>
 #include <mcstate/random/random.hpp>
 
 namespace dust2 {
@@ -44,6 +45,7 @@ public:
     internal_(internal),
 
     time_(time),
+    zero_every_(zero_every_vec<T>(shared_)),
     rng_(n_particles_total_, seed, deterministic),
     solver_(n_state_, control_) {
     // TODO: above, filter rng states need adding here too, or
@@ -62,7 +64,8 @@ public:
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
         real_type * y = state_data + offset;
-        solver_.run(time_, time, y, ode_internals_[k],
+        solver_.run(time_, time, y, zero_every_[i],
+                    ode_internals_[k],
                     rhs_(shared_[i], internal_[i]));
       }
     }
@@ -210,6 +213,7 @@ private:
   std::vector<shared_state> shared_;
   std::vector<internal_state> internal_;
   real_type time_;
+  std::vector<std::map<real_type, std::vector<size_t>>> zero_every_;
   mcstate::random::prng<rng_state_type> rng_;
   ode::solver<real_type> solver_;
 
