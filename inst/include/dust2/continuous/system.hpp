@@ -213,7 +213,7 @@ private:
   std::vector<shared_state> shared_;
   std::vector<internal_state> internal_;
   real_type time_;
-  std::vector<std::map<real_type, std::vector<size_t>>> zero_every_;
+  std::vector<zero_every_type<real_type>> zero_every_;
   mcstate::random::prng<rng_state_type> rng_;
   ode::solver<real_type> solver_;
 
