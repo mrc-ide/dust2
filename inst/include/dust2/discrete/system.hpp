@@ -2,8 +2,8 @@
 
 #include <map>
 #include <vector>
-#include <mcstate/random/random.hpp>
 #include <dust2/zero.hpp>
+#include <mcstate/random/random.hpp>
 
 namespace dust2 {
 
