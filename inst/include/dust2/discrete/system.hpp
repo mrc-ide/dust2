@@ -1,7 +1,9 @@
 #pragma once
 
+#include <map>
 #include <vector>
 #include <mcstate/random/random.hpp>
+#include <dust2/zero.hpp>
 
 namespace dust2 {
 
@@ -34,11 +36,8 @@ public:
     internal_(internal),
     time_(time),
     dt_(dt),
+    zero_every_(zero_every_vec<T>(shared_)),
     rng_(n_particles_total_, seed, deterministic) {
-    // TODO: above, filter rng states need adding here too, or
-    // somewhere at least (we might move the filter elsewhere though,
-    // in which case that particular bit of weirdness goes away).
-
     // We don't check that the size is the same across all states;
     // this should be done by the caller (similarly, we don't check
     // that shared and internal have the same size).
@@ -60,6 +59,7 @@ public:
         const auto offset = k * n_state_;
         run_particle(time_, dt_, n_steps,
                      shared_[i], internal_[i],
+                     zero_every_[i],
                      state_data + offset,
                      rng_.state(k),
                      state_next_data + offset);
@@ -188,13 +188,22 @@ private:
   std::vector<internal_state> internal_;
   real_type time_;
   real_type dt_;
+  std::vector<std::map<real_type, std::vector<size_t>>> zero_every_;
   mcstate::random::prng<rng_state_type> rng_;
 
   static void run_particle(real_type time, real_type dt, size_t n_steps,
                            const shared_state& shared, internal_state& internal,
+                           const std::map<real_type, std::vector<size_t>> zero_every,
                            real_type * state, rng_state_type& rng_state,
                            real_type * state_next) {
     for (size_t i = 0; i < n_steps; ++i) {
+      for (const auto& el : zero_every) {
+        if (std::fmod(time, el.first) == 0) {
+          for (const auto j : el.second) {
+            state[j] = 0;
+          }
+        }
+      }
       T::update(time + i * dt, dt, state, shared, internal, rng_state,
                 state_next);
       std::swap(state, state_next);
