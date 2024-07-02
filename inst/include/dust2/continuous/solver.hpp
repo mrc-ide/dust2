@@ -199,7 +199,7 @@ public:
 
   template <typename Rhs>
   void run(real_type t, real_type t_end, real_type* y,
-           const std::map<real_type, std::vector<size_t>>& zero_every,
+           zero_every_type<real_type>& zero_every,
            ode::internals<real_type>& internals, Rhs rhs) {
     while (t < t_end) {
       apply_zero_every(t, y, zero_every, internals);
@@ -208,7 +208,7 @@ public:
   }
 
   void apply_zero_every(real_type t, real_type* y,
-                        const std::map<real_type, std::vector<size_t>>& zero_every,
+                        const zero_every_type<real_type>& zero_every,
                         const ode::internals<real_type>& internals) {
     if (zero_every.empty() || internals.last_step_size == 0) {
       return;
