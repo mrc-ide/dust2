@@ -188,12 +188,12 @@ private:
   std::vector<internal_state> internal_;
   real_type time_;
   real_type dt_;
-  std::vector<std::map<real_type, std::vector<size_t>>> zero_every_;
+  std::vector<zero_every_type<real_type>> zero_every_;
   mcstate::random::prng<rng_state_type> rng_;
 
   static void run_particle(real_type time, real_type dt, size_t n_steps,
                            const shared_state& shared, internal_state& internal,
-                           const std::map<real_type, std::vector<size_t>> zero_every,
+                           const zero_every_type<real_type>& zero_every,
                            real_type * state, rng_state_type& rng_state,
                            real_type * state_next) {
     for (size_t i = 0; i < n_steps; ++i) {
