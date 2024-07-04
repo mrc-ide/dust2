@@ -100,4 +100,8 @@ public:
   static internal_state build_internal(const shared_state& shared) {
     return internal_state{};
   }
+
+  static auto zero_every(const shared_state& shared) {
+    return dust2::zero_every_type<real_type>();
+  }
 };
