@@ -83,6 +83,10 @@ public:
   static void update_internal(const shared_state& shared,
                               internal_state& internal) {
   }
+
+  static auto zero_every(const shared_state& shared) {
+    return dust2::zero_every_type<real_type>();
+  }
 };
 
 #include <cpp11.hpp>

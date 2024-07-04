@@ -197,15 +197,15 @@ private:
                            real_type * state, rng_state_type& rng_state,
                            real_type * state_next) {
     for (size_t i = 0; i < n_steps; ++i) {
+      const auto time_i = time + i * dt;
       for (const auto& el : zero_every) {
-        if (std::fmod(time, el.first) == 0) {
+        if (std::fmod(time_i, el.first) == 0) {
           for (const auto j : el.second) {
             state[j] = 0;
           }
         }
       }
-      T::update(time + i * dt, dt, state, shared, internal, rng_state,
-                state_next);
+      T::update(time_i, dt, state, shared, internal, rng_state, state_next);
       std::swap(state, state_next);
     }
   }

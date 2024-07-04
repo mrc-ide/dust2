@@ -216,10 +216,10 @@ public:
     for (const auto& el : zero_every) {
       const auto every = el.first;
       const auto t_last_step = t - internals.last_step_size;
-      const int n = std::ceil(t / every);
-      const int m = std::ceil(t_last_step / every);
+      const int n = std::floor(t / every);
+      const int m = std::floor(t_last_step / every);
       if (n > m) {
-        const auto t_reset = (n - 1) * every;
+        const auto t_reset = n * every;
         if (t_reset == t) {
           for (const auto j : el.second) {
             y[j] = 0;

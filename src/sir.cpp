@@ -83,7 +83,7 @@ public:
   }
 
   static internal_state build_internal(const shared_state& shared) {
-    return sir::internal_state{};
+    return internal_state{};
   }
 
   // This is the bit that we'll use to do fast parameter updating, and
@@ -101,7 +101,7 @@ public:
   }
 
   static auto zero_every(const shared_state& shared) {
-    return dust2::zero_every_type<real_type>{{4, {1}}}; // zero[4] = {1};
+    return dust2::zero_every_type<real_type>{{1, {4}}}; // zero[1] = {4};
   }
 
   static data_type build_data(cpp11::list r_data) {
