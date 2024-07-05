@@ -18,7 +18,7 @@ integers or numeric values, but \code{dydt} (the current derivative
 of the target function with respect to time) and \code{step_times}
 (times that the solver has stopped at, if
 \code{debug_record_step_times} is in \link{dust_ode_control} was set to
-\code{TRUE}) will be list columns, each element of which is a numeric
+\code{TRUE}) will be a list of columns, each element of which is a numeric
 vector.
 }
 \description{
