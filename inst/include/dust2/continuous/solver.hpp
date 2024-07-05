@@ -205,36 +205,7 @@ public:
       apply_zero_every(t, y, zero_every, internals);
       t = step(t, t_end, y, internals, rhs);
     }
-  }
-
-  void apply_zero_every(real_type t, real_type* y,
-                        const zero_every_type<real_type>& zero_every,
-                        const ode::internals<real_type>& internals) {
-    Rprintf("At t: %f\n", t);
-    if (zero_every.empty() || internals.last_step_size == 0) {
-      return;
-    }
-    for (const auto& el : zero_every) {
-      const auto every = el.first;
-      const auto t_last_step = t - internals.last_step_size;
-      const int n = std::floor(t / every);
-      const int m = std::floor(t_last_step / every);
-      if (n > m) {
-        const auto t_reset = n * every;
-        Rprintf("...zeroing\n");
-        if (t_reset == t) {
-          for (const auto j : el.second) {
-            y[j] = 0;
-          }
-        } else {
-          const auto theta = (t_reset - t_last_step) / internals.last_step_size;
-          const auto theta1 = 1 - theta;
-          for (const auto j : el.second) {
-            y[j] -= interpolate(j, theta, theta1, internals);
-          }
-        }
-      }
-    }
+    apply_zero_every_final(t, y, zero_every, internals);
   }
 
   template <typename Rhs>
@@ -324,6 +295,61 @@ private:
        (internals.c3[idx] + theta *
         (internals.c4[idx] + theta1 *
          internals.c5[idx])));
+  }
+
+  void apply_zero_every(real_type t, real_type* y,
+                        const zero_every_type<real_type>& zero_every,
+                        const ode::internals<real_type>& internals) {
+    Rprintf("At t: %f\n", t);
+    if (zero_every.empty() || internals.last_step_size == 0) {
+      return;
+    }
+    for (const auto& el : zero_every) {
+      const auto every = el.first;
+      const auto t_last_step = t - internals.last_step_size;
+      const int n = std::floor(t / every);
+      const int m = std::floor(t_last_step / every);
+      if (n > m) {
+        const auto t_reset = n * every;
+        Rprintf("...zeroing\n");
+        if (t_reset == t) {
+          for (const auto j : el.second) {
+            y[j] = 0;
+          }
+        } else {
+          const auto theta = (t_reset - t_last_step) / internals.last_step_size;
+          const auto theta1 = 1 - theta;
+          for (const auto j : el.second) {
+            y[j] -= interpolate(j, theta, theta1, internals);
+          }
+        }
+      }
+    }
+  }
+
+  // action at the final step is slightly different:
+  void apply_zero_every_final(real_type t, real_type* y,
+                              const zero_every_type<real_type>& zero_every,
+                              const ode::internals<real_type>& internals) {
+    if (zero_every.empty() || internals.last_step_size == 0) {
+      return;
+    }
+    for (const auto& el : zero_every) {
+      const auto every = el.first;
+      if (internals.last_step_size > every) {
+        const auto t_last_step = t - internals.last_step_size;
+        const int n = std::ceil(t / every);
+        const int m = std::ceil(t_last_step / every);
+        if (n > m) {
+          const auto t_reset = (n - 1) * every;
+          const auto theta = (t_reset - t_last_step) / internals.last_step_size;
+          const auto theta1 = 1 - theta;
+          for (const auto j : el.second) {
+            y[j] -= interpolate(j, theta, theta1, internals);
+          }
+        }
+      }
+    }
   }
 
   size_t n_variables_;

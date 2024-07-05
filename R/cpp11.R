@@ -148,6 +148,10 @@ dust2_system_sirode_alloc <- function(r_pars, r_time, r_ode_control, r_n_particl
   .Call(`_dust2_dust2_system_sirode_alloc`, r_pars, r_time, r_ode_control, r_n_particles, r_n_groups, r_seed, r_deterministic)
 }
 
+dust2_system_sirode_internals <- function(ptr) {
+  .Call(`_dust2_dust2_system_sirode_internals`, ptr)
+}
+
 dust2_system_sirode_run_to_time <- function(ptr, r_time) {
   .Call(`_dust2_dust2_system_sirode_run_to_time`, ptr, r_time)
 }
