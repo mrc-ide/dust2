@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-examples <- c("logistic.cpp", "sir.cpp", "walk.cpp")
+examples <- c("logistic.cpp", "sir.cpp", "sirode.cpp", "walk.cpp")
 
 setwd(here::here())
 unlink(file.path("src", basename(examples)))

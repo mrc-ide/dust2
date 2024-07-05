@@ -210,6 +210,7 @@ public:
   void apply_zero_every(real_type t, real_type* y,
                         const zero_every_type<real_type>& zero_every,
                         const ode::internals<real_type>& internals) {
+    Rprintf("At t: %f\n", t);
     if (zero_every.empty() || internals.last_step_size == 0) {
       return;
     }
@@ -220,6 +221,7 @@ public:
       const int m = std::floor(t_last_step / every);
       if (n > m) {
         const auto t_reset = n * every;
+        Rprintf("...zeroing\n");
         if (t_reset == t) {
           for (const auto j : el.second) {
             y[j] = 0;

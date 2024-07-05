@@ -144,6 +144,54 @@ dust2_filter_sir_set_rng_state <- function(ptr, r_rng_state) {
   .Call(`_dust2_dust2_filter_sir_set_rng_state`, ptr, r_rng_state)
 }
 
+dust2_system_sirode_alloc <- function(r_pars, r_time, r_ode_control, r_n_particles, r_n_groups, r_seed, r_deterministic) {
+  .Call(`_dust2_dust2_system_sirode_alloc`, r_pars, r_time, r_ode_control, r_n_particles, r_n_groups, r_seed, r_deterministic)
+}
+
+dust2_system_sirode_run_to_time <- function(ptr, r_time) {
+  .Call(`_dust2_dust2_system_sirode_run_to_time`, ptr, r_time)
+}
+
+dust2_system_sirode_state <- function(ptr, grouped) {
+  .Call(`_dust2_dust2_system_sirode_state`, ptr, grouped)
+}
+
+dust2_system_sirode_time <- function(ptr) {
+  .Call(`_dust2_dust2_system_sirode_time`, ptr)
+}
+
+dust2_system_sirode_set_state_initial <- function(ptr) {
+  .Call(`_dust2_dust2_system_sirode_set_state_initial`, ptr)
+}
+
+dust2_system_sirode_set_state <- function(ptr, r_state, grouped) {
+  .Call(`_dust2_dust2_system_sirode_set_state`, ptr, r_state, grouped)
+}
+
+dust2_system_sirode_reorder <- function(ptr, r_index) {
+  .Call(`_dust2_dust2_system_sirode_reorder`, ptr, r_index)
+}
+
+dust2_system_sirode_rng_state <- function(ptr) {
+  .Call(`_dust2_dust2_system_sirode_rng_state`, ptr)
+}
+
+dust2_system_sirode_set_rng_state <- function(ptr, r_rng_state) {
+  .Call(`_dust2_dust2_system_sirode_set_rng_state`, ptr, r_rng_state)
+}
+
+dust2_system_sirode_set_time <- function(ptr, r_time) {
+  .Call(`_dust2_dust2_system_sirode_set_time`, ptr, r_time)
+}
+
+dust2_system_sirode_update_pars <- function(ptr, pars, grouped) {
+  .Call(`_dust2_dust2_system_sirode_update_pars`, ptr, pars, grouped)
+}
+
+dust2_system_sirode_simulate <- function(ptr, r_times, r_index, grouped) {
+  .Call(`_dust2_dust2_system_sirode_simulate`, ptr, r_times, r_index, grouped)
+}
+
 test_resample_weight <- function(w, u) {
   .Call(`_dust2_test_resample_weight`, w, u)
 }
