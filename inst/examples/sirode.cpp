@@ -1,16 +1,15 @@
 #include <dust2/common.hpp>
 
-// [[dust2::class(sir)]]
-// [[dust2::time_type(discrete)]]
-// [[dust2::has_compare()]]
+// [[dust2::class(sirode)]]
+// [[dust2::time_type(continuous)]]
 // [[dust2::parameter(I0)]]
 // [[dust2::parameter(N)]]
 // [[dust2::parameter(beta)]]
 // [[dust2::parameter(gamma)]]
 // [[dust2::parameter(exp_noise)]]
-class sir {
+class sirode {
 public:
-  sir() = delete;
+  sirode() = delete;
 
   using real_type = double;
 
@@ -35,7 +34,6 @@ public:
   }
 
   static void initial(real_type time,
-                      real_type dt,
                       const shared_state& shared,
                       internal_state& internal,
                       rng_state_type& rng_state,
@@ -47,28 +45,20 @@ public:
     state_next[4] = 0;
   }
 
-  // The main update function, converting state to state_next
-  static void update(real_type time,
-                     real_type dt,
-                     const real_type * state,
-                     const shared_state& shared,
-                     internal_state& internal,
-                     rng_state_type& rng_state,
-                     real_type * state_next) {
+  static void rhs(real_type time,
+                  const real_type * state,
+                  const shared_state& shared,
+                  internal_state& internal,
+                  real_type * state_deriv) {
     const auto S = state[0];
     const auto I = state[1];
-    const auto R = state[2];
-    const auto cases_cumul = state[3];
-    const auto cases_inc = state[4];
-    const auto p_SI = 1 - mcstate::math::exp(-shared.beta * I / shared.N * dt);
-    const auto p_IR = 1 - mcstate::math::exp(-shared.gamma * dt);
-    const auto n_SI = mcstate::random::binomial<real_type>(rng_state, S, p_SI);
-    const auto n_IR = mcstate::random::binomial<real_type>(rng_state, I, p_IR);
-    state_next[0] = S - n_SI;
-    state_next[1] = I + n_SI - n_IR;
-    state_next[2] = R + n_IR;
-    state_next[3] = cases_cumul + n_SI;
-    state_next[4] = cases_inc + n_SI;
+    const auto rate_SI = shared.beta * S * I / shared.N;
+    const auto rate_IR = shared.gamma * I;
+    state_deriv[0] = -rate_SI;
+    state_deriv[1] = rate_SI - rate_IR;
+    state_deriv[2] = rate_IR;
+    state_deriv[3] = rate_SI;
+    state_deriv[4] = rate_SI;
   }
 
   static shared_state build_shared(cpp11::list pars) {
@@ -100,29 +90,5 @@ public:
 
   static auto zero_every(const shared_state& shared) {
     return dust2::zero_every_type<real_type>{{1, {4}}}; // zero[1] = {4};
-  }
-
-  static data_type build_data(cpp11::list r_data) {
-    auto data = static_cast<cpp11::list>(r_data);
-    auto incidence = dust2::r::read_real(data, "incidence");
-    return data_type{incidence};
-  }
-
-  static real_type compare_data(const real_type time,
-                                const real_type dt,
-                                const real_type * state,
-                                const data_type& data,
-                                const shared_state& shared,
-                                internal_state& internal,
-                                rng_state_type& rng_state) {
-    const auto incidence_observed = data.incidence;
-    if (std::isnan(data.incidence)) {
-      return 0;
-    }
-    const auto noise =
-      mcstate::random::exponential(rng_state, shared.exp_noise);
-    const auto incidence_modelled = state[4];
-    const auto lambda = incidence_modelled + noise;
-    return mcstate::density::poisson(incidence_observed, lambda, true);
   }
 };
