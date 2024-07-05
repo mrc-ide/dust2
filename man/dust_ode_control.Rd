@@ -36,8 +36,10 @@ step as it wants to.  If you have short-lived fluctuations in
 your rhs that the solver may skip over by accident, then specify
 a smaller maximum step size here.}
 
-\item{debug_record_step_times}{Logical, indicating if the step times
-should be recorded.  This should only be enabled for debugging.}
+\item{debug_record_step_times}{Logical, indicating if the step
+times should be recorded.  This should only be enabled for
+debugging.  Step times can be retrieved via
+\code{\link[=dust_system_internals]{dust_system_internals()}}.}
 }
 \value{
 A named list of class "dust_ode_control".  Do not modify

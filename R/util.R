@@ -20,6 +20,16 @@ vlapply <- function(...) {
 }
 
 
+viapply <- function(...) {
+  vapply(..., FUN.VALUE = 1L)
+}
+
+
+vnapply <- function(...) {
+  vapply(..., FUN.VALUE = 1)
+}
+
+
 vcapply <- function(...) {
   vapply(..., FUN.VALUE = "")
 }

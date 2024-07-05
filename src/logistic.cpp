@@ -92,6 +92,11 @@ public:
 SEXP dust2_system_logistic_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::list r_ode_control, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic) {
   return dust2::r::dust2_continuous_alloc<logistic>(r_pars, r_time, r_ode_control, r_n_particles, r_n_groups, r_seed, r_deterministic);
 }
+
+[[cpp11::register]]
+SEXP dust2_system_logistic_internals(cpp11::sexp ptr) {
+  return dust2::r::dust2_system_internals<dust2::dust_continuous<logistic>>(ptr);
+}
 [[cpp11::register]]
 SEXP dust2_system_logistic_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {
   return dust2::r::dust2_system_run_to_time<dust2::dust_continuous<logistic>>(ptr, r_time);

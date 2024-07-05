@@ -22,6 +22,7 @@ reference:
   - subtitle: Other
     contents:
       - dust_system_reorder
+      - dust_system_internals
       - dust_ode_control
   - title: Likelihood
     contents:

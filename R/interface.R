@@ -18,7 +18,8 @@ dust_system_generator <- function(name, time_type,
                     "rng_state", "set_rng_state",
                     "update_pars",
                     "run_to_time", "simulate",
-                    "reorder")
+                    "reorder",
+                    if (time_type == "continuous") "internals")
   methods_compare <- "compare_data"
   methods <- get_methods(c(methods_core, methods_compare), "system", name)
   ok <- !vapply(methods[methods_core], is.null, TRUE)
@@ -340,6 +341,44 @@ dust_system_reorder <- function(sys, index) {
   check_is_dust_system(sys)
   sys$methods$reorder(sys$ptr, index)
   invisible()
+}
+
+
+##' Return internal data from the system.  This is intended for
+##' debugging only, and all formats are subject to change.
+##'
+##' @title Fetch system internals
+##'
+##' @inheritParams dust_system_state
+##'
+##' @return If `sys` is a discrete-time system, this function returns
+##'   `NULL`, as no internal data is stored.  Otherwise, for a
+##'   continuous-time system we return a `data.frame` of statistics
+##'   with one row per particle.  Most of the columns are simple
+##'   integers or numeric values, but `dydt` (the current derivative
+##'   of the target function with respect to time) and `step_times`
+##'   (times that the solver has stopped at, if
+##'   `debug_record_step_times` is in [dust_ode_control] was set to
+##'   `TRUE`) will be list columns, each element of which is a numeric
+##'   vector.
+##'
+##' @export
+dust_system_internals <- function(sys) {
+  check_is_dust_system(sys)
+  if (sys$properties$time_type == "discrete") {
+    ## No internals for now, perhaps never?
+    return(NULL)
+  }
+  dat <- sys$methods$internals(sys$ptr)
+  data_frame(
+    particle = seq_along(dat),
+    dydt = I(lapply(dat, "[[", "dydt")),
+    step_times = I(lapply(dat, "[[", "step_times")),
+    step_size = vnapply(dat, "[[", "step_size"),
+    error = vnapply(dat, "[[", "error"),
+    n_steps = viapply(dat, "[[", "n_steps"),
+    n_steps_accepted = viapply(dat, "[[", "n_steps_accepted"),
+    n_steps_rejected = viapply(dat, "[[", "n_steps_rejected"))
 }
 
 

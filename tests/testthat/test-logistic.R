@@ -22,6 +22,34 @@ test_that("can run simple logistic system", {
 })
 
 
+test_that("can extract statistics from solver", {
+  pars <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
+  obj <- dust_system_create(logistic(), pars, n_particles = 1,
+                            deterministic = TRUE)
+
+  d <- dust_system_internals(obj)
+  expect_s3_class(d, "data.frame")
+  expect_equal(nrow(d), 1)
+  expect_equal(d$particle, 1)
+  expect_equal(d$dydt, I(list(c(0, 0, 0))))
+  expect_equal(d$step_times, I(list(numeric())))
+  expect_equal(d$step_size, 0)
+  expect_equal(d$error, 0)
+  expect_equal(d$n_steps, 0)
+  expect_equal(d$n_steps_accepted, 0)
+  expect_equal(d$n_steps_rejected, 0)
+
+  dust_system_set_state_initial(obj)
+  dust_system_run_to_time(obj, 10)
+
+  d <- dust_system_internals(obj)
+  expect_gt(d$n_steps, 0)
+  expect_gt(d$n_steps_accepted, 0)
+  ## Step times off by default:
+  expect_equal(d$step_times, I(list(numeric())))
+})
+
+
 test_that("can set system state from a vector", {
   pars <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
   obj <- dust_system_create(logistic(), pars, n_particles = 1,
@@ -280,4 +308,22 @@ test_that("can error if initial step size calculation fails", {
   y0 <- matrix(NA_real_, 3, 1)
   expect_error(dust_system_set_state(obj, y0),
                "Initial step size was not finite")
+})
+
+
+test_that("can save step times for debugging", {
+  pars <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
+  ctl <- dust_ode_control(debug_record_step_times = TRUE)
+  obj <- dust_system_create(logistic(), pars, n_particles = 1,
+                            deterministic = TRUE, ode_control = ctl)
+
+  dust_system_set_state_initial(obj)
+  dust_system_run_to_time(obj, 10)
+
+  d <- dust_system_internals(obj)
+  expect_type(d$step_times, "list")
+  expect_length(d$step_times[[1]], d$n_steps + 1)
+  expect_equal(d$step_times[[1]][[1]], 0)
+  expect_equal(d$step_times[[1]][[d$n_steps + 1]], 10)
+  expect_false(any(diff(d$step_times[[1]]) <= 0))
 })

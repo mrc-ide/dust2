@@ -27,6 +27,7 @@ T clamp(T x, T min, T max) {
 template <typename real_type>
 struct internals {
   std::vector<real_type> dydt;
+  std::vector<real_type> step_times;
   real_type step_size;
   real_type error;
   size_t n_steps;
@@ -43,6 +44,7 @@ struct internals {
     n_steps = 0;
     n_steps_accepted = 0;
     n_steps_rejected = 0;
+    step_times.resize(0);
   }
 };
 
@@ -148,6 +150,9 @@ public:
         success = true;
         accept(y, internals.dydt.data());
         internals.n_steps_accepted++;
+        if (control_.debug_record_step_times) {
+          internals.step_times.push_back(truncated ? t_end : t + h);
+        }
         if (!truncated) {
           const auto fac_old =
             std::max(internals.error, static_cast<real_type>(1e-4));
@@ -182,6 +187,9 @@ public:
   void initialise(const real_type t, const real_type* y,
                   ode::internals<real_type>& internals, Rhs rhs) {
     internals.reset();
+    if (control_.debug_record_step_times) {
+      internals.step_times.push_back(t);
+    }
     auto f0 = internals.dydt.data();
     auto f1 = k3_.data();
     auto y1 = y_next_.data();
