@@ -359,7 +359,7 @@ dust_system_reorder <- function(sys, index) {
 ##'   of the target function with respect to time) and `step_times`
 ##'   (times that the solver has stopped at, if
 ##'   `debug_record_step_times` is in [dust_ode_control] was set to
-##'   `TRUE`) will be list columns, each element of which is a numeric
+##'   `TRUE`) will be a list of columns, each element of which is a numeric
 ##'   vector.
 ##'
 ##' @export
