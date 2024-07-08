@@ -187,6 +187,11 @@ public:
     }
   }
 
+  // This is just used for debugging
+  const auto& ode_internals() const {
+    return ode_internals_;
+  }
+
 private:
   size_t n_state_;
   size_t n_particles_;

@@ -13,6 +13,13 @@ extern "C" SEXP _dust2_dust2_system_logistic_alloc(SEXP r_pars, SEXP r_time, SEX
   END_CPP11
 }
 // logistic.cpp
+SEXP dust2_system_logistic_internals(cpp11::sexp ptr);
+extern "C" SEXP _dust2_dust2_system_logistic_internals(SEXP ptr) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_system_logistic_internals(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr)));
+  END_CPP11
+}
+// logistic.cpp
 SEXP dust2_system_logistic_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time);
 extern "C" SEXP _dust2_dust2_system_logistic_run_to_time(SEXP ptr, SEXP r_time) {
   BEGIN_CPP11
@@ -365,6 +372,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_filter_sir_set_rng_state",          (DL_FUNC) &_dust2_dust2_filter_sir_set_rng_state,          2},
     {"_dust2_dust2_filter_sir_update_pars",            (DL_FUNC) &_dust2_dust2_filter_sir_update_pars,            3},
     {"_dust2_dust2_system_logistic_alloc",             (DL_FUNC) &_dust2_dust2_system_logistic_alloc,             7},
+    {"_dust2_dust2_system_logistic_internals",         (DL_FUNC) &_dust2_dust2_system_logistic_internals,         1},
     {"_dust2_dust2_system_logistic_reorder",           (DL_FUNC) &_dust2_dust2_system_logistic_reorder,           2},
     {"_dust2_dust2_system_logistic_rng_state",         (DL_FUNC) &_dust2_dust2_system_logistic_rng_state,         1},
     {"_dust2_dust2_system_logistic_run_to_time",       (DL_FUNC) &_dust2_dust2_system_logistic_run_to_time,       2},

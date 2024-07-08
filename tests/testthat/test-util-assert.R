@@ -20,6 +20,13 @@ test_that("assert_character", {
 })
 
 
+test_that("assert_logical", {
+  expect_silent(assert_logical(TRUE))
+  expect_error(assert_logical(1), "to be logical")
+  expect_error(assert_logical("TRUE"), "to be logical")
+})
+
+
 test_that("assert_nonmissing", {
   expect_silent(assert_nonmissing(TRUE))
   expect_error(assert_nonmissing(NA), "Expected 'NA' to be non-NA")

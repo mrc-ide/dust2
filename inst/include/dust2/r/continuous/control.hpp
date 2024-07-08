@@ -15,7 +15,8 @@ dust2::ode::control<real_type> validate_ode_control(cpp11::list ode_control) {
     std::max(static_cast<real_type>(dust2::r::read_real(ode_control, "step_size_min")),
              std::numeric_limits<real_type>::epsilon());
   const auto step_size_max = dust2::r::read_real(ode_control, "step_size_max");
-  const auto debug_record_step_times = false;
+  const auto debug_record_step_times =
+    dust2::r::read_bool(ode_control, "debug_record_step_times");
   return dust2::ode::control<real_type>(max_steps, atol, rtol, step_size_min,
                                         step_size_max, debug_record_step_times);
 }

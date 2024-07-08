@@ -27,12 +27,18 @@
 ##'   your rhs that the solver may skip over by accident, then specify
 ##'   a smaller maximum step size here.
 ##'
+##' @param debug_record_step_times Logical, indicating if the step
+##'   times should be recorded.  This should only be enabled for
+##'   debugging.  Step times can be retrieved via
+##'   [dust_system_internals()].
+##'
 ##' @export
 ##'
 ##' @return A named list of class "dust_ode_control".  Do not modify
 ##'   this after creation.
 dust_ode_control <- function(max_steps = 10000, atol = 1e-6, rtol = 1e-6,
-                             step_size_min = 0, step_size_max = Inf) {
+                             step_size_min = 0, step_size_max = Inf,
+                             debug_record_step_times = FALSE) {
   call <- environment()
   ctl <- list(
     max_steps = assert_scalar_size(
@@ -44,7 +50,9 @@ dust_ode_control <- function(max_steps = 10000, atol = 1e-6, rtol = 1e-6,
     step_size_min = assert_scalar_positive_numeric(
       step_size_min, allow_zero = TRUE, call = call),
     step_size_max = assert_scalar_positive_numeric(
-      step_size_max, allow_zero = TRUE, call = call))
+      step_size_max, allow_zero = TRUE, call = call),
+    debug_record_step_times = assert_scalar_logical(
+      debug_record_step_times, call = call))
   class(ctl) <- "dust_ode_control"
   ctl
 }
