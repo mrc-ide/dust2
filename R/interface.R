@@ -352,9 +352,8 @@ dust_system_reorder <- function(sys, index) {
 ##' @inheritParams dust_system_state
 ##'
 ##' @param include_coefficients Boolean, indicating if interpolation
-##'   coefficients should be included in the output.  There's quite a
-##'   lot of these, and they'll be opaque until we document how to use
-##'   them....
+##'   coefficients should be included in the output.  These are
+##'   intentionally undocumented for now.
 ##'
 ##' @return If `sys` is a discrete-time system, this function returns
 ##'   `NULL`, as no internal data is stored.  Otherwise, for a
