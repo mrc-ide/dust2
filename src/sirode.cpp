@@ -104,8 +104,8 @@ SEXP dust2_system_sirode_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::li
 }
 
 [[cpp11::register]]
-SEXP dust2_system_sirode_internals(cpp11::sexp ptr) {
-  return dust2::r::dust2_system_internals<dust2::dust_continuous<sirode>>(ptr);
+SEXP dust2_system_sirode_internals(cpp11::sexp ptr, bool include_coefficients) {
+  return dust2::r::dust2_system_internals<dust2::dust_continuous<sirode>>(ptr, include_coefficients);
 }
 [[cpp11::register]]
 SEXP dust2_system_sirode_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {
