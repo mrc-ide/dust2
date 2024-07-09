@@ -269,8 +269,6 @@ public:
 
 private:
   void accept(real_type* y, real_type h, ode::internals<real_type>& internals) {
-    std::copy_n(k2_.begin(), n_variables_, internals.dydt.begin());
-
     // We might want to only do this bit if we'll actually use the
     // history, but it's pretty cheap really.
     for (size_t i = 0; i < n_variables_; ++i) {
@@ -282,6 +280,7 @@ private:
       internals.c4[i] = -h * k2_[i] + ydiff - bspl;
     }
 
+    std::copy_n(k2_.begin(), n_variables_, internals.dydt.begin());
     std::copy_n(y_next_.begin(), n_variables_, y);
     internals.last_step_size = h;
   }
