@@ -303,12 +303,12 @@ private:
       return;
     }
     for (const auto& el : zero_every) {
-      const auto every = el.first;
+      const auto period = el.first;
       const auto t_last_step = t - internals.last_step_size;
-      const int n = std::floor(t / every);
-      const int m = std::floor(t_last_step / every);
+      const int n = std::floor(t / period);
+      const int m = std::floor(t_last_step / period);
       if (n > m) {
-        const auto t_reset = n * every;
+        const auto t_reset = n * period;
         if (t_reset == t) {
           for (const auto j : el.second) {
             y[j] = 0;
@@ -332,13 +332,13 @@ private:
       return;
     }
     for (const auto& el : zero_every) {
-      const auto every = el.first;
-      if (internals.last_step_size > every) {
+      const auto period = el.first;
+      if (internals.last_step_size > period) {
         const auto t_last_step = t - internals.last_step_size;
-        const int n = std::ceil(t / every);
-        const int m = std::ceil(t_last_step / every);
+        const int n = std::ceil(t / period);
+        const int m = std::ceil(t_last_step / period);
         if (n > m) {
-          const auto t_reset = (n - 1) * every;
+          const auto t_reset = (n - 1) * period;
           const auto theta = (t_reset - t_last_step) / internals.last_step_size;
           const auto theta1 = 1 - theta;
           for (const auto j : el.second) {
