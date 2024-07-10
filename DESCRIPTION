@@ -27,11 +27,14 @@ Suggests:
     cpp11,
     decor,
     glue,
+    knitr,
+    mockery,
     pkgbuild,
     pkgload,
-    mockery,
+    rmarkdown,
     testthat (>= 3.0.0),
     withr
+VignetteBuilder: knitr
 Config/testthat/edition: 3
 Config/Needs/compile: cpp11, decor, glue, pkgbuild, pkgload
 Remotes: mrc-ide/mcstate2

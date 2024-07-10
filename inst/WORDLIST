@@ -1,12 +1,17 @@
 CMD
+Dormand
 Makevars
+ODEs
 OpenMP
 R's
 codecov
 cpp
 etc
 io
+lfloor
 pkgload
+resettings
+rfloor
 rng
 roxygen
 th

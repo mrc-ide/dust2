@@ -43,3 +43,9 @@ reference:
     contents:
       - dust_compile
       - dust_package
+
+articles:
+  - title: Details
+    navbar: Details
+    contents:
+      - periodic
