@@ -20,7 +20,7 @@ This vignette is intended as documentation for the package authors and for very 
 
 # Discrete time systems
 
-We start with discrete time systems because they're much easier to think about, and consider the case of the SIR system in the package, which we'll write out by hand here (we could relax this if we tweaked `simulate` to allow returning fractional days, think).
+We start with discrete time systems because they're much easier to think about, and consider the case of the SIR system in the package, which we'll write out by hand here (we could relax this if we tweaked `simulate` to allow returning fractional days, I think).
 
 The relevant section of the `update()` method looks like this:
 
@@ -71,9 +71,9 @@ The middle pair of points run from day 19 to 24, crossing from the middle of wee
 
 In the fourth case, we jump over *two* reset values, but this is OK too, even though we never hold a correct value through week 2, we also never *use* that value in week 2.  We still need to reset before continuing as we've crossed at least one boundary.
 
-Having decided to reset, we then need to make the changes to the values.  In the case where we have landed exactly at a boundary (which is more common than you'd think; see above) this is very easy; we can just zero the value of out variables in question!
+Having decided to reset, we then need to make the changes to the values.  In the case where we have landed exactly at a boundary (which is more common than you'd think; see above) this is very easy; we can just zero the value of our variables in question!
 
-In the question where we are part-way through a interval this is more complex though.  This is the case for the second and fourth cases above.  We need to compute the value of the target function at the time of reset and subtract this off of the current value of the variables to be reset.  To do this we exploit the Dormand-Prince solver's "dense output", which allows us to interpolate any variable over the interval of the previous interval.  In the fourth case where we have jumped over two intervals, this calculation only happens for the final interval.
+In the case where we are part-way through an interval this is more complex though.  This is true for the second and fourth cases above.  We need to compute the value of the target function at the time of reset and subtract this off of the current value of the variables to be reset.  To do this we exploit the Dormand-Prince solver's "dense output", which allows us to interpolate any variable over the interval of the previous interval.  In the fourth case where we have jumped over two intervals, this calculation only happens for the final interval.
 
 There's one remaining wrinkle, which is what happens at the very end of the integration.  Consider the points above to be the final steps taken by the solver at the end of the integration (so at the beginning of the step our resetting variables were corrected as above).  In this case, for the *fourth* case we have a problem in that the step has passed into a new interval so we need to apply a reset.  Here our step has taken us from 13 through to 25 jumping over resets at 14 and 21.  We look up the value of the variables at 21 and subtract them from the final values held, so that we now have only values accumulated during week 3.
 
