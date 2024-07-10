@@ -90,6 +90,26 @@ test_that("validate data size on compare", {
 })
 
 
+test_that("periodic calculation adds up to cumulative cases", {
+  n_time <- 20
+  n_particles <- 100
+
+  pars <- list(beta = 1.0, gamma = 0.5, N = 1000, I0 = 10, exp_noise = 1e6)
+  obj <- dust_system_create(sir(), pars, n_particles = n_particles,
+                            seed = 42)
+  dust_system_set_state_initial(obj)
+  res <- dust_system_simulate(obj, 0:5)
+
+  ## Cumulative cases never decrease:
+  expect_true(all(diff(t(res[4, , ])) >= 0))
+
+  ## Incidence resets somtimes:
+  expect_true(any(diff(t(res[5, , ])) < 0))
+
+  expect_equal(apply(res[5, , ], 1, cumsum), t(res[4, , ]))
+})
+
+
 test_that("can reset cases daily", {
   n_time <- 20
   n_particles <- 100
@@ -105,6 +125,8 @@ test_that("can reset cases daily", {
 
   ## Incidence resets somtimes:
   expect_true(any(diff(t(res[5, , ])) < 0))
+
+  expect_equal(apply(res[5, , ], 1, cumsum), t(res[4, , ]))
 })
 
 

@@ -83,6 +83,10 @@ public:
   static void update_internal(const shared_state& shared,
                               internal_state& internal) {
   }
+
+  static auto zero_every(const shared_state& shared) {
+    return dust2::zero_every_type<real_type>();
+  }
 };
 
 #include <cpp11.hpp>
@@ -94,8 +98,8 @@ SEXP dust2_system_logistic_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::
 }
 
 [[cpp11::register]]
-SEXP dust2_system_logistic_internals(cpp11::sexp ptr) {
-  return dust2::r::dust2_system_internals<dust2::dust_continuous<logistic>>(ptr);
+SEXP dust2_system_logistic_internals(cpp11::sexp ptr, bool include_coefficients) {
+  return dust2::r::dust2_system_internals<dust2::dust_continuous<logistic>>(ptr, include_coefficients);
 }
 [[cpp11::register]]
 SEXP dust2_system_logistic_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {

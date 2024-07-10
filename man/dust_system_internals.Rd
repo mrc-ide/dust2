@@ -4,10 +4,14 @@
 \alias{dust_system_internals}
 \title{Fetch system internals}
 \usage{
-dust_system_internals(sys)
+dust_system_internals(sys, include_coefficients = FALSE)
 }
 \arguments{
 \item{sys}{A \code{dust_system} object}
+
+\item{include_coefficients}{Boolean, indicating if interpolation
+coefficients should be included in the output.  These are
+intentionally undocumented for now.}
 }
 \value{
 If \code{sys} is a discrete-time system, this function returns
@@ -18,8 +22,10 @@ integers or numeric values, but \code{dydt} (the current derivative
 of the target function with respect to time) and \code{step_times}
 (times that the solver has stopped at, if
 \code{debug_record_step_times} is in \link{dust_ode_control} was set to
-\code{TRUE}) will be a list of columns, each element of which is a numeric
-vector.
+\code{TRUE}) will be a list of columns, each element of which is a
+numeric vector.  If \code{include_coefficients} is \code{TRUE}, the
+\code{coefficients} column exists and holds a list of coefficients
+(the structure of these may change over time, too).
 }
 \description{
 Return internal data from the system.  This is intended for

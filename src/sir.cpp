@@ -70,7 +70,7 @@ public:
     state_next[1] = I + n_SI - n_IR;
     state_next[2] = R + n_IR;
     state_next[3] = cases_cumul + n_SI;
-    state_next[4] = dust2::tools::accumulate_periodic(time, static_cast<real_type>(1), cases_inc, n_SI);
+    state_next[4] = cases_inc + n_SI;
   }
 
   static shared_state build_shared(cpp11::list pars) {
@@ -83,7 +83,7 @@ public:
   }
 
   static internal_state build_internal(const shared_state& shared) {
-    return sir::internal_state{};
+    return internal_state{};
   }
 
   // This is the bit that we'll use to do fast parameter updating, and
@@ -98,6 +98,10 @@ public:
   // case
   static void update_internal(const shared_state& shared,
                               internal_state& internal) {
+  }
+
+  static auto zero_every(const shared_state& shared) {
+    return dust2::zero_every_type<real_type>{{1, {4}}}; // zero[1] = {4};
   }
 
   static data_type build_data(cpp11::list r_data) {

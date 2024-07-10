@@ -58,25 +58,38 @@ SEXP dust2_continuous_alloc(cpp11::list r_pars,
 }
 
 template <typename real_type>
-cpp11::sexp ode_internals_to_sexp(const ode::internals<real_type>& internals) {
+cpp11::sexp ode_internals_to_sexp(const ode::internals<real_type>& internals,
+                                  bool include_coefficients) {
   using namespace cpp11::literals;
-  return cpp11::writable::list{
+  auto ret = cpp11::writable::list{
     "dydt"_nm = cpp11::as_sexp(internals.dydt),
-      "step_times"_nm = cpp11::as_sexp(internals.step_times),
-      "step_size"_nm = cpp11::as_sexp(internals.step_size),
-      "error"_nm = cpp11::as_sexp(internals.error),
-      "n_steps"_nm = cpp11::as_sexp(internals.n_steps),
-      "n_steps_accepted"_nm = cpp11::as_sexp(internals.n_steps_accepted),
-      "n_steps_rejected"_nm = cpp11::as_sexp(internals.n_steps_rejected)};
+    "step_times"_nm = cpp11::as_sexp(internals.step_times),
+    "step_size"_nm = cpp11::as_sexp(internals.step_size),
+    "error"_nm = cpp11::as_sexp(internals.error),
+    "n_steps"_nm = cpp11::as_sexp(internals.n_steps),
+    "n_steps_accepted"_nm = cpp11::as_sexp(internals.n_steps_accepted),
+    "n_steps_rejected"_nm = cpp11::as_sexp(internals.n_steps_rejected),
+    "coefficients"_nm = R_NilValue};
+  if (include_coefficients) {
+    auto r_coef = cpp11::writable::doubles_matrix<>(internals.c1.size(), 5);
+    auto coef = REAL(r_coef);
+    coef = std::copy(internals.c1.begin(), internals.c1.end(), coef);
+    coef = std::copy(internals.c2.begin(), internals.c2.end(), coef);
+    coef = std::copy(internals.c3.begin(), internals.c3.end(), coef);
+    coef = std::copy(internals.c4.begin(), internals.c4.end(), coef);
+    coef = std::copy(internals.c5.begin(), internals.c5.end(), coef);
+    ret["coefficients"] = r_coef;
+  }
+  return ret;
 }
 
 template <typename T>
-SEXP dust2_system_internals(cpp11::sexp ptr) {
+SEXP dust2_system_internals(cpp11::sexp ptr, bool include_coefficients) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
   const auto& internals = obj->ode_internals();
   cpp11::writable::list ret(internals.size());
   for (size_t i = 0; i < internals.size(); ++i) {
-    ret[i] = ode_internals_to_sexp(internals[i]);
+    ret[i] = ode_internals_to_sexp(internals[i], include_coefficients);
   }
   return cpp11::as_sexp(ret);
 }

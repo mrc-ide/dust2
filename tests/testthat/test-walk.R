@@ -537,3 +537,11 @@ test_that("reject ode_control as an argument when creating walk model", {
                        n_particles = 1),
     "Can't use 'ode_control' with discrete-time systems")
 })
+
+
+test_that("discrete time models have no internals", {
+  pars <- list(sd = 1, random_initial = TRUE)
+  obj <- dust_system_create(walk(), pars, n_particles = 10, seed = 42)
+  expect_null(dust_system_run_to_time(obj, 3))
+  expect_null(dust_system_internals(obj))
+})

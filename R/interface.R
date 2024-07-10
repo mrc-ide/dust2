@@ -351,6 +351,10 @@ dust_system_reorder <- function(sys, index) {
 ##'
 ##' @inheritParams dust_system_state
 ##'
+##' @param include_coefficients Boolean, indicating if interpolation
+##'   coefficients should be included in the output.  These are
+##'   intentionally undocumented for now.
+##'
 ##' @return If `sys` is a discrete-time system, this function returns
 ##'   `NULL`, as no internal data is stored.  Otherwise, for a
 ##'   continuous-time system we return a `data.frame` of statistics
@@ -359,18 +363,20 @@ dust_system_reorder <- function(sys, index) {
 ##'   of the target function with respect to time) and `step_times`
 ##'   (times that the solver has stopped at, if
 ##'   `debug_record_step_times` is in [dust_ode_control] was set to
-##'   `TRUE`) will be a list of columns, each element of which is a numeric
-##'   vector.
+##'   `TRUE`) will be a list of columns, each element of which is a
+##'   numeric vector.  If `include_coefficients` is `TRUE`, the
+##'   `coefficients` column exists and holds a list of coefficients
+##'   (the structure of these may change over time, too).
 ##'
 ##' @export
-dust_system_internals <- function(sys) {
+dust_system_internals <- function(sys, include_coefficients = FALSE) {
   check_is_dust_system(sys)
   if (sys$properties$time_type == "discrete") {
     ## No internals for now, perhaps never?
     return(NULL)
   }
-  dat <- sys$methods$internals(sys$ptr)
-  data_frame(
+  dat <- sys$methods$internals(sys$ptr, include_coefficients)
+  ret <- data_frame(
     particle = seq_along(dat),
     dydt = I(lapply(dat, "[[", "dydt")),
     step_times = I(lapply(dat, "[[", "step_times")),
@@ -379,6 +385,10 @@ dust_system_internals <- function(sys) {
     n_steps = viapply(dat, "[[", "n_steps"),
     n_steps_accepted = viapply(dat, "[[", "n_steps_accepted"),
     n_steps_rejected = viapply(dat, "[[", "n_steps_rejected"))
+  if (include_coefficients) {
+    ret$coefficients <- I(lapply(dat, "[[", "coefficients"))
+  }
+  ret
 }
 
 

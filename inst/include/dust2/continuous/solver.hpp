@@ -4,6 +4,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <vector>
+#include <dust2/zero.hpp>
 #include <dust2/continuous/control.hpp>
 
 namespace dust2 {
@@ -28,17 +29,32 @@ template <typename real_type>
 struct internals {
   std::vector<real_type> dydt;
   std::vector<real_type> step_times;
+  // Interpolation coefficients
+  std::vector<real_type> c1;
+  std::vector<real_type> c2;
+  std::vector<real_type> c3;
+  std::vector<real_type> c4;
+  std::vector<real_type> c5;
+  real_type last_step_size;
   real_type step_size;
   real_type error;
   size_t n_steps;
   size_t n_steps_accepted;
   size_t n_steps_rejected;
 
-  internals(size_t n_variables) : dydt(n_variables) {
+  internals(size_t n_variables) :
+    dydt(n_variables),
+    c1(n_variables),
+    c2(n_variables),
+    c3(n_variables),
+    c4(n_variables),
+    c5(n_variables),
+    last_step_size(0) {
     reset();
   }
 
   void reset() {
+    last_step_size = 0;
     step_size = 0;
     error = 0;
     n_steps = 0;
@@ -67,7 +83,7 @@ public:
 
   template <typename Rhs>
   real_type try_step(const real_type t, const real_type h, const real_type* y,
-                     const real_type* dydt, Rhs rhs) {
+                     const real_type* dydt, real_type* c5, Rhs rhs) {
     const real_type* k1 = dydt;
     const auto t_next = t + h;
     for (size_t i = 0; i < n_variables_; ++i) { // 22
@@ -98,6 +114,11 @@ public:
                               A75 * k5_[i] + A76 * k6_[i]);
     }
     rhs(t_next, y_next_.data(), k2_.data());
+
+    for (size_t i = 0; i < n_variables_; ++i) {
+      c5[i] = h * (D1 * k1[i]  + D3 * k3_[i] + D4 * k4_[i] +
+                   D5 * k5_[i] + D6 * k6_[i] + D7 * k2_[i]);
+    }
 
     for (size_t i = 0; i < n_variables_; ++i) {
       k4_[i] = h * (E1 * k1[i]  + E3 * k3_[i] + E4 * k4_[i] +
@@ -142,13 +163,14 @@ public:
         h = t_end - t;
       }
 
-      const auto err = try_step(t, h, y, internals.dydt.data(), rhs);
+      const auto err = try_step(t, h, y, internals.dydt.data(),
+                                internals.c5.data(), rhs);
       internals.n_steps++;
       const auto fac11 = std::pow(err, control_.constant);
 
       if (err <= 1) {
         success = true;
-        accept(y, internals.dydt.data());
+        accept(y, h, internals);
         internals.n_steps_accepted++;
         if (control_.debug_record_step_times) {
           internals.step_times.push_back(truncated ? t_end : t + h);
@@ -177,10 +199,13 @@ public:
 
   template <typename Rhs>
   void run(real_type t, real_type t_end, real_type* y,
+           zero_every_type<real_type>& zero_every,
            ode::internals<real_type>& internals, Rhs rhs) {
     while (t < t_end) {
+      apply_zero_every(t, y, zero_every, internals);
       t = step(t, t_end, y, internals, rhs);
     }
+    apply_zero_every_final(t, y, zero_every, internals);
   }
 
   template <typename Rhs>
@@ -243,9 +268,85 @@ public:
   }
 
 private:
-  void accept(real_type* y, real_type* dydt) {
-    std::copy_n(k2_.begin(), n_variables_, dydt);
+  void accept(real_type* y, real_type h, ode::internals<real_type>& internals) {
+    // We might want to only do this bit if we'll actually use the
+    // history, but it's pretty cheap really.
+    for (size_t i = 0; i < n_variables_; ++i) {
+      const auto ydiff = y_next_[i] - y[i];
+      const auto bspl = h * internals.dydt[i] - ydiff;
+      internals.c1[i] = y[i];
+      internals.c2[i] = ydiff;
+      internals.c3[i] = bspl;
+      internals.c4[i] = -h * k2_[i] + ydiff - bspl;
+    }
+
+    std::copy_n(k2_.begin(), n_variables_, internals.dydt.begin());
     std::copy_n(y_next_.begin(), n_variables_, y);
+    internals.last_step_size = h;
+  }
+
+  real_type interpolate(size_t idx,
+                        const real_type theta,
+                        const real_type theta1,
+                        const ode::internals<real_type>& internals) {
+    return internals.c1[idx] + theta *
+      (internals.c2[idx] + theta1 *
+       (internals.c3[idx] + theta *
+        (internals.c4[idx] + theta1 *
+         internals.c5[idx])));
+  }
+
+  void apply_zero_every(real_type t, real_type* y,
+                        const zero_every_type<real_type>& zero_every,
+                        const ode::internals<real_type>& internals) {
+    if (zero_every.empty() || internals.last_step_size == 0) {
+      return;
+    }
+    for (const auto& el : zero_every) {
+      const auto period = el.first;
+      const auto t_last_step = t - internals.last_step_size;
+      const int n = std::floor(t / period);
+      const int m = std::floor(t_last_step / period);
+      if (n > m) {
+        const auto t_reset = n * period;
+        if (t_reset == t) {
+          for (const auto j : el.second) {
+            y[j] = 0;
+          }
+        } else {
+          const auto theta = (t_reset - t_last_step) / internals.last_step_size;
+          const auto theta1 = 1 - theta;
+          for (const auto j : el.second) {
+            y[j] -= interpolate(j, theta, theta1, internals);
+          }
+        }
+      }
+    }
+  }
+
+  // action at the final step is slightly different:
+  void apply_zero_every_final(real_type t, real_type* y,
+                              const zero_every_type<real_type>& zero_every,
+                              const ode::internals<real_type>& internals) {
+    if (zero_every.empty() || internals.last_step_size == 0) {
+      return;
+    }
+    for (const auto& el : zero_every) {
+      const auto period = el.first;
+      if (internals.last_step_size > period) {
+        const auto t_last_step = t - internals.last_step_size;
+        const int n = std::ceil(t / period);
+        const int m = std::ceil(t_last_step / period);
+        if (n > m) {
+          const auto t_reset = (n - 1) * period;
+          const auto theta = (t_reset - t_last_step) / internals.last_step_size;
+          const auto theta1 = 1 - theta;
+          for (const auto j : el.second) {
+            y[j] -= interpolate(j, theta, theta1, internals);
+          }
+        }
+      }
+    }
   }
 
   size_t n_variables_;

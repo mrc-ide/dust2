@@ -5,6 +5,9 @@ logistic <- function() {
 sir <- function() {
   dust_system_generator("sir", "discrete")
 }
+sirode <- function() {
+  dust_system_generator("sirode", "continuous")
+}
 walk <- function() {
   dust_system_generator("walk", "discrete")
 }
