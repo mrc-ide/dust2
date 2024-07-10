@@ -1,6 +1,8 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://mrc-ide.github.io/dust2/404.html</loc></url>
 <url><loc>https://mrc-ide.github.io/dust2/LICENSE-text.html</loc></url>
+<url><loc>https://mrc-ide.github.io/dust2/articles/index.html</loc></url>
+<url><loc>https://mrc-ide.github.io/dust2/articles/periodic.html</loc></url>
 <url><loc>https://mrc-ide.github.io/dust2/authors.html</loc></url>
 <url><loc>https://mrc-ide.github.io/dust2/index.html</loc></url>
 <url><loc>https://mrc-ide.github.io/dust2/reference/dust_compile.html</loc></url>
