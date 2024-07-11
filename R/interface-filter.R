@@ -47,17 +47,16 @@ dust_filter_create <- function(generator, time_start, time, data,
   check_data(data, length(time), n_groups, call = call)
   check_index(index, call = call)
 
-  create <- function(filter, pars) {
-    list2env(
-      generator$methods$filter$alloc(pars, time_start, time, dt, data,
-                                     n_particles, n_groups, index,
-                                     filter$initial_rng_state),
-      filter)
-    filter$create <- NULL
-    filter$initial_rng_state <- NULL
-  }
+  inputs <- list(time_start = time_start,
+                 time = time,
+                 dt = dt,
+                 data = data,
+                 n_particles = n_particles,
+                 n_groups = n_groups,
+                 index = index)
+
   res <- list2env(
-    list(create = create,
+    list(inputs = inputs,
          initial_rng_state = filter_rng_state(n_particles, n_groups, seed),
          n_particles = as.integer(n_particles),
          n_groups = as.integer(max(n_groups), 1),
@@ -67,6 +66,50 @@ dust_filter_create <- function(generator, time_start, time, data,
     parent = emptyenv())
   class(res) <- "dust_filter"
   res
+}
+
+
+##' Create an independent copy of a filter.  The new filter is
+##' decoupled from the random number streams of the parent filter.  It
+##' is also decoupled from the *state size* of the parent filter, so
+##' you can use this to create a new filter where the system is
+##' fundamentally different but everything else is the same.
+##'
+##' @title Create copy of filter
+##'
+##' @inheritParams dust_filter_run
+##'
+##' @param seed The seed for the filter (see [dust_filter_create])
+##'
+##' @return A new `dust_filter` object
+dust_filter_copy <- function(filter, seed = NULL) {
+  dst <- new.env(parent = emptyenv())
+  nms <- c("inputs", "n_particles", "n_groups", "deterministic", "methods",
+           "index")
+  for (nm in nms) {
+    dst[[nm]] <- filter[[nm]]
+  }
+  dst$initial_rng_state <-
+    filter_rng_state(filter$n_particles, filter$n_groups, seed)
+  class(dst) <- "dust_filter"
+  dst
+}
+
+
+filter_create <- function(filter, pars) {
+  inputs <- filter$inputs
+  list2env(
+    filter$methods$alloc(pars,
+                         inputs$time_start,
+                         inputs$time,
+                         inputs$dt,
+                         inputs$data,
+                         inputs$n_particles,
+                         inputs$n_groups,
+                         inputs$index,
+                         filter$initial_rng_state),
+    filter)
+  filter$initial_rng_state <- NULL
 }
 
 
@@ -103,7 +146,7 @@ dust_filter_run <- function(filter, pars, initial = NULL,
       cli::cli_abort("'pars' cannot be NULL, as filter is not initialised",
                      arg = "pars")
     }
-    filter$create(filter, pars)
+    filter_create(filter, pars)
   } else if (!is.null(pars)) {
     filter$methods$update_pars(filter$ptr, pars, filter$grouped)
   }
