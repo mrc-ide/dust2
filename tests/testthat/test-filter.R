@@ -256,3 +256,36 @@ test_that("can set rng state into the filter after running", {
   expect_identical(dust_filter_rng_state(obj2), s1)
   expect_identical(dust_filter_run(obj1, pars), dust_filter_run(obj2, pars))
 })
+
+
+test_that("can create a new filter via copying", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+
+  time_start <- 0
+  time <- c(4, 8, 12, 16)
+  data <- lapply(1:4, function(i) list(incidence = i))
+  dt <- 1
+  n_particles <- 100
+  seed <- 42
+
+  obj1 <- dust_filter_create(sir(), time_start, time, data,
+                             n_particles = n_particles, seed = seed)
+  obj2 <- dust_filter_copy(obj1)
+  obj3 <- dust_filter_copy(obj1, seed = seed)
+
+  expect_setequal(names(obj1), names(obj2))
+  nms <- setdiff(names(obj1), "initial_rng_state")
+  expect_equal(as.list.environment(obj1)[nms],
+               as.list.environment(obj2)[nms])
+  expect_false(identical(obj1$initial_rng_state, obj2$initial_rng_state))
+
+  expect_equal(obj1, obj3)
+  expect_true(identical(obj1$initial_rng_state, obj3$initial_rng_state))
+
+  ll1 <- dust_filter_run(obj1, pars)
+  ll2 <- dust_filter_run(obj2, pars)
+  ll3 <- dust_filter_run(obj3, pars)
+
+  expect_false(identical(ll1, ll2))
+  expect_identical(ll1, ll3)
+})

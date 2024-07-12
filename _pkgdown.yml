@@ -38,7 +38,8 @@ reference:
       - dust_filter_run
       - dust_filter_last_history
       - dust_filter_rng_state
-      - dust_filter_set_rng_state      
+      - dust_filter_set_rng_state
+      - dust_filter_copy
   - title: Creation
     contents:
       - dust_compile

@@ -28,15 +28,16 @@ dust_unfilter_create <- function(generator, time_start, time, data,
   check_data(data, length(time), n_groups, call = call)
   check_index(index, call = call)
 
-  create <- function(unfilter, pars) {
-    list2env(
-      generator$methods$unfilter$alloc(pars, time_start, time, dt, data,
-                                       n_particles, n_groups, index),
-      unfilter)
-    unfilter$create <- NULL
-  }
+  inputs <- list(time_start = time_start,
+                 time = time,
+                 dt = dt,
+                 data = data,
+                 n_particles = n_particles,
+                 n_groups = n_groups,
+                 index = index)
+
   res <- list2env(
-    list(create = create,
+    list(inputs = inputs,
          n_particles = as.integer(n_particles),
          n_groups = as.integer(max(n_groups), 1),
          deterministic = TRUE,
@@ -45,6 +46,21 @@ dust_unfilter_create <- function(generator, time_start, time, data,
     parent = emptyenv())
   class(res) <- "dust_unfilter"
   res
+}
+
+
+unfilter_create <- function(unfilter, pars) {
+  inputs <- unfilter$inputs
+  list2env(
+    unfilter$methods$alloc(pars,
+                           inputs$time_start,
+                           inputs$time,
+                           inputs$dt,
+                           inputs$data,
+                           inputs$n_particles,
+                           inputs$n_groups,
+                           inputs$index),
+    unfilter)
 }
 
 
@@ -71,7 +87,7 @@ dust_unfilter_run <- function(unfilter, pars, initial = NULL,
       cli::cli_abort("'pars' cannot be NULL, as unfilter is not initialised",
                      arg = "pars")
     }
-    unfilter$create(unfilter, pars)
+    unfilter_create(unfilter, pars)
   } else if (!is.null(pars)) {
     unfilter$methods$update_pars(unfilter$ptr, pars, unfilter$grouped)
   }
