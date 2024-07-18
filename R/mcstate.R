@@ -47,19 +47,36 @@
 ##'   from unpacked parameters.
 ##'
 ##' @param domain Optionally, domain information to pass into the
-##'   model.  The format here is similar to that required by
-##'   [mcstate_model], with a two-colummn matrix named with your
-##'   parameter names.  At present you must use the parameter names
-##'   implied by your `packer`.
+##'   model.  If given, this is a two column matrix with row names
+##'   corresponding to the parameter names in `packer`, the first
+##'   column representing the lower bound and the second column
+##'   representing the upper bound.  You do not need to specify
+##'   parameters that have a domain of `(-Inf, Inf)` as this is
+##'   assumed.  We use [mcstate2::mcstate_domain_expand] to expand
+##'   logical parameters, so if you have a vector-valued parameter `b`
+##'   and a domain entry called `b` we will expand this to all
+##'   elements of `b`.
 ##'
-##' @return A [mcstate::mcstate_model] object
+##' @param failure_is_impossible Logical, indicating if an error while
+##'   computing the likelihood should be treated as a log-density of
+##'   `-Inf` (i.e., that this point is impossible).  This is a big
+##'   hammer to use, and you would be better off using the domain
+##'   (with reflecting boundiaries) or the priors to control this if
+##'   possible.  However, sometimes you can have integration failures
+##'   with very high parameter values, or just other pathalogical
+##'   parameter sets where, once you understand the model, giving up
+##'   on that parameter set and continuing is the best option.
+##'
+##' @return A [mcstate2::mcstate_model] object
 ##'
 ##' @export
 dust_filter_mcstate <- function(filter, packer, initial = NULL,
-                                domain = NULL) {
+                                domain = NULL, failure_is_impossible = FALSE) {
   call <- environment()
   check_is_dust_filter(filter, call = call)
   assert_is(packer, "mcstate_packer", call = call)
+
+  domain <- mcstates::mcstate_domain_expand(domain, packer)
 
   ## We configure saving trajectories on creation I think, which then
   ## affects density.  Start without trajectories?  Realistically
@@ -80,6 +97,10 @@ dust_filter_mcstate <- function(filter, packer, initial = NULL,
     dust_filter_run(filter,
                     pars,
                     initial = if (is.null(initial)) NULL else initial(pars))
+  }
+
+  if (failure_is_impossible) {
+    density <- protect(density, -Inf)
   }
 
   if (properties$is_stochastic) {

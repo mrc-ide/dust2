@@ -103,3 +103,12 @@ writelines_if_changed <- function(text, workdir, path, quiet) {
 same_content <- function(path, text) {
   identical(read_lines(path), paste(as.character(text), collapse = "\n"))
 }
+
+
+protect <- function(fn, on_error) {
+  force(fn)
+  force(on_error)
+  function(...) {
+    tryCatch(..., error = function(e) on_error)
+  }
+}
