@@ -37,7 +37,7 @@
 ##'
 ##' @title Create mcstate model
 ##'
-##' @param filter A `dust_filter` object, created from [dust_filter]
+##' @param filter A `dust_filter` object, created from [dust_filter_create]
 ##'
 ##' @param packer A parameter packer, which will convert between an
 ##'   unstructured vector of parameters as used in an MCMC into the

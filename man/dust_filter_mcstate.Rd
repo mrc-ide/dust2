@@ -13,7 +13,7 @@ dust_filter_mcstate(
 )
 }
 \arguments{
-\item{filter}{A \code{dust_filter} object, created from \link{dust_filter}}
+\item{filter}{A \code{dust_filter} object, created from \link{dust_filter_create}}
 
 \item{packer}{A parameter packer, which will convert between an
 unstructured vector of parameters as used in an MCMC into the
