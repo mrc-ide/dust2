@@ -1,3 +1,28 @@
+##' Create a system generator.  This function is not intended to be
+##' used by users directly, but will be called from packages built
+##' using [dust_package]
+##'
+##' @title Create a system generator
+##'
+##' @param name The name of the generator
+##'
+##' @param time_type The time type (discrete or continuous).  Using
+##'   the wrong time here will lead to crashes or failure to create
+##'   the generator.
+##'
+##' @param env The environment where the generator is defined.
+##'
+##' @return A `dust_system_generator` object
+##'
+##' @export
+##' @keywords internal
+##' @examples
+##' # This creates the "sir" generator
+##' dust_system_generator("sir", "discrete", asNamespace("dust2"))
+##'
+##' # This is the same code as in "dust2:::sir", except there we find
+##' # the correct environment automatically
+##' dust2:::sir
 dust_system_generator <- function(name, time_type,
                                   env = parent.env(parent.frame())) {
   ## I don't love that this requires running through sprintf() each
