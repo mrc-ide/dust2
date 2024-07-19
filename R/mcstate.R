@@ -1,4 +1,4 @@
-##' Create a [mcstate_model] from a [dust_filter] object.
+##' Create a [mcstate_model] from a `dust_filter` object.
 ##'
 ##' # Random number streams
 ##'
@@ -76,7 +76,7 @@ dust_filter_mcstate <- function(filter, packer, initial = NULL,
   check_is_dust_filter(filter, call = call)
   assert_is(packer, "mcstate_packer", call = call)
 
-  domain <- mcstates::mcstate_domain_expand(domain, packer)
+  domain <- mcstate2::mcstate_domain_expand(domain, packer)
 
   ## We configure saving trajectories on creation I think, which then
   ## affects density.  Start without trajectories?  Realistically

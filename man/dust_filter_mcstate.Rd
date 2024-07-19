@@ -47,7 +47,7 @@ on that parameter set and continuing is the best option.}
 A \link[mcstate2:mcstate_model]{mcstate2::mcstate_model} object
 }
 \description{
-Create a \link{mcstate_model} from a \link{dust_filter} object.
+Create a \link{mcstate_model} from a \code{dust_filter} object.
 }
 \section{Random number streams}{
 The short version: the seed argument that you may have passed to
