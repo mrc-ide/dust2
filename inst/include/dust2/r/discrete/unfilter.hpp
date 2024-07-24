@@ -35,7 +35,7 @@ cpp11::sexp dust2_discrete_unfilter_alloc(cpp11::list r_pars,
   // deterministic here?  Though nooone can think of a case where
   // that's actually the behaviour wanted.  For now let's go fully
   // deterministic.
-  auto seed = mcstate::random::r::as_rng_seed<rng_state_type>(R_NilValue);
+  auto seed = mcstate::random::seed_data<rng_state_type>(42);
   const auto deterministic = true;
 
   // Then allocate the system; this pulls together almost all the data

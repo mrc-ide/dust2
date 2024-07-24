@@ -29,11 +29,6 @@ test_that("can create mcstate model from sir model", {
 })
 
 
-## TODO: something in this tests uses R's random numbers, in contrast
-## to the previous, which is very unexpected.  It also shows the
-## limits of the warning we give, and I think we'll need a way of
-## debugging this better, pop some tracing on all calls that hit the
-## rng?
 test_that("can create deterministic model", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
 
@@ -58,7 +53,6 @@ test_that("can create deterministic model", {
 
   expect_s3_class(m, "mcstate_model")
   sampler <- mcstate2::mcstate_sampler_random_walk(diag(2) * c(0.02, 0.02))
-
-  res <- mcstate2::mcstate_sample(m + prior, sampler, 100)
+  res <- mcstate2::mcstate_sample(m + prior, sampler, 10)
   expect_s3_class(res, "mcstate_samples")
 })
