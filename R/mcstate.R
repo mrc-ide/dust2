@@ -73,7 +73,7 @@
 dust_filter_mcstate <- function(filter, packer, initial = NULL,
                                 domain = NULL, failure_is_impossible = FALSE) {
   call <- environment()
-  check_is_dust_filter(filter, call = call)
+  assert_is(filter, c("dust_filter", "dust_unfilter"), call = call)
   assert_is(packer, "mcstate_packer", call = call)
 
   domain <- mcstate2::mcstate_domain_expand(domain, packer)
@@ -92,11 +92,15 @@ dust_filter_mcstate <- function(filter, packer, initial = NULL,
     has_gradient = FALSE,
     has_parameter_groups = FALSE)
 
+  ## I think this really suggests that our filter and unfilter might
+  ## be best to share a common interface (mrc-5503)
+  dust_run <- if (filter$deterministic) dust_unfilter_run else dust_filter_run
+
   density <- function(x) {
     pars <- packer$unpack(x)
-    dust_filter_run(filter,
-                    pars,
-                    initial = if (is.null(initial)) NULL else initial(pars))
+    dust_run(filter,
+             pars,
+             initial = if (is.null(initial)) NULL else initial(pars))
   }
 
   if (failure_is_impossible) {
