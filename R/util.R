@@ -109,6 +109,6 @@ protect <- function(fn, on_error) {
   force(fn)
   force(on_error)
   function(...) {
-    tryCatch(..., error = function(e) on_error)
+    tryCatch(fn(...), error = function(e) on_error)
   }
 }
