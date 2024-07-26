@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 #include <dust2/zero.hpp>
+#include <dust2/errors.hpp>
 #include <mcstate/random/random.hpp>
 
 namespace dust2 {
@@ -37,6 +38,7 @@ public:
     time_(time),
     dt_(dt),
     zero_every_(zero_every_vec<T>(shared_)),
+    errors_(n_particles_total_),
     rng_(n_particles_total_, seed, deterministic) {
     // We don't check that the size is the same across all states;
     // this should be done by the caller (similarly, we don't check
@@ -57,14 +59,19 @@ public:
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
-        run_particle(time_, dt_, n_steps,
-                     shared_[i], internal_[i],
-                     zero_every_[i],
-                     state_data + offset,
-                     rng_.state(k),
-                     state_next_data + offset);
+        try {
+          run_particle(time_, dt_, n_steps,
+                       shared_[i], internal_[i],
+                       zero_every_[i],
+                       state_data + offset,
+                       rng_.state(k),
+                       state_next_data + offset);
+        } catch (std::exception const& e) {
+          errors_.capture(e, k);
+        }
       }
     }
+    errors_.report();
     if (n_steps % 2 == 1) {
       std::swap(state_, state_next_);
     }
@@ -72,21 +79,28 @@ public:
   }
 
   void set_state_initial() {
+    errors_.reset();
     real_type * state_data = state_.data();
     for (size_t i = 0; i < n_groups_; ++i) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
-        T::initial(time_, dt_,
-                   shared_[i], internal_[i],
-                   rng_.state(k),
-                   state_data + offset);
+        try {
+          T::initial(time_, dt_,
+                     shared_[i], internal_[i],
+                     rng_.state(k),
+                     state_data + offset);
+        } catch (std::exception const& e) {
+          errors_.capture(e, k);
+        }
       }
     }
+    errors_.report();
   }
 
   template <typename Iter>
   void set_state(Iter iter, bool recycle_particle, bool recycle_group) {
+    errors_.reset();
     const auto offset_read_group = recycle_group ? 0 :
       (n_state_ * (recycle_particle ? 1 : n_particles_));
     const auto offset_read_particle = recycle_particle ? 0 : n_state_;
@@ -171,10 +185,19 @@ public:
       for (size_t j = 0; j < n_particles_; ++j, ++output) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
-        *output = T::compare_data(time_, dt_, state_data + offset, *data,
-                                  shared_[i], internal_[i], rng_.state(k));
+        try {
+          *output = T::compare_data(time_, dt_, state_data + offset, *data,
+                                    shared_[i], internal_[i], rng_.state(k));
+        } catch (std::exception const& e) {
+          errors_.capture(e, k);
+        }
       }
     }
+    errors_.report();
+  }
+
+  bool errors_pending() const {
+    return errors_.unresolved();
   }
 
 private:
@@ -189,6 +212,7 @@ private:
   real_type time_;
   real_type dt_;
   std::vector<zero_every_type<real_type>> zero_every_;
+  dust2::utils::errors errors_;
   mcstate::random::prng<rng_state_type> rng_;
 
   static void run_particle(real_type time, real_type dt, size_t n_steps,

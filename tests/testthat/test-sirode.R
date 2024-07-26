@@ -59,3 +59,41 @@ test_that("can extract interpolation coefficients from internals", {
   expect_true("coefficients" %in% names(d2))
   expect_equal(dim(d2$coefficients[[1]]), c(5, 5))
 })
+
+
+test_that("throw nice error on run failure, then prevent access", {
+  pars <- list(beta = 0.2, gamma = 0.1, N = 1000, I0 = 10, exp_noise = 1e6)
+  obj <- dust_system_create(sirode(), pars, n_particles = 10,
+                            ode_control = dust_ode_control(max_steps = 5),
+                            deterministic = TRUE)
+  dust_system_set_state_initial(obj)
+
+  err <- expect_error(
+    dust_system_run_to_time(obj, 30),
+    "10 particles reported errors")
+  expect_match(conditionMessage(err), "1: too many steps")
+  expect_match(conditionMessage(err), "- (and 6 more)", fixed = TRUE)
+
+  expect_error(
+    dust_system_run_to_time(obj, 30),
+    "Can't currently run this system: errors are pending")
+  expect_error(
+    dust_system_time(obj),
+    "Can't currently get time from this system: errors are pending")
+  expect_error(
+    dust_system_state(obj),
+    "Can't currently get state from this system: errors are pending")
+  expect_error(
+    dust_system_reorder(obj, 1:10),
+    "Can't currently reorder this system: errors are pending")
+  expect_error(
+    dust_system_set_time(obj, 0),
+    "Can't currently set time for this system: errors are pending")
+  expect_error(
+    dust_system_simulate(obj, 0:10),
+    "Can't currently simulate this system: errors are pending")
+
+  dust_system_update_pars(obj, list(gamma = 0.2))
+  dust_system_set_state_initial(obj)
+  expect_equal(dust_system_time(obj), 0)
+})

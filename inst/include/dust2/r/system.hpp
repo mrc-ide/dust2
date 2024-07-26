@@ -7,8 +7,18 @@ namespace dust2 {
 namespace r {
 
 template <typename T>
+void check_errors(T* obj, const char *action) {
+  // It would be nice to throw a classed error here, but this is not
+  // easy; see https://github.com/r-lib/cpp11/issues/250
+  if (obj->errors_pending()) {
+    cpp11::stop("Can't currently %s this system: errors are pending", action);
+  }
+}
+
+template <typename T>
 SEXP dust2_system_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+  check_errors(obj, "run");
   const auto time = check_time(r_time, "time");
   const auto curr = obj->time();
   if (time < curr) {
@@ -22,6 +32,7 @@ SEXP dust2_system_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {
 template <typename T>
 SEXP dust2_system_state(cpp11::sexp ptr, bool grouped) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+  check_errors(obj, "get state from");
   cpp11::sexp ret = R_NilValue;
   const auto iter = obj->state().begin();
   if (grouped) {
@@ -37,6 +48,7 @@ SEXP dust2_system_state(cpp11::sexp ptr, bool grouped) {
 template <typename T>
 SEXP dust2_system_time(cpp11::sexp ptr) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+  check_errors(obj, "get time from");
   return cpp11::as_sexp(obj->time());
 }
 
@@ -71,6 +83,7 @@ SEXP dust2_system_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool grouped) 
 template <typename T>
 SEXP dust2_system_reorder(cpp11::sexp ptr, cpp11::integers r_index) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+  check_errors(obj, "reorder");
   const auto n_particles = obj->n_particles();
   const auto n_groups = obj->n_groups();
   const int len = n_particles * n_groups;
@@ -111,6 +124,7 @@ SEXP dust2_system_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
 template <typename T>
 SEXP dust2_system_set_time(cpp11::sexp ptr, cpp11::sexp r_time) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+  check_errors(obj, "set time for");
   const auto time = check_time(r_time, "time");
   obj->set_time(time);
   return R_NilValue;
@@ -134,6 +148,7 @@ SEXP dust2_system_compare_data(cpp11::sexp ptr,
   using data_type = typename T::data_type;
 
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+  check_errors(obj, "compare data for");
   const auto n_groups = obj->n_groups();
   std::vector<data_type> data;
   auto r_data_list = cpp11::as_cpp<cpp11::list>(r_data);
@@ -162,6 +177,7 @@ SEXP dust2_system_simulate(cpp11::sexp ptr,
                            bool grouped) {
   using real_type = typename T::real_type;
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+  check_errors(obj, "simulate");
   const auto n_state = obj->n_state();
   const auto times = check_time_sequence(obj->time(), r_times, false, "time");
   const auto index = check_index(r_index, obj->n_state(), "index");

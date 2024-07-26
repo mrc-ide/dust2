@@ -241,3 +241,42 @@ test_that("can set rng state", {
   expect_null(dust_system_set_rng_state(obj2, dust_system_rng_state(obj1)))
   expect_identical(dust_system_rng_state(obj1), dust_system_rng_state(obj2))
 })
+
+
+test_that("throw nice error on run failure, then prevent access", {
+  pars <- list(beta = 0.1, gamma = -0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  obj <- dust_system_create(sir(), pars, n_particles = 10, seed = 42)
+  expect_null(dust_system_set_state_initial(obj))
+
+  err <- expect_error(
+    expect_null(dust_system_run_to_time(obj, 30)),
+    "10 particles reported errors")
+  expect_match(conditionMessage(err), "1: Invalid call to binomial with")
+  expect_match(conditionMessage(err), "- (and 6 more)", fixed = TRUE)
+
+  expect_error(
+    dust_system_run_to_time(obj, 30),
+    "Can't currently run this system: errors are pending")
+  expect_error(
+    dust_system_time(obj),
+    "Can't currently get time from this system: errors are pending")
+  expect_error(
+    dust_system_state(obj),
+    "Can't currently get state from this system: errors are pending")
+  expect_error(
+    dust_system_reorder(obj, 1:10),
+    "Can't currently reorder this system: errors are pending")
+  expect_error(
+    dust_system_set_time(obj, 0),
+    "Can't currently set time for this system: errors are pending")
+  expect_error(
+    dust_system_compare_data(obj, list()),
+    "Can't currently compare data for this system: errors are pending")
+  expect_error(
+    dust_system_simulate(obj, 0:10),
+    "Can't currently simulate this system: errors are pending")
+
+  dust_system_update_pars(obj, list(gamma = 0.2))
+  dust_system_set_state_initial(obj)
+  expect_equal(dust_system_time(obj), 0)
+})

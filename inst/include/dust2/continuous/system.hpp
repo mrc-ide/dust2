@@ -4,6 +4,7 @@
 #include <vector>
 #include <dust2/continuous/control.hpp>
 #include <dust2/continuous/solver.hpp>
+#include <dust2/errors.hpp>
 #include <dust2/zero.hpp>
 #include <mcstate/random/random.hpp>
 
@@ -46,6 +47,7 @@ public:
 
     time_(time),
     zero_every_(zero_every_vec<T>(shared_)),
+    errors_(n_particles_total_),
     rng_(n_particles_total_, seed, deterministic),
     solver_(n_state_, control_) {
     // TODO: above, filter rng states need adding here too, or
@@ -64,31 +66,43 @@ public:
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
         real_type * y = state_data + offset;
-        solver_.run(time_, time, y, zero_every_[i],
-                    ode_internals_[k],
-                    rhs_(shared_[i], internal_[i]));
+        try {
+          solver_.run(time_, time, y, zero_every_[i],
+                      ode_internals_[k],
+                      rhs_(shared_[i], internal_[i]));
+        } catch (std::exception const& e) {
+          errors_.capture(e, k);
+        }
       }
     }
+    errors_.report();
     time_ = time;
   }
 
   void set_state_initial() {
+    errors_.reset();
     real_type * state_data = state_.data();
     for (size_t i = 0; i < n_groups_; ++i) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
         real_type * y = state_data + offset;
-        T::initial(time_, shared_[i], internal_[i],
-                   rng_.state(k), y);
-        solver_.initialise(time_, y, ode_internals_[k],
-                           rhs_(shared_[i], internal_[i]));
+        try {
+          T::initial(time_, shared_[i], internal_[i],
+                     rng_.state(k), y);
+          solver_.initialise(time_, y, ode_internals_[k],
+                             rhs_(shared_[i], internal_[i]));
+        } catch (std::exception const& e) {
+          errors_.capture(e, k);
+        }
       }
     }
+    errors_.report();
   }
 
   template <typename Iter>
   void set_state(Iter iter, bool recycle_particle, bool recycle_group) {
+    errors_.reset();
     const auto offset_read_group = recycle_group ? 0 :
       (n_state_ * (recycle_particle ? 1 : n_particles_));
     const auto offset_read_particle = recycle_particle ? 0 : n_state_;
@@ -184,15 +198,24 @@ public:
       for (size_t j = 0; j < n_particles_; ++j, ++output) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
-        *output = T::compare_data(time_, state_data + offset, *data,
-                                  shared_[i], internal_[i], rng_.state(k));
+        try {
+          *output = T::compare_data(time_, state_data + offset, *data,
+                                    shared_[i], internal_[i], rng_.state(k));
+        } catch (std::exception const& e) {
+          errors_.capture(e, k);
+        }
       }
     }
+    errors_.report();
   }
 
   // This is just used for debugging
   const auto& ode_internals() const {
     return ode_internals_;
+  }
+
+  bool errors_pending() const {
+    return errors_.unresolved();
   }
 
 private:
@@ -214,6 +237,7 @@ private:
   std::vector<internal_state> internal_;
   real_type time_;
   std::vector<zero_every_type<real_type>> zero_every_;
+  dust2::utils::errors errors_;
   mcstate::random::prng<rng_state_type> rng_;
   ode::solver<real_type> solver_;
 
