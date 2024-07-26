@@ -1,7 +1,6 @@
 #pragma once
 
-// #include <algorithm>
-// #include <numeric>
+#include <numeric>
 #include <sstream>
 #include <vector>
 
