@@ -37,7 +37,7 @@ elements of \code{b}.}
 computing the likelihood should be treated as a log-density of
 \code{-Inf} (i.e., that this point is impossible).  This is a big
 hammer to use, and you would be better off using the domain
-(with reflecting boundiaries) or the priors to control this if
+(with reflecting boundaries) or the priors to control this if
 possible.  However, sometimes you can have integration failures
 with very high parameter values, or just other pathalogical
 parameter sets where, once you understand the model, giving up
@@ -76,9 +76,9 @@ chain will have a seed that is created by performing a
 "long jump", moving 2^192 steps along the chain.  Then within each
 chain we will take a series of "jumps" (2^128 steps) for each of
 the streams we need across the groups, filters and particles.
-This ensures indepdence across the stochastic components of the
+This ensures independence across the stochastic components of the
 system but also the reproducibility and predictability of the
-system.  The intiial seeding performed by mcstate2 will respond to
+system.  The initial seeding performed by mcstate2 will respond to
 R's RNG (i.e., it will follow \code{set.seed}) if an explicit seed is
 not given.
 }
