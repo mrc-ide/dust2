@@ -71,3 +71,16 @@ test_that("can set names onto things", {
   expect_equal(set_names(c("a", "b"), "x"), c(x = "a", x = "b"))
   expect_equal(set_names(c("a", "b"), c("x", "i")), c(x = "a", i = "b"))
 })
+
+
+test_that("can use protect to avoid errors", {
+  f <- function(x) {
+    if (x < 0) {
+      stop("invalid value for 'x'")
+    }
+    sqrt(x)
+  }
+  g <- protect(f, -Inf)
+  expect_equal(g(4), 2)
+  expect_equal(g(-1), -Inf)
+})

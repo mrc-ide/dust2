@@ -12,7 +12,7 @@ Description: Experimental sources for the next generation of dust,
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Language: en-GB
 URL: https://github.com/mrc-ide/dust2, https://mrc-ide.github.io/dust2
 BugReports: https://github.com/mrc-ide/dust2/issues
