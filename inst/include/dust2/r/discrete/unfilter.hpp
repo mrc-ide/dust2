@@ -42,8 +42,9 @@ cpp11::sexp dust2_discrete_unfilter_alloc(cpp11::list r_pars,
   // we need.  At this point we could have constructed the system out
   // of one that exists already on the R side, but I think that's
   // going to feel weirder overall.
+  const size_t n_threads = 1;
   const auto system = dust2::dust_discrete<T>(shared, internal, time_start, dt, n_particles,
-                                             seed, deterministic);
+                                              seed, deterministic, n_threads);
   const auto index = check_index(r_index, system.n_state(), "index");
 
   auto obj = new unfilter<dust_discrete<T>>(system, time_start, time, data, index);

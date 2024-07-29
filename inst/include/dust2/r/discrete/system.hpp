@@ -16,7 +16,8 @@ SEXP dust2_discrete_alloc(cpp11::list r_pars,
                           cpp11::sexp r_n_particles,
                           cpp11::sexp r_n_groups,
                           cpp11::sexp r_seed,
-                          cpp11::sexp r_deterministic) {
+                          cpp11::sexp r_deterministic,
+			  cpp11::sexp r_n_threads) {
   using rng_state_type = typename T::rng_state_type;
 
   const auto time = check_time(r_time, "time");
@@ -32,8 +33,10 @@ SEXP dust2_discrete_alloc(cpp11::list r_pars,
   auto seed = mcstate::random::r::as_rng_seed<rng_state_type>(r_seed);
   auto deterministic = to_bool(r_deterministic, "deterministic");
 
+  const auto n_threads = to_size(r_n_threads, "n_threads");
+
   auto obj = new dust_discrete<T>(shared, internal, time, dt, n_particles,
-                                  seed, deterministic);
+                                  seed, deterministic, n_threads);
   cpp11::external_pointer<dust_discrete<T>> ptr(obj, true, false);
 
   // Later, we'll export a bit more back from the system (in particular

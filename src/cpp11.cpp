@@ -6,10 +6,10 @@
 #include <R_ext/Visibility.h>
 
 // logistic.cpp
-SEXP dust2_system_logistic_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::list r_ode_control, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic);
-extern "C" SEXP _dust2_dust2_system_logistic_alloc(SEXP r_pars, SEXP r_time, SEXP r_ode_control, SEXP r_n_particles, SEXP r_n_groups, SEXP r_seed, SEXP r_deterministic) {
+SEXP dust2_system_logistic_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::list r_ode_control, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic, cpp11::sexp r_n_threads);
+extern "C" SEXP _dust2_dust2_system_logistic_alloc(SEXP r_pars, SEXP r_time, SEXP r_ode_control, SEXP r_n_particles, SEXP r_n_groups, SEXP r_seed, SEXP r_deterministic, SEXP r_n_threads) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_system_logistic_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_ode_control), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_seed), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_deterministic)));
+    return cpp11::as_sexp(dust2_system_logistic_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_ode_control), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_seed), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_deterministic), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_threads)));
   END_CPP11
 }
 // logistic.cpp
@@ -97,10 +97,10 @@ extern "C" SEXP _dust2_dust2_system_logistic_simulate(SEXP ptr, SEXP r_times, SE
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_system_sir_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic);
-extern "C" SEXP _dust2_dust2_system_sir_alloc(SEXP r_pars, SEXP r_time, SEXP r_dt, SEXP r_n_particles, SEXP r_n_groups, SEXP r_seed, SEXP r_deterministic) {
+SEXP dust2_system_sir_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic, cpp11::sexp r_n_threads);
+extern "C" SEXP _dust2_dust2_system_sir_alloc(SEXP r_pars, SEXP r_time, SEXP r_dt, SEXP r_n_particles, SEXP r_n_groups, SEXP r_seed, SEXP r_deterministic, SEXP r_n_threads) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_system_sir_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_dt), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_seed), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_deterministic)));
+    return cpp11::as_sexp(dust2_system_sir_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_dt), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_seed), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_deterministic), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_threads)));
   END_CPP11
 }
 // sir.cpp
@@ -265,10 +265,10 @@ extern "C" SEXP _dust2_dust2_unfilter_sir_last_gradient(SEXP ptr, SEXP grouped) 
   END_CPP11
 }
 // sirode.cpp
-SEXP dust2_system_sirode_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::list r_ode_control, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic);
-extern "C" SEXP _dust2_dust2_system_sirode_alloc(SEXP r_pars, SEXP r_time, SEXP r_ode_control, SEXP r_n_particles, SEXP r_n_groups, SEXP r_seed, SEXP r_deterministic) {
+SEXP dust2_system_sirode_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::list r_ode_control, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic, cpp11::sexp r_n_threads);
+extern "C" SEXP _dust2_dust2_system_sirode_alloc(SEXP r_pars, SEXP r_time, SEXP r_ode_control, SEXP r_n_particles, SEXP r_n_groups, SEXP r_seed, SEXP r_deterministic, SEXP r_n_threads) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_system_sirode_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_ode_control), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_seed), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_deterministic)));
+    return cpp11::as_sexp(dust2_system_sirode_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_ode_control), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_seed), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_deterministic), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_threads)));
   END_CPP11
 }
 // sirode.cpp
@@ -377,10 +377,10 @@ extern "C" SEXP _dust2_test_history(SEXP r_time, SEXP r_state, SEXP r_order, SEX
   END_CPP11
 }
 // walk.cpp
-SEXP dust2_system_walk_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic);
-extern "C" SEXP _dust2_dust2_system_walk_alloc(SEXP r_pars, SEXP r_time, SEXP r_dt, SEXP r_n_particles, SEXP r_n_groups, SEXP r_seed, SEXP r_deterministic) {
+SEXP dust2_system_walk_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic, cpp11::sexp r_n_threads);
+extern "C" SEXP _dust2_dust2_system_walk_alloc(SEXP r_pars, SEXP r_time, SEXP r_dt, SEXP r_n_particles, SEXP r_n_groups, SEXP r_seed, SEXP r_deterministic, SEXP r_n_threads) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_system_walk_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_dt), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_seed), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_deterministic)));
+    return cpp11::as_sexp(dust2_system_walk_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_dt), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_seed), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_deterministic), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_threads)));
   END_CPP11
 }
 // walk.cpp
@@ -469,7 +469,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_filter_sir_run",                    (DL_FUNC) &_dust2_dust2_filter_sir_run,                    4},
     {"_dust2_dust2_filter_sir_set_rng_state",          (DL_FUNC) &_dust2_dust2_filter_sir_set_rng_state,          2},
     {"_dust2_dust2_filter_sir_update_pars",            (DL_FUNC) &_dust2_dust2_filter_sir_update_pars,            3},
-    {"_dust2_dust2_system_logistic_alloc",             (DL_FUNC) &_dust2_dust2_system_logistic_alloc,             7},
+    {"_dust2_dust2_system_logistic_alloc",             (DL_FUNC) &_dust2_dust2_system_logistic_alloc,             8},
     {"_dust2_dust2_system_logistic_internals",         (DL_FUNC) &_dust2_dust2_system_logistic_internals,         2},
     {"_dust2_dust2_system_logistic_reorder",           (DL_FUNC) &_dust2_dust2_system_logistic_reorder,           2},
     {"_dust2_dust2_system_logistic_rng_state",         (DL_FUNC) &_dust2_dust2_system_logistic_rng_state,         1},
@@ -482,7 +482,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_system_logistic_state",             (DL_FUNC) &_dust2_dust2_system_logistic_state,             2},
     {"_dust2_dust2_system_logistic_time",              (DL_FUNC) &_dust2_dust2_system_logistic_time,              1},
     {"_dust2_dust2_system_logistic_update_pars",       (DL_FUNC) &_dust2_dust2_system_logistic_update_pars,       3},
-    {"_dust2_dust2_system_sir_alloc",                  (DL_FUNC) &_dust2_dust2_system_sir_alloc,                  7},
+    {"_dust2_dust2_system_sir_alloc",                  (DL_FUNC) &_dust2_dust2_system_sir_alloc,                  8},
     {"_dust2_dust2_system_sir_compare_data",           (DL_FUNC) &_dust2_dust2_system_sir_compare_data,           3},
     {"_dust2_dust2_system_sir_reorder",                (DL_FUNC) &_dust2_dust2_system_sir_reorder,                2},
     {"_dust2_dust2_system_sir_rng_state",              (DL_FUNC) &_dust2_dust2_system_sir_rng_state,              1},
@@ -495,7 +495,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_system_sir_state",                  (DL_FUNC) &_dust2_dust2_system_sir_state,                  2},
     {"_dust2_dust2_system_sir_time",                   (DL_FUNC) &_dust2_dust2_system_sir_time,                   1},
     {"_dust2_dust2_system_sir_update_pars",            (DL_FUNC) &_dust2_dust2_system_sir_update_pars,            3},
-    {"_dust2_dust2_system_sirode_alloc",               (DL_FUNC) &_dust2_dust2_system_sirode_alloc,               7},
+    {"_dust2_dust2_system_sirode_alloc",               (DL_FUNC) &_dust2_dust2_system_sirode_alloc,               8},
     {"_dust2_dust2_system_sirode_internals",           (DL_FUNC) &_dust2_dust2_system_sirode_internals,           2},
     {"_dust2_dust2_system_sirode_reorder",             (DL_FUNC) &_dust2_dust2_system_sirode_reorder,             2},
     {"_dust2_dust2_system_sirode_rng_state",           (DL_FUNC) &_dust2_dust2_system_sirode_rng_state,           1},
@@ -508,7 +508,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_system_sirode_state",               (DL_FUNC) &_dust2_dust2_system_sirode_state,               2},
     {"_dust2_dust2_system_sirode_time",                (DL_FUNC) &_dust2_dust2_system_sirode_time,                1},
     {"_dust2_dust2_system_sirode_update_pars",         (DL_FUNC) &_dust2_dust2_system_sirode_update_pars,         3},
-    {"_dust2_dust2_system_walk_alloc",                 (DL_FUNC) &_dust2_dust2_system_walk_alloc,                 7},
+    {"_dust2_dust2_system_walk_alloc",                 (DL_FUNC) &_dust2_dust2_system_walk_alloc,                 8},
     {"_dust2_dust2_system_walk_reorder",               (DL_FUNC) &_dust2_dust2_system_walk_reorder,               2},
     {"_dust2_dust2_system_walk_rng_state",             (DL_FUNC) &_dust2_dust2_system_walk_rng_state,             1},
     {"_dust2_dust2_system_walk_run_to_time",           (DL_FUNC) &_dust2_dust2_system_walk_run_to_time,           2},

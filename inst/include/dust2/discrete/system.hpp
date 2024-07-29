@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #include <map>
 #include <vector>
 #include <dust2/errors.hpp>
@@ -26,7 +30,8 @@ public:
                 real_type dt,
                 size_t n_particles, // per group
                 const std::vector<rng_int_type>& seed,
-                bool deterministic) :
+                bool deterministic,
+		size_t n_threads) :
     n_state_(T::size_state(shared[0])),
     n_particles_(n_particles),
     n_groups_(shared.size()),
@@ -39,7 +44,8 @@ public:
     dt_(dt),
     zero_every_(zero_every_vec<T>(shared_)),
     errors_(n_particles_total_),
-    rng_(n_particles_total_, seed, deterministic) {
+    rng_(n_particles_total_, seed, deterministic),
+    n_threads_(n_threads) {
     // We don't check that the size is the same across all states;
     // this should be done by the caller (similarly, we don't check
     // that shared and internal have the same size).
@@ -51,10 +57,9 @@ public:
     real_type * state_data = state_.data();
     real_type * state_next_data = state_next_.data();
 
-    // Later we parallelise this and track errors carefully.  We
-    // should be able to parallelise with 'pragma omp parallel for
-    // collapse(2)' here, but for MPI we might investigate other
-    // approaches.
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
+#endif
     for (size_t i = 0; i < n_groups_; ++i) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
@@ -105,6 +110,9 @@ public:
   void set_state_initial() {
     errors_.reset();
     real_type * state_data = state_.data();
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
+#endif
     for (size_t i = 0; i < n_groups_; ++i) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
@@ -129,6 +137,9 @@ public:
       (n_state_ * (recycle_particle ? 1 : n_particles_));
     const auto offset_read_particle = recycle_particle ? 0 : n_state_;
 
+// #ifdef _OPENMP
+// #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
+// #endif
     real_type * state_data = state_.data();
     for (size_t i = 0; i < n_groups_; ++i) {
       for (size_t j = 0; j < n_particles_; ++j) {
@@ -213,6 +224,10 @@ public:
 
   template <typename IterData, typename IterOutput>
   void compare_data(IterData data, const real_type * state, IterOutput output) {
+    const real_type * state_data = state_.data();
+// #ifdef _OPENMP
+// #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
+// #endif
     for (size_t i = 0; i < n_groups_; ++i, ++data) {
       for (size_t j = 0; j < n_particles_; ++j, ++output) {
         const auto k = n_particles_ * i + j;
@@ -332,6 +347,7 @@ private:
   std::vector<zero_every_type<real_type>> zero_every_;
   dust2::utils::errors errors_;
   mcstate::random::prng<rng_state_type> rng_;
+  size_t n_threads_;
 
   static void run_particle(real_type time, real_type dt, size_t n_steps,
                            const shared_state& shared,

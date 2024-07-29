@@ -74,8 +74,9 @@ cpp11::sexp dust2_discrete_filter_alloc(cpp11::list r_pars,
                       it + rng_len, it + rng_len * (n_particles + 1));
   }
 
+  const size_t n_threads = 1;
   const auto system = dust2::dust_discrete<T>(shared, internal, time_start, dt, n_particles,
-                                             seed_system, deterministic);
+                                              seed_system, deterministic, n_threads);
 
   const auto index = check_index(r_index, system.n_state(), "index");
 
