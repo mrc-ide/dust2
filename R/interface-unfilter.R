@@ -23,6 +23,7 @@ dust_unfilter_create <- function(generator, time_start, time, data,
   check_generator_for_filter(generator, "unfilter", call = call)
   assert_scalar_size(n_particles, call = call)
   assert_scalar_size(n_groups, allow_zero = TRUE, call = call)
+  n_threads <- check_n_threads(n_threads, n_particles, n_groups)
   check_time_sequence(time_start, time, call = call)
   check_dt(dt, call = call)
   check_data(data, length(time), n_groups, call = call)
@@ -34,6 +35,7 @@ dust_unfilter_create <- function(generator, time_start, time, data,
                  data = data,
                  n_particles = n_particles,
                  n_groups = n_groups,
+                 n_threads = n_threads,
                  index = index)
 
   res <- list2env(

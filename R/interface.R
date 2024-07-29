@@ -152,6 +152,7 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 0,
   res$name <- generator$name
   res$n_particles <- as.integer(n_particles)
   res$n_groups <- as.integer(max(n_groups), 1)
+  res$n_threads <- check_n_threads(n_threads, n_particles, n_groups)
   res$deterministic <- deterministic
   res$methods <- generator$methods
   res$properties <- generator$properties
