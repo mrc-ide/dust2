@@ -9,7 +9,7 @@
 ## might have a good reason for doing it.
 ##
 ## This should do for now as a placeholder though?
-check_threads <- function(n_threads, n_particles, n_groups, call = NULL) {
+check_n_threads <- function(n_threads, n_particles, n_groups, call = NULL) {
   assert_scalar_size(n_threads, allow_zero = FALSE, arg = "n_threads",
                      call = call)
   n_particles_total <- n_groups * n_particles
