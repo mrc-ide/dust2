@@ -11,6 +11,7 @@ dust_unfilter_create(
   data,
   n_particles = 1,
   n_groups = 0,
+  n_threads = 1,
   dt = 1,
   index = NULL
 )
@@ -44,6 +45,9 @@ they produce the same likelihood but if you provide different
 initial conditions then you would see different likelihoods.}
 
 \item{n_groups}{Optionally, the number of parameter groups}
+
+\item{n_threads}{Integer, the number of threads to use in
+parallelisable calculations.  See Details.}
 
 \item{dt}{The time step for discrete time systems, defaults to 1
 if not given.  It is an error to provide a non-NULL argument

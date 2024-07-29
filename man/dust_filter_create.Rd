@@ -11,6 +11,7 @@ dust_filter_create(
   data,
   n_particles,
   n_groups = 0,
+  n_threads = 1,
   dt = 1,
   index = NULL,
   seed = NULL
@@ -44,6 +45,9 @@ will give lower variance in the likelihood estimate but run more
 slowly.}
 
 \item{n_groups}{Optionally, the number of parameter groups}
+
+\item{n_threads}{Integer, the number of threads to use in
+parallelisable calculations.  See Details.}
 
 \item{dt}{The time step for discrete time systems, defaults to 1
 if not given.  It is an error to provide a non-NULL argument

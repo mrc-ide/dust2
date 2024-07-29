@@ -17,7 +17,7 @@
 ##'
 ##' @export
 dust_unfilter_create <- function(generator, time_start, time, data,
-                                 n_particles = 1, n_groups = 0,
+                                 n_particles = 1, n_groups = 0, n_threads = 1,
                                  dt = 1, index = NULL) {
   call <- environment()
   check_generator_for_filter(generator, "unfilter", call = call)
@@ -59,6 +59,7 @@ unfilter_create <- function(unfilter, pars) {
                            inputs$data,
                            inputs$n_particles,
                            inputs$n_groups,
+                           inputs$n_threads,
                            inputs$index),
     unfilter)
 }

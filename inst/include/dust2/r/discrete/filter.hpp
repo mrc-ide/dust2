@@ -17,6 +17,7 @@ cpp11::sexp dust2_discrete_filter_alloc(cpp11::list r_pars,
                                         cpp11::list r_data,
                                         cpp11::sexp r_n_particles,
                                         cpp11::sexp r_n_groups,
+					cpp11::sexp r_n_threads,
                                         cpp11::sexp r_index,
                                         cpp11::sexp r_seed) {
   using rng_state_type = typename T::rng_state_type;
@@ -24,6 +25,7 @@ cpp11::sexp dust2_discrete_filter_alloc(cpp11::list r_pars,
 
   const auto n_particles = to_size(r_n_particles, "n_particles");
   const auto n_groups = to_size(r_n_groups, "n_groups");
+  const auto n_threads = to_size(r_n_threads, "n_threads");
   const auto grouped = n_groups > 0;
   const auto time_start = check_time(r_time_start, "time_start");
   const auto time = check_time_sequence(time_start, r_time, true, "time");
@@ -74,7 +76,6 @@ cpp11::sexp dust2_discrete_filter_alloc(cpp11::list r_pars,
                       it + rng_len, it + rng_len * (n_particles + 1));
   }
 
-  const size_t n_threads = 1;
   const auto system = dust2::dust_discrete<T>(shared, internal, time_start, dt, n_particles,
                                               seed_system, deterministic, n_threads);
 

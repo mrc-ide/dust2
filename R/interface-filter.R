@@ -36,8 +36,8 @@
 ##'
 ##' @export
 dust_filter_create <- function(generator, time_start, time, data,
-                               n_particles, n_groups = 0, dt = 1,
-                               index = NULL, seed = NULL) {
+                               n_particles, n_groups = 0, n_threads = 1,
+                               dt = 1, index = NULL, seed = NULL) {
   call <- environment()
   check_generator_for_filter(generator, "filter", call = call)
   assert_scalar_size(n_particles, call = call)
@@ -106,6 +106,7 @@ filter_create <- function(filter, pars) {
                          inputs$data,
                          inputs$n_particles,
                          inputs$n_groups,
+                         inputs$n_threads,
                          inputs$index,
                          filter$initial_rng_state),
     filter)
