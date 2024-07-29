@@ -2,7 +2,7 @@
 % Please edit documentation in R/interface.R
 \name{dust_system_create}
 \alias{dust_system_create}
-\title{Create a dust object}
+\title{Create a dust system object}
 \usage{
 dust_system_create(
   generator,
@@ -13,7 +13,8 @@ dust_system_create(
   dt = NULL,
   ode_control = NULL,
   seed = NULL,
-  deterministic = FALSE
+  deterministic = FALSE,
+  n_threads = 1
 )
 }
 \arguments{
@@ -43,6 +44,9 @@ initialisation.}
 
 \item{deterministic}{Logical, indicating if the system should be
 allocated in deterministic mode.}
+
+\item{n_threads}{Integer, the number of threads to use in
+parallelisable calculations.  See Details.}
 }
 \value{
 A \code{dust_system} object, with opaque format.
@@ -52,3 +56,14 @@ Create a dust system object from a system generator.  This allocates a
 system and sets an initial set of parameters.  Once created you can use
 other dust functions to interact with it.
 }
+\section{Parallelisation}{
+Many calculations within a dust system can be parallelised
+straightforwardly - the most important of these is typically
+running the model (via \link{dust_run_to_time} or \link{dust_simulate}) but
+we also parallelise \link{dust_set_state_initial}, \link{dust_compare_data}
+and even \link{dust_reorder}.  You need to set the number of threads
+for parallelism at system creation, and this number cannot be
+usefully larger than \code{n_particles} (or \code{n_particles * n_groups} if
+you have a grouped system).
+}
+
