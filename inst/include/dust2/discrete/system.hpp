@@ -137,10 +137,10 @@ public:
       (n_state_ * (recycle_particle ? 1 : n_particles_));
     const auto offset_read_particle = recycle_particle ? 0 : n_state_;
 
-// #ifdef _OPENMP
-// #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
-// #endif
     real_type * state_data = state_.data();
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
+#endif
     for (size_t i = 0; i < n_groups_; ++i) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto offset_read =
@@ -224,17 +224,18 @@ public:
 
   template <typename IterData, typename IterOutput>
   void compare_data(IterData data, const real_type * state, IterOutput output) {
-    const real_type * state_data = state_.data();
-// #ifdef _OPENMP
-// #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
-// #endif
-    for (size_t i = 0; i < n_groups_; ++i, ++data) {
-      for (size_t j = 0; j < n_particles_; ++j, ++output) {
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
+#endif
+    for (size_t i = 0; i < n_groups_; ++i) {
+      auto data_i = data + i;
+      for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
+	auto output_ij = output + k;
         try {
-          *output = T::compare_data(time_, dt_, state + offset, *data,
-                                    shared_[i], internal_[i], rng_.state(k));
+          *output_ij = T::compare_data(time_, dt_, state + offset, *data_i,
+				       shared_[i], internal_[i], rng_.state(k));
         } catch (std::exception const& e) {
           errors_.capture(e, k);
         }
