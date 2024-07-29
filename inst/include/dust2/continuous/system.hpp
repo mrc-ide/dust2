@@ -130,10 +130,15 @@ public:
         const auto offset_write = k * n_state_;
         real_type* y = state_data + offset_write;
         std::copy_n(iter + offset_read, n_state_, y);
-        solver_.initialise(time_, y, ode_internals_[k],
-                           rhs_(shared_[i], internal_[i]));
+	try {
+	  solver_.initialise(time_, y, ode_internals_[k],
+			     rhs_(shared_[i], internal_[i]));
+	} catch (std::exception const& e) {
+	  errors_.capture(e, k);
+	}
       }
     }
+    errors_.report();
   }
 
   // To do this, we need a second copy of all internal state (so
