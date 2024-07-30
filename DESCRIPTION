@@ -29,6 +29,7 @@ Suggests:
     glue,
     knitr,
     mockery,
+    numDeriv,
     pkgbuild,
     pkgload,
     rmarkdown,

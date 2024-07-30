@@ -26,6 +26,7 @@ parse_metadata <- function(filename, call = NULL) {
        name = parse_metadata_name(data, call) %||% class,
        time_type = parse_metadata_time_type(data, call),
        has_compare = parse_metadata_has_compare(data, call),
+       has_adjoint = parse_metadata_has_adjoint(data, call),
        parameters = parse_metadata_parameters(data, call))
 }
 
@@ -95,14 +96,25 @@ parse_metadata_time_type <- function(data, call = NULL) {
 
 
 parse_metadata_has_compare <- function(data, call = NULL) {
-  data <- find_attribute_value_single(data, "dust2::has_compare",
+  parse_metadata_has_feature("compare", data, call)
+}
+
+
+parse_metadata_has_adjoint <- function(data, call = NULL) {
+  parse_metadata_has_feature("adjoint", data, call)
+}
+
+
+parse_metadata_has_feature <- function(name, data, call = NULL) {
+  attribute <- sprintf("dust2::has_%s", name)
+  data <- find_attribute_value_single(data, attribute,
                                       required = FALSE, call = call)
   if (is.null(data)) {
     return(FALSE)
   }
   if (length(data) != 0) {
     cli::cli_abort(
-      "Expected no arguments to '[[dust2::has_compare()]]'",
+      "Expected no arguments to '[[{attribute}()]]'",
       call = call)
   }
   TRUE
