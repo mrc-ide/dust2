@@ -89,8 +89,8 @@ public:
         auto state_model_ij = state_.data() + offset;
         auto state_history_ij = state_history + offset;
         try {
-          run_particle(time_, dt_, n_steps, stride,
-                       shared_[i], internal_[i],
+          run_particle(time_, dt_, n_steps, n_state_, stride,
+                       shared_[i], internal_[i], zero_every_[i],
                        state_model_ij, state_history_ij,
                        rng_.state(k));
         } catch (std::exception const &e) {
@@ -99,7 +99,6 @@ public:
       }
     }
     errors_.report();
-    std::copy_n(state_history + stride * n_steps, stride, state_.begin());
     time_ = time_ + n_steps * dt_;
   }
 
@@ -309,9 +308,11 @@ private:
   mcstate::random::prng<rng_state_type> rng_;
 
   static void run_particle(real_type time, real_type dt, size_t n_steps,
-                           const shared_state& shared, internal_state& internal,
+                           const shared_state& shared,
+                           internal_state& internal,
                            const zero_every_type<real_type>& zero_every,
-                           real_type * state, rng_state_type& rng_state,
+                           real_type * state,
+                           rng_state_type& rng_state,
                            real_type * state_next) {
     for (size_t i = 0; i < n_steps; ++i) {
       const auto time_i = time + i * dt;
@@ -328,19 +329,31 @@ private:
   }
 
   static void run_particle(real_type time, real_type dt, size_t n_steps,
-                           size_t stride,
+                           size_t n_state, size_t stride,
                            const shared_state& shared,
                            internal_state& internal,
-                           const real_type* state_model,
+                           const zero_every_type<real_type>& zero_every,
+                           real_type* state_model,
                            real_type* state_history,
                            rng_state_type& rng_state) {
     auto state_curr = state_model;
     auto state_next = state_history + stride;
     for (size_t i = 0; i < n_steps; ++i, state_next += stride) {
-      T::update(time + i * dt, dt, state_curr, shared, internal, rng_state,
+      const auto time_i = time + i * dt;
+      for (const auto& el : zero_every) {
+        if (std::fmod(time_i, el.first) == 0) {
+          std::copy_n(state_curr, n_state, state_model);
+          state_curr = state_model;
+          for (const auto j : el.second) {
+            state_curr[j] = 0;
+          }
+        }
+      }
+      T::update(time_i, dt, state_curr, shared, internal, rng_state,
                 state_next);
       state_curr = state_next;
     }
+    std::copy_n(state_curr, n_state, state_model);
   }
 
   static void adjoint_run_particle(const real_type time,

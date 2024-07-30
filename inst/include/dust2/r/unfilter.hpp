@@ -80,7 +80,9 @@ cpp11::sexp dust2_discrete_unfilter_last_gradient(cpp11::sexp ptr, bool grouped)
   if (grouped) {
     cpp11::stop("Need to sort this out still");
   }
-  const auto n_gradient = obj->sys.n_adjoint();
+  const auto n_state = obj->sys.n_state();
+  const auto n_adjoint = obj->sys.n_adjoint();
+  const auto n_gradient = n_adjoint - n_state;
   const auto n_particles = 1;
   const auto n_groups = 1;
   const auto len = n_gradient * n_particles * n_groups;

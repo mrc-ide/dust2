@@ -35,25 +35,15 @@ public:
     history_index_(history_index),
     history_(history_index_.size() > 0 ? history_index_.size() : n_state_,
              n_particles_, n_groups_, time_.size()),
-    adjoint_(n_state_, n_particles_ * n_groups_, time_.size()),
+    adjoint_(n_state_, n_particles_ * n_groups_),
     history_is_current_(false),
     adjoint_is_current_(false),
     gradient_is_current_(false) {
   }
 
   void run(bool set_initial, bool save_history) {
-    reset(save_history, false);
-    // history_is_current_ = false;
-    // if (save_history) {
-    //   history_.reset();
-    // }
+    reset(set_initial, save_history, /* adjoint = */ false);
     const auto n_times = time_.size();
-
-    sys.set_time(time_start_);
-    if (set_initial) {
-      sys.set_state_initial();
-    }
-    std::fill(ll_.begin(), ll_.end(), 0);
 
     const bool use_index = history_index_.size() > 0;
 
@@ -81,16 +71,11 @@ public:
   // actually support adjoint methods.  It should give exactly the
   // same answers as the normal version, at the cost of more memory.
   void run_adjoint(bool set_initial, bool save_history) {
-    reset(save_history, true);
-    const auto n_times = time_.size();
-    if (set_initial) {
-      sys.set_state_initial();
-    }
-    std::fill(ll_.begin(), ll_.end(), 0);
+    reset(set_initial, save_history, /* adjoint = */true);
 
     // Run the entire forward time simulation
     auto state = adjoint_.state();
-    // sys.run_steps(step_tot_.back(), state);
+    sys.run_to_time(time_.back(), state);
 
     // Consider dumping out a fraction of history here into our normal
     // history saving; that's just a copy really.
@@ -98,18 +83,22 @@ public:
       throw std::runtime_error("not yet implemented");
     }
 
-    // Then all the data comparison in one pass.
+    // Then all the data comparison in one pass.  This bit can
+    // theoretically be parallelised but it's unlikely to be
+    // important in most models.
+    const auto dt = sys.dt();
+    const auto n_times = time_.size();
     const auto stride_state = n_particles_ * n_groups_ * n_state_;
-    auto it_data = data_.begin();
-    /* TODO:
-    for (size_t i = 0; i < n_times; ++i, it_data += n_groups_) {
-      state += step_[i] * stride_state;
-      sys.compare_data(it_data, state, ll_step_.begin());
+    for (size_t i = 0; i < n_times; ++i) {
+      const size_t n_steps =
+        std::round(std::max(0.0, time_[i] - time_start_) / dt);
+      const auto state_i = state + n_steps * stride_state;
+      const auto data_i = data_.begin() + n_groups_ * i;
+      sys.compare_data(data_i, state_i, ll_step_.begin());
       for (size_t j = 0; j < ll_.size(); ++j) {
         ll_[j] += ll_step_[j];
       }
     }
-    */
 
     adjoint_is_current_ = true;
     history_is_current_ = save_history;
@@ -163,17 +152,24 @@ private:
   bool adjoint_is_current_;
   bool gradient_is_current_;
 
-  void reset(bool save_history, bool adjoint) {
+  void reset(bool set_initial, bool save_history, bool adjoint) {
     history_is_current_ = false;
     adjoint_is_current_ = false;
     gradient_is_current_ = false;
     if (save_history) {
       history_.reset();
     }
-    // TODO:
-    // if (adjoint) {
-    //   adjoint_.init_history(step_tot_.back());
-    // }
+    if (adjoint) {
+      const auto dt = sys.dt();
+      const size_t n_steps =
+        std::round(std::max(0.0, time_.back() - time_start_) / dt);
+      adjoint_.init_history(n_steps);
+    }
+    std::fill(ll_.begin(), ll_.end(), 0);
+    sys.set_time(time_start_);
+    if (set_initial) {
+      sys.set_state_initial();
+    }
   }
 
   void compute_gradient_() {

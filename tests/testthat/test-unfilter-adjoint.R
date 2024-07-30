@@ -1,5 +1,4 @@
 test_that("can run an unfilter via the adjoint method", {
-  skip("WIP")
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
 
   time_start <- 0

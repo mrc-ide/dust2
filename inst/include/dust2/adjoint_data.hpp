@@ -14,7 +14,7 @@ namespace dust2 {
 template <typename real_type>
 class adjoint_data {
 public:
-  adjoint_data(size_t n_state, size_t n_particles, size_t n_steps) :
+  adjoint_data(size_t n_state, size_t n_particles) :
     n_state_(n_state),
     n_adjoint_(0),
     n_particles_(n_particles),
@@ -30,7 +30,7 @@ public:
 
   void init_adjoint(size_t n_adjoint) {
     if (n_adjoint_ != n_adjoint) {
-      adjoint_curr_.resize((n_state_ + n_adjoint) * n_particles_);
+      adjoint_curr_.resize(n_adjoint * n_particles_);
       adjoint_next_.resize(adjoint_curr_.size());
       n_adjoint_ = n_adjoint;
     }
