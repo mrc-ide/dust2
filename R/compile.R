@@ -91,6 +91,7 @@ dust_compile <- function(filename, quiet = FALSE, workdir = NULL,
   writeLines(res$namespace, file.path(workdir, "NAMESPACE"))
   writeLines(res$r, file.path(workdir, "R", "dust.R"))
   writeLines(res$cpp, file.path(workdir, "src", "dust.cpp"))
+  writeLines(res$makevars, file.path(workdir, "src", "Makevars"))
   pkgbuild::compile_dll(workdir, compile_attributes = TRUE,
                         quiet = quiet, debug = debug)
   env <- load_temporary_package(workdir, res$package, quiet)
