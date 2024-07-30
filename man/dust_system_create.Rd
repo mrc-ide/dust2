@@ -59,9 +59,10 @@ other dust functions to interact with it.
 \section{Parallelisation}{
 Many calculations within a dust system can be parallelised
 straightforwardly - the most important of these is typically
-running the model (via \link{dust_run_to_time} or \link{dust_simulate}) but
-we also parallelise \link{dust_set_state_initial}, \link{dust_compare_data}
-and even \link{dust_reorder}.  You need to set the number of threads
+running the model (via \link{dust_system_run_to_time} or
+\link{dust_system_simulate}) but we also parallelise
+\link{dust_system_set_state_initial}, \link{dust_system_compare_data} and
+even \link{dust_system_reorder}.  You need to set the number of threads
 for parallelism at system creation, and this number cannot be
 usefully larger than \code{n_particles} (or \code{n_particles * n_groups} if
 you have a grouped system).

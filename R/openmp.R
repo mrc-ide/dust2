@@ -12,7 +12,7 @@
 check_n_threads <- function(n_threads, n_particles, n_groups, call = NULL) {
   assert_scalar_size(n_threads, allow_zero = FALSE, arg = "n_threads",
                      call = call)
-  n_particles_total <- n_groups * n_particles
+  n_particles_total <- max(1, max(1, n_groups) * n_particles)
   if (n_threads > n_particles_total) {
     cli::cli_warn(
       paste("Reducing thread count from requested {n_threads} to",

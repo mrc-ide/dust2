@@ -83,9 +83,10 @@ dust_system_generator <- function(name, time_type,
 ##'
 ##' Many calculations within a dust system can be parallelised
 ##' straightforwardly - the most important of these is typically
-##' running the model (via [dust_run_to_time] or [dust_simulate]) but
-##' we also parallelise [dust_set_state_initial], [dust_compare_data]
-##' and even [dust_reorder].  You need to set the number of threads
+##' running the model (via [dust_system_run_to_time] or
+##' [dust_system_simulate]) but we also parallelise
+##' [dust_system_set_state_initial], [dust_system_compare_data] and
+##' even [dust_system_reorder].  You need to set the number of threads
 ##' for parallelism at system creation, and this number cannot be
 ##' usefully larger than `n_particles` (or `n_particles * n_groups` if
 ##' you have a grouped system).

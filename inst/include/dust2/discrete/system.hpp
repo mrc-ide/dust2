@@ -228,8 +228,8 @@ public:
 #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
 #endif
     for (size_t i = 0; i < n_groups_; ++i) {
-      auto data_i = data + i;
       for (size_t j = 0; j < n_particles_; ++j) {
+	auto data_i = data + i;
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
 	auto output_ij = output + k;
