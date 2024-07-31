@@ -71,21 +71,16 @@ public:
   // actually support adjoint methods.  It should give exactly the
   // same answers as the normal version, at the cost of more memory.
   void run_adjoint(bool set_initial, bool save_history) {
-    reset(set_initial, save_history, /* adjoint = */true);
+    reset(set_initial, save_history, /* adjoint = */ true);
 
     // Run the entire forward time simulation
     auto state = adjoint_.state();
     sys.run_to_time(time_.back(), state);
 
-    // Consider dumping out a fraction of history here into our normal
-    // history saving; that's just a copy really.
-    if (save_history) {
-      throw std::runtime_error("Saving both history and adjoint not currently supported");
-    }
-
     // Then all the data comparison in one pass.  This bit can
     // theoretically be parallelised but it's unlikely to be
     // important in most models.
+    const bool use_index = history_index_.size() > 0;
     const auto dt = sys.dt();
     const auto n_times = time_.size();
     const auto stride_state = n_particles_ * n_groups_ * n_state_;
@@ -97,6 +92,14 @@ public:
       sys.compare_data(data_i, state_i, ll_step_.begin());
       for (size_t j = 0; j < ll_.size(); ++j) {
         ll_[j] += ll_step_[j];
+      }
+      if (save_history) {
+        if (use_index) {
+          history_.add_with_index(time_[i], state_i,
+                                  history_index_.begin(), n_state_);
+        } else {
+          history_.add(time_[i], state_i);
+        }
       }
     }
 

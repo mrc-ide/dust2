@@ -79,7 +79,7 @@ test_that("can compute multiple gradients at once", {
 })
 
 
-test_that("can't yet save history while running unfilter with adjoint", {
+test_that("can save history while running unfilter with adjoint", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
 
   time_start <- 0
@@ -87,9 +87,13 @@ test_that("can't yet save history while running unfilter with adjoint", {
   data <- lapply(1:4, function(i) list(incidence = i))
 
   obj <- dust_unfilter_create(sir(), time_start, time, data)
-  expect_error(
-    dust_unfilter_run(obj, pars, adjoint = TRUE, save_history = TRUE),
-    "Saving both history and adjoint not currently supported")
+  ll1 <- dust_unfilter_run(obj, pars, save_history = TRUE)
+  h1 <- dust_unfilter_last_history(obj)
+
+  ll2 <- dust_unfilter_run(obj, pars, adjoint = TRUE, save_history = TRUE)
+  h2 <- dust_unfilter_last_history(obj)
+  expect_identical(ll2, ll1)
+  expect_identical(h2, h1)
 })
 
 
