@@ -237,13 +237,17 @@ public:
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
-        // TODO: within error block
-        T::adjoint_compare_data(time, dt_,
-                                state + offset, adjoint_curr, *data,
-                                shared_[i], internal_[i],
-                                adjoint_next);
+        try {
+          T::adjoint_compare_data(time, dt_,
+                                  state + offset, adjoint_curr, *data,
+                                  shared_[i], internal_[i],
+                                  adjoint_next);
+        } catch (std::exception const& e) {
+          errors_.capture(e, k);
+        }
       }
     }
+    errors_.report();
   }
 
   // Note that this does affect anything (except internal_) within the
@@ -263,12 +267,16 @@ public:
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
         auto state_ij = state + offset;
-        // TODO: within error block
-        adjoint_run_particle(time0, dt_, n_steps, stride,
-                             shared_[i], internal_[i],
-                             state_ij, adjoint_curr, adjoint_next);
+        try {
+          adjoint_run_particle(time0, dt_, n_steps, stride,
+                               shared_[i], internal_[i],
+                               state_ij, adjoint_curr, adjoint_next);
+        } catch (std::exception const& e) {
+          errors_.capture(e, k);
+        }
       }
     }
+    errors_.report();
     return n_steps;
   }
 
@@ -279,15 +287,20 @@ public:
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
-        T::adjoint_initial(time,
-                           dt_,
-                           state + offset,
-                           adjoint_curr + offset,
-                           shared_[i],
-                           internal_[i],
-                           adjoint_next + offset);
+        try {
+          T::adjoint_initial(time,
+                             dt_,
+                             state + offset,
+                             adjoint_curr + offset,
+                             shared_[i],
+                             internal_[i],
+                             adjoint_next + offset);
+        } catch (std::exception const& e) {
+          errors_.capture(e, k);
+        }
       }
     }
+    errors_.report();
   }
 
   bool errors_pending() const {

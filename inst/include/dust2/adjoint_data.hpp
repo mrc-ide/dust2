@@ -37,10 +37,6 @@ public:
     }
   }
 
-  // TODO: it would be nicer to use iterators throughout I think,
-  // though the end result will be identical?  Probably best to do
-  // this throughout really and try and remove as many raw pointers as
-  // possible.
   auto state() {
     return state_.data();
   }
