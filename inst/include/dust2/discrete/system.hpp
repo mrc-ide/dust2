@@ -368,8 +368,8 @@ private:
                                    real_type* adjoint_curr,
                                    real_type* adjoint_next) {
     for (size_t i = 0; i < n_steps; ++i) {
-      const auto time_i = time - i * dt;
-      const auto state_i = state - i * stride;
+      const auto time_i = time - (i + 1) * dt;
+      const auto state_i = state - (i + 1) * stride;
       T::adjoint_update(time_i,
                         dt,
                         state_i,

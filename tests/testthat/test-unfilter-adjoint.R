@@ -14,7 +14,6 @@ test_that("can run an unfilter via the adjoint method", {
 
 
 test_that("can run the adjoint model", {
-  skip("WIP")
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
 
   time_start <- 0
@@ -27,13 +26,11 @@ test_that("can run the adjoint model", {
 
   x <- c(beta = 0.1, gamma = 0.2, I0 = 10)
 
-  ## This is not correct; this could be because I have misspecified my
-  ## model though.  The incorrect answer on the initial condition is
-  ## more of a concern though, but I *have* changed the initial
-  ## conditions here.
   ll <- dust_unfilter_run(obj, as.list(x), adjoint = TRUE)
   gr <- dust_unfilter_last_gradient(obj)
 
   ll <- dust_unfilter_run(obj, as.list(x))
-  gr_num <- numDeriv::grad(function(x) dust_unfilter_run(obj, as.list(x)), x)
+  gr_num <- numDeriv::grad(function(x) dust_unfilter_run(obj, as.list(x)), x,
+                           method = "Richardson", method.args = list(r = 6))
+  expect_equal(gr_num, gr, tolerance = 1e-4)
 })

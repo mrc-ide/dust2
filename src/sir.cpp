@@ -130,7 +130,7 @@ public:
   }
 
   static size_t adjoint_size(const shared_state& shared) {
-    return 3;
+    return 8;
   }
 
   static void adjoint_initial(real_type time,
