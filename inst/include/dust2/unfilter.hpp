@@ -182,33 +182,38 @@ private:
     const auto stride_state = n_particles_ * n_groups_ * n_state_;
     const auto state = adjoint_.state();
     const auto dt = sys.dt();
-    /* TODO:
+    auto time = sys.time();
+    size_t position = std::round(std::max(0.0, time - time_start_) / dt);
 
-    // We do need the time here, and there are a couple of ways of
-    // getting it.
     for (size_t irev = 0; irev < n_times; ++irev) {
       const auto i = n_times - irev - 1;
-      const auto time = time_start_ + step_tot_[i] * dt;
-      const auto n_steps = step_[i];
-      const auto state_i = state + step_tot_[i] * stride_state;
+      const auto time_i = i == 0 ? time_start_ : time_[i - 1];
+      const auto state_i = state + position * stride_state;
       const auto data_i = data_.begin() + i * n_groups_;
       // Compare data
-      sys.adjoint_compare_data(data_i, state_i, adjoint_curr, adjoint_next);
+      sys.adjoint_compare_data(time, data_i, state_i,
+                               adjoint_curr, adjoint_next);
       std::swap(adjoint_curr, adjoint_next);
-      // Then run the system backwards
-      sys.adjoint_run_steps(n_steps, time,
-                              state_i, adjoint_curr, adjoint_next);
+      // Then run the system backwards from time => time_i
+      const auto n_steps = sys.adjoint_run_to_time(time, time_i, state_i,
+                                                   adjoint_curr, adjoint_next);
       // Bookkeeping chore
       if (n_steps % 2 == 1) {
         std::swap(adjoint_curr, adjoint_next);
       }
+      position -= n_steps;
+      time = time_i;
     }
 
     // Initial conditions go right at the end, and are surprisingly
     // hard to work out.
-    sys.adjoint_initial(time_start_, state, adjoint_curr, adjoint_next);
-    std::swap(adjoint_curr, adjoint_next);
-    */
+    sys.adjoint_initial(time, state, adjoint_curr, adjoint_next);
+
+    // At the end of the calculation, copy the final states so that
+    // both copies winthin adjoint_ are the same - this means that the
+    // gradient calculation will be correct.
+    std::copy_n(adjoint_next, n_adjoint, adjoint_curr);
+
     gradient_is_current_ = true;
   }
 };

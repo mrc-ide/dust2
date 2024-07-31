@@ -229,7 +229,7 @@ public:
   }
 
   template <typename IterData>
-  void adjoint_compare_data(IterData data,
+  void adjoint_compare_data(real_type time, IterData data,
                             const real_type * state,
                             const real_type * adjoint_curr,
                             real_type * adjoint_next) {
@@ -237,7 +237,8 @@ public:
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
-        T::adjoint_compare_data(time_, dt_,
+        // TODO: within error block
+        T::adjoint_compare_data(time, dt_,
                                 state + offset, adjoint_curr, *data,
                                 shared_[i], internal_[i],
                                 adjoint_next);
@@ -248,26 +249,27 @@ public:
   // Note that this does affect anything (except internal_) within the
   // model; not time and not state, as we want those to reflect the
   // state of the forwards model.
-  //
-  // I don't like the two args here requiring a swap at all!  Let's
-  // get it moving and then think about what we can do.  Probably the
-  // solution is to pass in adjoint state generally here?
-  void adjoint_run_to_time(size_t n_steps, real_type time,
-                           const real_type* state,
-                           real_type* adjoint_curr,
-                           real_type* adjoint_next) {
-    // rewrite a bit.
+  size_t adjoint_run_to_time(const real_type time0,
+                             const real_type time1,
+                             const real_type* state,
+                             real_type* adjoint_curr,
+                             real_type* adjoint_next) {
+    // ----|xxxx|---
+    //     1<---0
+    const size_t n_steps = std::round(std::max(0.0, time0 - time1) / dt_);
     const auto stride = n_state_ * n_particles_ * n_groups_;
     for (size_t i = 0; i < n_groups_; ++i) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
         auto state_ij = state + offset;
-        adjoint_run_particle(time, dt_, n_steps, stride,
+        // TODO: within error block
+        adjoint_run_particle(time0, dt_, n_steps, stride,
                              shared_[i], internal_[i],
                              state_ij, adjoint_curr, adjoint_next);
       }
     }
+    return n_steps;
   }
 
   void adjoint_initial(real_type time, const real_type * state,

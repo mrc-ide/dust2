@@ -26,6 +26,7 @@ public:
       state_.resize(n_state_ * n_particles_ * (n_steps + 1));
       n_steps_ = n_steps;
     }
+    reset();
   }
 
   void init_adjoint(size_t n_adjoint) {
@@ -50,6 +51,12 @@ public:
 
   auto next() {
     return adjoint_next_.data();
+  }
+
+  void reset() {
+    std::fill(state_.begin(), state_.end(), 0);
+    std::fill(adjoint_curr_.begin(), adjoint_curr_.end(), 0);
+    std::fill(adjoint_next_.begin(), adjoint_next_.end(), 0);
   }
 
   template <typename Iter>
