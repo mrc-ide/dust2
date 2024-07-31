@@ -80,7 +80,7 @@ public:
     // Consider dumping out a fraction of history here into our normal
     // history saving; that's just a copy really.
     if (save_history) {
-      throw std::runtime_error("not yet implemented");
+      throw std::runtime_error("Saving both history and adjoint not currently supported");
     }
 
     // Then all the data comparison in one pass.  This bit can

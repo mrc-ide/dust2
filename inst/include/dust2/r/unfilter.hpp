@@ -75,7 +75,7 @@ cpp11::sexp dust2_discrete_unfilter_last_gradient(cpp11::sexp ptr, bool grouped)
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
   if (!obj->adjoint_is_current()) {
-    cpp11::stop("Model was not run with 'adjoint = TRUE'");
+    cpp11::stop("System was not run with 'adjoint = TRUE'");
   }
   if (grouped) {
     cpp11::stop("Need to sort this out still");
