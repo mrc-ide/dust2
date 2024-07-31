@@ -49,7 +49,7 @@ test_that("can't compute adjoint where it was not enabled in the unfilter", {
 
 test_that("can compute multiple gradients at once", {
   base <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
-  n_groups <- 3
+  n_groups <- 4
   pars <- lapply(seq_len(n_groups),
                  function(i) modifyList(base, list(beta = i * 0.1)))
 
@@ -60,8 +60,8 @@ test_that("can compute multiple gradients at once", {
   })
   dt <- 1
 
-  obj1 <- dust_unfilter_create(sir(), time_start, time, data, n_groups = 3)
-  obj2 <- lapply(1:3, function(i) {
+  obj1 <- dust_unfilter_create(sir(), time_start, time, data, n_groups = 4)
+  obj2 <- lapply(1:4, function(i) {
     data_i <- lapply(data, function(x) x[[i]])
     dust_unfilter_create(sir(), time_start, time, data_i)
   })
@@ -70,13 +70,12 @@ test_that("can compute multiple gradients at once", {
   ll2 <- dust_unfilter_run(obj1, pars, adjoint = TRUE)
   expect_equal(ll1, ll2)
 
-  cmp <- vapply(1:3, function(i) {
+  cmp <- vapply(1:4, function(i) {
     dust_unfilter_run(obj2[[i]], pars[[i]], adjoint = TRUE)
     dust_unfilter_last_gradient(obj2[[i]])
   }, numeric(3))
 
-  skip("WIP")
-  dust_unfilter_last_gradient(obj1)
+  expect_equal(dust_unfilter_last_gradient(obj1), cmp)
 })
 
 

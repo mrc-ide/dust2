@@ -77,15 +77,17 @@ cpp11::sexp dust2_discrete_unfilter_last_gradient(cpp11::sexp ptr, bool grouped)
   if (!obj->adjoint_is_current()) {
     cpp11::stop("System was not run with 'adjoint = TRUE'");
   }
-  if (grouped) {
-    cpp11::stop("Need to sort this out still");
-  }
   const auto n_state = obj->sys.n_state();
   const auto n_adjoint = obj->sys.n_adjoint();
   const auto n_gradient = n_adjoint - n_state;
-  const auto n_particles = 1;
-  const auto n_groups = 1;
+
+  const auto n_particles = obj->sys.n_particles();
+  const auto n_groups = obj->sys.n_groups();
   const auto len = n_gradient * n_particles * n_groups;
+
+  if (n_particles > 1) {
+    cpp11::stop("n_particles > 1 not yet supported; see mrc-5406");
+  }
   cpp11::sexp ret = cpp11::writable::doubles(len);
   obj->last_gradient(REAL(ret));
   if (grouped) {

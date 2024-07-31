@@ -192,10 +192,11 @@ private:
       const auto data_i = data_.begin() + i * n_groups_;
       // Compare data
       sys.adjoint_compare_data(time, data_i, state_i,
-                               adjoint_curr, adjoint_next);
+                               n_adjoint, adjoint_curr, adjoint_next);
       std::swap(adjoint_curr, adjoint_next);
       // Then run the system backwards from time => time_i
       const auto n_steps = sys.adjoint_run_to_time(time, time_i, state_i,
+                                                   n_adjoint,
                                                    adjoint_curr, adjoint_next);
       // Bookkeeping chore
       if (n_steps % 2 == 1) {
@@ -207,12 +208,12 @@ private:
 
     // Initial conditions go right at the end, and are surprisingly
     // hard to work out.
-    sys.adjoint_initial(time, state, adjoint_curr, adjoint_next);
+    sys.adjoint_initial(time, state, n_adjoint, adjoint_curr, adjoint_next);
 
     // At the end of the calculation, copy the final states so that
     // both copies winthin adjoint_ are the same - this means that the
     // gradient calculation will be correct.
-    std::copy_n(adjoint_next, n_adjoint, adjoint_curr);
+    std::copy_n(adjoint_next, n_adjoint * n_groups_, adjoint_curr);
 
     gradient_is_current_ = true;
   }

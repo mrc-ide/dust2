@@ -229,19 +229,24 @@ public:
   }
 
   template <typename IterData>
-  void adjoint_compare_data(real_type time, IterData data,
+  void adjoint_compare_data(const real_type time,
+                            IterData data,
                             const real_type * state,
+                            const size_t n_adjoint,
                             const real_type * adjoint_curr,
                             real_type * adjoint_next) {
     for (size_t i = 0; i < n_groups_; ++i, ++data) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
-        const auto offset = k * n_state_;
+        const auto offset_state = k * n_state_;
+        const auto offset_adjoint = k * n_adjoint;
         try {
           T::adjoint_compare_data(time, dt_,
-                                  state + offset, adjoint_curr, *data,
+                                  state + offset_state,
+                                  adjoint_curr + offset_adjoint,
+                                  *data,
                                   shared_[i], internal_[i],
-                                  adjoint_next);
+                                  adjoint_next + offset_adjoint);
         } catch (std::exception const& e) {
           errors_.capture(e, k);
         }
@@ -256,6 +261,7 @@ public:
   size_t adjoint_run_to_time(const real_type time0,
                              const real_type time1,
                              const real_type* state,
+                             const size_t n_adjoint,
                              real_type* adjoint_curr,
                              real_type* adjoint_next) {
     // ----|xxxx|---
@@ -265,12 +271,14 @@ public:
     for (size_t i = 0; i < n_groups_; ++i) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
-        const auto offset = k * n_state_;
-        auto state_ij = state + offset;
+        const auto offset_state = k * n_state_;
+        const auto offset_adjoint = k * n_adjoint;
         try {
           adjoint_run_particle(time0, dt_, n_steps, stride,
                                shared_[i], internal_[i],
-                               state_ij, adjoint_curr, adjoint_next);
+                               state + offset_state,
+                               adjoint_curr + offset_adjoint,
+                               adjoint_next + offset_adjoint);
         } catch (std::exception const& e) {
           errors_.capture(e, k);
         }
@@ -280,21 +288,24 @@ public:
     return n_steps;
   }
 
-  void adjoint_initial(real_type time, const real_type * state,
+  void adjoint_initial(const real_type time,
+                       const real_type * state,
+                       const size_t n_adjoint,
                        const real_type * adjoint_curr,
                        real_type * adjoint_next) {
     for (size_t i = 0; i < n_groups_; ++i) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
-        const auto offset = k * n_state_;
+        const auto offset_state = k * n_state_;
+        const auto offset_adjoint = k * n_adjoint;
         try {
           T::adjoint_initial(time,
                              dt_,
-                             state + offset,
-                             adjoint_curr + offset,
+                             state + offset_state,
+                             adjoint_curr + offset_adjoint,
                              shared_[i],
                              internal_[i],
-                             adjoint_next + offset);
+                             adjoint_next + offset_adjoint);
         } catch (std::exception const& e) {
           errors_.capture(e, k);
         }
