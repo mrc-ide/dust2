@@ -170,6 +170,15 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 0,
 ##'
 ##' @param sys A `dust_system` object
 ##'
+##' @param index_state Index of the state to fetch, if you would like
+##'   only a subset
+##'
+##' @param index_particle Index of the particle to fetch, if you would
+##'   like a subset
+##'
+##' @param index_group Index of the group to fetch, if you would like
+##'   a subset
+##'
 ##' @return An array of system state.  If your system is ungrouped, then
 ##'   this has two dimensions (state, particle).  If grouped, this has
 ##'   three dimensions (state, particle, group)
@@ -179,9 +188,11 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 0,
 ##'   system-specific initial conditions.
 ##'
 ##' @export
-dust_system_state <- function(sys) {
+dust_system_state <- function(sys, index_state = NULL, index_particle = NULL,
+                              index_group = NULL) {
   check_is_dust_system(sys)
-  sys$methods$state(sys$ptr, sys$grouped)
+  sys$methods$state(sys$ptr, index_state, index_particle, index_group,
+                    sys$grouped)
 }
 
 
