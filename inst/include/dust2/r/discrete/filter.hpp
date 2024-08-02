@@ -62,13 +62,12 @@ cpp11::sexp dust2_discrete_filter_alloc(cpp11::list r_pars,
   // means that we can change the number of groups without affecting
   // the results, though we can't change the number of particles as
   // easily.
-  const auto n_groups_effective = grouped ? n_groups : 1;
-  const auto n_streams = n_groups_effective * (n_particles + 1);
+  const auto n_streams = n_groups * (n_particles + 1);
   const auto rng_state = mcstate::random::prng<rng_state_type>(n_streams, seed, deterministic).export_state();
   const auto rng_len = rng_state_type::size();
   rng_seed_type seed_filter;
   rng_seed_type seed_system;
-  for (size_t i = 0; i < n_groups_effective; ++i) {
+  for (size_t i = 0; i < n_groups; ++i) {
     const auto it = rng_state.begin() + i * rng_len * (n_particles + 1);
     seed_filter.insert(seed_filter.end(),
                        it, it + rng_len);
@@ -85,18 +84,9 @@ cpp11::sexp dust2_discrete_filter_alloc(cpp11::list r_pars,
   cpp11::external_pointer<filter<dust_discrete<T>>> ptr(obj, true, false);
 
   cpp11::sexp r_n_state = cpp11::as_sexp(obj->sys.n_state());
-  cpp11::sexp r_group_names = R_NilValue;
-  if (grouped) {
-    r_group_names = r_pars.attr("names");
-  }
-  cpp11::sexp r_grouped = cpp11::as_sexp(grouped);
 
   using namespace cpp11::literals;
-  return cpp11::writable::list{"ptr"_nm = ptr,
-      "n_state"_nm = r_n_state,
-      "grouped"_nm = r_grouped,
-      "group_names"_nm = r_group_names
-      };
+  return cpp11::writable::list{"ptr"_nm = ptr, "n_state"_nm = r_n_state};
 }
 
 }

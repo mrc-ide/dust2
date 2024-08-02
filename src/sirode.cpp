@@ -113,8 +113,8 @@ SEXP dust2_system_sirode_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {
 }
 
 [[cpp11::register]]
-SEXP dust2_system_sirode_state(cpp11::sexp ptr, cpp11::sexp r_index_state, cpp11::sexp r_index_particle, cpp11::sexp r_index_group, bool grouped) {
-  return dust2::r::dust2_system_state<dust2::dust_continuous<sirode>>(ptr, r_index_state, r_index_particle, r_index_group, grouped);
+SEXP dust2_system_sirode_state(cpp11::sexp ptr, cpp11::sexp r_index_state, cpp11::sexp r_index_particle, cpp11::sexp r_index_group, bool preserve_group_dimension) {
+  return dust2::r::dust2_system_state<dust2::dust_continuous<sirode>>(ptr, r_index_state, r_index_particle, r_index_group, preserve_group_dimension);
 }
 
 [[cpp11::register]]
@@ -128,8 +128,8 @@ SEXP dust2_system_sirode_set_state_initial(cpp11::sexp ptr) {
 }
 
 [[cpp11::register]]
-SEXP dust2_system_sirode_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool grouped) {
-  return dust2::r::dust2_system_set_state<dust2::dust_continuous<sirode>>(ptr, r_state, grouped);
+SEXP dust2_system_sirode_set_state(cpp11::sexp ptr, cpp11::sexp r_state) {
+  return dust2::r::dust2_system_set_state<dust2::dust_continuous<sirode>>(ptr, r_state);
 }
 
 [[cpp11::register]]
@@ -153,11 +153,11 @@ SEXP dust2_system_sirode_set_time(cpp11::sexp ptr, cpp11::sexp r_time) {
 }
 
 [[cpp11::register]]
-SEXP dust2_system_sirode_update_pars(cpp11::sexp ptr, cpp11::list pars, bool grouped) {
-  return dust2::r::dust2_system_update_pars<dust2::dust_continuous<sirode>>(ptr, pars, grouped);
+SEXP dust2_system_sirode_update_pars(cpp11::sexp ptr, cpp11::list pars) {
+  return dust2::r::dust2_system_update_pars<dust2::dust_continuous<sirode>>(ptr, pars);
 }
 
 [[cpp11::register]]
-SEXP dust2_system_sirode_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::sexp r_index, bool grouped) {
-  return dust2::r::dust2_system_simulate<dust2::dust_continuous<sirode>>(ptr, r_times, r_index, grouped);
+SEXP dust2_system_sirode_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::sexp r_index, bool preserve_group_dimension) {
+  return dust2::r::dust2_system_simulate<dust2::dust_continuous<sirode>>(ptr, r_times, r_index, preserve_group_dimension);
 }

@@ -199,29 +199,27 @@ cpp11::sexp export_array_n(Iter iter, std::initializer_list<size_t> dims) {
 
 template <typename T>
 std::vector<typename T::shared_state> build_shared(cpp11::list r_pars,
-                                                   size_t n_groups) {
-  const auto grouped = n_groups > 0;
-  std::vector<typename T::shared_state> shared;
-  if (grouped) {
-
-    if (r_pars.size() != static_cast<int>(n_groups)) {
-      cpp11::stop("Expected 'pars' to have length %d to match 'n_groups'",
-                  static_cast<int>(n_groups));
-    }
-    size_t size = 0;
-    for (size_t i = 0; i < n_groups; ++i) {
-      shared.push_back(T::build_shared(r_pars[i]));
-      const auto size_i = T::size_state(shared[i]);
-      if (i == 0) {
-        size = size_i;
-      } else if (size_i != size) {
-        cpp11::stop("Expected state length for group %d to be %d, but it was %d",
-                    i + 1, size, size_i);
-      }
-    }
-  } else {
-    shared.push_back(T::build_shared(r_pars));
+						   size_t n_groups) {
+  if (r_pars.size() != static_cast<int>(n_groups)) {
+    cpp11::stop("Expected 'pars' to have length %d to match 'n_groups'",
+		static_cast<int>(n_groups));
   }
+
+  std::vector<typename T::shared_state> shared;
+  shared.reserve(n_groups);
+
+  size_t size = 0;
+  for (size_t i = 0; i < n_groups; ++i) {
+    shared.push_back(T::build_shared(r_pars[i]));
+    const auto size_i = T::size_state(shared[i]);
+    if (i == 0) {
+      size = size_i;
+    } else if (size_i != size) {
+      cpp11::stop("Expected state length for group %d to be %d, but it was %d",
+		  i + 1, size, size_i);
+    }
+  }
+
   return shared;
 }
 
@@ -236,24 +234,18 @@ std::vector<typename T::internal_state> build_internal(std::vector<typename T::s
 }
 
 template <typename T>
-void update_pars(T& obj, cpp11::list r_pars, bool grouped) {
+void update_pars(T& obj, cpp11::list r_pars) {
   using system_type = typename T::system_type;
-  if (grouped) {
-    const auto n_groups = obj.n_groups();
-    if (r_pars.size() != static_cast<int>(n_groups)) {
-      cpp11::stop("Expected 'pars' to have length %d to match 'n_groups'",
-                  static_cast<int>(n_groups));
-    }
-    for (size_t i = 0; i < n_groups; ++i) {
-      cpp11::list r_pars_i = r_pars[i];
-      obj.update_shared(i, [&] (auto& shared) {
-                             system_type::update_shared(r_pars_i, shared);
-                            });
-    }
-  } else {
-    obj.update_shared(0, [&] (auto& shared) {
-                           system_type::update_shared(r_pars, shared);
-                          });
+  const auto n_groups = obj.n_groups();
+  if (r_pars.size() != static_cast<int>(n_groups)) {
+    cpp11::stop("Expected 'pars' to have length %d to match 'n_groups'",
+		static_cast<int>(n_groups));
+  }
+  for (size_t i = 0; i < n_groups; ++i) {
+    cpp11::list r_pars_i = r_pars[i];
+    obj.update_shared(i, [&] (auto& shared) {
+      system_type::update_shared(r_pars_i, shared);
+    });
   }
 }
 
@@ -262,7 +254,7 @@ std::vector<typename T::data_type> check_data(cpp11::list r_data,
                                               size_t n_time,
                                               size_t n_groups,
                                               const char * name) {
-  const bool grouped = n_groups > 0;
+  const bool grouped = n_groups > 1; // for now, this needs changing though
   std::vector<typename T::data_type> data;
 
   check_length(r_data, n_time, name);
@@ -292,10 +284,15 @@ std::vector<typename T::data_type> check_data(cpp11::list r_data,
 }
 
 template <typename T>
-void set_state(T& obj, cpp11::sexp r_state, bool grouped) {
+void set_state(T& obj, cpp11::sexp r_state) {
   // Suppose that we have a n_state x n_particles x n_groups grouped
   // system, we then require that we have a state array with rank 3;
   // for an ungrouped system this will be rank 2 array.
+  //
+  // TODO: these checks would be nicer in R, just do it there and here
+  // we can just accept what we are given?
+  //
+  bool grouped = obj.n_groups() > 1; // TODO, fixme, as above.
   auto dim = cpp11::as_cpp<cpp11::integers>(r_state.attr("dim"));
   const auto rank = dim.size();
   const auto rank_expected = grouped ? 3 : 2;

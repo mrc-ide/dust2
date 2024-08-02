@@ -32,7 +32,8 @@ SEXP dust2_system_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {
 template <typename T>
 SEXP dust2_system_state(cpp11::sexp ptr, cpp11::sexp r_index_state,
 			cpp11::sexp r_index_particle,
-			cpp11::sexp r_index_group, bool grouped) {
+			cpp11::sexp r_index_group,
+			bool preserve_group_dimension) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
   check_errors(obj, "get state from");
   const auto n_state = obj->n_state();
@@ -45,13 +46,13 @@ SEXP dust2_system_state(cpp11::sexp ptr, cpp11::sexp r_index_state,
     r_index_particle == R_NilValue &&
     r_index_group == R_NilValue;
   if (everything) {
-    if (grouped) {
+    if (preserve_group_dimension) {
       ret = export_array_n(iter_src, {n_state, n_particles, n_groups});
     } else {
       ret = export_array_n(iter_src, {n_state, n_particles * n_groups});
     }
   } else {
-    if (!grouped && r_index_group != R_NilValue) {
+    if (!preserve_group_dimension && r_index_group != R_NilValue) {
       cpp11::stop("Can't provide 'index_group' for a non-grouped system");
     }
     const auto index_state =
@@ -70,7 +71,7 @@ SEXP dust2_system_state(cpp11::sexp ptr, cpp11::sexp r_index_state,
       index_group.empty() ? n_groups : index_group.size();
     cpp11::writable::doubles d(n_state_save * n_particle_save * n_group_save);
     double* it_dst = REAL(d);
-    if (grouped) {
+    if (preserve_group_dimension) {
       set_array_dims(d, {n_state_save, n_particle_save, n_group_save});
     } else {
       set_array_dims(d, {n_state_save, n_particle_save * n_group_save});
@@ -124,9 +125,9 @@ SEXP dust2_system_set_state_initial(cpp11::sexp ptr) {
 }
 
 template <typename T>
-SEXP dust2_system_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool grouped) {
+SEXP dust2_system_set_state(cpp11::sexp ptr, cpp11::sexp r_state) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
-  set_state(*obj, r_state, grouped);
+  set_state(*obj, r_state);
   return R_NilValue;
 }
 
@@ -183,10 +184,9 @@ SEXP dust2_system_set_time(cpp11::sexp ptr, cpp11::sexp r_time) {
 }
 
 template <typename T>
-SEXP dust2_system_update_pars(cpp11::sexp ptr, cpp11::list r_pars,
-                              bool grouped) {
+SEXP dust2_system_update_pars(cpp11::sexp ptr, cpp11::list r_pars) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
-  update_pars(*obj, r_pars, grouped);
+  update_pars(*obj, r_pars);
   return R_NilValue;
 }
 
@@ -195,7 +195,7 @@ SEXP dust2_system_update_pars(cpp11::sexp ptr, cpp11::list r_pars,
 template <typename T>
 SEXP dust2_system_compare_data(cpp11::sexp ptr,
                                cpp11::sexp r_data,
-                               bool grouped) {
+                               bool preserve_group_dimension) {
   using system_type = typename T::system_type;
   using data_type = typename T::data_type;
 
@@ -204,7 +204,8 @@ SEXP dust2_system_compare_data(cpp11::sexp ptr,
   const auto n_groups = obj->n_groups();
   std::vector<data_type> data;
   auto r_data_list = cpp11::as_cpp<cpp11::list>(r_data);
-  if (grouped) {
+  // TODO: shift into R
+  if (preserve_group_dimension) {
     check_length(r_data_list, n_groups, "data");
     for (size_t i = 0; i < n_groups; ++i) {
       auto r_data_list_i = cpp11::as_cpp<cpp11::list>(r_data_list[i]);
@@ -216,7 +217,7 @@ SEXP dust2_system_compare_data(cpp11::sexp ptr,
 
   cpp11::writable::doubles ret(obj->n_particles() * obj->n_groups());
   obj->compare_data(data.begin(), REAL(ret));
-  if (grouped) {
+  if (preserve_group_dimension) {
     set_array_dims(ret, {obj->n_particles(), obj->n_groups()});
   }
   return ret;
@@ -226,7 +227,7 @@ template <typename T>
 SEXP dust2_system_simulate(cpp11::sexp ptr,
                            cpp11::sexp r_times,
                            cpp11::sexp r_index,
-                           bool grouped) {
+                           bool preserve_group_dimension) {
   using real_type = typename T::real_type;
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
   check_errors(obj, "simulate");
@@ -255,7 +256,7 @@ SEXP dust2_system_simulate(cpp11::sexp ptr,
   const auto len = n_state_save * n_particles * n_groups * n_times;
   cpp11::sexp ret = cpp11::writable::doubles(len);
   h.export_state(REAL(ret), false);
-  if (grouped) {
+  if (preserve_group_dimension) {
     set_array_dims(ret, {n_state_save, n_particles, n_groups, n_times});
   } else {
     set_array_dims(ret, {n_state_save, n_particles * n_groups, n_times});

@@ -52,18 +52,9 @@ cpp11::sexp dust2_discrete_unfilter_alloc(cpp11::list r_pars,
   cpp11::external_pointer<unfilter<dust_discrete<T>>> ptr(obj, true, false);
 
   cpp11::sexp r_n_state = cpp11::as_sexp(obj->sys.n_state());
-  cpp11::sexp r_group_names = R_NilValue;
-  if (grouped) {
-    r_group_names = r_pars.attr("names");
-  }
-  cpp11::sexp r_grouped = cpp11::as_sexp(grouped);
 
   using namespace cpp11::literals;
-  return cpp11::writable::list{"ptr"_nm = ptr,
-      "n_state"_nm = r_n_state,
-      "grouped"_nm = r_grouped,
-      "group_names"_nm = r_group_names
-      };
+  return cpp11::writable::list{"ptr"_nm = ptr, "n_state"_nm = r_n_state};
 }
 
 }

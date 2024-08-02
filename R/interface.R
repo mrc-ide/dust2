@@ -123,14 +123,47 @@ dust_system_generator <- function(name, time_type,
 ##' @param n_threads Integer, the number of threads to use in
 ##'   parallelisable calculations.  See Details.
 ##'
+##' @param preserve_particle_dimension Logical, indicating if output
+##'   from the system should preserve the particle dimension in the
+##'   case where a single particle is run.  In the case where more
+##'   than one particle is run, this argument has no effect as the
+##'   dimension is always preserved.
+##'
+##' @param preserve_group_dimension Logical, indicating if state and
+##'   output from the system should preserve the group dimension in
+##'   the case where a single group is run.  In the case where more
+##'   than one group is run, this argument has no effect as the
+##'   dimension is always preserved.
+##'
 ##' @return A `dust_system` object, with opaque format.
 ##'
 ##' @export
-dust_system_create <- function(generator, pars, n_particles, n_groups = 0,
+dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
                                time = 0, dt = NULL, ode_control = NULL,
                                seed = NULL, deterministic = FALSE,
-                               n_threads = 1) {
+                               n_threads = 1,
+                               preserve_particle_dimension = FALSE,
+                               preserve_group_dimension = FALSE) {
+  call <- environment()
   check_is_dust_system_generator(generator, substitute(generator))
+  ## check_time(time, call = call)
+  check_dt(dt, call = call)
+  assert_scalar_size(n_particles, call = call)
+  assert_scalar_size(n_groups, call = call)
+  assert_scalar_size(n_threads, call = call)
+  assert_scalar_character(preserve_particle_dimension, call = call)
+  assert_scalar_character(preserve_group_dimension, call = call)
+
+  preserve_particle_dimension <- preserve_particle_dimension || n_particles > 1
+  preserve_group_dimension <- preserve_group_dimension || n_groups > 1
+
+  ## This simplifies processing of parameters in the system, but
+  ## there's a chance that we'll need to be careful with errors thrown
+  ## there.
+  if (n_groups == 1 && !preserve_group_dimension) {
+    pars <- list(pars)
+  }
+
   if (generator$properties$time_type == "discrete") {
     if (!is.null(ode_control)) {
       cli::cli_abort("Can't use 'ode_control' with discrete-time systems")
@@ -152,11 +185,13 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 0,
   ## Here, we augment things slightly
   res$name <- generator$name
   res$n_particles <- as.integer(n_particles)
-  res$n_groups <- as.integer(max(n_groups), 1)
+  res$n_groups <- as.integer(n_groups)
   res$n_threads <- check_n_threads(n_threads, n_particles, n_groups)
   res$deterministic <- deterministic
   res$methods <- generator$methods
   res$properties <- generator$properties
+  res$preserve_particle_dimension <- preserve_particle_dimension
+  res$preserve_group_dimension <- preserve_group_dimension
   res$ode_control <- ode_control
   res$dt <- dt
   class(res) <- "dust_system"
@@ -179,9 +214,10 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 0,
 ##' @param index_group Index of the group to fetch, if you would like
 ##'   a subset
 ##'
-##' @return An array of system state.  If your system is ungrouped, then
-##'   this has two dimensions (state, particle).  If grouped, this has
-##'   three dimensions (state, particle, group)
+##' @return An array of system state.  If your system is ungrouped
+##'   (i.e., `n_groups = 1` and `preserve_group_dimension = FALSE`),
+##'   then this has two dimensions (state, particle).  If grouped,
+##'   this has three dimensions (state, particle, group)
 ##'
 ##' @seealso [dust_system_set_state()] for setting state and
 ##'   [dust_system_set_state_initial()] for setting state to the
@@ -192,7 +228,7 @@ dust_system_state <- function(sys, index_state = NULL, index_particle = NULL,
                               index_group = NULL) {
   check_is_dust_system(sys)
   sys$methods$state(sys$ptr, index_state, index_particle, index_group,
-                    sys$grouped)
+                    sys$preserve_group_dimension)
 }
 
 
@@ -212,7 +248,7 @@ dust_system_state <- function(sys, index_state = NULL, index_particle = NULL,
 ##' @export
 dust_system_set_state <- function(sys, state) {
   check_is_dust_system(sys)
-  sys$methods$set_state(sys$ptr, state, sys$grouped)
+  sys$methods$set_state(sys$ptr, state, sys$preserve_group_dimension)
   invisible()
 }
 
@@ -315,7 +351,10 @@ dust_system_set_rng_state <- function(sys, rng_state) {
 ##' @export
 dust_system_update_pars <- function(sys, pars) {
   check_is_dust_system(sys)
-  sys$methods$update_pars(sys$ptr, pars, sys$grouped)
+  if (!sys$preserve_group_dimension) {
+    pars <- list(pars)
+  }
+  sys$methods$update_pars(sys$ptr, pars)
   invisible()
 }
 
@@ -365,7 +404,7 @@ dust_system_run_to_time <- function(sys, time) {
 ##' @export
 dust_system_simulate <- function(sys, times, index = NULL) {
   check_is_dust_system(sys)
-  ret <- sys$methods$simulate(sys$ptr, times, index, sys$grouped)
+  ret <- sys$methods$simulate(sys$ptr, times, index, sys$preserve_group_dimension)
   if (!is.null(index) && !is.null(names(index))) {
     rownames(ret) <- names(index)
   }
@@ -479,14 +518,14 @@ dust_system_compare_data <- function(sys, data) {
             "have 'compare_data' support"),
       arg = "system")
   }
-  sys$methods$compare_data(sys$ptr, data, sys$grouped)
+  sys$methods$compare_data(sys$ptr, data, sys$preserve_group_dimension)
 }
 
 
 ##' @export
 print.dust_system <- function(x, ...) {
   cli::cli_h1("<dust_system: {x$name}>")
-  if (x$grouped) {
+  if (x$preserve_group_dimension) {
     cli::cli_alert_info(paste(
       "{x$n_state} state x {x$n_particles} particle{?s} x",
       "{x$n_groups} group{?s}"))
@@ -530,7 +569,7 @@ print.dust_system_generator <- function(x, ...) {
 
 ##' @export
 dim.dust_system <- function(x, ...) {
-  c(x$n_state, x$n_particles, if (x$grouped) x$n_groups)
+  c(x$n_state, x$n_particles, if (x$preserve_group_dimension) x$n_groups)
 }
 
 
