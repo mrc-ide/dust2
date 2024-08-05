@@ -44,6 +44,7 @@ cpp11::sexp dust2_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
 
 template <typename T>
 cpp11::sexp dust2_unfilter_last_history(cpp11::sexp ptr,
+                                        bool preserve_particle_dimension,
 					bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
@@ -63,10 +64,12 @@ cpp11::sexp dust2_unfilter_last_history(cpp11::sexp ptr,
   const auto len = n_state * n_particles * n_groups * n_times;
   cpp11::sexp ret = cpp11::writable::doubles(len);
   history.export_state(REAL(ret), reorder);
-  if (preserve_group_dimension) {
+  if (preserve_group_dimension && preserve_particle_dimension) {
     set_array_dims(ret, {n_state, n_particles, n_groups, n_times});
-  } else {
+  } else if (preserve_group_dimension || preserve_particle_dimension) {
     set_array_dims(ret, {n_state, n_particles * n_groups, n_times});
+  } else {
+    set_array_dims(ret, {n_state * n_particles * n_groups, n_times});
   }
   return ret;
 }

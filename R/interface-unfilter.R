@@ -139,6 +139,7 @@ dust_unfilter_last_history <- function(unfilter) {
       i = "Unfilter has not yet been run"))
   }
   unfilter$methods$last_history(unfilter$ptr,
+                                unfilter$preserve_particle_dimension,
                                 unfilter$preserve_group_dimension)
 }
 

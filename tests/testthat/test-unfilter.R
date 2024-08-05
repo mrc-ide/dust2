@@ -71,7 +71,6 @@ test_that("can get unfilter history", {
     "History is not current")
 
   m <- dust_system_create(sir(), pars, time = time_start, n_particles = 1,
-                          preserve_particle_dimension = TRUE,
                           deterministic = TRUE)
   dust_system_set_state_initial(m)
   cmp <- dust_system_simulate(m, time)
@@ -95,9 +94,9 @@ test_that("can get partial unfilter history", {
 
   h1 <- dust_unfilter_last_history(obj1)
   h2 <- dust_unfilter_last_history(obj2)
-  expect_equal(dim(h1), c(5, 1, 4))
-  expect_equal(dim(h2), c(2, 1, 4))
-  expect_equal(h2, h1[c(2, 4), , , drop = FALSE])
+  expect_equal(dim(h1), c(5, 4))
+  expect_equal(dim(h2), c(2, 4))
+  expect_equal(h2, h1[c(2, 4), , drop = FALSE])
 })
 
 
@@ -223,9 +222,9 @@ test_that("can save history from structured unfilter", {
   h1 <- dust_unfilter_last_history(obj1)
   h2 <- dust_unfilter_last_history(obj2)
 
-  expect_equal(dim(h), c(5, 1, 2, 4))
-  expect_equal(dim(h1), c(5, 1, 4))
-  expect_equal(dim(h2), c(5, 1, 4))
-  expect_equal(array(h[, , 1, ], dim(h1)), h1)
-  expect_equal(array(h[, , 2, ], dim(h2)), h2)
+  expect_equal(dim(h), c(5, 2, 4))
+  expect_equal(dim(h1), c(5, 4))
+  expect_equal(dim(h2), c(5, 4))
+  expect_equal(array(h[, 1, ], dim(h1)), h1)
+  expect_equal(array(h[, 2, ], dim(h2)), h2)
 })
