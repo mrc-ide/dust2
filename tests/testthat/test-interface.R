@@ -68,3 +68,21 @@ test_that("error if non-dust system given to dust function", {
   expect_error(dust_filter_run(NULL),
                "Expected 'filter' to be a 'dust_filter' object")
 })
+
+
+test_that("can control dropping of single-element dimensions", {
+  pars <- list(len = 3, sd = 1, random_initial = TRUE)
+  obj1 <- dust_system_create(walk(), list(pars), n_particles = 10,
+                             preserve_group_dimension = TRUE,
+                             seed = 42)
+  obj2 <- dust_system_create(walk(), pars, n_particles = 10,
+                             seed = 42)
+  dust_system_set_state_initial(obj1)
+  dust_system_set_state_initial(obj2)
+  r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)$normal(3, 0, 1)
+  expect_equal(dim(obj1), c(3, 10, 1))
+  expect_equal(dim(obj2), c(3, 10))
+
+  expect_equal(dust_system_state(obj1), array(r, c(3, 10, 1)))
+  expect_equal(dust_system_state(obj2), r)
+})
