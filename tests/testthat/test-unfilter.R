@@ -88,7 +88,7 @@ test_that("can get partial unfilter history", {
 
   obj1 <- dust_unfilter_create(sir(), time_start, time, data)
   obj2 <- dust_unfilter_create(sir(), time_start, time, data,
-                               index = c(2, 4))
+                               index_state = c(2, 4))
   expect_equal(dust_unfilter_run(obj1, pars, save_history = TRUE),
                dust_unfilter_run(obj2, pars, save_history = TRUE))
 

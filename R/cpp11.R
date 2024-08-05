@@ -100,12 +100,12 @@ dust2_system_sir_simulate <- function(ptr, r_times, r_index, preserve_particle_d
   .Call(`_dust2_dust2_system_sir_simulate`, ptr, r_times, r_index, preserve_particle_dimension, preserve_group_dimension)
 }
 
-dust2_unfilter_sir_alloc <- function(r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_n_threads, r_index) {
-  .Call(`_dust2_dust2_unfilter_sir_alloc`, r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_n_threads, r_index)
+dust2_unfilter_sir_alloc <- function(r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_n_threads, r_index_state) {
+  .Call(`_dust2_dust2_unfilter_sir_alloc`, r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_n_threads, r_index_state)
 }
 
-dust2_filter_sir_alloc <- function(r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_n_threads, r_index, r_seed) {
-  .Call(`_dust2_dust2_filter_sir_alloc`, r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_n_threads, r_index, r_seed)
+dust2_filter_sir_alloc <- function(r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_n_threads, r_index_state, r_seed) {
+  .Call(`_dust2_dust2_filter_sir_alloc`, r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_n_threads, r_index_state, r_seed)
 }
 
 dust2_system_sir_compare_data <- function(ptr, r_data, preserve_particle_dimension, preserve_group_dimension) {

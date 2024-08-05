@@ -12,7 +12,7 @@ dust_filter_create(
   n_particles,
   n_groups = 1,
   dt = 1,
-  index = NULL,
+  index_state = NULL,
   n_threads = 1,
   preserve_group_dimension = FALSE,
   seed = NULL
@@ -50,6 +50,12 @@ slowly.}
 \item{dt}{The time step for discrete time systems, defaults to 1
 if not given.  It is an error to provide a non-NULL argument
 with continuous-time systems.}
+
+\item{index_state}{An optional index of states to extract.  If
+given, then we subset the system state on return.  You can use
+this to return fewer system states than the system ran with, to
+reorder states, or to name them on exit (names present on the
+index will be copied into the rownames of the returned array).}
 
 \item{n_threads}{Integer, the number of threads to use in
 parallelisable calculations.  See Details.}

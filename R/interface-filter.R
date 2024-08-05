@@ -37,7 +37,7 @@
 ##' @export
 dust_filter_create <- function(generator, time_start, time, data,
                                n_particles, n_groups = 1, dt = 1,
-                               index = NULL, n_threads = 1,
+                               index_state = NULL, n_threads = 1,
                                preserve_group_dimension = FALSE,
                                seed = NULL) {
   call <- environment()
@@ -54,7 +54,7 @@ dust_filter_create <- function(generator, time_start, time, data,
   dt <- check_dt(dt, call = call)
   data <- check_data(data, length(time), n_groups, preserve_group_dimension,
                      call = call)
-  index <- check_index(index, call = call)
+  index_state <- check_index(index_state, call = call)
   n_threads <- check_n_threads(n_threads, n_particles, n_groups)
 
   inputs <- list(time_start = time_start,
@@ -64,7 +64,7 @@ dust_filter_create <- function(generator, time_start, time, data,
                  n_particles = n_particles,
                  n_groups = n_groups,
                  n_threads = n_threads,
-                 index = index,
+                 index_state = index_state,
                  preserve_group_dimension = preserve_group_dimension)
 
   res <- list2env(
@@ -74,7 +74,7 @@ dust_filter_create <- function(generator, time_start, time, data,
          n_groups = as.integer(max(n_groups), 1),
          deterministic = FALSE,
          methods = generator$methods$filter,
-         index = index,
+         index_state = index_state,
          preserve_group_dimension = preserve_group_dimension),
     parent = emptyenv())
   class(res) <- "dust_filter"
@@ -98,7 +98,7 @@ dust_filter_create <- function(generator, time_start, time, data,
 dust_filter_copy <- function(filter, seed = NULL) {
   dst <- new.env(parent = emptyenv())
   nms <- c("inputs", "n_particles", "n_groups", "deterministic", "methods",
-           "index", "preserve_group_dimension")
+           "index_state", "preserve_group_dimension")
   for (nm in nms) {
     dst[[nm]] <- filter[[nm]]
   }
@@ -120,7 +120,7 @@ filter_create <- function(filter, pars) {
                          inputs$n_particles,
                          inputs$n_groups,
                          inputs$n_threads,
-                         inputs$index,
+                         inputs$index_state,
                          filter$initial_rng_state),
     filter)
   filter$initial_rng_state <- NULL
@@ -145,7 +145,7 @@ filter_create <- function(filter, pars) {
 ##'   should be saved while the simulation runs; this has a small
 ##'   overhead in runtime and in memory.  History (particle
 ##'   trajectories) will be saved at each time in the filter.  If the
-##'   filter was constructed using a non-`NULL` `index` parameter,
+##'   filter was constructed using a non-`NULL` `index_state` parameter,
 ##'   the history is restricted to these states.
 ##'
 ##' @return A vector of likelihood values, with as many elements as

@@ -5,6 +5,7 @@
 ##'
 ##' @title Create an unfilter
 ##'
+##' @inheritParams dust_system_create
 ##' @inheritParams dust_filter_create
 ##'
 ##' @param n_particles The number of particles to run.  Typically this
@@ -18,7 +19,7 @@
 ##' @export
 dust_unfilter_create <- function(generator, time_start, time, data,
                                  n_particles = 1, n_groups = 1,
-                                 dt = 1, n_threads = 1, index = NULL,
+                                 dt = 1, n_threads = 1, index_state = NULL,
                                  preserve_particle_dimension = FALSE,
                                  preserve_group_dimension = FALSE) {
   call <- environment()
@@ -34,7 +35,7 @@ dust_unfilter_create <- function(generator, time_start, time, data,
   dt <- check_dt(dt, call = call)
   data <- check_data(data, length(time), n_groups, preserve_group_dimension,
                      call = call)
-  index <- check_index(index, call = call)
+  index_state <- check_index(index_state, call = call)
   n_threads <- check_n_threads(n_threads, n_particles, n_groups)
 
   inputs <- list(time_start = time_start,
@@ -44,7 +45,7 @@ dust_unfilter_create <- function(generator, time_start, time, data,
                  n_particles = n_particles,
                  n_groups = n_groups,
                  n_threads = n_threads,
-                 index = index,
+                 index_state = index_state,
                  preserve_particle_dimension = preserve_particle_dimension,
                  preserve_group_dimension = preserve_group_dimension)
 
@@ -54,7 +55,7 @@ dust_unfilter_create <- function(generator, time_start, time, data,
          n_groups = as.integer(n_groups),
          deterministic = TRUE,
          methods = generator$methods$unfilter,
-         index = index,
+         index_state = index_state,
          preserve_particle_dimension = preserve_particle_dimension,
          preserve_group_dimension = preserve_group_dimension),
     parent = emptyenv())
@@ -74,7 +75,7 @@ unfilter_create <- function(unfilter, pars) {
                            inputs$n_particles,
                            inputs$n_groups,
                            inputs$n_threads,
-                           inputs$index),
+                           inputs$index_state),
     unfilter)
 }
 
