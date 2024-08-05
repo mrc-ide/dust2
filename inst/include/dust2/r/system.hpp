@@ -125,9 +125,10 @@ SEXP dust2_system_set_state_initial(cpp11::sexp ptr) {
 }
 
 template <typename T>
-SEXP dust2_system_set_state(cpp11::sexp ptr, cpp11::sexp r_state) {
+SEXP dust2_system_set_state(cpp11::sexp ptr, cpp11::sexp r_state,
+                            bool preserve_group_dimension) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
-  set_state(*obj, r_state);
+  set_state(*obj, r_state, preserve_group_dimension);
   return R_NilValue;
 }
 

@@ -24,8 +24,8 @@ SEXP dust2_filter_{{name}}_update_pars(cpp11::sexp ptr, cpp11::list r_pars) {
 }
 
 [[cpp11::register]]
-SEXP dust2_filter_{{name}}_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history) {
-  return dust2::r::dust2_filter_run<dust2::dust_{{time_type}}<{{class}}>>(ptr, r_initial, save_history);
+SEXP dust2_filter_{{name}}_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool preserve_group_dimension) {
+  return dust2::r::dust2_filter_run<dust2::dust_{{time_type}}<{{class}}>>(ptr, r_initial, save_history, preserve_group_dimension);
 }
 
 [[cpp11::register]]

@@ -23,7 +23,7 @@ cpp11::sexp dust2_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
   if (r_initial != R_NilValue) {
-    set_state(obj->sys, r_initial);
+    set_state(obj->sys, r_initial, preserve_group_dimension);
   }
   const auto set_initial = r_initial == R_NilValue;
   if (adjoint) {

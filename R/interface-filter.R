@@ -40,6 +40,11 @@ dust_filter_create <- function(generator, time_start, time, data,
                                index = NULL, n_threads = 1,
                                preserve_group_dimension = FALSE,
                                seed = NULL) {
+  call <- environment()
+  check_generator_for_filter(generator, "filter", call = call)
+  assert_scalar_size(n_particles, allow_zero = FALSE, call = call)
+  assert_scalar_size(n_groups, allow_zero = FALSE, call = call)
+  n_threads <- check_n_threads(n_threads, n_particles, n_groups)
   check_time_sequence(time_start, time, call = call)
   check_dt(dt, call = call)
   check_data(data, length(time), n_groups, preserve_group_dimension,

@@ -136,8 +136,8 @@ SEXP dust2_system_walk_set_state_initial(cpp11::sexp ptr) {
 }
 
 [[cpp11::register]]
-SEXP dust2_system_walk_set_state(cpp11::sexp ptr, cpp11::sexp r_state) {
-  return dust2::r::dust2_system_set_state<dust2::dust_discrete<walk>>(ptr, r_state);
+SEXP dust2_system_walk_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool preserve_group_dimension) {
+  return dust2::r::dust2_system_set_state<dust2::dust_discrete<walk>>(ptr, r_state, preserve_group_dimension);
 }
 
 [[cpp11::register]]

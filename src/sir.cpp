@@ -239,8 +239,8 @@ SEXP dust2_system_sir_set_state_initial(cpp11::sexp ptr) {
 }
 
 [[cpp11::register]]
-SEXP dust2_system_sir_set_state(cpp11::sexp ptr, cpp11::sexp r_state) {
-  return dust2::r::dust2_system_set_state<dust2::dust_discrete<sir>>(ptr, r_state);
+SEXP dust2_system_sir_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool preserve_group_dimension) {
+  return dust2::r::dust2_system_set_state<dust2::dust_discrete<sir>>(ptr, r_state, preserve_group_dimension);
 }
 
 [[cpp11::register]]
@@ -308,8 +308,8 @@ SEXP dust2_filter_sir_update_pars(cpp11::sexp ptr, cpp11::list r_pars) {
 }
 
 [[cpp11::register]]
-SEXP dust2_filter_sir_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history) {
-  return dust2::r::dust2_filter_run<dust2::dust_discrete<sir>>(ptr, r_initial, save_history);
+SEXP dust2_filter_sir_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool preserve_group_dimension) {
+  return dust2::r::dust2_filter_run<dust2::dust_discrete<sir>>(ptr, r_initial, save_history, preserve_group_dimension);
 }
 
 [[cpp11::register]]

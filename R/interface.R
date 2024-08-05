@@ -147,9 +147,9 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
   call <- environment()
   check_is_dust_system_generator(generator, substitute(generator))
   ## check_time(time, call = call)
-  assert_scalar_size(n_particles, call = call)
-  assert_scalar_size(n_groups, call = call)
-  assert_scalar_size(n_threads, call = call)
+  assert_scalar_size(n_particles, allow_zero = FALSE, call = call)
+  assert_scalar_size(n_groups, allow_zero = FALSE, call = call)
+  assert_scalar_size(n_threads, allow_zero = FALSE, call = call)
   assert_scalar_logical(preserve_particle_dimension, call = call)
   assert_scalar_logical(preserve_group_dimension, call = call)
 

@@ -48,10 +48,10 @@ extern "C" SEXP _dust2_dust2_system_logistic_set_state_initial(SEXP ptr) {
   END_CPP11
 }
 // logistic.cpp
-SEXP dust2_system_logistic_set_state(cpp11::sexp ptr, cpp11::sexp r_state);
-extern "C" SEXP _dust2_dust2_system_logistic_set_state(SEXP ptr, SEXP r_state) {
+SEXP dust2_system_logistic_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_system_logistic_set_state(SEXP ptr, SEXP r_state, SEXP preserve_group_dimension) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_system_logistic_set_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_state)));
+    return cpp11::as_sexp(dust2_system_logistic_set_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_state), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // logistic.cpp
@@ -132,10 +132,10 @@ extern "C" SEXP _dust2_dust2_system_sir_set_state_initial(SEXP ptr) {
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_system_sir_set_state(cpp11::sexp ptr, cpp11::sexp r_state);
-extern "C" SEXP _dust2_dust2_system_sir_set_state(SEXP ptr, SEXP r_state) {
+SEXP dust2_system_sir_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_system_sir_set_state(SEXP ptr, SEXP r_state, SEXP preserve_group_dimension) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_system_sir_set_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_state)));
+    return cpp11::as_sexp(dust2_system_sir_set_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_state), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // sir.cpp
@@ -230,10 +230,10 @@ extern "C" SEXP _dust2_dust2_filter_sir_update_pars(SEXP ptr, SEXP r_pars) {
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_filter_sir_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history);
-extern "C" SEXP _dust2_dust2_filter_sir_run(SEXP ptr, SEXP r_initial, SEXP save_history) {
+SEXP dust2_filter_sir_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_filter_sir_run(SEXP ptr, SEXP r_initial, SEXP save_history, SEXP preserve_group_dimension) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_filter_sir_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(save_history)));
+    return cpp11::as_sexp(dust2_filter_sir_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(save_history), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // sir.cpp
@@ -307,10 +307,10 @@ extern "C" SEXP _dust2_dust2_system_sirode_set_state_initial(SEXP ptr) {
   END_CPP11
 }
 // sirode.cpp
-SEXP dust2_system_sirode_set_state(cpp11::sexp ptr, cpp11::sexp r_state);
-extern "C" SEXP _dust2_dust2_system_sirode_set_state(SEXP ptr, SEXP r_state) {
+SEXP dust2_system_sirode_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_system_sirode_set_state(SEXP ptr, SEXP r_state, SEXP preserve_group_dimension) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_system_sirode_set_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_state)));
+    return cpp11::as_sexp(dust2_system_sirode_set_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_state), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // sirode.cpp
@@ -412,10 +412,10 @@ extern "C" SEXP _dust2_dust2_system_walk_set_state_initial(SEXP ptr) {
   END_CPP11
 }
 // walk.cpp
-SEXP dust2_system_walk_set_state(cpp11::sexp ptr, cpp11::sexp r_state);
-extern "C" SEXP _dust2_dust2_system_walk_set_state(SEXP ptr, SEXP r_state) {
+SEXP dust2_system_walk_set_state(cpp11::sexp ptr, cpp11::sexp r_state, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_system_walk_set_state(SEXP ptr, SEXP r_state, SEXP preserve_group_dimension) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_system_walk_set_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_state)));
+    return cpp11::as_sexp(dust2_system_walk_set_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_state), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // walk.cpp
@@ -466,7 +466,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_filter_sir_alloc",                  (DL_FUNC) &_dust2_dust2_filter_sir_alloc,                  10},
     {"_dust2_dust2_filter_sir_last_history",           (DL_FUNC) &_dust2_dust2_filter_sir_last_history,            2},
     {"_dust2_dust2_filter_sir_rng_state",              (DL_FUNC) &_dust2_dust2_filter_sir_rng_state,               1},
-    {"_dust2_dust2_filter_sir_run",                    (DL_FUNC) &_dust2_dust2_filter_sir_run,                     3},
+    {"_dust2_dust2_filter_sir_run",                    (DL_FUNC) &_dust2_dust2_filter_sir_run,                     4},
     {"_dust2_dust2_filter_sir_set_rng_state",          (DL_FUNC) &_dust2_dust2_filter_sir_set_rng_state,           2},
     {"_dust2_dust2_filter_sir_update_pars",            (DL_FUNC) &_dust2_dust2_filter_sir_update_pars,             2},
     {"_dust2_dust2_system_logistic_alloc",             (DL_FUNC) &_dust2_dust2_system_logistic_alloc,              8},
@@ -475,7 +475,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_system_logistic_rng_state",         (DL_FUNC) &_dust2_dust2_system_logistic_rng_state,          1},
     {"_dust2_dust2_system_logistic_run_to_time",       (DL_FUNC) &_dust2_dust2_system_logistic_run_to_time,        2},
     {"_dust2_dust2_system_logistic_set_rng_state",     (DL_FUNC) &_dust2_dust2_system_logistic_set_rng_state,      2},
-    {"_dust2_dust2_system_logistic_set_state",         (DL_FUNC) &_dust2_dust2_system_logistic_set_state,          2},
+    {"_dust2_dust2_system_logistic_set_state",         (DL_FUNC) &_dust2_dust2_system_logistic_set_state,          3},
     {"_dust2_dust2_system_logistic_set_state_initial", (DL_FUNC) &_dust2_dust2_system_logistic_set_state_initial,  1},
     {"_dust2_dust2_system_logistic_set_time",          (DL_FUNC) &_dust2_dust2_system_logistic_set_time,           2},
     {"_dust2_dust2_system_logistic_simulate",          (DL_FUNC) &_dust2_dust2_system_logistic_simulate,           4},
@@ -488,7 +488,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_system_sir_rng_state",              (DL_FUNC) &_dust2_dust2_system_sir_rng_state,               1},
     {"_dust2_dust2_system_sir_run_to_time",            (DL_FUNC) &_dust2_dust2_system_sir_run_to_time,             2},
     {"_dust2_dust2_system_sir_set_rng_state",          (DL_FUNC) &_dust2_dust2_system_sir_set_rng_state,           2},
-    {"_dust2_dust2_system_sir_set_state",              (DL_FUNC) &_dust2_dust2_system_sir_set_state,               2},
+    {"_dust2_dust2_system_sir_set_state",              (DL_FUNC) &_dust2_dust2_system_sir_set_state,               3},
     {"_dust2_dust2_system_sir_set_state_initial",      (DL_FUNC) &_dust2_dust2_system_sir_set_state_initial,       1},
     {"_dust2_dust2_system_sir_set_time",               (DL_FUNC) &_dust2_dust2_system_sir_set_time,                2},
     {"_dust2_dust2_system_sir_simulate",               (DL_FUNC) &_dust2_dust2_system_sir_simulate,                4},
@@ -501,7 +501,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_system_sirode_rng_state",           (DL_FUNC) &_dust2_dust2_system_sirode_rng_state,            1},
     {"_dust2_dust2_system_sirode_run_to_time",         (DL_FUNC) &_dust2_dust2_system_sirode_run_to_time,          2},
     {"_dust2_dust2_system_sirode_set_rng_state",       (DL_FUNC) &_dust2_dust2_system_sirode_set_rng_state,        2},
-    {"_dust2_dust2_system_sirode_set_state",           (DL_FUNC) &_dust2_dust2_system_sirode_set_state,            2},
+    {"_dust2_dust2_system_sirode_set_state",           (DL_FUNC) &_dust2_dust2_system_sirode_set_state,            3},
     {"_dust2_dust2_system_sirode_set_state_initial",   (DL_FUNC) &_dust2_dust2_system_sirode_set_state_initial,    1},
     {"_dust2_dust2_system_sirode_set_time",            (DL_FUNC) &_dust2_dust2_system_sirode_set_time,             2},
     {"_dust2_dust2_system_sirode_simulate",            (DL_FUNC) &_dust2_dust2_system_sirode_simulate,             4},
@@ -513,7 +513,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_system_walk_rng_state",             (DL_FUNC) &_dust2_dust2_system_walk_rng_state,              1},
     {"_dust2_dust2_system_walk_run_to_time",           (DL_FUNC) &_dust2_dust2_system_walk_run_to_time,            2},
     {"_dust2_dust2_system_walk_set_rng_state",         (DL_FUNC) &_dust2_dust2_system_walk_set_rng_state,          2},
-    {"_dust2_dust2_system_walk_set_state",             (DL_FUNC) &_dust2_dust2_system_walk_set_state,              2},
+    {"_dust2_dust2_system_walk_set_state",             (DL_FUNC) &_dust2_dust2_system_walk_set_state,              3},
     {"_dust2_dust2_system_walk_set_state_initial",     (DL_FUNC) &_dust2_dust2_system_walk_set_state_initial,      1},
     {"_dust2_dust2_system_walk_set_time",              (DL_FUNC) &_dust2_dust2_system_walk_set_time,               2},
     {"_dust2_dust2_system_walk_simulate",              (DL_FUNC) &_dust2_dust2_system_walk_simulate,               4},

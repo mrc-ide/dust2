@@ -4,7 +4,7 @@
 check_pars <- function(pars, n_groups, preserve_group_dimension,
                        name = deparse(substitute(pars)), call = NULL) {
   if (preserve_group_dimension) {
-    if (!length(pars) != n_groups) {
+    if (length(pars) != n_groups) {
       cli::cli_abort(
         paste("Expected 'pars' to have length {n_groups} to match 'n_groups',",
               "but it had length {length(pars)}"),
