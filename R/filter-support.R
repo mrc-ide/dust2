@@ -6,6 +6,7 @@ check_generator_for_filter <- function(generator, what, call = NULL) {
             "not have 'compare_data' support"),
       arg = "generator")
   }
+  generator
 }
 
 check_dt <- function(dt, call = NULL) {
@@ -20,6 +21,7 @@ check_dt <- function(dt, call = NULL) {
     cli::cli_abort("Expected 'dt' to be the inverse of an integer",
                    arg = "dt", call = call)
   }
+  dt
 }
 
 
@@ -46,6 +48,7 @@ check_time_sequence <- function(time_start, time, call = NULL) {
         set_names(detail, "x")),
       arg = "time", call = call)
   }
+  stop("Fix return")
 }
 
 
@@ -78,7 +81,10 @@ check_data <- function(data, n_time, n_groups, preserve_group_dimension,
           set_names(detail, "x")),
         arg = "data", call = call)
     }
+  } else {
+    data <- list(data)
   }
+  data
 }
 
 
@@ -90,4 +96,5 @@ check_index <- function(index, call = NULL) {
                      arg = "index", call = call)
     }
   }
+  index
 }

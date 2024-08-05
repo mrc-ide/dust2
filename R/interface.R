@@ -147,29 +147,23 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
   call <- environment()
   check_is_dust_system_generator(generator, substitute(generator))
   ## check_time(time, call = call)
-  check_dt(dt, call = call)
   assert_scalar_size(n_particles, call = call)
   assert_scalar_size(n_groups, call = call)
   assert_scalar_size(n_threads, call = call)
-  assert_scalar_character(preserve_particle_dimension, call = call)
-  assert_scalar_character(preserve_group_dimension, call = call)
+  assert_scalar_logical(preserve_particle_dimension, call = call)
+  assert_scalar_logical(preserve_group_dimension, call = call)
 
   preserve_particle_dimension <- preserve_particle_dimension || n_particles > 1
   preserve_group_dimension <- preserve_group_dimension || n_groups > 1
 
-  ## This simplifies processing of parameters in the system, but
-  ## there's a chance that we'll need to be careful with errors thrown
-  ## there.
-  if (n_groups == 1 && !preserve_group_dimension) {
-    pars <- list(pars)
-  }
-
+  pars <- check_pars(pars, n_groups, preserve_group_dimension)
   if (generator$properties$time_type == "discrete") {
     if (!is.null(ode_control)) {
       cli::cli_abort("Can't use 'ode_control' with discrete-time systems")
     }
-    res <- generator$methods$alloc(pars, time, dt %||% 1, n_particles,
-                                   n_groups, seed, deterministic, n_threads)
+    dt <- check_dt(dt %||% 1, call = call)
+    res <- generator$methods$alloc(pars, time, dt, n_particles,
+                                   n_groups, seed, deterministic)
   } else {
     if (!is.null(dt)) {
       cli::cli_abort("Can't use 'dt' with continuous-time systems")
@@ -227,6 +221,7 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
 dust_system_state <- function(sys, index_state = NULL, index_particle = NULL,
                               index_group = NULL) {
   check_is_dust_system(sys)
+  ## TODO: preserve_particle_dimension
   sys$methods$state(sys$ptr, index_state, index_particle, index_group,
                     sys$preserve_group_dimension)
 }
@@ -248,6 +243,8 @@ dust_system_state <- function(sys, index_state = NULL, index_particle = NULL,
 ##' @export
 dust_system_set_state <- function(sys, state) {
   check_is_dust_system(sys)
+  ## TODO: check rank etc here (mrc-5565), and support
+  ## preserve_particle_dimension
   sys$methods$set_state(sys$ptr, state, sys$preserve_group_dimension)
   invisible()
 }
@@ -301,6 +298,7 @@ dust_system_time <- function(sys) {
 ##' @export
 dust_system_set_time <- function(sys, time) {
   check_is_dust_system(sys)
+  ## check_time(time) # TODO
   sys$methods$set_time(sys$ptr, time)
   invisible()
 }
@@ -351,9 +349,7 @@ dust_system_set_rng_state <- function(sys, rng_state) {
 ##' @export
 dust_system_update_pars <- function(sys, pars) {
   check_is_dust_system(sys)
-  if (!sys$preserve_group_dimension) {
-    pars <- list(pars)
-  }
+  pars <- check_pars(pars, sys$n_groups, sys$preserve_group_dimension)
   sys$methods$update_pars(sys$ptr, pars)
   invisible()
 }
@@ -404,7 +400,10 @@ dust_system_run_to_time <- function(sys, time) {
 ##' @export
 dust_system_simulate <- function(sys, times, index = NULL) {
   check_is_dust_system(sys)
-  ret <- sys$methods$simulate(sys$ptr, times, index, sys$preserve_group_dimension)
+  ## TODO: check time sequence, except for the first?
+  ## TODO: preserve particle dimension
+  ret <- sys$methods$simulate(sys$ptr, times, index,
+                              sys$preserve_group_dimension)
   if (!is.null(index) && !is.null(names(index))) {
     rownames(ret) <- names(index)
   }
@@ -435,6 +434,8 @@ dust_system_simulate <- function(sys, times, index = NULL) {
 ##' @export
 dust_system_reorder <- function(sys, index) {
   check_is_dust_system(sys)
+  ## TODO: check reorder dimensionality? less important here because
+  ## this is a debugging method.
   sys$methods$reorder(sys$ptr, index)
   invisible()
 }
@@ -471,6 +472,7 @@ dust_system_internals <- function(sys, include_coefficients = FALSE) {
     ## No internals for now, perhaps never?
     return(NULL)
   }
+  ## TODO: cope with dimension preservation
   dat <- sys$methods$internals(sys$ptr, include_coefficients)
   ret <- data_frame(
     particle = seq_along(dat),
@@ -525,6 +527,7 @@ dust_system_compare_data <- function(sys, data) {
 ##' @export
 print.dust_system <- function(x, ...) {
   cli::cli_h1("<dust_system: {x$name}>")
+  ## TODO: Special treatment if not preserve particle dimension
   if (x$preserve_group_dimension) {
     cli::cli_alert_info(paste(
       "{x$n_state} state x {x$n_particles} particle{?s} x",

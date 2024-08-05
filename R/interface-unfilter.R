@@ -28,10 +28,10 @@ dust_unfilter_create <- function(generator, time_start, time, data,
   n_threads <- check_n_threads(n_threads, n_particles, n_groups)
   check_time_sequence(time_start, time, call = call)
   check_dt(dt, call = call)
-  assert_scalar_character(preserve_particle_dimension, call = call)
-  assert_scalar_character(preserve_group_dimension, call = call)
-  check_data(data, length(time), n_groups, preserve_group_dimension,
-             call = call)
+  assert_scalar_logical(preserve_particle_dimension, call = call)
+  assert_scalar_logical(preserve_group_dimension, call = call)
+  data <- check_data(data, length(time), n_groups, preserve_group_dimension,
+                     call = call)
   check_index(index, call = call)
 
   inputs <- list(time_start = time_start,
@@ -99,6 +99,10 @@ unfilter_create <- function(unfilter, pars) {
 dust_unfilter_run <- function(unfilter, pars, initial = NULL,
                               save_history = FALSE, adjoint = FALSE) {
   check_is_dust_unfilter(unfilter)
+  if (!iis.null(pars)) {
+    pars <- check_pars(pars, unfilter$n_groups,
+                       unfilter$preserve_group_dimension)
+  }
   if (is.null(unfilter$ptr)) {
     if (is.null(pars)) {
       cli::cli_abort("'pars' cannot be NULL, as unfilter is not initialised",
