@@ -223,6 +223,7 @@ dust_system_state <- function(sys, index_state = NULL, index_particle = NULL,
   check_is_dust_system(sys)
   ## TODO: preserve_particle_dimension
   sys$methods$state(sys$ptr, index_state, index_particle, index_group,
+                    sys$preserve_particle_dimension,
                     sys$preserve_group_dimension)
 }
 
@@ -387,25 +388,25 @@ dust_system_run_to_time <- function(sys, time) {
 ##'   first time must be no less than the current system time
 ##'   (as reported by [dust_system_time])
 ##'
-##' @param index An optional index of states to extract.  If given,
-##'   then we subset the system state on return.  You can use this to
-##'   return fewer system states than the system ran with, to reorder
-##'   states, or to name them on exit (names present on the index will
-##'   be copied into the rownames of the returned array).
+##' @param index_state An optional index of states to extract.  If
+##'   given, then we subset the system state on return.  You can use
+##'   this to return fewer system states than the system ran with, to
+##'   reorder states, or to name them on exit (names present on the
+##'   index will be copied into the rownames of the returned array).
 ##'
 ##' @return An array with 3 dimensions (state x particle x time) or 4
 ##'   dimensions (state x particle x group x time) for a grouped
 ##'   system.
 ##'
 ##' @export
-dust_system_simulate <- function(sys, times, index = NULL) {
+dust_system_simulate <- function(sys, times, index_state = NULL) {
   check_is_dust_system(sys)
   ## TODO: check time sequence, except for the first?
-  ## TODO: preserve particle dimension
-  ret <- sys$methods$simulate(sys$ptr, times, index,
+  ret <- sys$methods$simulate(sys$ptr, times, index_state,
+                              sys$preserve_particle_dimension,
                               sys$preserve_group_dimension)
-  if (!is.null(index) && !is.null(names(index))) {
-    rownames(ret) <- names(index)
+  if (!is.null(index_state) && !is.null(names(index_state))) {
+    rownames(ret) <- names(index_state)
   }
   ret
 }
@@ -520,7 +521,11 @@ dust_system_compare_data <- function(sys, data) {
             "have 'compare_data' support"),
       arg = "system")
   }
-  sys$methods$compare_data(sys$ptr, data, sys$preserve_group_dimension)
+  if (!sys$preserve_group_dimension) {
+    data <- list(data)
+  }
+  sys$methods$compare_data(sys$ptr, data, sys$preserve_particle_dimension,
+                           sys$preserve_group_dimension)
 }
 
 
@@ -572,7 +577,9 @@ print.dust_system_generator <- function(x, ...) {
 
 ##' @export
 dim.dust_system <- function(x, ...) {
-  c(x$n_state, x$n_particles, if (x$preserve_group_dimension) x$n_groups)
+  c(x$n_state,
+    if (x$preserve_particle_dimension) x$n_particles,
+    if (x$preserve_group_dimension) x$n_groups)
 }
 
 

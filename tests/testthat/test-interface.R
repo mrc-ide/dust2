@@ -70,7 +70,7 @@ test_that("error if non-dust system given to dust function", {
 })
 
 
-test_that("can control dropping of single-element dimensions", {
+test_that("can control dropping of single-element group dimensions", {
   pars <- list(len = 3, sd = 1, random_initial = TRUE)
   obj1 <- dust_system_create(walk(), list(pars), n_particles = 10,
                              preserve_group_dimension = TRUE,
@@ -85,4 +85,43 @@ test_that("can control dropping of single-element dimensions", {
 
   expect_equal(dust_system_state(obj1), array(r, c(3, 10, 1)))
   expect_equal(dust_system_state(obj2), r)
+})
+
+
+test_that("can control dropping of single-element particle dimensions", {
+  pars <- list(list(len = 3, sd = 1, random_initial = TRUE),
+               list(len = 3, sd = 1, random_initial = TRUE))
+  obj1 <- dust_system_create(walk(), pars, n_particles = 1, n_groups = 2,
+                             preserve_particle_dimension = TRUE,
+                             seed = 42)
+  obj2 <- dust_system_create(walk(), pars, n_particles = 1, n_groups = 2,
+                             seed = 42)
+  dust_system_set_state_initial(obj1)
+  dust_system_set_state_initial(obj2)
+  r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 2)$normal(3, 0, 1)
+  expect_equal(dim(obj1), c(3, 1, 2))
+  expect_equal(dim(obj2), c(3, 2))
+
+  expect_equal(dust_system_state(obj1), array(r, c(3, 1, 2)))
+  expect_equal(dust_system_state(obj2), r)
+})
+
+
+test_that("can control dropping of all dimensions", {
+  pars <- list(len = 3, sd = 1, random_initial = TRUE)
+  obj1 <- dust_system_create(walk(), list(pars), n_particles = 1, n_groups = 1,
+                             preserve_group_dimension = TRUE,
+                             preserve_particle_dimension = TRUE,
+                             seed = 42)
+  obj2 <- dust_system_create(walk(), pars, n_particles = 1, n_groups = 1,
+                             seed = 42)
+
+  dust_system_set_state_initial(obj1)
+  dust_system_set_state_initial(obj2)
+  r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 1)$normal(3, 0, 1)
+  expect_equal(dim(obj1), c(3, 1, 1))
+  expect_equal(dim(obj2), 3)
+
+  expect_equal(dust_system_state(obj1), array(r, c(3, 1, 1)))
+  expect_equal(dust_system_state(obj2), drop(r))
 })

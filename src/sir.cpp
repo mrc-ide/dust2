@@ -224,8 +224,8 @@ SEXP dust2_system_sir_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {
 }
 
 [[cpp11::register]]
-SEXP dust2_system_sir_state(cpp11::sexp ptr, cpp11::sexp r_index_state, cpp11::sexp r_index_particle, cpp11::sexp r_index_group, bool preserve_group_dimension) {
-  return dust2::r::dust2_system_state<dust2::dust_discrete<sir>>(ptr, r_index_state, r_index_particle, r_index_group, preserve_group_dimension);
+SEXP dust2_system_sir_state(cpp11::sexp ptr, cpp11::sexp r_index_state, cpp11::sexp r_index_particle, cpp11::sexp r_index_group, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_system_state<dust2::dust_discrete<sir>>(ptr, r_index_state, r_index_particle, r_index_group, preserve_particle_dimension, preserve_group_dimension);
 }
 
 [[cpp11::register]]
@@ -269,8 +269,8 @@ SEXP dust2_system_sir_update_pars(cpp11::sexp ptr, cpp11::list pars) {
 }
 
 [[cpp11::register]]
-SEXP dust2_system_sir_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::sexp r_index, bool preserve_group_dimension) {
-  return dust2::r::dust2_system_simulate<dust2::dust_discrete<sir>>(ptr, r_times, r_index, preserve_group_dimension);
+SEXP dust2_system_sir_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::sexp r_index, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_system_simulate<dust2::dust_discrete<sir>>(ptr, r_times, r_index, preserve_particle_dimension, preserve_group_dimension);
 }
 
 [[cpp11::register]]
@@ -283,8 +283,8 @@ SEXP dust2_filter_sir_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11:
   return dust2::r::dust2_discrete_filter_alloc<sir>(r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_n_threads, r_index, r_seed);
 }
 [[cpp11::register]]
-SEXP dust2_system_sir_compare_data(cpp11::sexp ptr, cpp11::sexp r_data, bool preserve_group_dimension) {
-  return dust2::r::dust2_system_compare_data<dust2::dust_discrete<sir>>(ptr, r_data, preserve_group_dimension);
+SEXP dust2_system_sir_compare_data(cpp11::sexp ptr, cpp11::list r_data, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_system_compare_data<dust2::dust_discrete<sir>>(ptr, r_data, preserve_particle_dimension, preserve_group_dimension);
 }
 
 [[cpp11::register]]

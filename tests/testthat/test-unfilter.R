@@ -18,7 +18,7 @@ test_that("can run an unfilter", {
     time0 <- c(time_start, time)
     for (i in seq_along(time)) {
       dust_system_run_to_time(obj, time[i])
-      incidence[i] <- dust_system_state(obj)[5, , drop = TRUE]
+      incidence[i] <- dust_system_state(obj)[5]
     }
     sum(dpois(1:4, incidence + 1e-6, log = TRUE))
   }
@@ -71,6 +71,7 @@ test_that("can get unfilter history", {
     "History is not current")
 
   m <- dust_system_create(sir(), pars, time = time_start, n_particles = 1,
+                          preserve_particle_dimension = TRUE,
                           deterministic = TRUE)
   dust_system_set_state_initial(m)
   cmp <- dust_system_simulate(m, time)
@@ -118,7 +119,7 @@ test_that("can run an unfilter with manually set state", {
     time0 <- c(time_start, time)
     for (i in seq_along(time)) {
       dust_system_run_to_time(obj, time[i])
-      incidence[i] <- dust_system_state(obj)[5, , drop = TRUE]
+      incidence[i] <- dust_system_state(obj)[5]
     }
     sum(dpois(1:4, incidence + 1e-6, log = TRUE))
   }
@@ -151,7 +152,7 @@ test_that("can run unfilter on structured system", {
     time0 <- c(time_start, time)
     for (i in seq_along(time)) {
       dust_system_run_to_time(obj, time[i])
-      incidence[, i] <- dust_system_state(obj)[5, , , drop = TRUE]
+      incidence[, i] <- dust_system_state(obj)[5, , drop = TRUE]
     }
     observed <- matrix(unlist(data, use.names = FALSE), n_groups)
     rowSums(dpois(observed, incidence + 1e-6, log = TRUE))

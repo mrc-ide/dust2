@@ -4,7 +4,7 @@
 \alias{dust_system_simulate}
 \title{Simulate system}
 \usage{
-dust_system_simulate(sys, times, index = NULL)
+dust_system_simulate(sys, times, index_state = NULL)
 }
 \arguments{
 \item{sys}{A \code{dust_system} object}
@@ -13,11 +13,11 @@ dust_system_simulate(sys, times, index = NULL)
 first time must be no less than the current system time
 (as reported by \link{dust_system_time})}
 
-\item{index}{An optional index of states to extract.  If given,
-then we subset the system state on return.  You can use this to
-return fewer system states than the system ran with, to reorder
-states, or to name them on exit (names present on the index will
-be copied into the rownames of the returned array).}
+\item{index_state}{An optional index of states to extract.  If
+given, then we subset the system state on return.  You can use
+this to return fewer system states than the system ran with, to
+reorder states, or to name them on exit (names present on the
+index will be copied into the rownames of the returned array).}
 }
 \value{
 An array with 3 dimensions (state x particle x time) or 4

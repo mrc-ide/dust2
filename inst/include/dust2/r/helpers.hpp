@@ -179,6 +179,9 @@ inline std::vector<size_t> check_index(cpp11::sexp r_index, size_t max,
 // The initializer_list is a type-safe variadic-like approach.
 inline void set_array_dims(cpp11::sexp data,
                            std::initializer_list<size_t> dims) {
+  if (dims.size() < 2) {
+    return;
+  }
   cpp11::writable::integers r_dim(dims.size());
   auto dim_i = dims.begin();
   for (size_t i = 0; i < dims.size(); ++i, ++dim_i) {

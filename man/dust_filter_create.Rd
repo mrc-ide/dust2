@@ -10,10 +10,11 @@ dust_filter_create(
   time,
   data,
   n_particles,
-  n_groups = 0,
-  n_threads = 1,
+  n_groups = 1,
   dt = 1,
   index = NULL,
+  n_threads = 1,
+  preserve_group_dimension = FALSE,
   seed = NULL
 )
 }
@@ -46,18 +47,18 @@ slowly.}
 
 \item{n_groups}{Optionally, the number of parameter groups}
 
-\item{n_threads}{Integer, the number of threads to use in
-parallelisable calculations.  See Details.}
-
 \item{dt}{The time step for discrete time systems, defaults to 1
 if not given.  It is an error to provide a non-NULL argument
 with continuous-time systems.}
 
-\item{index}{An optional index of states to extract.  If given,
-then we subset the system state on return.  You can use this to
-return fewer system states than the system ran with, to reorder
-states, or to name them on exit (names present on the index will
-be copied into the rownames of the returned array).}
+\item{n_threads}{Integer, the number of threads to use in
+parallelisable calculations.  See Details.}
+
+\item{preserve_group_dimension}{Logical, indicating if state and
+output from the system should preserve the group dimension in
+the case where a single group is run.  In the case where more
+than one group is run, this argument has no effect as the
+dimension is always preserved.}
 
 \item{seed}{Optionally, a seed.  Otherwise we respond to R's RNG seed on
 initialisation.}
