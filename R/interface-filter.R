@@ -44,12 +44,18 @@ dust_filter_create <- function(generator, time_start, time, data,
   check_generator_for_filter(generator, "filter", call = call)
   assert_scalar_size(n_particles, allow_zero = FALSE, call = call)
   assert_scalar_size(n_groups, allow_zero = FALSE, call = call)
+  assert_scalar_logical(preserve_group_dimension, call = call)
+  preserve_group_dimension <- preserve_group_dimension || n_groups > 1
+
+  ## NOTE: there is no preserve_particle_dimension option here because
+  ## we will always preserve this dimension.
+
+  time <- check_time_sequence(time_start, time, call = call)
+  dt <- check_dt(dt, call = call)
+  data <- check_data(data, length(time), n_groups, preserve_group_dimension,
+                     call = call)
+  index <- check_index(index, call = call)
   n_threads <- check_n_threads(n_threads, n_particles, n_groups)
-  check_time_sequence(time_start, time, call = call)
-  check_dt(dt, call = call)
-  check_data(data, length(time), n_groups, preserve_group_dimension,
-             call = call)
-  check_index(index, call = call)
 
   inputs <- list(time_start = time_start,
                  time = time,
@@ -59,7 +65,6 @@ dust_filter_create <- function(generator, time_start, time, data,
                  n_groups = n_groups,
                  n_threads = n_threads,
                  index = index,
-                 preserve_particle_dimension = preserve_particle_dimension,
                  preserve_group_dimension = preserve_group_dimension)
 
   res <- list2env(
@@ -70,7 +75,6 @@ dust_filter_create <- function(generator, time_start, time, data,
          deterministic = FALSE,
          methods = generator$methods$filter,
          index = index,
-         preserve_particle_dimension = preserve_particle_dimension,
          preserve_group_dimension = preserve_group_dimension),
     parent = emptyenv())
   class(res) <- "dust_filter"
@@ -94,7 +98,7 @@ dust_filter_create <- function(generator, time_start, time, data,
 dust_filter_copy <- function(filter, seed = NULL) {
   dst <- new.env(parent = emptyenv())
   nms <- c("inputs", "n_particles", "n_groups", "deterministic", "methods",
-           "index")
+           "index", "preserve_group_dimension")
   for (nm in nms) {
     dst[[nm]] <- filter[[nm]]
   }
@@ -151,6 +155,10 @@ filter_create <- function(filter, pars) {
 dust_filter_run <- function(filter, pars, initial = NULL,
                             save_history = FALSE) {
   check_is_dust_filter(filter)
+  if (!is.null(pars)) {
+    pars <- check_pars(pars, filter$n_groups,
+                       filter$preserve_group_dimension)
+  }
   if (is.null(filter$ptr)) {
     if (is.null(pars)) {
       cli::cli_abort("'pars' cannot be NULL, as filter is not initialised",
@@ -158,8 +166,7 @@ dust_filter_run <- function(filter, pars, initial = NULL,
     }
     filter_create(filter, pars)
   } else if (!is.null(pars)) {
-    filter$methods$update_pars(filter$ptr, pars,
-                               filter$preserve_group_dimension)
+    filter$methods$update_pars(filter$ptr, pars)
   }
   filter$methods$run(filter$ptr, initial, save_history,
                      filter$preserve_group_dimension)

@@ -25,14 +25,17 @@ dust_unfilter_create <- function(generator, time_start, time, data,
   check_generator_for_filter(generator, "unfilter", call = call)
   assert_scalar_size(n_particles, allow_zero = FALSE, call = call)
   assert_scalar_size(n_groups, allow_zero = FALSE, call = call)
-  n_threads <- check_n_threads(n_threads, n_particles, n_groups)
-  check_time_sequence(time_start, time, call = call)
-  check_dt(dt, call = call)
   assert_scalar_logical(preserve_particle_dimension, call = call)
   assert_scalar_logical(preserve_group_dimension, call = call)
+  preserve_particle_dimension <- preserve_particle_dimension || n_particles > 1
+  preserve_group_dimension <- preserve_group_dimension || n_groups > 1
+
+  time <- check_time_sequence(time_start, time, call = call)
+  dt <- check_dt(dt, call = call)
   data <- check_data(data, length(time), n_groups, preserve_group_dimension,
                      call = call)
-  check_index(index, call = call)
+  index <- check_index(index, call = call)
+  n_threads <- check_n_threads(n_threads, n_particles, n_groups)
 
   inputs <- list(time_start = time_start,
                  time = time,
@@ -99,7 +102,7 @@ unfilter_create <- function(unfilter, pars) {
 dust_unfilter_run <- function(unfilter, pars, initial = NULL,
                               save_history = FALSE, adjoint = FALSE) {
   check_is_dust_unfilter(unfilter)
-  if (!iis.null(pars)) {
+  if (!is.null(pars)) {
     pars <- check_pars(pars, unfilter$n_groups,
                        unfilter$preserve_group_dimension)
   }
@@ -110,8 +113,7 @@ dust_unfilter_run <- function(unfilter, pars, initial = NULL,
     }
     unfilter_create(unfilter, pars)
   } else if (!is.null(pars)) {
-    unfilter$methods$update_pars(unfilter$ptr, pars,
-                                 unfilter$preserve_group_dimension)
+    unfilter$methods$update_pars(unfilter$ptr, pars)
   }
   unfilter$methods$run(unfilter$ptr, initial, save_history, adjoint,
                        unfilter$preserve_group_dimension)

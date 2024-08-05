@@ -18,8 +18,7 @@ cpp11::sexp dust2_filter_update_pars(cpp11::sexp ptr,
 
 template <typename T>
 cpp11::sexp dust2_filter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
-                             bool save_history,
-                             bool preserve_group_dimension) {
+                             bool save_history, bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
   if (r_initial != R_NilValue) {

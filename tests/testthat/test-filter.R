@@ -123,6 +123,8 @@ test_that("can run a nested particle filter and get the same result", {
   s <- dust_filter_rng_state(obj)
   expect_equal(s, r)
 
+  expect_true(obj$preserve_group_dimension)
+
   res <- replicate(20, dust_filter_run(obj, pars, save_history = TRUE))
 
   ## now compare:

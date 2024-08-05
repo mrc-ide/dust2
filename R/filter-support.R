@@ -9,6 +9,7 @@ check_generator_for_filter <- function(generator, what, call = NULL) {
   generator
 }
 
+
 check_dt <- function(dt, call = NULL) {
   assert_scalar_numeric(dt, call = call)
   if (dt <= 0) {
@@ -48,7 +49,7 @@ check_time_sequence <- function(time_start, time, call = NULL) {
         set_names(detail, "x")),
       arg = "time", call = call)
   }
-  stop("Fix return")
+  as.numeric(time)
 }
 
 
@@ -82,7 +83,7 @@ check_data <- function(data, n_time, n_groups, preserve_group_dimension,
         arg = "data", call = call)
     }
   } else {
-    data <- list(data)
+    data <- lapply(data, function(el) list(el))
   }
   data
 }
