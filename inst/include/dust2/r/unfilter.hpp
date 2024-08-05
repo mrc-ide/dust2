@@ -19,6 +19,7 @@ cpp11::sexp dust2_unfilter_update_pars(cpp11::sexp ptr,
 template <typename T>
 cpp11::sexp dust2_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
                                bool save_history, bool adjoint,
+                               bool preserve_particle_dimension,
 			       bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
@@ -36,7 +37,7 @@ cpp11::sexp dust2_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
   const auto n_particles = obj->sys.n_particles();
   cpp11::writable::doubles ret(n_groups * n_particles);
   obj->last_log_likelihood(REAL(ret));
-  if (preserve_group_dimension && n_particles > 1) { // TODO: particle too
+  if (preserve_group_dimension && preserve_particle_dimension) {
     set_array_dims(ret, {n_particles, n_groups});
   }
   return ret;

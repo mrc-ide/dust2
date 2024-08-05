@@ -116,8 +116,8 @@ dust2_unfilter_sir_update_pars <- function(ptr, r_pars) {
   .Call(`_dust2_dust2_unfilter_sir_update_pars`, ptr, r_pars)
 }
 
-dust2_unfilter_sir_run <- function(ptr, r_initial, save_history, adjoint, preserve_group_dimension) {
-  .Call(`_dust2_dust2_unfilter_sir_run`, ptr, r_initial, save_history, adjoint, preserve_group_dimension)
+dust2_unfilter_sir_run <- function(ptr, r_initial, save_history, adjoint, preserve_particle_dimension, preserve_group_dimension) {
+  .Call(`_dust2_dust2_unfilter_sir_run`, ptr, r_initial, save_history, adjoint, preserve_particle_dimension, preserve_group_dimension)
 }
 
 dust2_unfilter_sir_last_history <- function(ptr, preserve_particle_dimension, preserve_group_dimension) {

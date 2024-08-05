@@ -9,8 +9,8 @@ SEXP dust2_unfilter_{{name}}_update_pars(cpp11::sexp ptr, cpp11::list r_pars) {
 }
 
 [[cpp11::register]]
-SEXP dust2_unfilter_{{name}}_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, bool preserve_group_dimension) {
-  return dust2::r::dust2_unfilter_run<dust2::dust_{{time_type}}<{{class}}>>(ptr, r_initial, save_history, adjoint, preserve_group_dimension);
+SEXP dust2_unfilter_{{name}}_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_unfilter_run<dust2::dust_{{time_type}}<{{class}}>>(ptr, r_initial, save_history, adjoint, preserve_particle_dimension, preserve_group_dimension);
 }
 
 [[cpp11::register]]

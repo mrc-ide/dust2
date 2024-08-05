@@ -116,6 +116,7 @@ dust_unfilter_run <- function(unfilter, pars, initial = NULL,
     unfilter$methods$update_pars(unfilter$ptr, pars)
   }
   unfilter$methods$run(unfilter$ptr, initial, save_history, adjoint,
+                       unfilter$preserve_particle_dimension,
                        unfilter$preserve_group_dimension)
 }
 

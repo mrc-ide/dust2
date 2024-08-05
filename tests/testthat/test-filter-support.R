@@ -67,6 +67,28 @@ test_that("can validate data", {
 })
 
 
+test_that("sensible explanation about expected data size", {
+  err <- expect_error(
+    check_data(vector("list", 3), 3,
+               n_groups = 2, preserve_group_dimension = TRUE),
+    "Expected all elements of 'data' to have length 2")
+  expect_match(
+    conditionMessage(err),
+    "You have a grouped system ('n_groups' is greater than one)",
+    fixed = TRUE)
+
+  err <- expect_error(
+    check_data(vector("list", 3), 3,
+               n_groups = 1, preserve_group_dimension = TRUE),
+    "Expected all elements of 'data' to have length 1")
+  expect_match(
+    conditionMessage(err),
+    "You have a grouped system ('preserve_group_dimension' was TRUE)",
+    fixed = TRUE)
+
+})
+
+
 test_that("check index", {
   expect_no_error(check_index(NULL))
   expect_no_error(check_index(1:4))

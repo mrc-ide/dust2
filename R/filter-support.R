@@ -71,7 +71,7 @@ check_data <- function(data, n_time, n_groups, preserve_group_dimension,
       if (n_groups > 1) {
         justification <- "'n_groups' is greater than one"
       } else {
-        justification <- "preserve_group_dimension was TRUE"
+        justification <- "'preserve_group_dimension' was TRUE"
       }
       cli::cli_abort(
         c("Expected all elements of 'data' to have length {n_groups}",

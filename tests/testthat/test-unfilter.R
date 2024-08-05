@@ -228,3 +228,47 @@ test_that("can save history from structured unfilter", {
   expect_equal(array(h[, 1, ], dim(h1)), h1)
   expect_equal(array(h[, 2, ], dim(h2)), h2)
 })
+
+
+test_that("history output can have dimensions preserved", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  time_start <- 0
+  time <- c(4, 8, 12, 16)
+  data <- lapply(1:4, function(i) list(incidence = i))
+  dt <- 1
+  data_grouped <- lapply(data, list)
+
+  obj1 <- dust_unfilter_create(sir(), time_start, time, data)
+  ll1 <- dust_unfilter_run(obj1, pars, save_history = TRUE)
+
+  obj2 <- dust_unfilter_create(sir(), time_start, time, data,
+                               preserve_particle_dimension = TRUE)
+  ll2 <- dust_unfilter_run(obj2, pars, save_history = TRUE)
+  expect_equal(ll2, ll1)
+
+  obj3 <- dust_unfilter_create(sir(), time_start, time, data_grouped,
+                               preserve_group_dimension = TRUE)
+  ll3 <- dust_unfilter_run(obj3, list(pars), save_history = TRUE)
+  expect_equal(ll3, ll1)
+
+  obj4 <- dust_unfilter_create(sir(), time_start, time, data_grouped,
+                               preserve_group_dimension = TRUE,
+                               preserve_particle_dimension = TRUE)
+  ll4 <- dust_unfilter_run(obj4, list(pars), save_history = TRUE)
+  expect_equal(ll4, matrix(ll1, 1, 1))
+
+  h1 <- dust_unfilter_last_history(obj1)
+  expect_equal(dim(h1), c(5, 4))
+
+  h2 <- dust_unfilter_last_history(obj2)
+  expect_equal(dim(h2), c(5, 1, 4))
+  expect_equal(drop(h2), h1)
+
+  h3 <- dust_unfilter_last_history(obj3)
+  expect_equal(dim(h3), c(5, 1, 4))
+  expect_equal(drop(h3), h1)
+
+  h4 <- dust_unfilter_last_history(obj4)
+  expect_equal(dim(h4), c(5, 1, 1, 4))
+  expect_equal(drop(h4), h1)
+})
