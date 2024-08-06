@@ -86,7 +86,7 @@ SEXP dust2_system_state(cpp11::sexp ptr, cpp11::sexp r_index_state,
 	  it_dst = std::copy_n(it_j, n_state, it_dst);
 	} else {
 	  for (size_t k = 0; k < n_state_save; ++k, ++it_dst) {
-	    const auto kk = index_state.empty() ? j : index_state[k];
+	    const auto kk = index_state[k];
 	    *it_dst = *(it_j + kk);
 	  }
 	}
