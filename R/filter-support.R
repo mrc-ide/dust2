@@ -55,6 +55,23 @@ check_time_sequence <- function(time_start, time, call = NULL) {
 
 check_data <- function(data, n_time, n_groups, preserve_group_dimension,
                        call = NULL) {
+  if (is.data.frame(data)) {
+    ## The issue here is that we might want our data.frame to be in
+    ## terms of group _names_ and in actual times.  Let's do this one
+    ## with docs first?
+  } else if (is.list(data)) {
+    check_data_list(data, n_time, n_groups, preserve_group_dimension,
+                    call = call)
+  } else {
+    cli::cli_abort("'data' must be either a data.frame or a list",
+                   call = call)
+  }
+  data
+}
+
+
+check_data_list <- function(data, n_time, n_groups, preserve_group_dimension,
+                            call = NULL) {
   assert_list(data, call = call)
   assert_length(data, n_time, call = call)
   if (preserve_group_dimension) {
