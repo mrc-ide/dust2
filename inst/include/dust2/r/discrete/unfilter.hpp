@@ -25,7 +25,6 @@ cpp11::sexp dust2_discrete_unfilter_alloc(cpp11::list r_pars,
   const auto n_particles = to_size(r_n_particles, "n_particles");
   const auto n_groups = to_size(r_n_groups, "n_groups");
   const auto n_threads = to_size(r_n_threads, "n_threads");
-  const auto grouped = n_groups > 0;
   const auto time_start = check_time(r_time_start, "time_start");
   const auto time = check_time_sequence(time_start, r_time, true, "time");
   const auto dt = check_dt(r_dt);
