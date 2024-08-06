@@ -163,7 +163,8 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
     }
     dt <- check_dt(dt %||% 1, call = call)
     res <- generator$methods$alloc(pars, time, dt, n_particles,
-                                   n_groups, seed, deterministic)
+                                   n_groups, seed, deterministic,
+                                   n_threads)
   } else {
     if (!is.null(dt)) {
       cli::cli_abort("Can't use 'dt' with continuous-time systems")
