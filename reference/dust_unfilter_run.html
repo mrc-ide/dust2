@@ -44,7 +44,13 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dust_unfilter_run</span><span class="op">(</span><span class="va">unfilter</span>, <span class="va">pars</span>, initial <span class="op">=</span> <span class="cn">NULL</span>, save_history <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dust_unfilter_run</span><span class="op">(</span></span>
+<span>  <span class="va">unfilter</span>,</span>
+<span>  <span class="va">pars</span>,</span>
+<span>  initial <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  save_history <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  adjoint <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -74,6 +80,13 @@ overhead in runtime and in memory.  History (particle
 trajectories) will be saved at each time in the filter.  If the
 filter was constructed using a non-<code>NULL</code> <code>index</code> parameter,
 the history is restricted to these states.</p></dd>
+
+
+<dt id="arg-adjoint">adjoint<a class="anchor" aria-label="anchor" href="#arg-adjoint"></a></dt>
+<dd><p>Logical, indicating if we should enable adjoint
+history saving.  This can be enabled even when your model does not
+support adjoints!  But you will not be able to compute
+gradients.</p></dd>
 
 </dl></div>
     <div class="section level2">
