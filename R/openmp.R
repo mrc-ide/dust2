@@ -15,8 +15,9 @@ check_n_threads <- function(n_threads, n_particles, n_groups, call = NULL) {
   n_particles_total <- max(1, max(1, n_groups) * n_particles)
   if (n_threads > n_particles_total) {
     cli::cli_warn(
-      paste("Reducing thread count from requested {n_threads} to",
-            "{n_particles_total}, to match the total numbe of particles"))
+      paste("Reducing 'n_threads' from requested {n_threads} to",
+            "{n_particles_total}, to match the total number of particles"))
+    n_threads <- n_particles_total
   }
   as.integer(n_threads)
 }
