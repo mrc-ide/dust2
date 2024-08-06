@@ -31,7 +31,7 @@ filter was constructed using a non-\code{NULL} \code{index} parameter,
 the history is restricted to these states.}
 
 \item{adjoint}{Logical, indicating if we should enable adjoint
-history saving.  This can enabled even when your model does not
+history saving.  This can be enabled even when your model does not
 support adjoints!  But you will not be able to compute
 gradients.}
 }

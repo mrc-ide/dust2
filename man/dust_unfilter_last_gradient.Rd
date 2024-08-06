@@ -11,12 +11,12 @@ dust_unfilter_last_gradient(unfilter)
 \link{dust_unfilter_create}}
 }
 \value{
-An vector (if ungrouped) or a matrix (if grouped).
+A vector (if ungrouped) or a matrix (if grouped).
 }
 \description{
 Fetch the last gradient created by running an unfilter.  This
 errors if the last call to \link{dust_unfilter_run} did not use
 \code{adjoint = TRUE}.  The first time you call this (after a
-particular set of paramters) it will trigger running the reverse
+particular set of parameters) it will trigger running the reverse
 model.
 }
