@@ -60,6 +60,7 @@ this method will change in future.</p>
 <span>  <span class="va">data</span>,</span>
 <span>  n_particles <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  n_groups <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  n_threads <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  dt <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  index <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -108,6 +109,11 @@ initial conditions then you would see different likelihoods.</p></dd>
 
 <dt id="arg-n-groups">n_groups<a class="anchor" aria-label="anchor" href="#arg-n-groups"></a></dt>
 <dd><p>Optionally, the number of parameter groups</p></dd>
+
+
+<dt id="arg-n-threads">n_threads<a class="anchor" aria-label="anchor" href="#arg-n-threads"></a></dt>
+<dd><p>Integer, the number of threads to use in
+parallelisable calculations.  See Details.</p></dd>
 
 
 <dt id="arg-dt">dt<a class="anchor" aria-label="anchor" href="#arg-dt"></a></dt>
