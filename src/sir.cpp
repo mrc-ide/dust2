@@ -215,8 +215,8 @@ public:
 #include <dust2/r/discrete/unfilter.hpp>
 
 [[cpp11::register]]
-SEXP dust2_system_sir_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic) {
-  return dust2::r::dust2_discrete_alloc<sir>(r_pars, r_time, r_dt, r_n_particles, r_n_groups, r_seed, r_deterministic);
+SEXP dust2_system_sir_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic, cpp11::sexp r_n_threads) {
+  return dust2::r::dust2_discrete_alloc<sir>(r_pars, r_time, r_dt, r_n_particles, r_n_groups, r_seed, r_deterministic, r_n_threads);
 }
 [[cpp11::register]]
 SEXP dust2_system_sir_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {
@@ -274,13 +274,13 @@ SEXP dust2_system_sir_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::sexp
 }
 
 [[cpp11::register]]
-SEXP dust2_unfilter_sir_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_index) {
-  return dust2::r::dust2_discrete_unfilter_alloc<sir>(r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_index);
+SEXP dust2_unfilter_sir_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_n_threads, cpp11::sexp r_index) {
+  return dust2::r::dust2_discrete_unfilter_alloc<sir>(r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_n_threads, r_index);
 }
 
 [[cpp11::register]]
-SEXP dust2_filter_sir_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_index, cpp11::sexp r_seed) {
-  return dust2::r::dust2_discrete_filter_alloc<sir>(r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_index, r_seed);
+SEXP dust2_filter_sir_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_n_threads, cpp11::sexp r_index, cpp11::sexp r_seed) {
+  return dust2::r::dust2_discrete_filter_alloc<sir>(r_pars, r_time_start, r_time, r_dt, r_data, r_n_particles, r_n_groups, r_n_threads, r_index, r_seed);
 }
 [[cpp11::register]]
 SEXP dust2_system_sir_compare_data(cpp11::sexp ptr, cpp11::sexp r_data, bool grouped) {

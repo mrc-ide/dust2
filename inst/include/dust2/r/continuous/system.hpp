@@ -17,7 +17,8 @@ SEXP dust2_continuous_alloc(cpp11::list r_pars,
                             cpp11::sexp r_n_particles,
                             cpp11::sexp r_n_groups,
                             cpp11::sexp r_seed,
-                            cpp11::sexp r_deterministic) {
+                            cpp11::sexp r_deterministic,
+			    cpp11::sexp r_n_threads) {
   using rng_state_type = typename T::rng_state_type;
   using real_type = typename  T::real_type;
 
@@ -34,8 +35,11 @@ SEXP dust2_continuous_alloc(cpp11::list r_pars,
   auto deterministic = to_bool(r_deterministic, "deterministic");
   auto ode_control = validate_ode_control<real_type>(r_ode_control);
 
+  const auto n_threads = to_size(r_n_threads, "n_threads");
+
   auto obj = new dust_continuous<T>(shared, internal, time, ode_control,
-                                    n_particles, seed, deterministic);
+                                    n_particles, seed, deterministic,
+				    n_threads);
   cpp11::external_pointer<dust_continuous<T>> ptr(obj, true, false);
 
   // Later, we'll export a bit more back from the system (in particular

@@ -79,7 +79,19 @@ dust_system_generator <- function(name, time_type,
 ##' system and sets an initial set of parameters.  Once created you can use
 ##' other dust functions to interact with it.
 ##'
-##' @title Create a dust object
+##' # Parallelisation
+##'
+##' Many calculations within a dust system can be parallelised
+##' straightforwardly - the most important of these is typically
+##' running the model (via [dust_system_run_to_time] or
+##' [dust_system_simulate]) but we also parallelise
+##' [dust_system_set_state_initial], [dust_system_compare_data] and
+##' even [dust_system_reorder].  You need to set the number of threads
+##' for parallelism at system creation, and this number cannot be
+##' usefully larger than `n_particles` (or `n_particles * n_groups` if
+##' you have a grouped system).
+##'
+##' @title Create a dust system object
 ##'
 ##' @param generator A system generator object, with class
 ##'   `dust_system_generator`
@@ -108,19 +120,23 @@ dust_system_generator <- function(name, time_type,
 ##' @param deterministic Logical, indicating if the system should be
 ##'   allocated in deterministic mode.
 ##'
+##' @param n_threads Integer, the number of threads to use in
+##'   parallelisable calculations.  See Details.
+##'
 ##' @return A `dust_system` object, with opaque format.
 ##'
 ##' @export
 dust_system_create <- function(generator, pars, n_particles, n_groups = 0,
                                time = 0, dt = NULL, ode_control = NULL,
-                               seed = NULL, deterministic = FALSE) {
+                               seed = NULL, deterministic = FALSE,
+                               n_threads = 1) {
   check_is_dust_system_generator(generator, substitute(generator))
   if (generator$properties$time_type == "discrete") {
     if (!is.null(ode_control)) {
       cli::cli_abort("Can't use 'ode_control' with discrete-time systems")
     }
     res <- generator$methods$alloc(pars, time, dt %||% 1, n_particles,
-                                   n_groups, seed, deterministic)
+                                   n_groups, seed, deterministic, n_threads)
   } else {
     if (!is.null(dt)) {
       cli::cli_abort("Can't use 'dt' with continuous-time systems")
@@ -131,12 +147,13 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 0,
       assert_is(ode_control, "dust_ode_control", call = environment())
     }
     res <- generator$methods$alloc(pars, time, ode_control, n_particles,
-                                   n_groups, seed, deterministic)
+                                   n_groups, seed, deterministic, n_threads)
   }
   ## Here, we augment things slightly
   res$name <- generator$name
   res$n_particles <- as.integer(n_particles)
   res$n_groups <- as.integer(max(n_groups), 1)
+  res$n_threads <- check_n_threads(n_threads, n_particles, n_groups)
   res$deterministic <- deterministic
   res$methods <- generator$methods
   res$properties <- generator$properties

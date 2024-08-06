@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #include <algorithm>
 #include <vector>
 #include <dust2/continuous/control.hpp>
@@ -27,7 +31,7 @@ public:
                   const ode::control<real_type> control, // in place of dt
                   size_t n_particles, // per group
                   const std::vector<rng_int_type>& seed,
-                  bool deterministic) :
+                  bool deterministic, size_t n_threads) :
     n_state_(T::size_state(shared[0])),
     n_particles_(n_particles),
     n_groups_(shared.size()),
@@ -49,7 +53,8 @@ public:
     zero_every_(zero_every_vec<T>(shared_)),
     errors_(n_particles_total_),
     rng_(n_particles_total_, seed, deterministic),
-    solver_(n_state_, control_) {
+    solver_(n_state_, control_),
+    n_threads_(n_threads) {
     // TODO: above, filter rng states need adding here too, or
     // somewhere at least (we might move the filter elsewhere though,
     // in which case that particular bit of weirdness goes away).
@@ -61,6 +66,9 @@ public:
 
   auto run_to_time(real_type time) {
     real_type * state_data = state_.data();
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
+#endif
     for (size_t i = 0; i < n_groups_; ++i) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
@@ -82,6 +90,9 @@ public:
   void set_state_initial() {
     errors_.reset();
     real_type * state_data = state_.data();
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
+#endif
     for (size_t i = 0; i < n_groups_; ++i) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
@@ -108,6 +119,9 @@ public:
     const auto offset_read_particle = recycle_particle ? 0 : n_state_;
 
     real_type * state_data = state_.data();
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
+#endif
     for (size_t i = 0; i < n_groups_; ++i) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
@@ -116,10 +130,15 @@ public:
         const auto offset_write = k * n_state_;
         real_type* y = state_data + offset_write;
         std::copy_n(iter + offset_read, n_state_, y);
-        solver_.initialise(time_, y, ode_internals_[k],
-                           rhs_(shared_[i], internal_[i]));
+	try {
+	  solver_.initialise(time_, y, ode_internals_[k],
+			     rhs_(shared_[i], internal_[i]));
+	} catch (std::exception const& e) {
+	  errors_.capture(e, k);
+	}
       }
     }
+    errors_.report();
   }
 
   // To do this, we need a second copy of all internal state (so
@@ -135,6 +154,9 @@ public:
   template <typename Iter>
   void reorder(Iter iter) {
     state_other_.resize(state_.size());
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
+#endif
     for (size_t i = 0; i < n_groups_; ++i) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k_to = n_particles_ * i + j;
@@ -194,13 +216,18 @@ public:
   template <typename IterData, typename IterOutput>
   void compare_data(IterData data, IterOutput output) {
     const real_type * state_data = state_.data();
-    for (size_t i = 0; i < n_groups_; ++i, ++data) {
-      for (size_t j = 0; j < n_particles_; ++j, ++output) {
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
+#endif
+    for (size_t i = 0; i < n_groups_; ++i) {
+      for (size_t j = 0; j < n_particles_; ++j) {
+	auto data_i = data + i;
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
+	auto output_ij = output + k;
         try {
-          *output = T::compare_data(time_, state_data + offset, *data,
-                                    shared_[i], internal_[i], rng_.state(k));
+          *output_ij = T::compare_data(time_, state_data + offset, *data_i,
+				       shared_[i], internal_[i], rng_.state(k));
         } catch (std::exception const& e) {
           errors_.capture(e, k);
         }
@@ -240,6 +267,7 @@ private:
   dust2::utils::errors errors_;
   mcstate::random::prng<rng_state_type> rng_;
   ode::solver<real_type> solver_;
+  size_t n_threads_;
 
   static auto rhs_(const shared_state& shared, internal_state& internal) {
     return [&](real_type t, const real_type* y, real_type* dydt) {
