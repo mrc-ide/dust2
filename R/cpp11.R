@@ -116,8 +116,8 @@ dust2_unfilter_sir_update_pars <- function(ptr, r_pars, grouped) {
   .Call(`_dust2_dust2_unfilter_sir_update_pars`, ptr, r_pars, grouped)
 }
 
-dust2_unfilter_sir_run <- function(ptr, r_initial, save_history, grouped) {
-  .Call(`_dust2_dust2_unfilter_sir_run`, ptr, r_initial, save_history, grouped)
+dust2_unfilter_sir_run <- function(ptr, r_initial, save_history, adjoint, grouped) {
+  .Call(`_dust2_dust2_unfilter_sir_run`, ptr, r_initial, save_history, adjoint, grouped)
 }
 
 dust2_unfilter_sir_last_history <- function(ptr, grouped) {
@@ -142,6 +142,10 @@ dust2_filter_sir_rng_state <- function(ptr) {
 
 dust2_filter_sir_set_rng_state <- function(ptr, r_rng_state) {
   .Call(`_dust2_dust2_filter_sir_set_rng_state`, ptr, r_rng_state)
+}
+
+dust2_unfilter_sir_last_gradient <- function(ptr, grouped) {
+  .Call(`_dust2_dust2_unfilter_sir_last_gradient`, ptr, grouped)
 }
 
 dust2_system_sirode_alloc <- function(r_pars, r_time, r_ode_control, r_n_particles, r_n_groups, r_seed, r_deterministic) {

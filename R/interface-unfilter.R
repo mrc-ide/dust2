@@ -73,6 +73,11 @@ unfilter_create <- function(unfilter, pars) {
 ##' @param unfilter A `dust_unfilter` object, created by
 ##'   [dust_unfilter_create]
 ##'
+##' @param adjoint Logical, indicating if we should enable adjoint
+##'   history saving.  This can be enabled even when your model does not
+##'   support adjoints!  But you will not be able to compute
+##'   gradients.
+##'
 ##' @inheritParams dust_filter_run
 ##'
 ##' @return A vector of likelihood values, with as many elements as
@@ -80,7 +85,7 @@ unfilter_create <- function(unfilter, pars) {
 ##'
 ##' @export
 dust_unfilter_run <- function(unfilter, pars, initial = NULL,
-                              save_history = FALSE) {
+                              save_history = FALSE, adjoint = FALSE) {
   check_is_dust_unfilter(unfilter)
   if (is.null(unfilter$ptr)) {
     if (is.null(pars)) {
@@ -91,7 +96,8 @@ dust_unfilter_run <- function(unfilter, pars, initial = NULL,
   } else if (!is.null(pars)) {
     unfilter$methods$update_pars(unfilter$ptr, pars, unfilter$grouped)
   }
-  unfilter$methods$run(unfilter$ptr, initial, save_history, unfilter$grouped)
+  unfilter$methods$run(unfilter$ptr, initial, save_history, adjoint,
+                       unfilter$grouped)
 }
 
 
@@ -114,6 +120,30 @@ dust_unfilter_last_history <- function(unfilter) {
       i = "Unfilter has not yet been run"))
   }
   unfilter$methods$last_history(unfilter$ptr, unfilter$grouped)
+}
+
+
+##' Fetch the last gradient created by running an unfilter.  This
+##' errors if the last call to [dust_unfilter_run] did not use
+##' `adjoint = TRUE`.  The first time you call this (after a
+##' particular set of parameters) it will trigger running the reverse
+##' model.
+##'
+##' @title Fetch last unfilter gradient
+##'
+##' @inheritParams dust_unfilter_run
+##'
+##' @return A vector (if ungrouped) or a matrix (if grouped).
+##'
+##' @export
+dust_unfilter_last_gradient <- function(unfilter) {
+  check_is_dust_unfilter(unfilter)
+  if (is.null(unfilter$ptr)) {
+    cli::cli_abort(c(
+      "Gradient is not current",
+      i = "Unfilter has not yet been run"))
+  }
+  unfilter$methods$last_gradient(unfilter$ptr, unfilter$grouped)
 }
 
 
