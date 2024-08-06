@@ -12,8 +12,8 @@ dust2_system_logistic_run_to_time <- function(ptr, r_time) {
   .Call(`_dust2_dust2_system_logistic_run_to_time`, ptr, r_time)
 }
 
-dust2_system_logistic_state <- function(ptr, grouped) {
-  .Call(`_dust2_dust2_system_logistic_state`, ptr, grouped)
+dust2_system_logistic_state <- function(ptr, r_index_state, r_index_particle, r_index_group, grouped) {
+  .Call(`_dust2_dust2_system_logistic_state`, ptr, r_index_state, r_index_particle, r_index_group, grouped)
 }
 
 dust2_system_logistic_time <- function(ptr) {
@@ -60,8 +60,8 @@ dust2_system_sir_run_to_time <- function(ptr, r_time) {
   .Call(`_dust2_dust2_system_sir_run_to_time`, ptr, r_time)
 }
 
-dust2_system_sir_state <- function(ptr, grouped) {
-  .Call(`_dust2_dust2_system_sir_state`, ptr, grouped)
+dust2_system_sir_state <- function(ptr, r_index_state, r_index_particle, r_index_group, grouped) {
+  .Call(`_dust2_dust2_system_sir_state`, ptr, r_index_state, r_index_particle, r_index_group, grouped)
 }
 
 dust2_system_sir_time <- function(ptr) {
@@ -160,8 +160,8 @@ dust2_system_sirode_run_to_time <- function(ptr, r_time) {
   .Call(`_dust2_dust2_system_sirode_run_to_time`, ptr, r_time)
 }
 
-dust2_system_sirode_state <- function(ptr, grouped) {
-  .Call(`_dust2_dust2_system_sirode_state`, ptr, grouped)
+dust2_system_sirode_state <- function(ptr, r_index_state, r_index_particle, r_index_group, grouped) {
+  .Call(`_dust2_dust2_system_sirode_state`, ptr, r_index_state, r_index_particle, r_index_group, grouped)
 }
 
 dust2_system_sirode_time <- function(ptr) {
@@ -220,8 +220,8 @@ dust2_system_walk_run_to_time <- function(ptr, r_time) {
   .Call(`_dust2_dust2_system_walk_run_to_time`, ptr, r_time)
 }
 
-dust2_system_walk_state <- function(ptr, grouped) {
-  .Call(`_dust2_dust2_system_walk_state`, ptr, grouped)
+dust2_system_walk_state <- function(ptr, r_index_state, r_index_particle, r_index_group, grouped) {
+  .Call(`_dust2_dust2_system_walk_state`, ptr, r_index_state, r_index_particle, r_index_group, grouped)
 }
 
 dust2_system_walk_time <- function(ptr) {

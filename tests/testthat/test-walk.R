@@ -545,3 +545,77 @@ test_that("discrete time models have no internals", {
   expect_null(dust_system_run_to_time(obj, 3))
   expect_null(dust_system_internals(obj))
 })
+
+
+test_that("can extract subset of state from an ungrouped system", {
+  set.seed(1)
+  pars <- list(len = 5, sd = 1, random_initial = TRUE)
+  obj <- dust_system_create(walk(), pars, n_particles = 7)
+  dust_system_set_state_initial(obj)
+  m <- dust_system_state(obj)
+  expect_equal(dim(m), c(5, 7))
+
+  expect_equal(
+    dust_system_state(obj, index_particle = c(2, 5, 6)),
+    m[, c(2, 5, 6)])
+  expect_equal(
+    dust_system_state(obj, index_state = c(1, 2, 4)),
+    m[c(1, 2, 4), ])
+  expect_equal(
+    dust_system_state(obj, index_particle = c(4, 7), index_state = c(1, 2, 4)),
+    m[c(1, 2, 4), c(4, 7)])
+
+  expect_error(
+    dust_system_state(obj, index_particle = integer(0)),
+    "'index_particle' must have nonzero length")
+  expect_error(
+    dust_system_state(obj, index_state = integer(0)),
+    "'index_state' must have nonzero length")
+
+  expect_error(
+    dust_system_state(obj, index_group = 1),
+    "Can't provide 'index_group' for a non-grouped system")
+  expect_error(
+    dust_system_state(obj, index_group = 1:2),
+    "Can't provide 'index_group' for a non-grouped system")
+})
+
+
+test_that("can extract subset of state from a grouped system", {
+  set.seed(1)
+  pars <- rep(list(list(len = 5, sd = 1, random_initial = TRUE)), 3)
+  obj <- dust_system_create(walk(), pars, n_particles = 7, n_groups = 3)
+  dust_system_set_state_initial(obj)
+  m <- dust_system_state(obj)
+  expect_equal(dim(m), c(5, 7, 3))
+
+  expect_equal(
+    dust_system_state(obj, index_particle = c(2, 5, 6)),
+    m[, c(2, 5, 6), ])
+  expect_equal(
+    dust_system_state(obj, index_state = c(1, 2, 4)),
+    m[c(1, 2, 4), , ])
+  expect_equal(
+    dust_system_state(obj, index_group = c(2, 3)),
+    m[, , c(2, 3)])
+  expect_equal(
+    dust_system_state(obj, index_particle = c(4, 7), index_state = c(1, 2, 4)),
+    m[c(1, 2, 4), c(4, 7), ])
+  expect_equal(
+    dust_system_state(obj, index_particle = c(4, 7), index_group = c(2, 3)),
+    m[, c(4, 7), c(2, 3)])
+  expect_equal(
+    dust_system_state(obj, index_state = 2, index_particle = c(4, 7),
+                      index_group = c(2, 3)),
+    m[2, c(4, 7), c(2, 3), drop = FALSE])
+
+  expect_error(
+    dust_system_state(obj, index_particle = integer(0)),
+    "'index_particle' must have nonzero length")
+  expect_error(
+    dust_system_state(obj, index_state = integer(0)),
+    "'index_state' must have nonzero length")
+  expect_error(
+    dust_system_state(obj, index_group = integer(0)),
+    "'index_group' must have nonzero length")
+})

@@ -30,17 +30,69 @@ SEXP dust2_system_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {
 }
 
 template <typename T>
-SEXP dust2_system_state(cpp11::sexp ptr, bool grouped) {
+SEXP dust2_system_state(cpp11::sexp ptr, cpp11::sexp r_index_state,
+			cpp11::sexp r_index_particle,
+			cpp11::sexp r_index_group, bool grouped) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
   check_errors(obj, "get state from");
+  const auto n_state = obj->n_state();
+  const auto n_particles = obj->n_particles();
+  const auto n_groups = obj->n_groups();
+
   cpp11::sexp ret = R_NilValue;
-  const auto iter = obj->state().begin();
-  if (grouped) {
-    ret = export_array_n(iter,
-                         {obj->n_state(), obj->n_particles(), obj->n_groups()});
+  const auto iter_src = obj->state().begin();
+  bool everything = r_index_state == R_NilValue &&
+    r_index_particle == R_NilValue &&
+    r_index_group == R_NilValue;
+  if (everything) {
+    if (grouped) {
+      ret = export_array_n(iter_src, {n_state, n_particles, n_groups});
+    } else {
+      ret = export_array_n(iter_src, {n_state, n_particles * n_groups});
+    }
   } else {
-    ret = export_array_n(iter,
-                         {obj->n_state(), obj->n_particles() * obj->n_groups()});
+    if (!grouped && r_index_group != R_NilValue) {
+      cpp11::stop("Can't provide 'index_group' for a non-grouped system");
+    }
+    const auto index_state =
+      check_index(r_index_state, n_state, "index_state");
+    const auto index_particle =
+      check_index(r_index_particle, n_particles, "index_particle");
+    const auto index_group =
+      check_index(r_index_group, n_groups, "index_group");
+
+    // This is surprisingly icky to do, but this will do a subsetting copy
+    const auto n_state_save =
+      index_state.empty() ? n_state : index_state.size();
+    const auto n_particle_save =
+      index_particle.empty() ? n_particles : index_particle.size();
+    const auto n_group_save =
+      index_group.empty() ? n_groups : index_group.size();
+    cpp11::writable::doubles d(n_state_save * n_particle_save * n_group_save);
+    double* it_dst = REAL(d);
+    if (grouped) {
+      set_array_dims(d, {n_state_save, n_particle_save, n_group_save});
+    } else {
+      set_array_dims(d, {n_state_save, n_particle_save * n_group_save});
+    }
+
+    for (size_t i = 0; i < n_group_save; ++i) {
+      const auto ii = index_group.empty() ? i : index_group[i];
+      auto it_i = iter_src + ii * n_state * n_particles;
+      for (size_t j = 0; j < n_particle_save; ++j) {
+	const auto jj = index_particle.empty() ? j : index_particle[j];
+	const auto it_j = it_i + jj * n_state;
+	if (index_state.empty()) {
+	  it_dst = std::copy_n(it_j, n_state, it_dst);
+	} else {
+	  for (size_t k = 0; k < n_state_save; ++k, ++it_dst) {
+	    const auto kk = index_state[k];
+	    *it_dst = *(it_j + kk);
+	  }
+	}
+      }
+    }
+    ret = d;
   }
   return ret;
 }

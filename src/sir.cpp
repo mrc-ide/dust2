@@ -224,8 +224,8 @@ SEXP dust2_system_sir_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {
 }
 
 [[cpp11::register]]
-SEXP dust2_system_sir_state(cpp11::sexp ptr, bool grouped) {
-  return dust2::r::dust2_system_state<dust2::dust_discrete<sir>>(ptr, grouped);
+SEXP dust2_system_sir_state(cpp11::sexp ptr, cpp11::sexp r_index_state, cpp11::sexp r_index_particle, cpp11::sexp r_index_group, bool grouped) {
+  return dust2::r::dust2_system_state<dust2::dust_discrete<sir>>(ptr, r_index_state, r_index_particle, r_index_group, grouped);
 }
 
 [[cpp11::register]]

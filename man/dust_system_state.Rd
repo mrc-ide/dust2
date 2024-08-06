@@ -4,10 +4,24 @@
 \alias{dust_system_state}
 \title{Extract system state}
 \usage{
-dust_system_state(sys)
+dust_system_state(
+  sys,
+  index_state = NULL,
+  index_particle = NULL,
+  index_group = NULL
+)
 }
 \arguments{
 \item{sys}{A \code{dust_system} object}
+
+\item{index_state}{Index of the state to fetch, if you would like
+only a subset}
+
+\item{index_particle}{Index of the particle to fetch, if you would
+like a subset}
+
+\item{index_group}{Index of the group to fetch, if you would like
+a subset}
 }
 \value{
 An array of system state.  If your system is ungrouped, then
