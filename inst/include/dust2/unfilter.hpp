@@ -214,7 +214,7 @@ private:
     sys.adjoint_initial(time, state, n_adjoint, adjoint_curr, adjoint_next);
 
     // At the end of the calculation, copy the final states so that
-    // both copies winthin adjoint_ are the same - this means that the
+    // both copies within adjoint_ are the same - this means that the
     // gradient calculation will be correct.
     std::copy_n(adjoint_next, n_adjoint * n_groups_, adjoint_curr);
 

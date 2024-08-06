@@ -74,7 +74,7 @@ unfilter_create <- function(unfilter, pars) {
 ##'   [dust_unfilter_create]
 ##'
 ##' @param adjoint Logical, indicating if we should enable adjoint
-##'   history saving.  This can enabled even when your model does not
+##'   history saving.  This can be enabled even when your model does not
 ##'   support adjoints!  But you will not be able to compute
 ##'   gradients.
 ##'
@@ -126,14 +126,14 @@ dust_unfilter_last_history <- function(unfilter) {
 ##' Fetch the last gradient created by running an unfilter.  This
 ##' errors if the last call to [dust_unfilter_run] did not use
 ##' `adjoint = TRUE`.  The first time you call this (after a
-##' particular set of paramters) it will trigger running the reverse
+##' particular set of parameters) it will trigger running the reverse
 ##' model.
 ##'
 ##' @title Fetch last unfilter gradient
 ##'
 ##' @inheritParams dust_unfilter_run
 ##'
-##' @return An vector (if ungrouped) or a matrix (if grouped).
+##' @return A vector (if ungrouped) or a matrix (if grouped).
 ##'
 ##' @export
 dust_unfilter_last_gradient <- function(unfilter) {
