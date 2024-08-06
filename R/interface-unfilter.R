@@ -167,6 +167,7 @@ dust_unfilter_last_gradient <- function(unfilter) {
       i = "Unfilter has not yet been run"))
   }
   unfilter$methods$last_gradient(unfilter$ptr,
+                                 unfilter$preserve_particle_dimension,
                                  unfilter$preserve_group_dimension)
 }
 

@@ -76,7 +76,9 @@ cpp11::sexp dust2_unfilter_last_history(cpp11::sexp ptr,
 }
 
 template <typename T>
-cpp11::sexp dust2_discrete_unfilter_last_gradient(cpp11::sexp ptr, bool grouped) {
+cpp11::sexp dust2_discrete_unfilter_last_gradient(cpp11::sexp ptr,
+                                                  bool preserve_particle_dimension,
+                                                  bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
   if (!obj->adjoint_is_current()) {
@@ -95,8 +97,10 @@ cpp11::sexp dust2_discrete_unfilter_last_gradient(cpp11::sexp ptr, bool grouped)
   }
   cpp11::sexp ret = cpp11::writable::doubles(len);
   obj->last_gradient(REAL(ret));
-  if (grouped) {
-    set_array_dims(ret, {n_gradient, n_groups});
+  if (preserve_group_dimension && preserve_particle_dimension) {
+    set_array_dims(ret, {n_gradient, n_particles, n_groups});
+  } else if (preserve_group_dimension || preserve_particle_dimension) {
+    set_array_dims(ret, {n_gradient, n_particles * n_groups});
   }
   return ret;
 }

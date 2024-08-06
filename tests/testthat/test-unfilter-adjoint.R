@@ -76,6 +76,14 @@ test_that("can compute multiple gradients at once", {
   }, numeric(3))
 
   expect_equal(dust_unfilter_last_gradient(obj1), cmp)
+
+  obj3 <- dust_unfilter_create(sir(), time_start, time, data, n_groups = 4,
+                               preserve_particle_dimension = TRUE)
+  ll3 <- dust_unfilter_run(obj3, pars, adjoint = TRUE)
+  expect_equal(dim(ll3), c(1, 4))
+  expect_equal(ll3, matrix(ll1, 1, 4))
+  expect_equal(dust_unfilter_last_gradient(obj3),
+               array(cmp, c(3, 1, 4)))
 })
 
 

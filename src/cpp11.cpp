@@ -258,10 +258,10 @@ extern "C" SEXP _dust2_dust2_filter_sir_set_rng_state(SEXP ptr, SEXP r_rng_state
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_unfilter_sir_last_gradient(cpp11::sexp ptr, bool grouped);
-extern "C" SEXP _dust2_dust2_unfilter_sir_last_gradient(SEXP ptr, SEXP grouped) {
+SEXP dust2_unfilter_sir_last_gradient(cpp11::sexp ptr, bool preserve_particle_dimension, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_unfilter_sir_last_gradient(SEXP ptr, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_unfilter_sir_last_gradient(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(grouped)));
+    return cpp11::as_sexp(dust2_unfilter_sir_last_gradient(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // sirode.cpp
@@ -521,7 +521,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_system_walk_time",                  (DL_FUNC) &_dust2_dust2_system_walk_time,                   1},
     {"_dust2_dust2_system_walk_update_pars",           (DL_FUNC) &_dust2_dust2_system_walk_update_pars,            2},
     {"_dust2_dust2_unfilter_sir_alloc",                (DL_FUNC) &_dust2_dust2_unfilter_sir_alloc,                 9},
-    {"_dust2_dust2_unfilter_sir_last_gradient",        (DL_FUNC) &_dust2_dust2_unfilter_sir_last_gradient,         2},
+    {"_dust2_dust2_unfilter_sir_last_gradient",        (DL_FUNC) &_dust2_dust2_unfilter_sir_last_gradient,         3},
     {"_dust2_dust2_unfilter_sir_last_history",         (DL_FUNC) &_dust2_dust2_unfilter_sir_last_history,          3},
     {"_dust2_dust2_unfilter_sir_run",                  (DL_FUNC) &_dust2_dust2_unfilter_sir_run,                   6},
     {"_dust2_dust2_unfilter_sir_update_pars",          (DL_FUNC) &_dust2_dust2_unfilter_sir_update_pars,           2},
