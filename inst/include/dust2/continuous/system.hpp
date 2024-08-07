@@ -9,6 +9,7 @@
 #include <dust2/continuous/control.hpp>
 #include <dust2/continuous/solver.hpp>
 #include <dust2/errors.hpp>
+#include <dust2/tools.hpp>
 #include <dust2/zero.hpp>
 #include <mcstate/random/random.hpp>
 
