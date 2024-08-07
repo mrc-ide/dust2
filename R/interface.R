@@ -222,7 +222,6 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
 dust_system_state <- function(sys, index_state = NULL, index_particle = NULL,
                               index_group = NULL) {
   check_is_dust_system(sys)
-  ## TODO: preserve_particle_dimension
   sys$methods$state(sys$ptr, index_state, index_particle, index_group,
                     sys$preserve_particle_dimension,
                     sys$preserve_group_dimension)
@@ -474,7 +473,6 @@ dust_system_internals <- function(sys, include_coefficients = FALSE) {
     ## No internals for now, perhaps never?
     return(NULL)
   }
-  ## TODO: cope with dimension preservation
   dat <- sys$methods$internals(sys$ptr, include_coefficients)
   ret <- data_frame(
     particle = seq_along(dat),
