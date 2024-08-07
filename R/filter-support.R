@@ -53,56 +53,15 @@ check_time_sequence <- function(time_start, time, call = NULL) {
 }
 
 
-check_data <- function(data, n_time, n_groups, preserve_group_dimension,
+check_data <- function(data, n_groups, preserve_group_dimension,
                        call = NULL) {
-  if (is.data.frame(data)) {
-    ## The issue here is that we might want our data.frame to be in
-    ## terms of group _names_ and in actual times.  Let's do this one
-    ## with docs first?
-  } else if (is.list(data)) {
-    check_data_list(data, n_time, n_groups, preserve_group_dimension,
-                    call = call)
-  } else {
-    cli::cli_abort("'data' must be either a data.frame or a list",
-                   call = call)
+  if (!is.null(n_groups)) {
+    assert_scalar_integer(n_groups, call = call)
   }
-  data
-}
-
-
-check_data_list <- function(data, n_time, n_groups, preserve_group_dimension,
-                            call = NULL) {
-  assert_list(data, call = call)
-  assert_length(data, n_time, call = call)
-  if (preserve_group_dimension) {
-    len <- lengths(data)
-    err <- len != n_groups
-    if (any(err)) {
-      detail <- sprintf("Error for element %d, which has length %d",
-                        which(err), len[err])
-      if (length(detail) > 5) {
-        detail <- c(
-          detail[1:4],
-          sprintf("...and %d other elements", sum(err) - 4))
-      }
-      if (n_groups > 1) {
-        justification <- "'n_groups' is greater than one"
-      } else {
-        justification <- "'preserve_group_dimension' was TRUE"
-      }
-      cli::cli_abort(
-        c("Expected all elements of 'data' to have length {n_groups}",
-          i = paste(
-            "You have a grouped system ({justification})",
-            "so each element in data must be a list with data for each group",
-            "in turn"),
-          set_names(detail, "x")),
-        arg = "data", call = call)
-    }
-  } else {
-    data <- lapply(data, function(el) list(el))
-  }
-  data
+  data <- dust_filter_data(data) # do earlier.
+  list(time = data[[attr(data, "time")]],
+       n_groups = attr(data, "n_groups"),
+       data = data_to_list(data, n_groups, preserve_group_dimension, call))
 }
 
 

@@ -2,14 +2,10 @@ test_that("can create mcstate model from sir model", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
 
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) list(incidence = i))
-  dt <- 1
-  n_particles <- 100
-  seed <- 42
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
 
-  obj <- dust_filter_create(sir(), time_start, time, data,
-                            n_particles = n_particles, seed = seed)
+  obj <- dust_filter_create(sir(), time_start, data, n_particles = 100,
+                            seed = 42)
   packer <- mcstate2::mcstate_packer(
     c("beta", "gamma"),
     fixed = list(N = 1000, I0 = 10, exp_noise = 1e6))

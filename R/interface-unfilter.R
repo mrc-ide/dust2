@@ -17,31 +17,40 @@
 ##'   [dust_unfilter_run]
 ##'
 ##' @export
-dust_unfilter_create <- function(generator, time_start, time, data,
-                                 n_particles = 1, n_groups = 1,
+dust_unfilter_create <- function(generator, time_start, data,
+                                 n_particles = 1, n_groups = NULL,
                                  dt = 1, n_threads = 1, index_state = NULL,
                                  preserve_particle_dimension = FALSE,
                                  preserve_group_dimension = FALSE) {
   call <- environment()
   check_generator_for_filter(generator, "unfilter", call = call)
   assert_scalar_size(n_particles, allow_zero = FALSE, call = call)
-  assert_scalar_size(n_groups, allow_zero = FALSE, call = call)
   assert_scalar_logical(preserve_particle_dimension, call = call)
-  assert_scalar_logical(preserve_group_dimension, call = call)
   preserve_particle_dimension <- preserve_particle_dimension || n_particles > 1
+
+  dt <- check_dt(dt, call = call)
+
+  data <- check_data(data, n_groups, preserve_group_dimension, call = call)
+  time <- data$time
+  n_groups <- data$n_groups
+  data_list <- data$data
   preserve_group_dimension <- preserve_group_dimension || n_groups > 1
 
-  time <- check_time_sequence(time_start, time, call = call)
-  dt <- check_dt(dt, call = call)
-  data <- check_data(data, length(time), n_groups, preserve_group_dimension,
-                     call = call)
+  assert_scalar_integer(time_start, call = call)
+  if (time_start > time[[1]]) {
+    cli::cli_abort(
+      paste("'time_start' ({time_start}) is later than the first time",
+            "in 'data' ({time[[1]]})"),
+      call = call)
+  }
+
   index_state <- check_index(index_state, call = call)
   n_threads <- check_n_threads(n_threads, n_particles, n_groups)
 
   inputs <- list(time_start = time_start,
                  time = time,
                  dt = dt,
-                 data = data,
+                 data = data_list,
                  n_particles = n_particles,
                  n_groups = n_groups,
                  n_threads = n_threads,

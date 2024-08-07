@@ -67,6 +67,7 @@ dust_filter_data <- function(data, time = NULL, group = NULL, n_groups = NULL) {
 
   if (is.null(group)) {
     n_groups <- 1
+    data <- data[order(data[[time]]), ]
   } else {
     assert_integer(data[[group]], name = sprintf('data[["%s"]]', group),
                    arg = "data")
@@ -89,6 +90,7 @@ dust_filter_data <- function(data, time = NULL, group = NULL, n_groups = NULL) {
                     "the same times (from the '{time}' column), but",
                     "your groups have different times")))
     }
+    data <- data[order(data[[time]], data[[group]]), ]
   }
 
   if (length(setdiff(names(data), c(time, group))) == 0) {
@@ -97,9 +99,41 @@ dust_filter_data <- function(data, time = NULL, group = NULL, n_groups = NULL) {
             "{squote(c(time, group))}"))
   }
 
+  rownames(data) <- NULL
   attr(data, "time") <- time
   attr(data, "group") <- group
   attr(data, "n_groups") <- n_groups
   class(data) <- c("dust_filter_data", class(data))
   data
+}
+
+
+data_to_list <- function(data, n_groups, preserve_group_dimension,
+                         call = NULL) {
+  time <- attr(data, "time")
+  group <- attr(data, "group")
+  n_groups_data <- attr(data, "n_groups")
+
+  if (is.null(n_groups)) {
+    n_groups <- n_groups_data
+  } else if (n_groups != n_groups_data) {
+    cli::cli_abort(
+      "Expected 'data' to have {n_groups} groups, but it had {n_groups_data}",
+      call = call)
+  }
+
+  data_by_time <- unname(split(data[names(data) != time], data[[time]]))
+
+  if (is.null(group)) {
+    d <- lapply(data_by_time, as.list)
+    if (preserve_group_dimension) {
+      d <- lapply(d, list)
+    }
+  } else {
+    d <- lapply(data_by_time, function(el) {
+      lapply(unname(split(el[names(el) != group], el[[group]])), as.list)
+    })
+  }
+
+  d
 }
