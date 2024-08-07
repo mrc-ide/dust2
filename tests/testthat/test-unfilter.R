@@ -8,6 +8,9 @@ test_that("can run an unfilter", {
   data <- lapply(1:4, function(i) list(incidence = i))
   dt <- 1
 
+  data <- data.frame(time = c(4, 8, 12, 16),
+                     incidence = c(1, 2, 3, 4))
+
   ## Manually compute likelihood:
   f <- function(pars) {
     base[names(pars)] <- pars
