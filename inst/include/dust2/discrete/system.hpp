@@ -64,9 +64,10 @@ public:
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
+        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
         try {
           run_particle(time_, dt_, n_steps,
-                       shared_[i], internal_[i],
+                       shared_[i], internal_i,
                        zero_every_[i],
                        state_data + offset,
                        rng_.state(k),
@@ -93,9 +94,10 @@ public:
         const auto offset = k * n_state_;
         auto state_model_ij = state_.data() + offset;
         auto state_history_ij = state_history + offset;
+        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
         try {
           run_particle(time_, dt_, n_steps, n_state_, stride,
-                       shared_[i], internal_[i], zero_every_[i],
+                       shared_[i], internal_i, zero_every_[i],
                        state_model_ij, state_history_ij,
                        rng_.state(k));
         } catch (std::exception const &e) {
@@ -117,9 +119,10 @@ public:
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
+        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
         try {
           T::initial(time_, dt_,
-                     shared_[i], internal_[i],
+                     shared_[i], internal_i,
                      rng_.state(k),
                      state_data + offset);
         } catch (std::exception const& e) {
@@ -232,10 +235,11 @@ public:
 	auto data_i = data + i;
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
-	auto output_ij = output + k;
+        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
+        auto output_ij = output + k;
         try {
           *output_ij = T::compare_data(time_, dt_, state + offset, *data_i,
-				       shared_[i], internal_[i], rng_.state(k));
+				       shared_[i], internal_i, rng_.state(k));
         } catch (std::exception const& e) {
           errors_.capture(e, k);
         }
@@ -256,12 +260,13 @@ public:
         const auto k = n_particles_ * i + j;
         const auto offset_state = k * n_state_;
         const auto offset_adjoint = k * n_adjoint;
+        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
         try {
           T::adjoint_compare_data(time, dt_,
                                   state + offset_state,
                                   adjoint_curr + offset_adjoint,
                                   *data,
-                                  shared_[i], internal_[i],
+                                  shared_[i], internal_i,
                                   adjoint_next + offset_adjoint);
         } catch (std::exception const& e) {
           errors_.capture(e, k);
@@ -289,9 +294,10 @@ public:
         const auto k = n_particles_ * i + j;
         const auto offset_state = k * n_state_;
         const auto offset_adjoint = k * n_adjoint;
+        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
         try {
           adjoint_run_particle(time0, dt_, n_steps, stride,
-                               shared_[i], internal_[i],
+                               shared_[i], internal_i,
                                state + offset_state,
                                adjoint_curr + offset_adjoint,
                                adjoint_next + offset_adjoint);
@@ -314,13 +320,14 @@ public:
         const auto k = n_particles_ * i + j;
         const auto offset_state = k * n_state_;
         const auto offset_adjoint = k * n_adjoint;
+        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
         try {
           T::adjoint_initial(time,
                              dt_,
                              state + offset_state,
                              adjoint_curr + offset_adjoint,
                              shared_[i],
-                             internal_[i],
+                             internal_i,
                              adjoint_next + offset_adjoint);
         } catch (std::exception const& e) {
           errors_.capture(e, k);

@@ -35,13 +35,11 @@ SEXP dust2_discrete_alloc(cpp11::list r_pars,
   const auto dt = check_dt(r_dt);
   const auto n_particles = to_size(r_n_particles, "n_particles");
   const auto n_groups = to_size(r_n_groups, "n_groups");
+  const auto n_threads = to_size(r_n_threads, "n_threads");
   const auto shared = build_shared<T>(r_pars, n_groups);
-  // Later, we need one of these per thread
-  const auto internal = build_internal<T>(shared);
+  const auto internal = build_internal<T>(shared, n_threads);
   auto seed = mcstate::random::r::as_rng_seed<rng_state_type>(r_seed);
   auto deterministic = to_bool(r_deterministic, "deterministic");
-
-  const auto n_threads = to_size(r_n_threads, "n_threads");
 
   auto obj = new dust_discrete<T>(shared, internal, time, dt, n_particles,
                                   seed, deterministic, n_threads);
