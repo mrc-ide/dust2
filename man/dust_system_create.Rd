@@ -8,13 +8,15 @@ dust_system_create(
   generator,
   pars,
   n_particles,
-  n_groups = 0,
+  n_groups = 1,
   time = 0,
   dt = NULL,
   ode_control = NULL,
   seed = NULL,
   deterministic = FALSE,
-  n_threads = 1
+  n_threads = 1,
+  preserve_particle_dimension = FALSE,
+  preserve_group_dimension = FALSE
 )
 }
 \arguments{
@@ -47,6 +49,18 @@ allocated in deterministic mode.}
 
 \item{n_threads}{Integer, the number of threads to use in
 parallelisable calculations.  See Details.}
+
+\item{preserve_particle_dimension}{Logical, indicating if output
+from the system should preserve the particle dimension in the
+case where a single particle is run.  In the case where more
+than one particle is run, this argument has no effect as the
+dimension is always preserved.}
+
+\item{preserve_group_dimension}{Logical, indicating if state and
+output from the system should preserve the group dimension in
+the case where a single group is run.  In the case where more
+than one group is run, this argument has no effect as the
+dimension is always preserved.}
 }
 \value{
 A \code{dust_system} object, with opaque format.

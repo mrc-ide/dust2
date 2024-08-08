@@ -1,6 +1,7 @@
 test_that("can run simple logistic system", {
   pars <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
   obj <- dust_system_create(logistic(), pars, n_particles = 1,
+                            preserve_particle_dimension = TRUE,
                             deterministic = TRUE)
   expect_s3_class(obj, "dust_system")
 
@@ -25,6 +26,7 @@ test_that("can run simple logistic system", {
 test_that("can extract statistics from solver", {
   pars <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
   obj <- dust_system_create(logistic(), pars, n_particles = 1,
+                            preserve_particle_dimension = TRUE,
                             deterministic = TRUE)
 
   d <- dust_system_internals(obj)
@@ -53,6 +55,7 @@ test_that("can extract statistics from solver", {
 test_that("can set system state from a vector", {
   pars <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
   obj <- dust_system_create(logistic(), pars, n_particles = 1,
+                            preserve_particle_dimension = TRUE,
                             deterministic = TRUE)
   expect_s3_class(obj, "dust_system")
 
@@ -107,7 +110,8 @@ test_that("can set rng state", {
 test_that("can update parameters", {
   pars1 <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
   pars2 <- list(r = pars1$r * 5)
-  obj <- dust_system_create(logistic(), pars1, n_particles = 1, seed = 42)
+  obj <- dust_system_create(logistic(), pars1, n_particles = 1, seed = 42,
+                            preserve_particle_dimension = TRUE)
 
   dust_system_set_state_initial(obj)
   expect_null(dust_system_run_to_time(obj, 5))
@@ -142,8 +146,10 @@ test_that("can accept a vector of parameters", {
 test_that("can convert integer vectors to numeric", {
   pars1 <- list(n = 3, r = c(0.1, 0.2, 0.3), K = c(100L, 200L, 300L))
   pars2 <- list(n = 3, r = c(0.1, 0.2, 0.3), K = c(100, 200, 300))
-  obj1 <- dust_system_create(logistic(), pars1, n_particles = 1)
-  obj2 <- dust_system_create(logistic(), pars2, n_particles = 1)
+  obj1 <- dust_system_create(logistic(), pars1, n_particles = 1,
+                             preserve_particle_dimension = TRUE)
+  obj2 <- dust_system_create(logistic(), pars2, n_particles = 1,
+                             preserve_particle_dimension = TRUE)
   dust_system_set_state_initial(obj1)
   dust_system_set_state_initial(obj2)
   dust_system_run_to_time(obj1, 10)
@@ -258,8 +264,10 @@ test_that("can set ode control", {
   ctl1 <- dust_ode_control(atol = 1e-8, rtol = 1e-8)
   ctl2 <- dust_ode_control(atol = 1e-3, rtol = 1e-3)
   obj1 <- dust_system_create(logistic(), pars, n_particles = 1,
+                             preserve_particle_dimension = TRUE,
                              ode_control = ctl1)
   obj2 <- dust_system_create(logistic(), pars, n_particles = 1,
+                             preserve_particle_dimension = TRUE,
                              ode_control = ctl2)
   dust_system_set_state_initial(obj1)
   dust_system_set_state_initial(obj2)
@@ -283,7 +291,8 @@ test_that("can error if too many steps taken", {
   pars <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
   ctl <- dust_ode_control(max_steps = 2)
   obj <- dust_system_create(logistic(), pars, n_particles = 1,
-                             ode_control = ctl)
+                            preserve_particle_dimension = TRUE,
+                            ode_control = ctl)
   dust_system_set_state_initial(obj)
   expect_error(dust_system_run_to_time(obj, 10),
                "too many steps")
@@ -294,7 +303,8 @@ test_that("can error if steps are too small", {
   pars <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
   ctl <- dust_ode_control(step_size_min = 10)
   obj <- dust_system_create(logistic(), pars, n_particles = 1,
-                             ode_control = ctl)
+                            preserve_particle_dimension = TRUE,
+                            ode_control = ctl)
   dust_system_set_state_initial(obj)
   expect_error(dust_system_run_to_time(obj, 10),
                "step too small")
@@ -304,6 +314,7 @@ test_that("can error if steps are too small", {
 test_that("can error if initial step size calculation fails", {
   pars <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
   obj <- dust_system_create(logistic(), pars, n_particles = 1,
+                            preserve_particle_dimension = TRUE,
                             deterministic = TRUE)
   y0 <- matrix(NA_real_, 3, 1)
   expect_error(dust_system_set_state(obj, y0),
@@ -315,6 +326,7 @@ test_that("can save step times for debugging", {
   pars <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
   ctl <- dust_ode_control(debug_record_step_times = TRUE)
   obj <- dust_system_create(logistic(), pars, n_particles = 1,
+                            preserve_particle_dimension = TRUE,
                             deterministic = TRUE, ode_control = ctl)
 
   dust_system_set_state_initial(obj)

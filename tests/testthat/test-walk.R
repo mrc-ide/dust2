@@ -130,13 +130,13 @@ test_that("validate inputs", {
     matrix(0, 1, 10))
   expect_error(
     dust_system_create(walk(), pars, n_particles = 9.5),
-    "'n_particles' must be integer-like")
+    "Expected 'n_particles' to be integer")
   expect_error(
     dust_system_create(walk(), pars, n_particles = "10"),
-    "'n_particles' must be scalar integer")
+    "Expected 'n_particles' to be integer")
   expect_error(
     dust_system_create(walk(), pars, n_particles = -5),
-    "'n_particles' must be non-negative")
+    "'n_particles' must be at least 1")
 
   expect_error(
     dust_system_create(walk(), pars, n_particles = 10, deterministic = 1),
@@ -164,16 +164,6 @@ test_that("can initialise multiple groups with different parameter sets", {
   expect_equal(dust_system_time(obj), 3)
 
   expect_identical(dim(obj), c(1L, 10L, 4L))
-})
-
-
-test_that("return names passed in with groups", {
-  pars <- lapply(1:4, function(sd) list(sd = sd, random_initial = TRUE))
-  names(pars) <- letters[1:4]
-  obj <- dust_system_create(walk(), pars, n_particles = 10, n_groups = 4)
-  ## This interface will change/improve soon
-  expect_true(obj$grouped)
-  expect_equal(obj$group_names, letters[1:4])
 })
 
 

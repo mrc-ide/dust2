@@ -1,6 +1,7 @@
 test_that("can run sirode model", {
   pars <- list(beta = 0.2, gamma = 0.1, N = 1000, I0 = 10, exp_noise = 1e6)
   obj <- dust_system_create(sirode(), pars, n_particles = 1,
+                            preserve_particle_dimension = TRUE,
                             ode_control = dust_ode_control(step_size_max = 0.8),
                             deterministic = TRUE)
   dust_system_set_state_initial(obj)
@@ -20,6 +21,7 @@ test_that("can cope with multiple resets within a step", {
 
   f <- function(t) {
     obj1 <- dust_system_create(sirode(), pars, n_particles = 1,
+                               preserve_particle_dimension = TRUE,
                                ode_control = ctl, deterministic = TRUE)
     dust_system_set_state_initial(obj1)
     dust_system_run_to_time(obj1, t)
@@ -30,7 +32,8 @@ test_that("can cope with multiple resets within a step", {
   res <- lapply(1:10, f)
 
   obj2 <- dust_system_create(sirode(), pars, n_particles = 1,
-                            ode_control = ctl, deterministic = TRUE)
+                             preserve_particle_dimension = TRUE,
+                             ode_control = ctl, deterministic = TRUE)
   dust_system_set_state_initial(obj2)
   cmp <- dust_system_simulate(obj2, 1:10)
 

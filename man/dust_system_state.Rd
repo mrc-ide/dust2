@@ -24,9 +24,10 @@ like a subset}
 a subset}
 }
 \value{
-An array of system state.  If your system is ungrouped, then
-this has two dimensions (state, particle).  If grouped, this has
-three dimensions (state, particle, group)
+An array of system state.  If your system is ungrouped
+(i.e., \code{n_groups = 1} and \code{preserve_group_dimension = FALSE}),
+then this has two dimensions (state, particle).  If grouped,
+this has three dimensions (state, particle, group)
 }
 \description{
 Extract system state

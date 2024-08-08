@@ -41,24 +41,51 @@ test_that("can validate time sequence", {
 
 
 test_that("can validate data", {
-  expect_no_error(check_data(vector("list", 5), 5, n_groups = 0))
-  expect_error(check_data(vector("list", 3), 5, n_groups = 0),
+  expect_no_error(check_data(vector("list", 5), 5,
+                             n_groups = 1, preserve_group_dimension = FALSE))
+  expect_error(check_data(vector("list", 3), 5,
+                          n_groups = 1, preserve_group_dimension = FALSE),
                "Expected 'data' to have length 5, but was length 3")
-  expect_error(check_data(NULL, 5, n_groups = 0),
+  expect_error(check_data(NULL, 5,
+                          n_groups = 1, preserve_group_dimension = FALSE),
                "Expected 'data' to be a list")
 
   err <- expect_error(
-    check_data(vector("list", 3), 3, n_groups = 2),
+    check_data(vector("list", 3), 3,
+               n_groups = 2, preserve_group_dimension = TRUE),
     "Expected all elements of 'data' to have length 2")
   expect_equal(tail(err$body, 2),
                c(x = "Error for element 2, which has length 0",
                  x = "Error for element 3, which has length 0"))
   err <- expect_error(
-    check_data(vector("list", 10), 10, n_groups = 2),
+    check_data(vector("list", 10), 10,
+               n_groups = 2, preserve_group_dimension = TRUE),
     "Expected all elements of 'data' to have length 2")
   expect_equal(tail(err$body, 2),
                c(x = "Error for element 4, which has length 0",
                  x = "...and 6 other elements"))
+})
+
+
+test_that("sensible explanation about expected data size", {
+  err <- expect_error(
+    check_data(vector("list", 3), 3,
+               n_groups = 2, preserve_group_dimension = TRUE),
+    "Expected all elements of 'data' to have length 2")
+  expect_match(
+    conditionMessage(err),
+    "You have a grouped system ('n_groups' is greater than one)",
+    fixed = TRUE)
+
+  err <- expect_error(
+    check_data(vector("list", 3), 3,
+               n_groups = 1, preserve_group_dimension = TRUE),
+    "Expected all elements of 'data' to have length 1")
+  expect_match(
+    conditionMessage(err),
+    "You have a grouped system ('preserve_group_dimension' was TRUE)",
+    fixed = TRUE)
+
 })
 
 

@@ -9,21 +9,20 @@ namespace r {
 
 template <typename T>
 cpp11::sexp dust2_filter_update_pars(cpp11::sexp ptr,
-                                     cpp11::list r_pars,
-                                     bool grouped) {
+                                     cpp11::list r_pars) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
-  update_pars(obj->sys, cpp11::as_cpp<cpp11::list>(r_pars), grouped);
+  update_pars(obj->sys, r_pars);
   return R_NilValue;
 }
 
 template <typename T>
 cpp11::sexp dust2_filter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
-                             bool save_history, bool grouped) {
+                             bool save_history, bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
   if (r_initial != R_NilValue) {
-    set_state(obj->sys, r_initial, grouped);
+    set_state(obj->sys, r_initial, preserve_group_dimension);
   }
   obj->run(r_initial == R_NilValue, save_history);
 
@@ -34,7 +33,8 @@ cpp11::sexp dust2_filter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
 
 // Can collapse with above
 template <typename T>
-cpp11::sexp dust2_filter_last_history(cpp11::sexp ptr, bool grouped) {
+cpp11::sexp dust2_filter_last_history(cpp11::sexp ptr,
+				      bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
   if (!obj->last_history_is_current()) {
@@ -54,7 +54,7 @@ cpp11::sexp dust2_filter_last_history(cpp11::sexp ptr, bool grouped) {
   const auto len = n_state * n_particles * n_groups * n_times;
   cpp11::sexp ret = cpp11::writable::doubles(len);
   history.export_state(REAL(ret), reorder);
-  if (grouped) {
+  if (preserve_group_dimension) {
     set_array_dims(ret, {n_state, n_particles, n_groups, n_times});
   } else {
     set_array_dims(ret, {n_state, n_particles * n_groups, n_times});

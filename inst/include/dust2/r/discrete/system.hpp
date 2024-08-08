@@ -20,16 +20,24 @@ SEXP dust2_discrete_alloc(cpp11::list r_pars,
 			  cpp11::sexp r_n_threads) {
   using rng_state_type = typename T::rng_state_type;
 
+  // These duplicate checks that happen on the R side and can be
+  // relaxed over time.  However, they're fast and pretty harmless -
+  // most will just arrange for the conversion from SEXP type to the
+  // expected underlying C type (with no cost) and then we cast out
+  // into the C++ type that we need here (e.g., SEXP -> int -> size_t)
+  //
+  // The only one of these that might throw is the the build_shared
+  // call, which might fail because of validation checks that the user
+  // has getting parameters from the SEXP, or because it creates a
+  // system with an unexpected size.  These will result in a fairly
+  // ugly error compared with most.
   const auto time = check_time(r_time, "time");
   const auto dt = check_dt(r_dt);
-
   const auto n_particles = to_size(r_n_particles, "n_particles");
   const auto n_groups = to_size(r_n_groups, "n_groups");
-
   const auto shared = build_shared<T>(r_pars, n_groups);
   // Later, we need one of these per thread
   const auto internal = build_internal<T>(shared);
-
   auto seed = mcstate::random::r::as_rng_seed<rng_state_type>(r_seed);
   auto deterministic = to_bool(r_deterministic, "deterministic");
 
@@ -39,23 +47,12 @@ SEXP dust2_discrete_alloc(cpp11::list r_pars,
                                   seed, deterministic, n_threads);
   cpp11::external_pointer<dust_discrete<T>> ptr(obj, true, false);
 
-  // Later, we'll export a bit more back from the system (in particular
-  // systems need to provide information about how they organise
-  // variables, ode systems report computed control, etc.
-  const auto grouped = n_groups > 0;
-  cpp11::sexp r_group_names = R_NilValue;
-  if (grouped) {
-    r_group_names = r_pars.attr("names");
-  }
+  // Later, we'll export information about how systems structure
+  // variables (mrc-5422, with support needed from mcstate2)
   cpp11::sexp r_n_state = cpp11::as_sexp(obj->n_state());
-  cpp11::sexp r_grouped = cpp11::as_sexp(grouped);
 
   using namespace cpp11::literals;
-  return cpp11::writable::list{"ptr"_nm = ptr,
-      "n_state"_nm = r_n_state,
-      "grouped"_nm = r_grouped,
-      "group_names"_nm = r_group_names
-      };
+  return cpp11::writable::list{"ptr"_nm = ptr, "n_state"_nm = r_n_state};
 }
 
 }

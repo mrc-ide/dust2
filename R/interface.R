@@ -123,20 +123,48 @@ dust_system_generator <- function(name, time_type,
 ##' @param n_threads Integer, the number of threads to use in
 ##'   parallelisable calculations.  See Details.
 ##'
+##' @param preserve_particle_dimension Logical, indicating if output
+##'   from the system should preserve the particle dimension in the
+##'   case where a single particle is run.  In the case where more
+##'   than one particle is run, this argument has no effect as the
+##'   dimension is always preserved.
+##'
+##' @param preserve_group_dimension Logical, indicating if state and
+##'   output from the system should preserve the group dimension in
+##'   the case where a single group is run.  In the case where more
+##'   than one group is run, this argument has no effect as the
+##'   dimension is always preserved.
+##'
 ##' @return A `dust_system` object, with opaque format.
 ##'
 ##' @export
-dust_system_create <- function(generator, pars, n_particles, n_groups = 0,
+dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
                                time = 0, dt = NULL, ode_control = NULL,
                                seed = NULL, deterministic = FALSE,
-                               n_threads = 1) {
+                               n_threads = 1,
+                               preserve_particle_dimension = FALSE,
+                               preserve_group_dimension = FALSE) {
+  call <- environment()
   check_is_dust_system_generator(generator, substitute(generator))
+  ## check_time(time, call = call)
+  assert_scalar_size(n_particles, allow_zero = FALSE, call = call)
+  assert_scalar_size(n_groups, allow_zero = FALSE, call = call)
+  assert_scalar_size(n_threads, allow_zero = FALSE, call = call)
+  assert_scalar_logical(preserve_particle_dimension, call = call)
+  assert_scalar_logical(preserve_group_dimension, call = call)
+
+  preserve_particle_dimension <- preserve_particle_dimension || n_particles > 1
+  preserve_group_dimension <- preserve_group_dimension || n_groups > 1
+
+  pars <- check_pars(pars, n_groups, preserve_group_dimension)
   if (generator$properties$time_type == "discrete") {
     if (!is.null(ode_control)) {
       cli::cli_abort("Can't use 'ode_control' with discrete-time systems")
     }
-    res <- generator$methods$alloc(pars, time, dt %||% 1, n_particles,
-                                   n_groups, seed, deterministic, n_threads)
+    dt <- check_dt(dt %||% 1, call = call)
+    res <- generator$methods$alloc(pars, time, dt, n_particles,
+                                   n_groups, seed, deterministic,
+                                   n_threads)
   } else {
     if (!is.null(dt)) {
       cli::cli_abort("Can't use 'dt' with continuous-time systems")
@@ -152,11 +180,13 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 0,
   ## Here, we augment things slightly
   res$name <- generator$name
   res$n_particles <- as.integer(n_particles)
-  res$n_groups <- as.integer(max(n_groups), 1)
+  res$n_groups <- as.integer(n_groups)
   res$n_threads <- check_n_threads(n_threads, n_particles, n_groups)
   res$deterministic <- deterministic
   res$methods <- generator$methods
   res$properties <- generator$properties
+  res$preserve_particle_dimension <- preserve_particle_dimension
+  res$preserve_group_dimension <- preserve_group_dimension
   res$ode_control <- ode_control
   res$dt <- dt
   class(res) <- "dust_system"
@@ -179,9 +209,10 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 0,
 ##' @param index_group Index of the group to fetch, if you would like
 ##'   a subset
 ##'
-##' @return An array of system state.  If your system is ungrouped, then
-##'   this has two dimensions (state, particle).  If grouped, this has
-##'   three dimensions (state, particle, group)
+##' @return An array of system state.  If your system is ungrouped
+##'   (i.e., `n_groups = 1` and `preserve_group_dimension = FALSE`),
+##'   then this has two dimensions (state, particle).  If grouped,
+##'   this has three dimensions (state, particle, group)
 ##'
 ##' @seealso [dust_system_set_state()] for setting state and
 ##'   [dust_system_set_state_initial()] for setting state to the
@@ -192,7 +223,8 @@ dust_system_state <- function(sys, index_state = NULL, index_particle = NULL,
                               index_group = NULL) {
   check_is_dust_system(sys)
   sys$methods$state(sys$ptr, index_state, index_particle, index_group,
-                    sys$grouped)
+                    sys$preserve_particle_dimension,
+                    sys$preserve_group_dimension)
 }
 
 
@@ -212,7 +244,9 @@ dust_system_state <- function(sys, index_state = NULL, index_particle = NULL,
 ##' @export
 dust_system_set_state <- function(sys, state) {
   check_is_dust_system(sys)
-  sys$methods$set_state(sys$ptr, state, sys$grouped)
+  ## TODO: check rank etc here (mrc-5565), and support
+  ## preserve_particle_dimension
+  sys$methods$set_state(sys$ptr, state, sys$preserve_group_dimension)
   invisible()
 }
 
@@ -265,6 +299,7 @@ dust_system_time <- function(sys) {
 ##' @export
 dust_system_set_time <- function(sys, time) {
   check_is_dust_system(sys)
+  ## check_time(time) # TODO
   sys$methods$set_time(sys$ptr, time)
   invisible()
 }
@@ -315,7 +350,8 @@ dust_system_set_rng_state <- function(sys, rng_state) {
 ##' @export
 dust_system_update_pars <- function(sys, pars) {
   check_is_dust_system(sys)
-  sys$methods$update_pars(sys$ptr, pars, sys$grouped)
+  pars <- check_pars(pars, sys$n_groups, sys$preserve_group_dimension)
+  sys$methods$update_pars(sys$ptr, pars)
   invisible()
 }
 
@@ -352,22 +388,25 @@ dust_system_run_to_time <- function(sys, time) {
 ##'   first time must be no less than the current system time
 ##'   (as reported by [dust_system_time])
 ##'
-##' @param index An optional index of states to extract.  If given,
-##'   then we subset the system state on return.  You can use this to
-##'   return fewer system states than the system ran with, to reorder
-##'   states, or to name them on exit (names present on the index will
-##'   be copied into the rownames of the returned array).
+##' @param index_state An optional index of states to extract.  If
+##'   given, then we subset the system state on return.  You can use
+##'   this to return fewer system states than the system ran with, to
+##'   reorder states, or to name them on exit (names present on the
+##'   index will be copied into the rownames of the returned array).
 ##'
 ##' @return An array with 3 dimensions (state x particle x time) or 4
 ##'   dimensions (state x particle x group x time) for a grouped
 ##'   system.
 ##'
 ##' @export
-dust_system_simulate <- function(sys, times, index = NULL) {
+dust_system_simulate <- function(sys, times, index_state = NULL) {
   check_is_dust_system(sys)
-  ret <- sys$methods$simulate(sys$ptr, times, index, sys$grouped)
-  if (!is.null(index) && !is.null(names(index))) {
-    rownames(ret) <- names(index)
+  ## TODO: check time sequence, except for the first?
+  ret <- sys$methods$simulate(sys$ptr, times, index_state,
+                              sys$preserve_particle_dimension,
+                              sys$preserve_group_dimension)
+  if (!is.null(index_state) && !is.null(names(index_state))) {
+    rownames(ret) <- names(index_state)
   }
   ret
 }
@@ -396,6 +435,8 @@ dust_system_simulate <- function(sys, times, index = NULL) {
 ##' @export
 dust_system_reorder <- function(sys, index) {
   check_is_dust_system(sys)
+  ## TODO: check reorder dimensionality? less important here because
+  ## this is a debugging method.
   sys$methods$reorder(sys$ptr, index)
   invisible()
 }
@@ -479,14 +520,19 @@ dust_system_compare_data <- function(sys, data) {
             "have 'compare_data' support"),
       arg = "system")
   }
-  sys$methods$compare_data(sys$ptr, data, sys$grouped)
+  if (!sys$preserve_group_dimension) {
+    data <- list(data)
+  }
+  sys$methods$compare_data(sys$ptr, data, sys$preserve_particle_dimension,
+                           sys$preserve_group_dimension)
 }
 
 
 ##' @export
 print.dust_system <- function(x, ...) {
   cli::cli_h1("<dust_system: {x$name}>")
-  if (x$grouped) {
+  ## TODO: Special treatment if not preserve particle dimension
+  if (x$preserve_group_dimension) {
     cli::cli_alert_info(paste(
       "{x$n_state} state x {x$n_particles} particle{?s} x",
       "{x$n_groups} group{?s}"))
@@ -530,7 +576,9 @@ print.dust_system_generator <- function(x, ...) {
 
 ##' @export
 dim.dust_system <- function(x, ...) {
-  c(x$n_state, x$n_particles, if (x$grouped) x$n_groups)
+  c(x$n_state,
+    if (x$preserve_particle_dimension) x$n_particles,
+    if (x$preserve_group_dimension) x$n_groups)
 }
 
 

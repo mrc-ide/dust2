@@ -10,24 +10,23 @@ dust_unfilter_create(
   time,
   data,
   n_particles = 1,
-  n_groups = 0,
-  n_threads = 1,
+  n_groups = 1,
   dt = 1,
-  index = NULL
+  n_threads = 1,
+  index_state = NULL,
+  preserve_particle_dimension = FALSE,
+  preserve_group_dimension = FALSE
 )
 }
 \arguments{
 \item{generator}{A system generator object, with class
-\code{dust_system_generator}.  The system must support \code{compare_data}
-to be used with this function.}
+\code{dust_system_generator}}
 
 \item{time_start}{The start time for the simulation - this is
 typically before the first data point.  Must be an integer-like
 value.}
 
-\item{time}{A vector of times, each of which has a corresponding
-entry in \code{data}.  The system will stop at each of these times to
-compute the likelihood using the compare function.}
+\item{time}{The initial time, defaults to 0}
 
 \item{data}{The data to compare against.  This must be a list with
 the same length as \code{time}, each element of which corresponds to
@@ -46,18 +45,30 @@ initial conditions then you would see different likelihoods.}
 
 \item{n_groups}{Optionally, the number of parameter groups}
 
-\item{n_threads}{Integer, the number of threads to use in
-parallelisable calculations.  See Details.}
-
 \item{dt}{The time step for discrete time systems, defaults to 1
 if not given.  It is an error to provide a non-NULL argument
 with continuous-time systems.}
 
-\item{index}{An optional index of states to extract.  If given,
-then we subset the system state on return.  You can use this to
-return fewer system states than the system ran with, to reorder
-states, or to name them on exit (names present on the index will
-be copied into the rownames of the returned array).}
+\item{n_threads}{Integer, the number of threads to use in
+parallelisable calculations.  See Details.}
+
+\item{index_state}{An optional index of states to extract.  If
+given, then we subset the system state on return.  You can use
+this to return fewer system states than the system ran with, to
+reorder states, or to name them on exit (names present on the
+index will be copied into the rownames of the returned array).}
+
+\item{preserve_particle_dimension}{Logical, indicating if output
+from the system should preserve the particle dimension in the
+case where a single particle is run.  In the case where more
+than one particle is run, this argument has no effect as the
+dimension is always preserved.}
+
+\item{preserve_group_dimension}{Logical, indicating if state and
+output from the system should preserve the group dimension in
+the case where a single group is run.  In the case where more
+than one group is run, this argument has no effect as the
+dimension is always preserved.}
 }
 \value{
 A \code{dust_unfilter} object, which can be used with

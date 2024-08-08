@@ -5,6 +5,7 @@
 ##'
 ##' @title Create an unfilter
 ##'
+##' @inheritParams dust_system_create
 ##' @inheritParams dust_filter_create
 ##'
 ##' @param n_particles The number of particles to run.  Typically this
@@ -17,17 +18,25 @@
 ##'
 ##' @export
 dust_unfilter_create <- function(generator, time_start, time, data,
-                                 n_particles = 1, n_groups = 0, n_threads = 1,
-                                 dt = 1, index = NULL) {
+                                 n_particles = 1, n_groups = 1,
+                                 dt = 1, n_threads = 1, index_state = NULL,
+                                 preserve_particle_dimension = FALSE,
+                                 preserve_group_dimension = FALSE) {
   call <- environment()
   check_generator_for_filter(generator, "unfilter", call = call)
-  assert_scalar_size(n_particles, call = call)
-  assert_scalar_size(n_groups, allow_zero = TRUE, call = call)
+  assert_scalar_size(n_particles, allow_zero = FALSE, call = call)
+  assert_scalar_size(n_groups, allow_zero = FALSE, call = call)
+  assert_scalar_logical(preserve_particle_dimension, call = call)
+  assert_scalar_logical(preserve_group_dimension, call = call)
+  preserve_particle_dimension <- preserve_particle_dimension || n_particles > 1
+  preserve_group_dimension <- preserve_group_dimension || n_groups > 1
+
+  time <- check_time_sequence(time_start, time, call = call)
+  dt <- check_dt(dt, call = call)
+  data <- check_data(data, length(time), n_groups, preserve_group_dimension,
+                     call = call)
+  index_state <- check_index(index_state, call = call)
   n_threads <- check_n_threads(n_threads, n_particles, n_groups)
-  check_time_sequence(time_start, time, call = call)
-  check_dt(dt, call = call)
-  check_data(data, length(time), n_groups, call = call)
-  check_index(index, call = call)
 
   inputs <- list(time_start = time_start,
                  time = time,
@@ -36,15 +45,19 @@ dust_unfilter_create <- function(generator, time_start, time, data,
                  n_particles = n_particles,
                  n_groups = n_groups,
                  n_threads = n_threads,
-                 index = index)
+                 index_state = index_state,
+                 preserve_particle_dimension = preserve_particle_dimension,
+                 preserve_group_dimension = preserve_group_dimension)
 
   res <- list2env(
     list(inputs = inputs,
          n_particles = as.integer(n_particles),
-         n_groups = as.integer(max(n_groups), 1),
+         n_groups = as.integer(n_groups),
          deterministic = TRUE,
          methods = generator$methods$unfilter,
-         index = index),
+         index_state = index_state,
+         preserve_particle_dimension = preserve_particle_dimension,
+         preserve_group_dimension = preserve_group_dimension),
     parent = emptyenv())
   class(res) <- "dust_unfilter"
   res
@@ -62,7 +75,7 @@ unfilter_create <- function(unfilter, pars) {
                            inputs$n_particles,
                            inputs$n_groups,
                            inputs$n_threads,
-                           inputs$index),
+                           inputs$index_state),
     unfilter)
 }
 
@@ -90,6 +103,10 @@ unfilter_create <- function(unfilter, pars) {
 dust_unfilter_run <- function(unfilter, pars, initial = NULL,
                               save_history = FALSE, adjoint = FALSE) {
   check_is_dust_unfilter(unfilter)
+  if (!is.null(pars)) {
+    pars <- check_pars(pars, unfilter$n_groups,
+                       unfilter$preserve_group_dimension)
+  }
   if (is.null(unfilter$ptr)) {
     if (is.null(pars)) {
       cli::cli_abort("'pars' cannot be NULL, as unfilter is not initialised",
@@ -97,10 +114,11 @@ dust_unfilter_run <- function(unfilter, pars, initial = NULL,
     }
     unfilter_create(unfilter, pars)
   } else if (!is.null(pars)) {
-    unfilter$methods$update_pars(unfilter$ptr, pars, unfilter$grouped)
+    unfilter$methods$update_pars(unfilter$ptr, pars)
   }
   unfilter$methods$run(unfilter$ptr, initial, save_history, adjoint,
-                       unfilter$grouped)
+                       unfilter$preserve_particle_dimension,
+                       unfilter$preserve_group_dimension)
 }
 
 
@@ -122,7 +140,9 @@ dust_unfilter_last_history <- function(unfilter) {
       "History is not current",
       i = "Unfilter has not yet been run"))
   }
-  unfilter$methods$last_history(unfilter$ptr, unfilter$grouped)
+  unfilter$methods$last_history(unfilter$ptr,
+                                unfilter$preserve_particle_dimension,
+                                unfilter$preserve_group_dimension)
 }
 
 
@@ -146,7 +166,9 @@ dust_unfilter_last_gradient <- function(unfilter) {
       "Gradient is not current",
       i = "Unfilter has not yet been run"))
   }
-  unfilter$methods$last_gradient(unfilter$ptr, unfilter$grouped)
+  unfilter$methods$last_gradient(unfilter$ptr,
+                                 unfilter$preserve_particle_dimension,
+                                 unfilter$preserve_group_dimension)
 }
 
 

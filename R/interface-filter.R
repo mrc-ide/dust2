@@ -36,17 +36,26 @@
 ##'
 ##' @export
 dust_filter_create <- function(generator, time_start, time, data,
-                               n_particles, n_groups = 0, n_threads = 1,
-                               dt = 1, index = NULL, seed = NULL) {
+                               n_particles, n_groups = 1, dt = 1,
+                               index_state = NULL, n_threads = 1,
+                               preserve_group_dimension = FALSE,
+                               seed = NULL) {
   call <- environment()
   check_generator_for_filter(generator, "filter", call = call)
-  assert_scalar_size(n_particles, call = call)
-  assert_scalar_size(n_groups, allow_zero = TRUE, call = call)
+  assert_scalar_size(n_particles, allow_zero = FALSE, call = call)
+  assert_scalar_size(n_groups, allow_zero = FALSE, call = call)
+  assert_scalar_logical(preserve_group_dimension, call = call)
+  preserve_group_dimension <- preserve_group_dimension || n_groups > 1
+
+  ## NOTE: there is no preserve_particle_dimension option here because
+  ## we will always preserve this dimension.
+
+  time <- check_time_sequence(time_start, time, call = call)
+  dt <- check_dt(dt, call = call)
+  data <- check_data(data, length(time), n_groups, preserve_group_dimension,
+                     call = call)
+  index_state <- check_index(index_state, call = call)
   n_threads <- check_n_threads(n_threads, n_particles, n_groups)
-  check_time_sequence(time_start, time, call = call)
-  check_dt(dt, call = call)
-  check_data(data, length(time), n_groups, call = call)
-  check_index(index, call = call)
 
   inputs <- list(time_start = time_start,
                  time = time,
@@ -55,7 +64,8 @@ dust_filter_create <- function(generator, time_start, time, data,
                  n_particles = n_particles,
                  n_groups = n_groups,
                  n_threads = n_threads,
-                 index = index)
+                 index_state = index_state,
+                 preserve_group_dimension = preserve_group_dimension)
 
   res <- list2env(
     list(inputs = inputs,
@@ -64,7 +74,8 @@ dust_filter_create <- function(generator, time_start, time, data,
          n_groups = as.integer(max(n_groups), 1),
          deterministic = FALSE,
          methods = generator$methods$filter,
-         index = index),
+         index_state = index_state,
+         preserve_group_dimension = preserve_group_dimension),
     parent = emptyenv())
   class(res) <- "dust_filter"
   res
@@ -87,7 +98,7 @@ dust_filter_create <- function(generator, time_start, time, data,
 dust_filter_copy <- function(filter, seed = NULL) {
   dst <- new.env(parent = emptyenv())
   nms <- c("inputs", "n_particles", "n_groups", "deterministic", "methods",
-           "index")
+           "index_state", "preserve_group_dimension")
   for (nm in nms) {
     dst[[nm]] <- filter[[nm]]
   }
@@ -109,7 +120,7 @@ filter_create <- function(filter, pars) {
                          inputs$n_particles,
                          inputs$n_groups,
                          inputs$n_threads,
-                         inputs$index,
+                         inputs$index_state,
                          filter$initial_rng_state),
     filter)
   filter$initial_rng_state <- NULL
@@ -134,7 +145,7 @@ filter_create <- function(filter, pars) {
 ##'   should be saved while the simulation runs; this has a small
 ##'   overhead in runtime and in memory.  History (particle
 ##'   trajectories) will be saved at each time in the filter.  If the
-##'   filter was constructed using a non-`NULL` `index` parameter,
+##'   filter was constructed using a non-`NULL` `index_state` parameter,
 ##'   the history is restricted to these states.
 ##'
 ##' @return A vector of likelihood values, with as many elements as
@@ -144,6 +155,10 @@ filter_create <- function(filter, pars) {
 dust_filter_run <- function(filter, pars, initial = NULL,
                             save_history = FALSE) {
   check_is_dust_filter(filter)
+  if (!is.null(pars)) {
+    pars <- check_pars(pars, filter$n_groups,
+                       filter$preserve_group_dimension)
+  }
   if (is.null(filter$ptr)) {
     if (is.null(pars)) {
       cli::cli_abort("'pars' cannot be NULL, as filter is not initialised",
@@ -151,9 +166,10 @@ dust_filter_run <- function(filter, pars, initial = NULL,
     }
     filter_create(filter, pars)
   } else if (!is.null(pars)) {
-    filter$methods$update_pars(filter$ptr, pars, filter$grouped)
+    filter$methods$update_pars(filter$ptr, pars)
   }
-  filter$methods$run(filter$ptr, initial, save_history, filter$grouped)
+  filter$methods$run(filter$ptr, initial, save_history,
+                     filter$preserve_group_dimension)
 }
 
 
@@ -175,7 +191,7 @@ dust_filter_last_history <- function(filter) {
       "History is not current",
       i = "Filter has not yet been run"))
   }
-  filter$methods$last_history(filter$ptr, filter$grouped)
+  filter$methods$last_history(filter$ptr, filter$preserve_group_dimension)
 }
 
 

@@ -179,6 +179,9 @@ inline std::vector<size_t> check_index(cpp11::sexp r_index, size_t max,
 // The initializer_list is a type-safe variadic-like approach.
 inline void set_array_dims(cpp11::sexp data,
                            std::initializer_list<size_t> dims) {
+  if (dims.size() < 2) {
+    return;
+  }
   cpp11::writable::integers r_dim(dims.size());
   auto dim_i = dims.begin();
   for (size_t i = 0; i < dims.size(); ++i, ++dim_i) {
@@ -199,29 +202,27 @@ cpp11::sexp export_array_n(Iter iter, std::initializer_list<size_t> dims) {
 
 template <typename T>
 std::vector<typename T::shared_state> build_shared(cpp11::list r_pars,
-                                                   size_t n_groups) {
-  const auto grouped = n_groups > 0;
-  std::vector<typename T::shared_state> shared;
-  if (grouped) {
-
-    if (r_pars.size() != static_cast<int>(n_groups)) {
-      cpp11::stop("Expected 'pars' to have length %d to match 'n_groups'",
-                  static_cast<int>(n_groups));
-    }
-    size_t size = 0;
-    for (size_t i = 0; i < n_groups; ++i) {
-      shared.push_back(T::build_shared(r_pars[i]));
-      const auto size_i = T::size_state(shared[i]);
-      if (i == 0) {
-        size = size_i;
-      } else if (size_i != size) {
-        cpp11::stop("Expected state length for group %d to be %d, but it was %d",
-                    i + 1, size, size_i);
-      }
-    }
-  } else {
-    shared.push_back(T::build_shared(r_pars));
+						   size_t n_groups) {
+  if (r_pars.size() != static_cast<int>(n_groups)) {
+    cpp11::stop("Expected 'pars' to have length %d to match 'n_groups'",
+		static_cast<int>(n_groups));
   }
+
+  std::vector<typename T::shared_state> shared;
+  shared.reserve(n_groups);
+
+  size_t size = 0;
+  for (size_t i = 0; i < n_groups; ++i) {
+    shared.push_back(T::build_shared(r_pars[i]));
+    const auto size_i = T::size_state(shared[i]);
+    if (i == 0) {
+      size = size_i;
+    } else if (size_i != size) {
+      cpp11::stop("Expected state length for group %d to be %d, but it was %d",
+		  i + 1, size, size_i);
+    }
+  }
+
   return shared;
 }
 
@@ -236,24 +237,18 @@ std::vector<typename T::internal_state> build_internal(std::vector<typename T::s
 }
 
 template <typename T>
-void update_pars(T& obj, cpp11::list r_pars, bool grouped) {
+void update_pars(T& obj, cpp11::list r_pars) {
   using system_type = typename T::system_type;
-  if (grouped) {
-    const auto n_groups = obj.n_groups();
-    if (r_pars.size() != static_cast<int>(n_groups)) {
-      cpp11::stop("Expected 'pars' to have length %d to match 'n_groups'",
-                  static_cast<int>(n_groups));
-    }
-    for (size_t i = 0; i < n_groups; ++i) {
-      cpp11::list r_pars_i = r_pars[i];
-      obj.update_shared(i, [&] (auto& shared) {
-                             system_type::update_shared(r_pars_i, shared);
-                            });
-    }
-  } else {
-    obj.update_shared(0, [&] (auto& shared) {
-                           system_type::update_shared(r_pars, shared);
-                          });
+  const auto n_groups = obj.n_groups();
+  if (r_pars.size() != static_cast<int>(n_groups)) {
+    cpp11::stop("Expected 'pars' to have length %d to match 'n_groups'",
+		static_cast<int>(n_groups));
+  }
+  for (size_t i = 0; i < n_groups; ++i) {
+    cpp11::list r_pars_i = r_pars[i];
+    obj.update_shared(i, [&] (auto& shared) {
+      system_type::update_shared(r_pars_i, shared);
+    });
   }
 }
 
@@ -262,29 +257,20 @@ std::vector<typename T::data_type> check_data(cpp11::list r_data,
                                               size_t n_time,
                                               size_t n_groups,
                                               const char * name) {
-  const bool grouped = n_groups > 0;
   std::vector<typename T::data_type> data;
+  data.reserve(n_time * n_groups);
 
+  // Errors here are no longer likely to be thrown, as check_data()
+  // should do the work for us.  The exception is that T::build_data()
+  // might fail and we should probably report back the time and group
+  // index that is failing here.
   check_length(r_data, n_time, name);
-
-  if (grouped) {
-    // There are two ways we might recieve things; as a list-of-lists
-    // or as a list matrix.  We might also want to cope with a
-    // data.frame but we can probably do that on the R side, and might
-    // provide helpers there that throw much nicer errors than we can
-    // throw here, really.
-    for (size_t i = 0; i < n_time; ++i) {
-      auto r_data_i = cpp11::as_cpp<cpp11::list>(r_data[i]);
-      check_length(r_data_i, n_groups, "data[i]"); // can do better with sstream
-      for (size_t j = 0; j < n_groups; ++j) {
-        auto r_data_ij = cpp11::as_cpp<cpp11::list>(r_data_i[j]);
-        data.push_back(T::build_data(r_data_ij));
-      }
-    }
-  } else {
-    for (size_t i = 0; i < n_time; ++i) {
-      auto r_data_i = cpp11::as_cpp<cpp11::list>(r_data[i]);
-      data.push_back(T::build_data(r_data_i));
+  for (size_t i = 0; i < n_time; ++i) {
+    auto r_data_i = cpp11::as_cpp<cpp11::list>(r_data[i]);
+    check_length(r_data_i, n_groups, "data[i]");
+    for (size_t j = 0; j < n_groups; ++j) {
+      auto r_data_ij = cpp11::as_cpp<cpp11::list>(r_data_i[j]);
+      data.push_back(T::build_data(r_data_ij));
     }
   }
 
@@ -292,20 +278,24 @@ std::vector<typename T::data_type> check_data(cpp11::list r_data,
 }
 
 template <typename T>
-void set_state(T& obj, cpp11::sexp r_state, bool grouped) {
+void set_state(T& obj, cpp11::sexp r_state, bool preserve_group_dimension) {
   // Suppose that we have a n_state x n_particles x n_groups grouped
   // system, we then require that we have a state array with rank 3;
   // for an ungrouped system this will be rank 2 array.
+  //
+  // TODO: these checks would be nicer in R, just do it there and here
+  // we can just accept what we are given? (mrc-5565)
   auto dim = cpp11::as_cpp<cpp11::integers>(r_state.attr("dim"));
   const auto rank = dim.size();
-  const auto rank_expected = grouped ? 3 : 2;
+  const auto rank_expected = preserve_group_dimension ? 3 : 2;
   if (rank != rank_expected) {
     cpp11::stop("Expected 'state' to be a %dd array", rank_expected);
   }
   const int n_state = obj.n_state();
   const int n_particles =
-    grouped ? obj.n_particles() : obj.n_particles() * obj.n_groups();
-  const int n_groups = grouped ? obj.n_groups() : 1;
+    preserve_group_dimension ? obj.n_particles() :
+    obj.n_particles() * obj.n_groups();
+  const int n_groups = preserve_group_dimension ? obj.n_groups() : 1;
   if (dim[0] != n_state) {
     cpp11::stop("Expected the first dimension of 'state' to have size %d",
                 n_state);
@@ -316,8 +306,9 @@ void set_state(T& obj, cpp11::sexp r_state, bool grouped) {
                 n_particles);
   }
 
-  const auto recycle_group = !grouped || (n_groups > 1 && dim[2] == 1);
-  if (grouped && dim[2] != n_groups && dim[2] != 1) {
+  const auto recycle_group =
+    !preserve_group_dimension || (n_groups > 1 && dim[2] == 1);
+  if (preserve_group_dimension && dim[2] != n_groups && dim[2] != 1) {
     cpp11::stop("Expected the third dimension of 'state' to have size %d or 1",
                 n_groups);
   }

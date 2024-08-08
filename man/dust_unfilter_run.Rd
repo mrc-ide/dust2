@@ -27,7 +27,7 @@ provided, the system initial conditions are used.}
 should be saved while the simulation runs; this has a small
 overhead in runtime and in memory.  History (particle
 trajectories) will be saved at each time in the filter.  If the
-filter was constructed using a non-\code{NULL} \code{index} parameter,
+filter was constructed using a non-\code{NULL} \code{index_state} parameter,
 the history is restricted to these states.}
 
 \item{adjoint}{Logical, indicating if we should enable adjoint
