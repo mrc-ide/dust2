@@ -33,13 +33,21 @@ public:
     rng_(n_groups_, seed, false),
     ll_(n_groups_ * n_particles_, 0),
     ll_step_(n_groups_ * n_particles_, 0),
+    all_groups_(n_groups_),
     history_index_state_(history_index_state),
     history_(history_index_state_.size() > 0 ? history_index_state_.size() : n_state_,
              n_particles_, n_groups_, time_.size()),
     history_is_current_(false) {
+    for (size_t i = 0; i < n_groups_; ++i) {
+      all_groups_[i] = i;
+    }
   }
 
   void run(bool set_initial, bool save_history) {
+    run(set_initial, save_history, all_groups_);
+  }
+
+  void run(bool set_initial, bool save_history, std::vector<size_t>& groups) {
     reset(set_initial, save_history);
     const auto n_times = time_.size();
 
@@ -51,10 +59,10 @@ public:
 
     auto it_data = data_.begin();
     for (size_t i = 0; i < n_times; ++i, it_data += n_groups_) {
-      sys.run_to_time(time_[i]);
-      sys.compare_data(it_data, ll_step_.begin());
+      sys.run_to_time(time_[i], groups);
+      sys.compare_data(it_data, ll_step_.begin(), groups);
 
-      for (size_t i = 0; i < n_groups_; ++i) {
+      for (auto i : groups) {
         const auto offset = i * n_particles_;
         const auto w = ll_step_.begin() + offset;
         ll_[i] += details::scale_log_weights<real_type>(n_particles_, w);
@@ -65,7 +73,7 @@ public:
       // this requires some fiddling.
 
       // This can be parallelised across groups
-      for (size_t i = 0; i < n_groups_; ++i) {
+      for (auto i : groups) {
         const auto offset = i * n_particles_;
         const auto w = ll_step_.begin() + offset;
         const auto idx = index.begin() + offset;
@@ -73,7 +81,7 @@ public:
         details::resample_weight(n_particles_, w, u, idx);
       }
 
-      sys.reorder(index.begin());
+      sys.reorder(index.begin(), groups);
 
       if (save_history) {
         if (use_index) {
@@ -91,6 +99,8 @@ public:
 
   template <typename It>
   void last_log_likelihood(It it) {
+    // This should return the likelihoods for the groups we ran with
+    // last time, blanking out the others perhaps?
     std::copy_n(ll_.begin(), n_groups_, it);
   }
 
@@ -120,6 +130,7 @@ private:
   mcstate::random::prng<rng_state_type> rng_;
   std::vector<real_type> ll_;
   std::vector<real_type> ll_step_;
+  std::vector<size_t> all_groups_;
   std::vector<size_t> history_index_state_;
   history<real_type> history_;
   bool history_is_current_;

@@ -32,6 +32,7 @@ public:
     n_groups_(sys.n_groups()),
     ll_(n_particles_ * n_groups_, 0),
     ll_step_(n_particles_ * n_groups_, 0),
+    all_groups_(n_groups_),
     history_index_state_(history_index_state),
     history_(history_index_state_.size() > 0 ? history_index_state_.size() : n_state_,
              n_particles_, n_groups_, time_.size()),
@@ -39,9 +40,16 @@ public:
     history_is_current_(false),
     adjoint_is_current_(false),
     gradient_is_current_(false) {
+    for (size_t i = 0; i < n_groups_; ++i) {
+      all_groups_[i] = i;
+    }
   }
 
   void run(bool set_initial, bool save_history) {
+    run(set_initial, save_history, all_groups_);
+  }
+
+  void run(bool set_initial, bool save_history, std::vector<size_t>& groups) {
     reset(set_initial, save_history, /* adjoint = */ false);
     const auto n_times = time_.size();
 
@@ -49,8 +57,8 @@ public:
 
     auto it_data = data_.begin();
     for (size_t i = 0; i < n_times; ++i, it_data += n_groups_) {
-      sys.run_to_time(time_[i]);
-      sys.compare_data(it_data, ll_step_.begin());
+      sys.run_to_time(time_[i], groups);
+      sys.compare_data(it_data, ll_step_.begin(), groups);
       for (size_t j = 0; j < ll_.size(); ++j) {
         ll_[j] += ll_step_[j];
       }
@@ -148,6 +156,7 @@ private:
   size_t n_groups_;
   std::vector<real_type> ll_;
   std::vector<real_type> ll_step_;
+  std::vector<size_t> all_groups_;
   std::vector<size_t> history_index_state_;
   history<real_type> history_;
   adjoint_data<real_type> adjoint_;
