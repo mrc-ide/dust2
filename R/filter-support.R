@@ -58,7 +58,7 @@ check_data <- function(data, n_groups, preserve_group_dimension,
   if (!is.null(n_groups)) {
     assert_scalar_integer(n_groups, call = call)
   }
-  data <- dust_filter_data(data) # do earlier.
+  data <- dust_filter_data(data)
   time <- data[[attr(data, "time")]]
   name_group <- attr(data, "group")
   if (!is.null(name_group)) {

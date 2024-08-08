@@ -88,3 +88,9 @@ test_that("validate that group is usable", {
     dust_filter_data(d, group = "imbalanced"),
     "Not all groups in 'data' have the same times")
 })
+
+
+test_that("if an object has class 'dust_filter_data' we just pass it back", {
+  x <- structure(list(), class = "dust_filter_data")
+  expect_identical(dust_filter_data(x), x)
+})

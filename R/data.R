@@ -17,17 +17,13 @@
 ##' @param group Optional name of a column within `data` to use for
 ##'   groups
 ##'
-##' @param n_groups Optional number of parameter groups that this
-##'   dataset applies to.
-##'
 ##' @return A data.frame, with the addition of the class attribute
 ##'   `dust_filter_data`; once created you should not modify this
 ##'   object.
 ##'
 ##' @export
-dust_filter_data <- function(data, time = NULL, group = NULL, n_groups = NULL) {
+dust_filter_data <- function(data, time = NULL, group = NULL) {
   if (inherits(data, "dust_filter_data")) {
-    ## TODO: reprocess here
     return(data)
   }
 
