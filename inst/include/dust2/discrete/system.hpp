@@ -41,6 +41,7 @@ public:
     state_next_(n_state_ * n_particles_total_),
     shared_(shared),
     internal_(internal),
+    all_groups_(n_groups_),
     time_(time),
     dt_(dt),
     zero_every_(zero_every_vec<T>(shared_)),
@@ -50,9 +51,16 @@ public:
     // We don't check that the size is the same across all states;
     // this should be done by the caller (similarly, we don't check
     // that shared and internal have the same size).
+    for (size_t i = 0; i < n_groups_; ++i) {
+      all_groups_[i] = i;
+    }
   }
 
   auto run_to_time(real_type time) {
+    run_to_time(time, all_groups_);
+  }
+
+  auto run_to_time(real_type time, const std::vector<size_t>& groups) {
     const size_t n_steps = std::round(std::max(0.0, time - time_) / dt_);
     // Ignore errors for now.
     real_type * state_data = state_.data();
@@ -61,7 +69,7 @@ public:
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
 #endif
-    for (size_t i = 0; i < n_groups_; ++i) {
+    for (auto i : groups) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
@@ -86,10 +94,15 @@ public:
   }
 
   void run_to_time(real_type time, real_type *state_history) {
+    run_to_time(time, state_history, all_groups_);
+  }
+
+  void run_to_time(real_type time, real_type *state_history,
+                   const std::vector<size_t>& groups) {
     const size_t n_steps = std::round(std::max(0.0, time - time_) / dt_);
     const auto stride = n_state_ * n_particles_ * n_groups_;
     std::copy_n(state_.begin(), stride, state_history);
-    for (size_t i = 0; i < n_groups_; ++i) {
+    for (auto i : groups) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
@@ -111,12 +124,16 @@ public:
   }
 
   void set_state_initial() {
+    set_state_initial(all_groups_);
+  }
+
+  void set_state_initial(const std::vector<size_t>& groups) {
     errors_.reset();
     real_type * state_data = state_.data();
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
 #endif
-    for (size_t i = 0; i < n_groups_; ++i) {
+    for (auto i : groups) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
@@ -136,6 +153,12 @@ public:
 
   template <typename Iter>
   void set_state(Iter iter, bool recycle_particle, bool recycle_group) {
+    set_state(iter, recycle_particle, recycle_group, all_groups_);
+  }
+
+  template <typename Iter>
+  void set_state(Iter iter, bool recycle_particle, bool recycle_group,
+                 const std::vector<size_t>& groups) {
     errors_.reset();
     const auto offset_read_group = recycle_group ? 0 :
       (n_state_ * (recycle_particle ? 1 : n_particles_));
@@ -145,7 +168,7 @@ public:
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
 #endif
-    for (size_t i = 0; i < n_groups_; ++i) {
+    for (auto i : groups) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto offset_read =
           i * offset_read_group + j * offset_read_particle;
@@ -159,7 +182,12 @@ public:
 
   template <typename Iter>
   void reorder(Iter iter) {
-    for (size_t i = 0; i < n_groups_; ++i) {
+    reorder(iter, all_groups_);
+  }
+
+  template <typename Iter>
+  void reorder(Iter iter, const std::vector<size_t>& groups) {
+    for (auto i : groups) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k_to = n_particles_ * i + j;
         const auto k_from = n_particles_ * i + *(iter + k_to);
@@ -223,15 +251,27 @@ public:
 
   template <typename IterData, typename IterOutput>
   void compare_data(IterData data, IterOutput output) {
-    compare_data(data, state_.data(), output);
+    compare_data(data, state_.data(), output, all_groups_);
+  }
+
+  template <typename IterData, typename IterOutput>
+  void compare_data(IterData data, IterOutput output,
+                    const std::vector<size_t>& groups) {
+    compare_data(data, state_.data(), output, groups);
   }
 
   template <typename IterData, typename IterOutput>
   void compare_data(IterData data, const real_type * state, IterOutput output) {
+    compare_data(data, state, output, all_groups_);
+  }
+
+  template <typename IterData, typename IterOutput>
+  void compare_data(IterData data, const real_type * state, IterOutput output,
+                    const std::vector<size_t>& groups) {
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
 #endif
-    for (size_t i = 0; i < n_groups_; ++i) {
+    for (auto i : groups) {
       for (size_t j = 0; j < n_particles_; ++j) {
 	auto data_i = data + i;
         const auto k = n_particles_ * i + j;
@@ -256,7 +296,20 @@ public:
                             const size_t n_adjoint,
                             const real_type * adjoint_curr,
                             real_type * adjoint_next) {
-    for (size_t i = 0; i < n_groups_; ++i, ++data) {
+    adjoint_compare_data(time, data, state, n_adjoint, adjoint_curr,
+                         adjoint_next, all_groups_);
+  }
+
+  template <typename IterData>
+  void adjoint_compare_data(const real_type time,
+                            IterData data,
+                            const real_type * state,
+                            const size_t n_adjoint,
+                            const real_type * adjoint_curr,
+                            real_type * adjoint_next,
+                            const std::vector<size_t>& groups) {
+    for (auto i : groups) {
+      const auto data_i = data + i;
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
         const auto offset_state = k * n_state_;
@@ -266,7 +319,7 @@ public:
           T::adjoint_compare_data(time, dt_,
                                   state + offset_state,
                                   adjoint_curr + offset_adjoint,
-                                  *data,
+                                  *data_i,
                                   shared_[i], internal_i,
                                   adjoint_next + offset_adjoint);
         } catch (std::exception const& e) {
@@ -286,11 +339,22 @@ public:
                              const size_t n_adjoint,
                              real_type* adjoint_curr,
                              real_type* adjoint_next) {
+    return adjoint_run_to_time(time0, time1, state, n_adjoint, adjoint_curr,
+                               adjoint_next, all_groups_);
+  }
+
+  size_t adjoint_run_to_time(const real_type time0,
+                             const real_type time1,
+                             const real_type* state,
+                             const size_t n_adjoint,
+                             real_type* adjoint_curr,
+                             real_type* adjoint_next,
+                             const std::vector<size_t>& groups) {
     // ----|xxxx|---
     //     1<---0
     const size_t n_steps = std::round(std::max(0.0, time0 - time1) / dt_);
     const auto stride = n_state_ * n_particles_ * n_groups_;
-    for (size_t i = 0; i < n_groups_; ++i) {
+    for (auto i : groups) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
         const auto offset_state = k * n_state_;
@@ -316,7 +380,17 @@ public:
                        const size_t n_adjoint,
                        const real_type * adjoint_curr,
                        real_type * adjoint_next) {
-    for (size_t i = 0; i < n_groups_; ++i) {
+    adjoint_initial(time, state, n_adjoint, adjoint_curr, adjoint_next,
+                    all_groups_);
+  }
+
+  void adjoint_initial(const real_type time,
+                       const real_type * state,
+                       const size_t n_adjoint,
+                       const real_type * adjoint_curr,
+                       real_type * adjoint_next,
+                       const std::vector<size_t>& groups) {
+    for (auto i : groups) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
         const auto offset_state = k * n_state_;
@@ -351,6 +425,7 @@ private:
   std::vector<real_type> state_next_;
   std::vector<shared_state> shared_;
   std::vector<internal_state> internal_;
+  std::vector<size_t> all_groups_;
   real_type time_;
   real_type dt_;
   std::vector<zero_every_type<real_type>> zero_every_;
