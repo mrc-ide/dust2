@@ -4,7 +4,7 @@
 \alias{dust_filter_data}
 \title{Prepare data}
 \usage{
-dust_filter_data(data, time = NULL, group = NULL, n_groups = NULL)
+dust_filter_data(data, time = NULL, group = NULL)
 }
 \arguments{
 \item{data}{A data.frame containing time and data to fit.  By
@@ -16,9 +16,6 @@ time.}
 
 \item{group}{Optional name of a column within \code{data} to use for
 groups}
-
-\item{n_groups}{Optional number of parameter groups that this
-dataset applies to.}
 }
 \value{
 A data.frame, with the addition of the class attribute

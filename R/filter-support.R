@@ -53,23 +53,6 @@ check_time_sequence <- function(time_start, time, call = NULL) {
 }
 
 
-check_data <- function(data, n_groups, preserve_group_dimension,
-                       call = NULL) {
-  if (!is.null(n_groups)) {
-    assert_scalar_integer(n_groups, call = call)
-  }
-  data <- dust_filter_data(data)
-  time <- data[[attr(data, "time")]]
-  name_group <- attr(data, "group")
-  if (!is.null(name_group)) {
-    time <- time[data[[name_group]] == 1]
-  }
-  list(time = time,
-       n_groups = attr(data, "n_groups"),
-       data = data_to_list(data, n_groups, preserve_group_dimension, call))
-}
-
-
 check_index <- function(index, call = NULL) {
   if (!is.null(index)) {
     assert_integer(index, call = call)

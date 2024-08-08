@@ -104,10 +104,14 @@ dust_filter_data <- function(data, time = NULL, group = NULL) {
 }
 
 
-data_to_list <- function(data, n_groups, preserve_group_dimension,
-                         call = NULL) {
-  time <- attr(data, "time")
-  group <- attr(data, "group")
+prepare_data <- function(data, n_groups, call = NULL) {
+  if (!is.null(n_groups)) {
+    assert_scalar_integer(n_groups, call = call)
+  }
+  data <- dust_filter_data(data)
+
+  name_time <- attr(data, "time")
+  name_group <- attr(data, "group")
   n_groups_data <- attr(data, "n_groups")
 
   if (is.null(n_groups)) {
@@ -118,15 +122,24 @@ data_to_list <- function(data, n_groups, preserve_group_dimension,
       call = call)
   }
 
-  data_by_time <- unname(split(data[names(data) != time], data[[time]]))
+  time <- data[[name_time]]
+  if (!is.null(name_group)) {
+    time <- time[data[[name_group]] == 1]
+  }
 
-  if (is.null(group)) {
-    d <- lapply(data_by_time, function(x) list(as.list(x)))
+  data_by_time <- unname(
+    split(data[names(data) != name_time], data[[name_time]]))
+  if (is.null(name_group)) {
+    data_by_time <- lapply(data_by_time, function(x) list(as.list(x)))
   } else {
-    d <- lapply(data_by_time, function(el) {
-      lapply(unname(split(el[names(el) != group], el[[group]])), as.list)
+    data_by_time <- lapply(data_by_time, function(el) {
+      lapply(unname(
+        split(el[names(el) != name_group], el[[name_group]])),
+        as.list)
     })
   }
 
-  d
+  list(time = time,
+       n_groups = n_groups_data,
+       data = data_by_time)
 }

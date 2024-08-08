@@ -46,7 +46,7 @@ dust_filter_create <- function(generator, time_start, data,
 
   dt <- check_dt(dt, call = call)
 
-  data <- check_data(data, n_groups, preserve_group_dimension, call = call)
+  data <- prepare_data(data, n_groups, call = call)
   time <- data$time
   n_groups <- data$n_groups
   data_list <- data$data
