@@ -54,13 +54,15 @@ other dust functions to interact with it.</p>
 <span>  <span class="va">generator</span>,</span>
 <span>  <span class="va">pars</span>,</span>
 <span>  <span class="va">n_particles</span>,</span>
-<span>  n_groups <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  n_groups <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  time <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  dt <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ode_control <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  deterministic <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  n_threads <span class="op">=</span> <span class="fl">1</span></span>
+<span>  n_threads <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  preserve_particle_dimension <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  preserve_group_dimension <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -116,6 +118,22 @@ allocated in deterministic mode.</p></dd>
 <dt id="arg-n-threads">n_threads<a class="anchor" aria-label="anchor" href="#arg-n-threads"></a></dt>
 <dd><p>Integer, the number of threads to use in
 parallelisable calculations.  See Details.</p></dd>
+
+
+<dt id="arg-preserve-particle-dimension">preserve_particle_dimension<a class="anchor" aria-label="anchor" href="#arg-preserve-particle-dimension"></a></dt>
+<dd><p>Logical, indicating if output
+from the system should preserve the particle dimension in the
+case where a single particle is run.  In the case where more
+than one particle is run, this argument has no effect as the
+dimension is always preserved.</p></dd>
+
+
+<dt id="arg-preserve-group-dimension">preserve_group_dimension<a class="anchor" aria-label="anchor" href="#arg-preserve-group-dimension"></a></dt>
+<dd><p>Logical, indicating if state and
+output from the system should preserve the group dimension in
+the case where a single group is run.  In the case where more
+than one group is run, this argument has no effect as the
+dimension is always preserved.</p></dd>
 
 </dl></div>
     <div class="section level2">

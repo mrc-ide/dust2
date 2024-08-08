@@ -50,7 +50,7 @@ according to some index.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dust_system_simulate</span><span class="op">(</span><span class="va">sys</span>, <span class="va">times</span>, index <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dust_system_simulate</span><span class="op">(</span><span class="va">sys</span>, <span class="va">times</span>, index_state <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -67,12 +67,12 @@ first time must be no less than the current system time
 (as reported by <a href="dust_system_time.html">dust_system_time</a>)</p></dd>
 
 
-<dt id="arg-index">index<a class="anchor" aria-label="anchor" href="#arg-index"></a></dt>
-<dd><p>An optional index of states to extract.  If given,
-then we subset the system state on return.  You can use this to
-return fewer system states than the system ran with, to reorder
-states, or to name them on exit (names present on the index will
-be copied into the rownames of the returned array).</p></dd>
+<dt id="arg-index-state">index_state<a class="anchor" aria-label="anchor" href="#arg-index-state"></a></dt>
+<dd><p>An optional index of states to extract.  If
+given, then we subset the system state on return.  You can use
+this to return fewer system states than the system ran with, to
+reorder states, or to name them on exit (names present on the
+index will be copied into the rownames of the returned array).</p></dd>
 
 </dl></div>
     <div class="section level2">
