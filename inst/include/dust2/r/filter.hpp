@@ -26,8 +26,9 @@ cpp11::sexp dust2_filter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
   }
   obj->run(r_initial == R_NilValue, save_history);
 
+  const auto& ll = obj->last_log_likelihood();
   cpp11::writable::doubles ret(obj->sys.n_groups());
-  obj->last_log_likelihood(REAL(ret));
+  std::copy_n(ll.begin(), ret.size(), REAL(ret));
   return ret;
 }
 

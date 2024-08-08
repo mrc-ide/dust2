@@ -31,7 +31,7 @@ public:
     n_particles_(sys.n_particles()),
     n_groups_(sys.n_groups()),
     rng_(n_groups_, seed, false),
-    ll_(n_groups_ * n_particles_, 0),
+    ll_(n_groups_, 0),
     ll_step_(n_groups_ * n_particles_, 0),
     all_groups_(n_groups_),
     history_index_state_(history_index_state),
@@ -97,11 +97,8 @@ public:
     history_is_current_ = save_history;
   }
 
-  template <typename It>
-  void last_log_likelihood(It it) {
-    // This should return the likelihoods for the groups we ran with
-    // last time, blanking out the others perhaps?
-    std::copy_n(ll_.begin(), n_groups_, it);
+  auto& last_log_likelihood() const {
+    return ll_;
   }
 
   auto& last_history() const {

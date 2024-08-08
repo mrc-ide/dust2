@@ -35,8 +35,9 @@ cpp11::sexp dust2_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
 
   const auto n_groups = obj->sys.n_groups();
   const auto n_particles = obj->sys.n_particles();
+  const auto& ll = obj->last_log_likelihood();
   cpp11::writable::doubles ret(n_groups * n_particles);
-  obj->last_log_likelihood(REAL(ret));
+  std::copy_n(ll.begin(), ret.size(), REAL(ret));
   if (preserve_group_dimension && preserve_particle_dimension) {
     set_array_dims(ret, {n_particles, n_groups});
   }

@@ -115,19 +115,11 @@ public:
     history_is_current_ = save_history;
   }
 
-  template <typename Iter>
-  void last_log_likelihood(Iter iter) {
-    std::copy(ll_.begin(), ll_.end(), iter);
+  auto& last_log_likelihood() const {
+    return ll_;
   }
 
-
   auto& last_history() const {
-    // In the case where adjoint_is_current_ &&
-    // !history_is_current_, we can fairly efficiently copy the
-    // history over and then return, though that means that this is no
-    // longer a const method (but the return value should still be
-    // marked as such).  If we do that then the test below should be
-    // ||'d with adjoint_is_current_.
     return history_;
   }
 
