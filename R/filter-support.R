@@ -59,7 +59,12 @@ check_data <- function(data, n_groups, preserve_group_dimension,
     assert_scalar_integer(n_groups, call = call)
   }
   data <- dust_filter_data(data) # do earlier.
-  list(time = data[[attr(data, "time")]],
+  time <- data[[attr(data, "time")]]
+  name_group <- attr(data, "group")
+  if (!is.null(name_group)) {
+    time <- time[data[[name_group]] == 1]
+  }
+  list(time = time,
        n_groups = attr(data, "n_groups"),
        data = data_to_list(data, n_groups, preserve_group_dimension, call))
 }

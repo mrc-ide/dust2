@@ -4,12 +4,8 @@ test_that("can run an unfilter", {
   pars2 <- list(beta = 0.2, gamma = 0.2, I0 = 10)
 
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) list(incidence = i))
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
   dt <- 1
-
-  data <- data.frame(time = c(4, 8, 12, 16),
-                     incidence = c(1, 2, 3, 4))
 
   ## Manually compute likelihood:
   f <- function(pars) {
@@ -17,16 +13,16 @@ test_that("can run an unfilter", {
     obj <- dust_system_create(sir(), base, time = time_start, dt = dt,
                               n_particles = 1, deterministic = TRUE)
     dust_system_set_state_initial(obj)
-    incidence <- numeric(length(time))
-    time0 <- c(time_start, time)
-    for (i in seq_along(time)) {
-      dust_system_run_to_time(obj, time[i])
+    incidence <- numeric(nrow(data))
+    time0 <- c(time_start, data$time)
+    for (i in seq_len(nrow(data))) {
+      dust_system_run_to_time(obj, data$time[i])
       incidence[i] <- dust_system_state(obj)[5]
     }
-    sum(dpois(1:4, incidence + 1e-6, log = TRUE))
+    sum(dpois(data$incidence, incidence + 1e-6, log = TRUE))
   }
 
-  obj <- dust_unfilter_create(sir(), time_start, time, data)
+  obj <- dust_unfilter_create(sir(), time_start, data)
   expect_equal(dust_unfilter_run(obj, base), f(pars1))
 
   expect_equal(dust_unfilter_run(obj, pars = pars1), f(pars1))
@@ -37,11 +33,9 @@ test_that("can run an unfilter", {
 test_that("can only use pars = NULL on initialised unfilter", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) list(incidence = i))
-  dt <- 1
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
 
-  obj <- dust_unfilter_create(sir(), time_start, time, data)
+  obj <- dust_unfilter_create(sir(), time_start, data)
   expect_error(dust_unfilter_run(obj, NULL),
                "'pars' cannot be NULL, as unfilter is not initialised")
   ll <- dust_unfilter_run(obj, pars)
@@ -53,11 +47,9 @@ test_that("can get unfilter history", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
 
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) list(incidence = i))
-  dt <- 1
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
 
-  obj <- dust_unfilter_create(sir(), time_start, time, data)
+  obj <- dust_unfilter_create(sir(), time_start, data)
   expect_error(
     dust_unfilter_last_history(obj),
     "History is not current")
@@ -76,7 +68,7 @@ test_that("can get unfilter history", {
   m <- dust_system_create(sir(), pars, time = time_start, n_particles = 1,
                           deterministic = TRUE)
   dust_system_set_state_initial(m)
-  cmp <- dust_system_simulate(m, time)
+  cmp <- dust_system_simulate(m, data$time)
   expect_equal(h, cmp)
 })
 
@@ -85,12 +77,10 @@ test_that("can get partial unfilter history", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
 
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) list(incidence = i))
-  dt <- 1
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
 
-  obj1 <- dust_unfilter_create(sir(), time_start, time, data)
-  obj2 <- dust_unfilter_create(sir(), time_start, time, data,
+  obj1 <- dust_unfilter_create(sir(), time_start, data)
+  obj2 <- dust_unfilter_create(sir(), time_start, data,
                                index_state = c(2, 4))
   expect_equal(dust_unfilter_run(obj1, pars, save_history = TRUE),
                dust_unfilter_run(obj2, pars, save_history = TRUE))
@@ -108,8 +98,7 @@ test_that("can run an unfilter with manually set state", {
   state <- matrix(c(1000 - 17, 17, 0, 0, 0), ncol = 1)
 
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) list(incidence = i))
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
   dt <- 1
 
   ## Manually compute likelihood:
@@ -117,16 +106,16 @@ test_that("can run an unfilter with manually set state", {
     obj <- dust_system_create(sir(), pars, time = time_start, dt = dt,
                               n_particles = 1, deterministic = TRUE)
     dust_system_set_state(obj, state)
-    incidence <- numeric(length(time))
-    time0 <- c(time_start, time)
-    for (i in seq_along(time)) {
-      dust_system_run_to_time(obj, time[i])
+    incidence <- numeric(nrow(data))
+    time0 <- c(time_start, data$time)
+    for (i in seq_along(incidence)) {
+      dust_system_run_to_time(obj, data$time[i])
       incidence[i] <- dust_system_state(obj)[5]
     }
-    sum(dpois(1:4, incidence + 1e-6, log = TRUE))
+    sum(dpois(data$incidence, incidence + 1e-6, log = TRUE))
   }
 
-  obj <- dust_unfilter_create(sir(), time_start, time, data)
+  obj <- dust_unfilter_create(sir(), time_start, data)
   expect_equal(dust_unfilter_run(obj, pars, initial = state), f(pars))
 })
 
@@ -138,41 +127,30 @@ test_that("can run unfilter on structured system", {
                  function(i) modifyList(base, list(beta = i * 0.1)))
 
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) {
-    lapply(seq_len(n_groups), function(j) list(incidence = 2 * (i - 1) + j))
-  })
-  dt <- 1
+  data <- data.frame(time = rep(c(4, 8, 12, 16), 3),
+                     group = rep(1:3, each = 4),
+                     incidence = 1:12)
 
-  ## Manually compute likelihood:
-  f <- function(pars) {
-    obj <- dust_system_create(sir(), pars, time = time_start, dt = dt,
-                              n_particles = 1, n_groups = n_groups,
-                              deterministic = TRUE)
-    dust_system_set_state_initial(obj)
-    incidence <- matrix(0, n_groups, length(time))
-    time0 <- c(time_start, time)
-    for (i in seq_along(time)) {
-      dust_system_run_to_time(obj, time[i])
-      incidence[, i] <- dust_system_state(obj)[5, , drop = TRUE]
-    }
-    observed <- matrix(unlist(data, use.names = FALSE), n_groups)
-    rowSums(dpois(observed, incidence + 1e-6, log = TRUE))
-  }
+  obj <- dust_unfilter_create(sir(), time_start, data, n_groups = 3)
+  ll <- dust_unfilter_run(obj, pars)
 
-  obj <- dust_unfilter_create(sir(), time_start, time, data, n_groups = 3)
-  expect_equal(dust_unfilter_run(obj, pars), f(pars))
+  obj1 <- dust_unfilter_create(sir(), time_start, data[data$group == 1, ])
+  obj2 <- dust_unfilter_create(sir(), time_start, data[data$group == 2, ])
+  obj3 <- dust_unfilter_create(sir(), time_start, data[data$group == 3, ])
+  ll1 <- dust_unfilter_run(obj1, pars[[1]])
+  ll2 <- dust_unfilter_run(obj2, pars[[2]])
+  ll3 <- dust_unfilter_run(obj3, pars[[3]])
+
+  expect_equal(ll, c(ll1, ll2, ll3))
 })
 
 
 test_that("can run replicated unfilter", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) list(incidence = i))
-  dt <- 1
-  obj1 <- dust_unfilter_create(sir(), time_start, time, data, n_particles = 5)
-  obj2 <- dust_unfilter_create(sir(), time_start, time, data, n_particles = 1)
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  obj1 <- dust_unfilter_create(sir(), time_start, data, n_particles = 5)
+  obj2 <- dust_unfilter_create(sir(), time_start, data, n_particles = 1)
   expect_equal(
     dust_unfilter_run(obj1, pars),
     rep(dust_unfilter_run(obj2, pars), 5))
@@ -184,14 +162,12 @@ test_that("can run replicated structured unfilter", {
     list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6),
     list(beta = 0.2, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6))
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) {
-    lapply(seq_len(2), function(j) list(incidence = 2 * (i - 1) + j))
-  })
-  dt <- 1
-  obj1 <- dust_unfilter_create(sir(), time_start, time, data,
+  data <- data.frame(time = rep(c(4, 8, 12, 16), 2),
+                     group = rep(1:2, each = 4),
+                     incidence = 1:8)
+  obj1 <- dust_unfilter_create(sir(), time_start, data,
                                n_particles = 5, n_groups = 2)
-  obj2 <- dust_unfilter_create(sir(), time_start, time, data,
+  obj2 <- dust_unfilter_create(sir(), time_start, data,
                                n_particles = 1, n_groups = 2)
   expect_equal(
     dust_unfilter_run(obj1, pars),
@@ -204,17 +180,14 @@ test_that("can save history from structured unfilter", {
     list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6),
     list(beta = 0.2, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6))
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) {
-    lapply(seq_len(2), function(j) list(incidence = 2 * (i - 1) + j))
-  })
-  data1 <- lapply(data, function(x) x[[1]])
-  data2 <- lapply(data, function(x) x[[2]])
-  dt <- 1
-  obj <- dust_unfilter_create(sir(), time_start, time, data,
-                              n_groups = 2)
-  obj1 <- dust_unfilter_create(sir(), time_start, time, data1)
-  obj2 <- dust_unfilter_create(sir(), time_start, time, data2)
+  data <- data.frame(time = rep(c(4, 8, 12, 16), 2),
+                     group = rep(1:2, each = 4),
+                     incidence = 1:8)
+  data1 <- data[data$group == 1, -2]
+  data2 <- data[data$group == 2, -2]
+  obj <- dust_unfilter_create(sir(), time_start, data)
+  obj1 <- dust_unfilter_create(sir(), time_start, data1)
+  obj2 <- dust_unfilter_create(sir(), time_start, data2)
 
   ll <- dust_unfilter_run(obj, pars, save_history = TRUE)
   ll1 <- dust_unfilter_run(obj1, pars[[1]], save_history = TRUE)
@@ -236,25 +209,22 @@ test_that("can save history from structured unfilter", {
 test_that("history output can have dimensions preserved", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) list(incidence = i))
-  dt <- 1
-  data_grouped <- lapply(data, list)
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
 
-  obj1 <- dust_unfilter_create(sir(), time_start, time, data)
+  obj1 <- dust_unfilter_create(sir(), time_start, data)
   ll1 <- dust_unfilter_run(obj1, pars, save_history = TRUE)
 
-  obj2 <- dust_unfilter_create(sir(), time_start, time, data,
+  obj2 <- dust_unfilter_create(sir(), time_start, data,
                                preserve_particle_dimension = TRUE)
   ll2 <- dust_unfilter_run(obj2, pars, save_history = TRUE)
   expect_equal(ll2, ll1)
 
-  obj3 <- dust_unfilter_create(sir(), time_start, time, data_grouped,
+  obj3 <- dust_unfilter_create(sir(), time_start, data,
                                preserve_group_dimension = TRUE)
   ll3 <- dust_unfilter_run(obj3, list(pars), save_history = TRUE)
   expect_equal(ll3, ll1)
 
-  obj4 <- dust_unfilter_create(sir(), time_start, time, data_grouped,
+  obj4 <- dust_unfilter_create(sir(), time_start, data,
                                preserve_group_dimension = TRUE,
                                preserve_particle_dimension = TRUE)
   ll4 <- dust_unfilter_run(obj4, list(pars), save_history = TRUE)

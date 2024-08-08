@@ -125,10 +125,7 @@ data_to_list <- function(data, n_groups, preserve_group_dimension,
   data_by_time <- unname(split(data[names(data) != time], data[[time]]))
 
   if (is.null(group)) {
-    d <- lapply(data_by_time, as.list)
-    if (preserve_group_dimension) {
-      d <- lapply(d, list)
-    }
+    d <- lapply(data_by_time, function(x) list(as.list(x)))
   } else {
     d <- lapply(data_by_time, function(el) {
       lapply(unname(split(el[names(el) != group], el[[group]])), as.list)
