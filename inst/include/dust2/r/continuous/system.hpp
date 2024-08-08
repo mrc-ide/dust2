@@ -26,16 +26,15 @@ SEXP dust2_continuous_alloc(cpp11::list r_pars,
 
   const auto n_particles = to_size(r_n_particles, "n_particles");
   const auto n_groups = to_size(r_n_groups, "n_groups");
+  const auto n_threads = to_size(r_n_threads, "n_threads");
 
   const auto shared = build_shared<T>(r_pars, n_groups);
-  // Later, we need one of these per thread
-  const auto internal = build_internal<T>(shared);
+  const auto internal = build_internal<T>(shared, n_threads);
 
   auto seed = mcstate::random::r::as_rng_seed<rng_state_type>(r_seed);
   auto deterministic = to_bool(r_deterministic, "deterministic");
   auto ode_control = validate_ode_control<real_type>(r_ode_control);
 
-  const auto n_threads = to_size(r_n_threads, "n_threads");
 
   auto obj = new dust_continuous<T>(shared, internal, time, ode_control,
                                     n_particles, seed, deterministic,

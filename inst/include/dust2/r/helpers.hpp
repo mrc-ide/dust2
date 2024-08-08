@@ -227,11 +227,15 @@ std::vector<typename T::shared_state> build_shared(cpp11::list r_pars,
 }
 
 template <typename T>
-std::vector<typename T::internal_state> build_internal(std::vector<typename T::shared_state> shared) {
+std::vector<typename T::internal_state> build_internal(std::vector<typename T::shared_state> shared, size_t n_threads) {
   std::vector<typename T::internal_state> internal;
-  internal.reserve(shared.size());
-  for (auto& s : shared) {
-    internal.push_back(T::build_internal(s));
+  const size_t n_groups = shared.size();
+  internal.reserve(n_groups * n_threads);
+  // We can parallelise this but it's probably not really wanted.
+  for (size_t i = 0; i < n_threads; ++i) {
+    for (auto& s : shared) {
+      internal.push_back(T::build_internal(s));
+    }
   }
   return internal;
 }

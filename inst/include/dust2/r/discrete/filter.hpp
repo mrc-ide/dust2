@@ -30,7 +30,7 @@ cpp11::sexp dust2_discrete_filter_alloc(cpp11::list r_pars,
   const auto time = check_time_sequence(time_start, r_time, true, "time");
   const auto dt = check_dt(r_dt);
   const auto shared = build_shared<T>(r_pars, n_groups);
-  const auto internal = build_internal<T>(shared);
+  const auto internal = build_internal<T>(shared, n_threads);
   const auto data = check_data<T>(r_data, time.size(), n_groups, "data");
 
   // It's possible that we don't want to always really be

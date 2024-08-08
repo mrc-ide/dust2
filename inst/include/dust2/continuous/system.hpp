@@ -9,6 +9,7 @@
 #include <dust2/continuous/control.hpp>
 #include <dust2/continuous/solver.hpp>
 #include <dust2/errors.hpp>
+#include <dust2/tools.hpp>
 #include <dust2/zero.hpp>
 #include <mcstate/random/random.hpp>
 
@@ -73,11 +74,12 @@ public:
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
+        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
         real_type * y = state_data + offset;
         try {
           solver_.run(time_, time, y, zero_every_[i],
                       ode_internals_[k],
-                      rhs_(shared_[i], internal_[i]));
+                      rhs_(shared_[i], internal_i));
         } catch (std::exception const& e) {
           errors_.capture(e, k);
         }
@@ -97,12 +99,13 @@ public:
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
+        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
         real_type * y = state_data + offset;
         try {
-          T::initial(time_, shared_[i], internal_[i],
+          T::initial(time_, shared_[i], internal_i,
                      rng_.state(k), y);
           solver_.initialise(time_, y, ode_internals_[k],
-                             rhs_(shared_[i], internal_[i]));
+                             rhs_(shared_[i], internal_i));
         } catch (std::exception const& e) {
           errors_.capture(e, k);
         }
@@ -128,11 +131,12 @@ public:
         const auto offset_read =
           i * offset_read_group + j * offset_read_particle;
         const auto offset_write = k * n_state_;
+        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
         real_type* y = state_data + offset_write;
         std::copy_n(iter + offset_read, n_state_, y);
 	try {
 	  solver_.initialise(time_, y, ode_internals_[k],
-			     rhs_(shared_[i], internal_[i]));
+			     rhs_(shared_[i], internal_i));
 	} catch (std::exception const& e) {
 	  errors_.capture(e, k);
 	}
@@ -224,10 +228,11 @@ public:
 	auto data_i = data + i;
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
+        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
 	auto output_ij = output + k;
         try {
           *output_ij = T::compare_data(time_, state_data + offset, *data_i,
-				       shared_[i], internal_[i], rng_.state(k));
+				       shared_[i], internal_i, rng_.state(k));
         } catch (std::exception const& e) {
           errors_.capture(e, k);
         }

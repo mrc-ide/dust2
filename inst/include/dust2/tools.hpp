@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #include <cmath>
 
 namespace dust2 {
@@ -20,6 +24,14 @@ inline bool is_evenly_divisible_by(double num, double by) {
 template <typename T, typename U>
 T accumulate_periodic(T time, T period, U previous, U value) {
   return is_evenly_divisible_by(time, period) ? value : previous + value;
+}
+
+inline size_t thread_index() {
+#ifdef _OPENMP
+  return omp_get_thread_num();
+#else
+  return 0;
+#endif
 }
 
 }
