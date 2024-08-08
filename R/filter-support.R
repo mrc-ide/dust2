@@ -63,3 +63,15 @@ check_index <- function(index, call = NULL) {
   }
   index
 }
+
+
+check_time_start <- function(time_start, time, call = NULL) {
+  assert_scalar_integer(time_start, call = call)
+  if (time_start > time[[1]]) {
+    cli::cli_abort(
+      paste("'time_start' ({time_start}) is later than the first time",
+            "in 'data' ({time[[1]]})"),
+      call = call)
+  }
+  time_start
+}

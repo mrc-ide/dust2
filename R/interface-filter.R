@@ -41,32 +41,22 @@ dust_filter_create <- function(generator, time_start, data,
   assert_scalar_size(n_particles, allow_zero = FALSE, call = call)
   assert_scalar_logical(preserve_group_dimension, call = call)
 
-  ## NOTE: there is no preserve_particle_dimension option here because
-  ## we will always preserve this dimension.
-
+  data <- prepare_data(data, n_groups, call = call)
+  time_start <- check_time_start(time_start, data$time, call = call)
   dt <- check_dt(dt, call = call)
 
-  data <- prepare_data(data, n_groups, call = call)
-  time <- data$time
+  ## NOTE: there is no preserve_particle_dimension option here because
+  ## we will always preserve this dimension.
   n_groups <- data$n_groups
-  data_list <- data$data
   preserve_group_dimension <- preserve_group_dimension || n_groups > 1
-
-  assert_scalar_integer(time_start, call = call)
-  if (time_start > time[[1]]) {
-    cli::cli_abort(
-      paste("'time_start' ({time_start}) is later than the first time",
-            "in 'data' ({time[[1]]})"),
-      call = call)
-  }
 
   index_state <- check_index(index_state, call = call)
   n_threads <- check_n_threads(n_threads, n_particles, n_groups)
 
   inputs <- list(time_start = time_start,
-                 time = time,
+                 time = data$time,
                  dt = dt,
-                 data = data_list,
+                 data = data$data,
                  n_particles = n_particles,
                  n_groups = n_groups,
                  n_threads = n_threads,
@@ -76,8 +66,8 @@ dust_filter_create <- function(generator, time_start, data,
   res <- list2env(
     list(inputs = inputs,
          initial_rng_state = filter_rng_state(n_particles, n_groups, seed),
-         n_particles = as.integer(n_particles),
-         n_groups = as.integer(max(n_groups), 1),
+         n_particles = n_particles,
+         n_groups = n_groups,
          deterministic = FALSE,
          methods = generator$methods$filter,
          index_state = index_state,

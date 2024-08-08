@@ -275,3 +275,22 @@ test_that("can create a new filter via copying", {
   expect_false(identical(ll1, ll2))
   expect_identical(ll1, ll3)
 })
+
+
+test_that("validate the number of groups in a data set", {
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  expect_error(
+    dust_filter_create(sir(), time_start, data, n_particles = 10, n_groups = 2),
+    "Expected 'data' to have 2 groups, but it had 1")
+})
+
+
+test_that("validate the starting time", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  expect_error(
+    dust_filter_create(sir(), 6, data, n_particles = 10),
+    "'time_start' (6) is later than the first time in 'data' (4)",
+    fixed = TRUE)
+})

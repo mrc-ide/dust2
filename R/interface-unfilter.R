@@ -26,31 +26,22 @@ dust_unfilter_create <- function(generator, time_start, data,
   check_generator_for_filter(generator, "unfilter", call = call)
   assert_scalar_size(n_particles, allow_zero = FALSE, call = call)
   assert_scalar_logical(preserve_particle_dimension, call = call)
-  preserve_particle_dimension <- preserve_particle_dimension || n_particles > 1
-
-  dt <- check_dt(dt, call = call)
 
   data <- prepare_data(data, n_groups, call = call)
-  time <- data$time
-  n_groups <- data$n_groups
-  data_list <- data$data
-  preserve_group_dimension <- preserve_group_dimension || n_groups > 1
+  time_start <- check_time_start(time_start, data$time, call = call)
+  dt <- check_dt(dt, call = call)
 
-  assert_scalar_integer(time_start, call = call)
-  if (time_start > time[[1]]) {
-    cli::cli_abort(
-      paste("'time_start' ({time_start}) is later than the first time",
-            "in 'data' ({time[[1]]})"),
-      call = call)
-  }
+  n_groups <- data$n_groups
+  preserve_group_dimension <- preserve_group_dimension || n_groups > 1
+  preserve_particle_dimension <- preserve_particle_dimension || n_particles > 1
 
   index_state <- check_index(index_state, call = call)
   n_threads <- check_n_threads(n_threads, n_particles, n_groups)
 
   inputs <- list(time_start = time_start,
-                 time = time,
+                 time = data$time,
                  dt = dt,
-                 data = data_list,
+                 data = data$data,
                  n_particles = n_particles,
                  n_groups = n_groups,
                  n_threads = n_threads,
