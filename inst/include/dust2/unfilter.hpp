@@ -35,7 +35,7 @@ public:
     history_index_state_(history_index_state),
     history_(history_index_state_.size() > 0 ? history_index_state_.size() : n_state_,
              n_particles_, n_groups_, time_.size()),
-    adjoint_(n_state_, n_particles_ * n_groups_),
+    adjoint_(n_state_, n_particles_, n_groups_),
     history_is_current_(n_particles_ * n_groups_),
     adjoint_is_current_(n_particles_ * n_groups_),
     gradient_is_current_(false) {
