@@ -58,10 +58,10 @@ public:
   }
 
   template <typename Iter>
-  void gradient(Iter iter, const std::vector<size_t>& groups) {
+  void gradient(Iter iter, const std::vector<size_t>& index_group) {
     auto iter_src = adjoint_curr_.begin() + n_state_;
     const auto n_gradient = n_adjoint_ - n_state_;
-    for (auto i : groups) {
+    for (auto i : index_group) {
       iter = std::copy_n(iter_src + n_adjoint_ * i, n_gradient, iter);
     }
   }

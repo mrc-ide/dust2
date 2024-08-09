@@ -46,7 +46,7 @@ public:
   }
 
   void run(bool set_initial, bool save_history,
-           const std::vector<size_t>& groups) {
+           const std::vector<size_t>& index_group) {
     reset(set_initial, save_history, /* adjoint = */ false);
     const auto n_times = time_.size();
 
@@ -54,8 +54,8 @@ public:
 
     auto it_data = data_.begin();
     for (size_t i = 0; i < n_times; ++i, it_data += n_groups_) {
-      sys.run_to_time(time_[i], groups);
-      sys.compare_data(it_data, ll_step_.begin(), groups);
+      sys.run_to_time(time_[i], index_group);
+      sys.compare_data(it_data, ll_step_.begin(), index_group);
       for (size_t j = 0; j < ll_.size(); ++j) {
         ll_[j] += ll_step_[j];
       }
@@ -63,16 +63,16 @@ public:
         if (use_index) {
           history_.add_with_index(time_[i], sys.state().begin(),
                                   history_index_state_.begin(), n_state_,
-                                  groups);
+                                  index_group);
         } else {
           history_.add(time_[i], sys.state().begin(),
-                       groups);
+                       index_group);
         }
       }
     }
 
     if (save_history) {
-      for (auto i : groups) {
+      for (auto i : index_group) {
         history_is_current_[i] = true;
       }
     }
@@ -86,12 +86,12 @@ public:
   }
 
   void run_adjoint(bool set_initial, bool save_history,
-                   const std::vector<size_t>& groups) {
+                   const std::vector<size_t>& index_group) {
     reset(set_initial, save_history, /* adjoint = */ true);
 
     // Run the entire forward time simulation
     auto state = adjoint_.state();
-    sys.run_to_time(time_.back(), state, groups);
+    sys.run_to_time(time_.back(), state, index_group);
 
     // Then all the data comparison in one pass.  This bit can
     // theoretically be parallelised but it's unlikely to be
@@ -105,7 +105,7 @@ public:
         std::round(std::max(0.0, time_[i] - time_start_) / dt);
       const auto state_i = state + n_steps * stride_state;
       const auto data_i = data_.begin() + n_groups_ * i;
-      sys.compare_data(data_i, state_i, ll_step_.begin(), groups);
+      sys.compare_data(data_i, state_i, ll_step_.begin(), index_group);
       for (size_t j = 0; j < ll_.size(); ++j) {
         ll_[j] += ll_step_[j];
       }
@@ -113,14 +113,14 @@ public:
         if (use_index) {
           history_.add_with_index(time_[i], state_i,
                                   history_index_state_.begin(), n_state_,
-                                  groups);
+                                  index_group);
         } else {
-          history_.add(time_[i], state_i, groups);
+          history_.add(time_[i], state_i, index_group);
         }
       }
     }
 
-    for (auto i : groups) {
+    for (auto i : index_group) {
       adjoint_is_current_[i] = true;
       history_is_current_[i] = save_history;
     }
@@ -143,11 +143,11 @@ public:
   }
 
   template <typename Iter>
-  void last_gradient(Iter iter, const std::vector<size_t>& groups) {
+  void last_gradient(Iter iter, const std::vector<size_t>& index_group) {
     if (!gradient_is_current_) {
-      compute_gradient_(groups);
+      compute_gradient_(index_group);
     }
-    adjoint_.gradient(iter, groups);
+    adjoint_.gradient(iter, index_group);
   }
 
 private:
@@ -190,7 +190,7 @@ private:
     compute_gradient_(sys.all_groups());
   }
 
-  void compute_gradient_(const std::vector<size_t>& groups) {
+  void compute_gradient_(const std::vector<size_t>& index_group) {
     const auto n_times = time_.size();
     const auto n_adjoint = sys.n_adjoint();
     adjoint_.init_adjoint(n_adjoint);
@@ -211,13 +211,13 @@ private:
       // Compare data
       sys.adjoint_compare_data(time, data_i, state_i,
                                n_adjoint, adjoint_curr, adjoint_next,
-                               groups);
+                               index_group);
       std::swap(adjoint_curr, adjoint_next);
       // Then run the system backwards from time => time_i
       const auto n_steps = sys.adjoint_run_to_time(time, time_i, state_i,
                                                    n_adjoint,
                                                    adjoint_curr, adjoint_next,
-                                                   groups);
+                                                   index_group);
       // Bookkeeping chore
       if (n_steps % 2 == 1) {
         std::swap(adjoint_curr, adjoint_next);
@@ -229,7 +229,7 @@ private:
     // Initial conditions go right at the end, and are surprisingly
     // hard to work out.
     sys.adjoint_initial(time, state, n_adjoint, adjoint_curr, adjoint_next,
-                        groups);
+                        index_group);
 
     // At the end of the calculation, copy the final states so that
     // both copies within adjoint_ are the same - this means that the
