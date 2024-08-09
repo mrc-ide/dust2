@@ -30,7 +30,7 @@ value.}
 which case it will be passed into \link{dust_filter_data} for
 validation, or it can be a \link{dust_filter_data}-augmented
 data.frame.  The times for comparison will be taken from this,
-and \code{time_start} must be earlier than the earliest time.}
+and \code{time_start} must be no later than than the earliest time.}
 
 \item{n_particles}{The number of particles to run.  Larger numbers
 will give lower variance in the likelihood estimate but run more
