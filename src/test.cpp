@@ -25,29 +25,35 @@ cpp11::list test_scale_log_weights(std::vector<double> w) {
 // particle filter.
 [[cpp11::register]]
 cpp11::sexp test_history(cpp11::doubles r_time, cpp11::list r_state,
-                         cpp11::sexp r_order, bool reorder) {
+                         cpp11::sexp r_order,
+                         cpp11::sexp r_index_group,
+                         bool reorder) {
   const size_t n_times = r_time.size();
   cpp11::sexp el0 = r_state[0];
-
   auto r_dim = cpp11::as_cpp<cpp11::integers>(el0.attr("dim"));
-  const size_t n_state = r_dim[0];
-  const size_t n_particles = r_dim[1];
-  const size_t n_groups = r_dim[2];
-  std::vector<size_t> index_group;
-  for (size_t i = 0; i < n_groups; ++i) {
-    index_group.push_back(i);
+
+  std::vector<size_t> all_groups;
+  const size_t n_groups_all = r_dim[2];
+  for (size_t i = 0; i < n_groups_all; ++i) {
+    all_groups.push_back(i);
   }
 
-  dust2::history<double> h(n_state, n_particles, n_groups, n_times);
+  const auto index_group = r_index_group == R_NilValue ? all_groups :
+    dust2::r::check_index(r_index_group, all_groups.size(), "index_group");
+  const size_t n_state = r_dim[0];
+  const size_t n_particles = r_dim[1];
+  const size_t n_groups = index_group.size();
+
+  dust2::history<double> h(n_state, n_particles, n_groups_all, n_times);
   for (size_t i = 0; i < static_cast<size_t>(r_state.size()); ++i) {
     if (r_order == R_NilValue) {
-      h.add(r_time[i], REAL(r_state[i]));
+      h.add(r_time[i], REAL(r_state[i]), index_group);
     } else {
       cpp11::sexp el = cpp11::as_cpp<cpp11::list>(r_order)[i];
       if (el == R_NilValue) {
-        h.add(r_time[i], REAL(r_state[i]));
+        h.add(r_time[i], REAL(r_state[i]), index_group);
       } else {
-        h.add(r_time[i], REAL(r_state[i]), INTEGER(el));
+        h.add(r_time[i], REAL(r_state[i]), INTEGER(el), index_group);
       }
     }
   }

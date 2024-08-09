@@ -44,7 +44,7 @@ public:
   }
 
   void run(bool set_initial, bool save_history,
-           const std::vector<size_t>& groups) {
+           const std::vector<size_t>& index_group) {
     reset(set_initial, save_history);
     const auto n_times = time_.size();
 
@@ -56,10 +56,10 @@ public:
 
     auto it_data = data_.begin();
     for (size_t i = 0; i < n_times; ++i, it_data += n_groups_) {
-      sys.run_to_time(time_[i], groups);
-      sys.compare_data(it_data, ll_step_.begin(), groups);
+      sys.run_to_time(time_[i], index_group);
+      sys.compare_data(it_data, ll_step_.begin(), index_group);
 
-      for (auto i : groups) {
+      for (auto i : index_group) {
         const auto offset = i * n_particles_;
         const auto w = ll_step_.begin() + offset;
         ll_[i] += details::scale_log_weights<real_type>(n_particles_, w);
@@ -70,7 +70,7 @@ public:
       // this requires some fiddling.
 
       // This can be parallelised across groups
-      for (auto i : groups) {
+      for (auto i : index_group) {
         const auto offset = i * n_particles_;
         const auto w = ll_step_.begin() + offset;
         const auto idx = index.begin() + offset;
@@ -78,21 +78,23 @@ public:
         details::resample_weight(n_particles_, w, u, idx);
       }
 
-      sys.reorder(index.begin(), groups);
+      sys.reorder(index.begin(), index_group);
 
       if (save_history) {
         if (use_index) {
           history_.add_with_index(time_[i], sys.state().begin(), index.begin(),
-                                  history_index_state_.begin(), n_state_);
+                                  history_index_state_.begin(), n_state_,
+                                  index_group);
         } else {
-          history_.add(time_[i], sys.state().begin(), index.begin());
+          history_.add(time_[i], sys.state().begin(), index.begin(),
+                       index_group);
         }
       }
       // save snapshots (perhaps)
     }
 
     if (save_history) {
-      for (auto i : groups) {
+      for (auto i : index_group) {
         history_is_current_[i] = true;
       }
     }

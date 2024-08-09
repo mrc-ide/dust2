@@ -51,30 +51,34 @@ public:
   }
 
   template <typename IterReal>
-  void add(real_type time, IterReal iter_state) {
-    copy_state_(iter_state);
+  void add(real_type time, IterReal iter_state,
+           const std::vector<size_t>& index_group) {
+    copy_state_(iter_state, index_group);
     update_position(time, false);
   }
 
   template <typename IterReal, typename IterSize>
-  void add(real_type time, IterReal iter_state, IterSize iter_order) {
-    copy_state_(iter_state);
-    copy_order_(iter_order);
+  void add(real_type time, IterReal iter_state, IterSize iter_order,
+           const std::vector<size_t>& index_group) {
+    copy_state_(iter_state, index_group);
+    copy_order_(iter_order, index_group);
     update_position(time, true);
   }
 
   template <typename IterReal, typename IterSize>
   void add_with_index(real_type time, IterReal iter_state, IterSize iter_index,
-                      size_t n_state_total) {
-    copy_state_with_index_(iter_state, iter_index, n_state_total);
+                      size_t n_state_total,
+                      const std::vector<size_t>& index_group) {
+    copy_state_with_index_(iter_state, iter_index, n_state_total, index_group);
     update_position(time, false);
   }
 
   template <typename IterReal, typename IterSize>
   void add_with_index(real_type time, IterReal iter_state, IterSize iter_order,
-                      IterSize iter_index, size_t n_state_total) {
-    copy_state_with_index_(iter_state, iter_index, n_state_total);
-    copy_order_(iter_order);
+                      IterSize iter_index, size_t n_state_total,
+                      const std::vector<size_t>& index_group) {
+    copy_state_with_index_(iter_state, iter_index, n_state_total, index_group);
+    copy_order_(iter_order, index_group);
     update_position(time, true);
   }
 
@@ -103,8 +107,8 @@ public:
 
   template <typename Iter>
   void export_state(Iter iter, bool reorder,
-                    const std::vector<size_t>& groups) const {
-    if (groups.size() != n_groups_) {
+                    const std::vector<size_t>& index_group) const {
+    if (index_group.size() != n_groups_) {
       throw std::runtime_error("need to organise filtering");
     }
     reorder = reorder && n_particles_ > 1 && position_ > 0 &&
@@ -165,14 +169,14 @@ private:
                       typename std::vector<size_t>::const_iterator iter_order,
                       bool reorder,
                       Iter iter_dest,
-                      typename std::vector<size_t>::iterator index) const {
+                      typename std::vector<size_t>::iterator index_particle) const {
     for (size_t i = 0; i < n_particles_; ++i) {
-      std::copy_n(iter_state + *(index + i) * n_state_,
+      std::copy_n(iter_state + *(index_particle + i) * n_state_,
                   n_state_,
                   iter_dest + i * n_state_);
       if (reorder) {
-        const auto index_i = index + i;
-        *index_i = *(iter_order + *index_i);
+        const auto index_particle_i = index_particle + i;
+        *index_particle_i = *(iter_order + *index_particle_i);
       }
     }
   }
@@ -185,25 +189,28 @@ private:
   }
 
   template <typename IterReal>
-  void copy_state_(IterReal iter) {
+  void copy_state_(IterReal iter, const std::vector<size_t>& index_state) {
     std::copy_n(iter, len_state_, state_.begin() + len_state_ * position_);
   }
 
   template <typename IterSize>
-  void copy_order_(IterSize iter_order) {
+  void copy_order_(IterSize iter_order,
+                   const std::vector<size_t>& index_state) {
     std::copy_n(iter_order, len_order_,
                 order_.begin() + position_ * len_order_);
   }
 
   template <typename IterReal, typename IterSize>
-  void copy_state_with_index_(IterReal iter_state, IterSize iter_index,
-                              size_t n_state_total) {
+  void copy_state_with_index_(IterReal iter_state,
+                              IterSize iter_index_state,
+                              size_t n_state_total,
+                              const std::vector<size_t>& index_group) {
     auto iter_dest = state_.begin() + position_ * len_state_;
     for (size_t i = 0; i < n_groups_ * n_particles_; ++i) {
       const auto iter_state_i = iter_state + i * n_state_total;
-      auto iter_index_i = iter_index;
-      for (size_t k = 0; k < n_state_; ++k, ++iter_dest, ++iter_index_i) {
-        *iter_dest = *(iter_state_i + *iter_index_i);
+      auto iter_index_state_i = iter_index_state;
+      for (size_t k = 0; k < n_state_; ++k, ++iter_dest, ++iter_index_state_i) {
+        *iter_dest = *(iter_state_i + *iter_index_state_i);
       }
     }
   }

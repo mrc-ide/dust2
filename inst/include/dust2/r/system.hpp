@@ -250,9 +250,9 @@ SEXP dust2_system_simulate(cpp11::sexp ptr,
     obj->run_to_time(times[i], index_group);
     if (use_index_state) {
       h.add_with_index(times[i], obj->state().begin(), index_state.begin(),
-                       n_state);
+                       n_state, index_group);
     } else {
-      h.add(times[i], obj->state().begin());
+      h.add(times[i], obj->state().begin(), index_group);
     }
   }
 

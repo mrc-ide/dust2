@@ -62,9 +62,11 @@ public:
       if (save_history) {
         if (use_index) {
           history_.add_with_index(time_[i], sys.state().begin(),
-                                  history_index_state_.begin(), n_state_);
+                                  history_index_state_.begin(), n_state_,
+                                  groups);
         } else {
-          history_.add(time_[i], sys.state().begin());
+          history_.add(time_[i], sys.state().begin(),
+                       groups);
         }
       }
     }
@@ -110,9 +112,10 @@ public:
       if (save_history) {
         if (use_index) {
           history_.add_with_index(time_[i], state_i,
-                                  history_index_state_.begin(), n_state_);
+                                  history_index_state_.begin(), n_state_,
+                                  groups);
         } else {
-          history_.add(time_[i], state_i);
+          history_.add(time_[i], state_i, groups);
         }
       }
     }

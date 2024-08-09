@@ -208,8 +208,8 @@ test_scale_log_weights <- function(w) {
   .Call(`_dust2_test_scale_log_weights`, w)
 }
 
-test_history <- function(r_time, r_state, r_order, reorder) {
-  .Call(`_dust2_test_history`, r_time, r_state, r_order, reorder)
+test_history <- function(r_time, r_state, r_order, r_index_group, reorder) {
+  .Call(`_dust2_test_history`, r_time, r_state, r_order, r_index_group, reorder)
 }
 
 dust2_system_walk_alloc <- function(r_pars, r_time, r_dt, r_n_particles, r_n_groups, r_seed, r_deterministic, r_n_threads) {

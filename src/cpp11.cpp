@@ -370,10 +370,10 @@ extern "C" SEXP _dust2_test_scale_log_weights(SEXP w) {
   END_CPP11
 }
 // test.cpp
-cpp11::sexp test_history(cpp11::doubles r_time, cpp11::list r_state, cpp11::sexp r_order, bool reorder);
-extern "C" SEXP _dust2_test_history(SEXP r_time, SEXP r_state, SEXP r_order, SEXP reorder) {
+cpp11::sexp test_history(cpp11::doubles r_time, cpp11::list r_state, cpp11::sexp r_order, cpp11::sexp r_index_group, bool reorder);
+extern "C" SEXP _dust2_test_history(SEXP r_time, SEXP r_state, SEXP r_order, SEXP r_index_group, SEXP reorder) {
   BEGIN_CPP11
-    return cpp11::as_sexp(test_history(cpp11::as_cpp<cpp11::decay_t<cpp11::doubles>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_state), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_order), cpp11::as_cpp<cpp11::decay_t<bool>>(reorder)));
+    return cpp11::as_sexp(test_history(cpp11::as_cpp<cpp11::decay_t<cpp11::doubles>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_state), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_order), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(reorder)));
   END_CPP11
 }
 // walk.cpp
@@ -525,7 +525,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_unfilter_sir_last_history",         (DL_FUNC) &_dust2_dust2_unfilter_sir_last_history,          4},
     {"_dust2_dust2_unfilter_sir_run",                  (DL_FUNC) &_dust2_dust2_unfilter_sir_run,                   7},
     {"_dust2_dust2_unfilter_sir_update_pars",          (DL_FUNC) &_dust2_dust2_unfilter_sir_update_pars,           2},
-    {"_dust2_test_history",                            (DL_FUNC) &_dust2_test_history,                             4},
+    {"_dust2_test_history",                            (DL_FUNC) &_dust2_test_history,                             5},
     {"_dust2_test_resample_weight",                    (DL_FUNC) &_dust2_test_resample_weight,                     2},
     {"_dust2_test_scale_log_weights",                  (DL_FUNC) &_dust2_test_scale_log_weights,                   1},
     {NULL, NULL, 0}
