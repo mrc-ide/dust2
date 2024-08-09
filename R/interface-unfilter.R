@@ -104,15 +104,21 @@ dust_unfilter_run <- function(unfilter, pars, initial = NULL,
                               save_history = FALSE, adjoint = FALSE,
                               index_group = NULL) {
   check_is_dust_unfilter(unfilter)
-  # TODO: parameter checking and updating need to go with our index too.
+  index_group <- check_index(index_group, max = unfilter$n_groups,
+                             unique = TRUE)
   if (!is.null(pars)) {
-    pars <- check_pars(pars, unfilter$n_groups,
+    pars <- check_pars(pars, unfilter$n_groups, index_group,
                        unfilter$preserve_group_dimension)
   }
   if (is.null(unfilter$ptr)) {
     if (is.null(pars)) {
       cli::cli_abort("'pars' cannot be NULL, as unfilter is not initialised",
                      arg = "pars")
+    }
+    if (!is.null(index_group)) {
+      cli::cli_abort(
+        "'index_group' must be NULL, as unfilter is not initialised",
+        arg = "index_group")
     }
     unfilter_create(unfilter, pars)
   } else if (!is.null(pars)) {
@@ -146,6 +152,8 @@ dust_unfilter_last_history <- function(unfilter, index_group = NULL) {
       "History is not current",
       i = "Unfilter has not yet been run"))
   }
+  index_group <- check_index(index_group, max = filter$n_groups,
+                             unique = TRUE)
   unfilter$methods$last_history(unfilter$ptr,
                                 index_group,
                                 unfilter$preserve_particle_dimension,
@@ -173,6 +181,8 @@ dust_unfilter_last_gradient <- function(unfilter, index_group = NULL) {
       "Gradient is not current",
       i = "Unfilter has not yet been run"))
   }
+  index_group <- check_index(index_group, max = filter$n_groups,
+                             unique = TRUE)
   unfilter$methods$last_gradient(unfilter$ptr,
                                  index_group,
                                  unfilter$preserve_particle_dimension,

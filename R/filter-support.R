@@ -53,12 +53,21 @@ check_time_sequence <- function(time_start, time, call = NULL) {
 }
 
 
-check_index <- function(index, call = NULL) {
+check_index <- function(index, max = NULL, unique = FALSE,
+                        name = deparse(substitute(index)), call = NULL) {
   if (!is.null(index)) {
     assert_integer(index, call = call)
-    if (any(index < 0)) {
-      cli::cli_abort("All elements of 'index' must be at least 1",
-                     arg = "index", call = call)
+    if (any(index < 1)) {
+      cli::cli_abort("All elements of '{name}' must be at least 1",
+                     arg = name, call = call)
+    }
+    if (!is.null(max) && any(index > max)) {
+      cli::cli_abort("All elements of '{name}' must be at most {max}",
+                     arg = name, call = call)
+    }
+    if (unique && anyDuplicated(index)) {
+      cli::cli_abort("All elements of '{name}' must be distinct",
+                     arg = name, call = call)
     }
   }
   index

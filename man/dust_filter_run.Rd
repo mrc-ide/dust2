@@ -32,7 +32,8 @@ the history is restricted to these states.}
 
 \item{index_group}{An optional vector of group indices to run the
 filter for.  You can use this to run a subset of possible
-groups, though at the moment this will likely crash.}
+groups, once the filter is initialised (this argument must be
+\code{NULL} on the \strong{first} call).}
 }
 \value{
 A vector of likelihood values, with as many elements as
