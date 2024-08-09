@@ -49,7 +49,8 @@
 <span>  <span class="va">pars</span>,</span>
 <span>  initial <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  save_history <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  adjoint <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  adjoint <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  index_group <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -87,6 +88,12 @@ the history is restricted to these states.</p></dd>
 history saving.  This can be enabled even when your model does not
 support adjoints!  But you will not be able to compute
 gradients.</p></dd>
+
+
+<dt id="arg-index-group">index_group<a class="anchor" aria-label="anchor" href="#arg-index-group"></a></dt>
+<dd><p>An optional vector of group indices to run the
+filter for.  You can use this to run a subset of possible
+groups, though at the moment this will likely crash.</p></dd>
 
 </dl></div>
     <div class="section level2">
