@@ -448,22 +448,25 @@ test_that("can validate index values", {
   obj <- dust_system_create(walk(), pars, n_particles = 10, seed = 42)
   expect_error(
     dust_system_simulate(obj, 0:20, c("2", "4")),
-    "Expected an integer vector for 'index'")
+    "Expected an integer vector for 'index_state'")
   expect_error(
     dust_system_simulate(obj, 0:20, c(2, 2.9)),
-    "All values of 'index' must be integer-like, but 'index[2]' was not",
+    paste("All values of 'index_state' must be integer-like, but",
+          "'index_state[2]' was not"),
     fixed = TRUE)
   expect_error(
     dust_system_simulate(obj, 0:20, c(2, 20)),
-    "All values of 'index' must be in [1, 3], but 'index[2]' was 20",
-    fixed = TRUE)
+    paste("All values of 'index_state' must be in [1, 3], but",
+          "'index_state[2]' was 20"),
+          fixed = TRUE)
   expect_error(
     dust_system_simulate(obj, 0:20, c(2, 3, -4)),
-    "All values of 'index' must be in [1, 3], but 'index[3]' was -4",
+    paste("All values of 'index_state' must be in [1, 3], but",
+          "'index_state[3]' was -4"),
     fixed = TRUE)
   expect_error(
     dust_system_simulate(obj, 0:20, integer()),
-    "'index' must have nonzero length")
+    "'index_state' must have nonzero length")
 })
 
 

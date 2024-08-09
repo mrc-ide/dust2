@@ -166,7 +166,7 @@ dust_unfilter_last_history <- function(unfilter, index_group = NULL) {
 ##' @return A vector (if ungrouped) or a matrix (if grouped).
 ##'
 ##' @export
-dust_unfilter_last_gradient <- function(unfilter, index_group) {
+dust_unfilter_last_gradient <- function(unfilter, index_group = NULL) {
   check_is_dust_unfilter(unfilter)
   if (is.null(unfilter$ptr)) {
     cli::cli_abort(c(

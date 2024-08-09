@@ -136,6 +136,7 @@ private:
     std::fill(ll_.begin(), ll_.end(), 0);
     sys.set_time(time_start_);
     if (set_initial) {
+      // TODO: group comes through here too
       sys.set_state_initial();
     }
   }

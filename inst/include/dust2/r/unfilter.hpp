@@ -73,7 +73,9 @@ cpp11::sexp dust2_unfilter_last_history(cpp11::sexp ptr,
 
   constexpr bool reorder = false; // never needed
 
-  // TODO: this needs an overhaul to work this way...
+  // TODO: this needs an overhaul to work this way, because the
+  // history dims here from the history object is no longer correct -
+  // we'll want this now to come from us.
   const auto& history = obj->last_history();
   const auto& dims = history.dims();
   // Could use destructured bind here in recent C++?
@@ -103,7 +105,7 @@ cpp11::sexp dust2_discrete_unfilter_last_gradient(cpp11::sexp ptr,
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
   const auto index_group = r_index_group == R_NilValue ? obj->all_groups() :
     check_index(r_index_group, obj->sys.n_groups(), "index_group");
-  const auto& is_current = obj->last_history_is_current();
+  const auto& is_current = obj->adjoint_is_current();
   for (auto i : index_group) {
     if (!is_current[i]) {
       if (!tools::any(is_current)) {
