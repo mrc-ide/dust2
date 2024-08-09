@@ -4,6 +4,7 @@
 #include <omp.h>
 #endif
 
+#include <algorithm>
 #include <cmath>
 
 namespace dust2 {
