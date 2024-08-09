@@ -316,7 +316,8 @@ void set_state(T& obj, cpp11::sexp r_state, bool preserve_group_dimension) {
     cpp11::stop("Expected the third dimension of 'state' to have size %d or 1",
                 n_groups);
   }
-  obj.set_state(REAL(r_state), recycle_particle, recycle_group);
+  obj.set_state(REAL(r_state), recycle_particle, recycle_group,
+                obj.all_groups());
 }
 
 template <typename T>

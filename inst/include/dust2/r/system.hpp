@@ -25,7 +25,7 @@ SEXP dust2_system_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {
     cpp11::stop("Can't run to time %f, system already at time %f",
                 time, curr);
   }
-  obj->run_to_time(time);
+  obj->run_to_time(time, obj->all_groups());
   return R_NilValue;
 }
 
@@ -125,7 +125,7 @@ SEXP dust2_system_time(cpp11::sexp ptr) {
 template <typename T>
 SEXP dust2_system_set_state_initial(cpp11::sexp ptr) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
-  obj->set_state_initial();
+  obj->set_state_initial(obj->all_groups());
   return R_NilValue;
 }
 
@@ -159,7 +159,7 @@ SEXP dust2_system_reorder(cpp11::sexp ptr, cpp11::integers r_index) {
     }
     index.push_back(i - 1);
   }
-  obj->reorder(index.begin());
+  obj->reorder(index.begin(), obj->all_groups());
   return R_NilValue;
 }
 

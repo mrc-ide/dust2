@@ -39,10 +39,6 @@ public:
     history_is_current_(n_groups_, false) {
   }
 
-  void run(bool set_initial, bool save_history) {
-    run(set_initial, save_history, sys.all_groups());
-  }
-
   void run(bool set_initial, bool save_history,
            const std::vector<size_t>& index_group) {
     reset(set_initial, save_history);
@@ -142,8 +138,7 @@ private:
     std::fill(ll_.begin(), ll_.end(), 0);
     sys.set_time(time_start_);
     if (set_initial) {
-      // TODO: group comes through here too
-      sys.set_state_initial();
+      sys.set_state_initial(sys.all_groups());
     }
   }
 };

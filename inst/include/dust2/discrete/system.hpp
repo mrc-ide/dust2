@@ -56,10 +56,6 @@ public:
     }
   }
 
-  auto run_to_time(real_type time) {
-    run_to_time(time, all_groups_);
-  }
-
   auto run_to_time(real_type time, const std::vector<size_t>& index_group) {
     const size_t n_steps = std::round(std::max(0.0, time - time_) / dt_);
     // Ignore errors for now.
@@ -120,10 +116,6 @@ public:
     time_ = time_ + n_steps * dt_;
   }
 
-  void set_state_initial() {
-    set_state_initial(all_groups_);
-  }
-
   void set_state_initial(const std::vector<size_t>& index_group) {
     errors_.reset();
     real_type * state_data = state_.data();
@@ -149,11 +141,6 @@ public:
   }
 
   template <typename Iter>
-  void set_state(Iter iter, bool recycle_particle, bool recycle_group) {
-    set_state(iter, recycle_particle, recycle_group, all_groups_);
-  }
-
-  template <typename Iter>
   void set_state(Iter iter, bool recycle_particle, bool recycle_group,
                  const std::vector<size_t>& index_group) {
     errors_.reset();
@@ -175,11 +162,6 @@ public:
                     state_data + offset_write);
       }
     }
-  }
-
-  template <typename Iter>
-  void reorder(Iter iter) {
-    reorder(iter, all_groups_);
   }
 
   template <typename Iter>
@@ -280,17 +262,6 @@ public:
       }
     }
     errors_.report();
-  }
-
-  template <typename IterData>
-  void adjoint_compare_data(const real_type time,
-                            IterData data,
-                            const real_type * state,
-                            const size_t n_adjoint,
-                            const real_type * adjoint_curr,
-                            real_type * adjoint_next) {
-    adjoint_compare_data(time, data, state, n_adjoint, adjoint_curr,
-                         adjoint_next, all_groups_);
   }
 
   template <typename IterData>

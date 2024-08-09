@@ -41,10 +41,6 @@ public:
     gradient_is_current_(false) {
   }
 
-  void run(bool set_initial, bool save_history) {
-    run(set_initial, save_history, sys.all_groups());
-  }
-
   void run(bool set_initial, bool save_history,
            const std::vector<size_t>& index_group) {
     reset(set_initial, save_history, /* adjoint = */ false);
@@ -81,10 +77,6 @@ public:
   // This part here we can _always_ do, even if the system does not
   // actually support adjoint methods.  It should give exactly the
   // same answers as the normal version, at the cost of more memory.
-  void run_adjoint(bool set_initial, bool save_history) {
-    run_adjoint(set_initial, save_history, sys.all_groups());
-  }
-
   void run_adjoint(bool set_initial, bool save_history,
                    const std::vector<size_t>& index_group) {
     reset(set_initial, save_history, /* adjoint = */ true);
@@ -182,12 +174,8 @@ private:
     std::fill(ll_.begin(), ll_.end(), 0);
     sys.set_time(time_start_);
     if (set_initial) {
-      sys.set_state_initial();
+      sys.set_state_initial(sys.all_groups());
     }
-  }
-
-  void compute_gradient_() {
-    compute_gradient_(sys.all_groups());
   }
 
   void compute_gradient_(const std::vector<size_t>& index_group) {

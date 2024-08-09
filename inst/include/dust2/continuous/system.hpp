@@ -69,10 +69,6 @@ public:
     }
   }
 
-  auto run_to_time(real_type time) {
-    run_to_time(time, all_groups_);
-  }
-
   auto run_to_time(real_type time, const std::vector<size_t>& index_group) {
     real_type * state_data = state_.data();
 #ifdef _OPENMP
@@ -95,10 +91,6 @@ public:
     }
     errors_.report();
     time_ = time;
-  }
-
-  void set_state_initial() {
-    set_state_initial(all_groups_);
   }
 
   void set_state_initial(const std::vector<size_t>& index_group) {
@@ -124,11 +116,6 @@ public:
       }
     }
     errors_.report();
-  }
-
-  template <typename Iter>
-  void set_state(Iter iter, bool recycle_particle, bool recycle_group) {
-    set_state(iter, recycle_particle, recycle_group, all_groups_);
   }
 
   template <typename Iter>
@@ -165,11 +152,6 @@ public:
 
   // iter here is an iterator to our *reordering index*, which will be
   // in terms of particles.  This probably warrants a better name.
-  template <typename Iter>
-  void reorder(Iter iter) {
-    reorder(iter, all_groups_);
-  }
-
   template <typename Iter>
   void reorder(Iter iter, const std::vector<size_t>& index_group) {
     // To do this, we need a second copy of all internal state (so
