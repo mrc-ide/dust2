@@ -166,6 +166,6 @@ SEXP dust2_system_walk_update_pars(cpp11::sexp ptr, cpp11::list pars) {
 }
 
 [[cpp11::register]]
-SEXP dust2_system_walk_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::sexp r_index, bool preserve_particle_dimension, bool preserve_group_dimension) {
-  return dust2::r::dust2_system_simulate<dust2::dust_discrete<walk>>(ptr, r_times, r_index, preserve_particle_dimension, preserve_group_dimension);
+SEXP dust2_system_walk_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::sexp r_index_state, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_system_simulate<dust2::dust_discrete<walk>>(ptr, r_times, r_index_state, preserve_particle_dimension, preserve_group_dimension);
 }

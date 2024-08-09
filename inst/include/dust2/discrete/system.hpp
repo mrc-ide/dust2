@@ -230,6 +230,10 @@ public:
     return T::adjoint_size(shared_[0]);
   }
 
+  auto& all_groups() const {
+    return all_groups_;
+  }
+
   void set_time(real_type time) {
     time_ = time;
   }

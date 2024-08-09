@@ -101,7 +101,11 @@ public:
   }
 
   template <typename Iter>
-  void export_state(Iter iter, bool reorder) const {
+  void export_state(Iter iter, bool reorder,
+                    const std::vector<size_t>& groups) const {
+    if (groups.size() != n_groups_) {
+      throw std::runtime_error("need to organise filtering");
+    }
     reorder = reorder && n_particles_ > 1 && position_ > 0 &&
       std::any_of(reorder_.begin(), reorder_.end(), [](auto v) { return v; });
     if (reorder) {

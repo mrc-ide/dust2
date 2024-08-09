@@ -228,7 +228,7 @@ SEXP dust2_system_compare_data(cpp11::sexp ptr,
 template <typename T>
 SEXP dust2_system_simulate(cpp11::sexp ptr,
                            cpp11::sexp r_times,
-                           cpp11::sexp r_index,
+                           cpp11::sexp r_index_state,
                            bool preserve_particle_dimension,
                            bool preserve_group_dimension) {
   using real_type = typename T::real_type;
@@ -236,18 +236,21 @@ SEXP dust2_system_simulate(cpp11::sexp ptr,
   check_errors(obj, "simulate");
   const auto n_state = obj->n_state();
   const auto times = check_time_sequence(obj->time(), r_times, false, "time");
-  const auto index = check_index(r_index, obj->n_state(), "index");
-  const auto use_index = index.size() > 0;
-  const auto n_state_save = use_index ? index.size() : n_state;
+  const auto index_state =
+    check_index(r_index_state, obj->n_state(), "index_state");
+  const auto index_group = obj->all_groups();
+  const auto use_index_state = index_state.size() > 0;
+  const auto n_state_save = use_index_state ? index_state.size() : n_state;
   const auto n_particles = obj->n_particles();
-  const auto n_groups = obj->n_groups();
+  const auto n_groups = index_group.size();
   const auto n_times = times.size();
 
   dust2::history<real_type> h(n_state_save, n_particles, n_groups, n_times);
   for (size_t i = 0; i < n_times; ++i) {
-    obj->run_to_time(times[i]);
-    if (use_index) {
-      h.add_with_index(times[i], obj->state().begin(), index.begin(), n_state);
+    obj->run_to_time(times[i], index_group);
+    if (use_index_state) {
+      h.add_with_index(times[i], obj->state().begin(), index_state.begin(),
+                       n_state);
     } else {
       h.add(times[i], obj->state().begin());
     }
@@ -258,7 +261,7 @@ SEXP dust2_system_simulate(cpp11::sexp ptr,
   // make later.
   const auto len = n_state_save * n_particles * n_groups * n_times;
   cpp11::sexp ret = cpp11::writable::doubles(len);
-  h.export_state(REAL(ret), false);
+  h.export_state(REAL(ret), false, index_group);
   if (preserve_group_dimension && preserve_particle_dimension) {
     set_array_dims(ret, {n_state_save, n_particles, n_groups, n_times});
   } else if (preserve_group_dimension || preserve_particle_dimension) {

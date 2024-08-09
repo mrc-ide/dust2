@@ -32,7 +32,6 @@ public:
     n_groups_(sys.n_groups()),
     ll_(n_particles_ * n_groups_, 0),
     ll_step_(n_particles_ * n_groups_, 0),
-    all_groups_(n_groups_),
     history_index_state_(history_index_state),
     history_(history_index_state_.size() > 0 ? history_index_state_.size() : n_state_,
              n_particles_, n_groups_, time_.size()),
@@ -40,16 +39,14 @@ public:
     history_is_current_(n_particles_ * n_groups_),
     adjoint_is_current_(n_particles_ * n_groups_),
     gradient_is_current_(false) {
-    for (size_t i = 0; i < n_groups_; ++i) {
-      all_groups_[i] = i;
-    }
   }
 
   void run(bool set_initial, bool save_history) {
-    run(set_initial, save_history, all_groups_);
+    run(set_initial, save_history, sys.all_groups());
   }
 
-  void run(bool set_initial, bool save_history, std::vector<size_t>& groups) {
+  void run(bool set_initial, bool save_history,
+           const std::vector<size_t>& groups) {
     reset(set_initial, save_history, /* adjoint = */ false);
     const auto n_times = time_.size();
 
@@ -83,11 +80,11 @@ public:
   // actually support adjoint methods.  It should give exactly the
   // same answers as the normal version, at the cost of more memory.
   void run_adjoint(bool set_initial, bool save_history) {
-    run_adjoint(set_initial, save_history, all_groups_);
+    run_adjoint(set_initial, save_history, sys.all_groups());
   }
 
   void run_adjoint(bool set_initial, bool save_history,
-                   std::vector<size_t>& groups) {
+                   const std::vector<size_t>& groups) {
     reset(set_initial, save_history, /* adjoint = */ true);
 
     // Run the entire forward time simulation
@@ -142,12 +139,16 @@ public:
     return adjoint_is_current_;
   }
 
+  auto& all_groups() const {
+    return sys.all_groups();
+  }
+
   template <typename Iter>
-  void last_gradient(Iter iter) {
+  void last_gradient(Iter iter, const std::vector<size_t>& groups) {
     if (!gradient_is_current_) {
-      compute_gradient_();
+      compute_gradient_(groups);
     }
-    adjoint_.gradient(iter);
+    adjoint_.gradient(iter, groups);
   }
 
 private:
@@ -159,7 +160,6 @@ private:
   size_t n_groups_;
   std::vector<real_type> ll_;
   std::vector<real_type> ll_step_;
-  std::vector<size_t> all_groups_;
   std::vector<size_t> history_index_state_;
   history<real_type> history_;
   adjoint_data<real_type> adjoint_;
@@ -188,7 +188,7 @@ private:
   }
 
   void compute_gradient_() {
-    compute_gradient_(all_groups_);
+    compute_gradient_(sys.all_groups());
   }
 
   void compute_gradient_(const std::vector<size_t>& groups) {

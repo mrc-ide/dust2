@@ -33,21 +33,18 @@ public:
     rng_(n_groups_, seed, false),
     ll_(n_groups_, 0),
     ll_step_(n_groups_ * n_particles_, 0),
-    all_groups_(n_groups_),
     history_index_state_(history_index_state),
     history_(history_index_state_.size() > 0 ? history_index_state_.size() : n_state_,
              n_particles_, n_groups_, time_.size()),
     history_is_current_(false) {
-    for (size_t i = 0; i < n_groups_; ++i) {
-      all_groups_[i] = i;
-    }
   }
 
   void run(bool set_initial, bool save_history) {
-    run(set_initial, save_history, all_groups_);
+    run(set_initial, save_history, sys.all_groups());
   }
 
-  void run(bool set_initial, bool save_history, std::vector<size_t>& groups) {
+  void run(bool set_initial, bool save_history,
+           const std::vector<size_t>& groups) {
     reset(set_initial, save_history);
     const auto n_times = time_.size();
 
@@ -127,7 +124,6 @@ private:
   mcstate::random::prng<rng_state_type> rng_;
   std::vector<real_type> ll_;
   std::vector<real_type> ll_step_;
-  std::vector<size_t> all_groups_;
   std::vector<size_t> history_index_state_;
   history<real_type> history_;
   bool history_is_current_;

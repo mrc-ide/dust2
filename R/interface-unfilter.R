@@ -101,8 +101,10 @@ unfilter_create <- function(unfilter, pars) {
 ##'
 ##' @export
 dust_unfilter_run <- function(unfilter, pars, initial = NULL,
-                              save_history = FALSE, adjoint = FALSE) {
+                              save_history = FALSE, adjoint = FALSE,
+                              index_group = NULL) {
   check_is_dust_unfilter(unfilter)
+  # TODO: parameter checking and updating need to go with our index too.
   if (!is.null(pars)) {
     pars <- check_pars(pars, unfilter$n_groups,
                        unfilter$preserve_group_dimension)
@@ -116,7 +118,11 @@ dust_unfilter_run <- function(unfilter, pars, initial = NULL,
   } else if (!is.null(pars)) {
     unfilter$methods$update_pars(unfilter$ptr, pars)
   }
-  unfilter$methods$run(unfilter$ptr, initial, save_history, adjoint,
+  unfilter$methods$run(unfilter$ptr,
+                       initial,
+                       save_history,
+                       adjoint,
+                       index_group,
                        unfilter$preserve_particle_dimension,
                        unfilter$preserve_group_dimension)
 }
@@ -133,7 +139,7 @@ dust_unfilter_run <- function(unfilter, pars, initial = NULL,
 ##' @return An array
 ##'
 ##' @export
-dust_unfilter_last_history <- function(unfilter) {
+dust_unfilter_last_history <- function(unfilter, index_group = NULL) {
   check_is_dust_unfilter(unfilter)
   if (is.null(unfilter$ptr)) {
     cli::cli_abort(c(
@@ -141,6 +147,7 @@ dust_unfilter_last_history <- function(unfilter) {
       i = "Unfilter has not yet been run"))
   }
   unfilter$methods$last_history(unfilter$ptr,
+                                index_group,
                                 unfilter$preserve_particle_dimension,
                                 unfilter$preserve_group_dimension)
 }
@@ -159,7 +166,7 @@ dust_unfilter_last_history <- function(unfilter) {
 ##' @return A vector (if ungrouped) or a matrix (if grouped).
 ##'
 ##' @export
-dust_unfilter_last_gradient <- function(unfilter) {
+dust_unfilter_last_gradient <- function(unfilter, index_group) {
   check_is_dust_unfilter(unfilter)
   if (is.null(unfilter$ptr)) {
     cli::cli_abort(c(
@@ -167,6 +174,7 @@ dust_unfilter_last_gradient <- function(unfilter) {
       i = "Unfilter has not yet been run"))
   }
   unfilter$methods$last_gradient(unfilter$ptr,
+                                 index_group,
                                  unfilter$preserve_particle_dimension,
                                  unfilter$preserve_group_dimension)
 }

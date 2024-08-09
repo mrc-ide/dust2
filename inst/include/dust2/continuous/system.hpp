@@ -221,6 +221,10 @@ public:
     return n_groups_;
   }
 
+  auto& all_groups() const {
+    return all_groups_;
+  }
+
   void set_time(real_type time) {
     time_ = time;
   }

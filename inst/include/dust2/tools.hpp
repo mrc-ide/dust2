@@ -39,5 +39,10 @@ bool all(const T& x) {
   return std::all_of(x.begin(), x.end(), [](auto v) { return v; });
 }
 
+template <typename T>
+bool any(const T& x) {
+  return std::any_of(x.begin(), x.end(), [](auto v) { return v; });
+}
+
 }
 }

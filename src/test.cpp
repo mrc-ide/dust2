@@ -33,6 +33,10 @@ cpp11::sexp test_history(cpp11::doubles r_time, cpp11::list r_state,
   const size_t n_state = r_dim[0];
   const size_t n_particles = r_dim[1];
   const size_t n_groups = r_dim[2];
+  std::vector<size_t> index_group;
+  for (size_t i = 0; i < n_groups; ++i) {
+    index_group.push_back(i);
+  }
 
   dust2::history<double> h(n_state, n_particles, n_groups, n_times);
   for (size_t i = 0; i < static_cast<size_t>(r_state.size()); ++i) {
@@ -51,7 +55,7 @@ cpp11::sexp test_history(cpp11::doubles r_time, cpp11::list r_state,
   cpp11::writable::doubles ret_time(static_cast<int>(h.size_time()));
   cpp11::writable::doubles ret_state(static_cast<int>(h.size_state()));
   h.export_time(REAL(ret_time));
-  h.export_state(REAL(ret_state), reorder);
+  h.export_state(REAL(ret_state), reorder, index_group);
   dust2::r::set_array_dims(ret_state, {n_state, n_particles, n_groups, h.size_time()});
 
   return cpp11::writable::list{ret_time, ret_state};
