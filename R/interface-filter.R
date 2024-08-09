@@ -146,7 +146,8 @@ filter_create <- function(filter, pars) {
 ##'
 ##' @param index_group An optional vector of group indices to run the
 ##'   filter for.  You can use this to run a subset of possible
-##'   groups, though at the moment this will likely crash.
+##'   groups, once the filter is initialised (this argument must be
+##'   `NULL` on the **first** call).
 ##'
 ##' @return A vector of likelihood values, with as many elements as
 ##'   there are groups.
@@ -155,8 +156,10 @@ filter_create <- function(filter, pars) {
 dust_filter_run <- function(filter, pars, initial = NULL,
                             save_history = FALSE, index_group = NULL) {
   check_is_dust_filter(filter)
+  index_group <- check_index(index_group, max = filter$n_groups,
+                             unique = TRUE)
   if (!is.null(pars)) {
-    pars <- check_pars(pars, filter$n_groups,
+    pars <- check_pars(pars, filter$n_groups, index_group,
                        filter$preserve_group_dimension)
   }
   if (is.null(filter$ptr)) {
@@ -164,11 +167,19 @@ dust_filter_run <- function(filter, pars, initial = NULL,
       cli::cli_abort("'pars' cannot be NULL, as filter is not initialised",
                      arg = "pars")
     }
+    if (!is.null(index_group)) {
+      cli::cli_abort(
+        "'index_group' must be NULL, as filter is not initialised",
+        arg = "index_group")
+    }
     filter_create(filter, pars)
   } else if (!is.null(pars)) {
     filter$methods$update_pars(filter$ptr, pars, index_group)
   }
-  filter$methods$run(filter$ptr, initial, save_history, index_group,
+  filter$methods$run(filter$ptr,
+                     initial,
+                     save_history,
+                     index_group,
                      filter$preserve_group_dimension)
 }
 
@@ -191,6 +202,8 @@ dust_filter_last_history <- function(filter, index_group = NULL) {
       "History is not current",
       i = "Filter has not yet been run"))
   }
+  index_group <- check_index(index_group, max = filter$n_groups,
+                             unique = TRUE)
   filter$methods$last_history(filter$ptr, index_group,
                               filter$preserve_group_dimension)
 }
