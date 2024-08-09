@@ -245,7 +245,7 @@ public:
   }
 
   template <typename IterData, typename IterOutput>
-  void compare_data(IterData data, IterOutput output) {
+  void compare_data(IterData data, const real_type * state, IterOutput output) {
     compare_data(data, state, output, all_groups_);
   }
 
