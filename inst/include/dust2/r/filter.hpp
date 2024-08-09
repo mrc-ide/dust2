@@ -29,7 +29,7 @@ cpp11::sexp dust2_filter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
   const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
     check_index(r_index_group, obj->sys.n_groups(), "index_group");
   if (r_initial != R_NilValue) {
-    set_state(obj->sys, r_initial, preserve_group_dimension);
+    set_state(obj->sys, r_initial, preserve_group_dimension, index_group);
   }
   obj->run(r_initial == R_NilValue, save_history, index_group);
 

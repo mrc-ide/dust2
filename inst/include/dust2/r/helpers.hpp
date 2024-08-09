@@ -284,7 +284,8 @@ std::vector<typename T::data_type> check_data(cpp11::list r_data,
 }
 
 template <typename T>
-void set_state(T& obj, cpp11::sexp r_state, bool preserve_group_dimension) {
+void set_state(T& obj, cpp11::sexp r_state, bool preserve_group_dimension,
+               const std::vector<size_t>& index_group) {
   // Suppose that we have a n_state x n_particles x n_groups grouped
   // system, we then require that we have a state array with rank 3;
   // for an ungrouped system this will be rank 2 array.
@@ -301,7 +302,7 @@ void set_state(T& obj, cpp11::sexp r_state, bool preserve_group_dimension) {
   const int n_particles =
     preserve_group_dimension ? obj.n_particles() :
     obj.n_particles() * obj.n_groups();
-  const int n_groups = preserve_group_dimension ? obj.n_groups() : 1;
+  const int n_groups = index_group.size();
   if (dim[0] != n_state) {
     cpp11::stop("Expected the first dimension of 'state' to have size %d",
                 n_state);
@@ -319,7 +320,7 @@ void set_state(T& obj, cpp11::sexp r_state, bool preserve_group_dimension) {
                 n_groups);
   }
   obj.set_state(REAL(r_state), recycle_particle, recycle_group,
-                obj.all_groups());
+                index_group);
 }
 
 template <typename T>
