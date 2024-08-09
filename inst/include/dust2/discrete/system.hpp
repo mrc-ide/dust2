@@ -93,12 +93,9 @@ public:
     time_ = time_ + n_steps * dt_;
   }
 
-  void run_to_time(real_type time, real_type *state_history) {
-    run_to_time(time, state_history, all_groups_);
-  }
-
-  void run_to_time(real_type time, real_type *state_history,
-                   const std::vector<size_t>& index_group) {
+  void run_to_time(real_type time,
+                   const std::vector<size_t>& index_group,
+                   real_type *state_history) {
     const size_t n_steps = std::round(std::max(0.0, time - time_) / dt_);
     const auto stride = n_state_ * n_particles_ * n_groups_;
     std::copy_n(state_.begin(), stride, state_history);
@@ -254,24 +251,16 @@ public:
   }
 
   template <typename IterData, typename IterOutput>
-  void compare_data(IterData data, IterOutput output) {
-    compare_data(data, state_.data(), output, all_groups_);
+  void compare_data(IterData data,
+                    const std::vector<size_t>& index_group,
+                    IterOutput output) {
+    compare_data(data, state_.data(), index_group, output);
   }
 
   template <typename IterData, typename IterOutput>
-  void compare_data(IterData data, IterOutput output,
-                    const std::vector<size_t>& index_group) {
-    compare_data(data, state_.data(), output, index_group);
-  }
-
-  template <typename IterData, typename IterOutput>
-  void compare_data(IterData data, const real_type * state, IterOutput output) {
-    compare_data(data, state, output, all_groups_);
-  }
-
-  template <typename IterData, typename IterOutput>
-  void compare_data(IterData data, const real_type * state, IterOutput output,
-                    const std::vector<size_t>& index_group) {
+  void compare_data(IterData data, const real_type * state,
+                    const std::vector<size_t>& index_group,
+                    IterOutput output) {
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
 #endif
@@ -309,9 +298,9 @@ public:
                             IterData data,
                             const real_type * state,
                             const size_t n_adjoint,
+                            const std::vector<size_t>& index_group,
                             const real_type * adjoint_curr,
-                            real_type * adjoint_next,
-                            const std::vector<size_t>& index_group) {
+                            real_type * adjoint_next) {
     for (auto i : index_group) {
       const auto data_i = data + i;
       for (size_t j = 0; j < n_particles_; ++j) {
@@ -341,19 +330,9 @@ public:
                              const real_type time1,
                              const real_type* state,
                              const size_t n_adjoint,
+                             const std::vector<size_t>& index_group,
                              real_type* adjoint_curr,
                              real_type* adjoint_next) {
-    return adjoint_run_to_time(time0, time1, state, n_adjoint, adjoint_curr,
-                               adjoint_next, all_groups_);
-  }
-
-  size_t adjoint_run_to_time(const real_type time0,
-                             const real_type time1,
-                             const real_type* state,
-                             const size_t n_adjoint,
-                             real_type* adjoint_curr,
-                             real_type* adjoint_next,
-                             const std::vector<size_t>& index_group) {
     // ----|xxxx|---
     //     1<---0
     const size_t n_steps = std::round(std::max(0.0, time0 - time1) / dt_);
@@ -382,18 +361,9 @@ public:
   void adjoint_initial(const real_type time,
                        const real_type * state,
                        const size_t n_adjoint,
+                       const std::vector<size_t>& index_group,
                        const real_type * adjoint_curr,
                        real_type * adjoint_next) {
-    adjoint_initial(time, state, n_adjoint, adjoint_curr, adjoint_next,
-                    all_groups_);
-  }
-
-  void adjoint_initial(const real_type time,
-                       const real_type * state,
-                       const size_t n_adjoint,
-                       const real_type * adjoint_curr,
-                       real_type * adjoint_next,
-                       const std::vector<size_t>& index_group) {
     for (auto i : index_group) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;

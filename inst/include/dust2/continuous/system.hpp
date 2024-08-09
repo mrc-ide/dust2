@@ -163,6 +163,8 @@ public:
     errors_.report();
   }
 
+  // iter here is an iterator to our *reordering index*, which will be
+  // in terms of particles.  This probably warrants a better name.
   template <typename Iter>
   void reorder(Iter iter) {
     reorder(iter, all_groups_);
@@ -245,13 +247,9 @@ public:
   }
 
   template <typename IterData, typename IterOutput>
-  void compare_data(IterData data, const real_type * state, IterOutput output) {
-    compare_data(data, state, output, all_groups_);
-  }
-
-  template <typename IterData, typename IterOutput>
-  void compare_data(IterData data, const real_type * state, IterOutput output,
-                    const std::vector<size_t>& index_group) {
+  void compare_data(IterData data, const real_type * state,
+                    const std::vector<size_t>& index_group,
+                    IterOutput output) {
     const real_type * state_data = state_.data();
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)

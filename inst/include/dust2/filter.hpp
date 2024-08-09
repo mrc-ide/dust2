@@ -57,7 +57,7 @@ public:
     auto it_data = data_.begin();
     for (size_t i = 0; i < n_times; ++i, it_data += n_groups_) {
       sys.run_to_time(time_[i], index_group);
-      sys.compare_data(it_data, ll_step_.begin(), index_group);
+      sys.compare_data(it_data, index_group, ll_step_.begin());
 
       for (auto i : index_group) {
         const auto offset = i * n_particles_;

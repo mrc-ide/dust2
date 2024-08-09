@@ -55,7 +55,7 @@ public:
     auto it_data = data_.begin();
     for (size_t i = 0; i < n_times; ++i, it_data += n_groups_) {
       sys.run_to_time(time_[i], index_group);
-      sys.compare_data(it_data, ll_step_.begin(), index_group);
+      sys.compare_data(it_data, index_group, ll_step_.begin());
       for (size_t j = 0; j < ll_.size(); ++j) {
         ll_[j] += ll_step_[j];
       }
@@ -91,7 +91,7 @@ public:
 
     // Run the entire forward time simulation
     auto state = adjoint_.state();
-    sys.run_to_time(time_.back(), state, index_group);
+    sys.run_to_time(time_.back(), index_group, state);
 
     // Then all the data comparison in one pass.  This bit can
     // theoretically be parallelised but it's unlikely to be
@@ -105,7 +105,7 @@ public:
         std::round(std::max(0.0, time_[i] - time_start_) / dt);
       const auto state_i = state + n_steps * stride_state;
       const auto data_i = data_.begin() + n_groups_ * i;
-      sys.compare_data(data_i, state_i, ll_step_.begin(), index_group);
+      sys.compare_data(data_i, state_i, index_group, ll_step_.begin());
       for (size_t j = 0; j < ll_.size(); ++j) {
         ll_[j] += ll_step_[j];
       }
@@ -210,14 +210,13 @@ private:
       const auto data_i = data_.begin() + i * n_groups_;
       // Compare data
       sys.adjoint_compare_data(time, data_i, state_i,
-                               n_adjoint, adjoint_curr, adjoint_next,
-                               index_group);
+                               n_adjoint, index_group,
+                               adjoint_curr, adjoint_next);
       std::swap(adjoint_curr, adjoint_next);
       // Then run the system backwards from time => time_i
       const auto n_steps = sys.adjoint_run_to_time(time, time_i, state_i,
-                                                   n_adjoint,
-                                                   adjoint_curr, adjoint_next,
-                                                   index_group);
+                                                   n_adjoint, index_group,
+                                                   adjoint_curr, adjoint_next);
       // Bookkeeping chore
       if (n_steps % 2 == 1) {
         std::swap(adjoint_curr, adjoint_next);
@@ -228,8 +227,8 @@ private:
 
     // Initial conditions go right at the end, and are surprisingly
     // hard to work out.
-    sys.adjoint_initial(time, state, n_adjoint, adjoint_curr, adjoint_next,
-                        index_group);
+    sys.adjoint_initial(time, state, n_adjoint, index_group,
+                        adjoint_curr, adjoint_next);
 
     // At the end of the calculation, copy the final states so that
     // both copies within adjoint_ are the same - this means that the
