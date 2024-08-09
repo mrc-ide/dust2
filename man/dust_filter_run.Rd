@@ -4,7 +4,13 @@
 \alias{dust_filter_run}
 \title{Run particle filter}
 \usage{
-dust_filter_run(filter, pars, initial = NULL, save_history = FALSE)
+dust_filter_run(
+  filter,
+  pars,
+  initial = NULL,
+  save_history = FALSE,
+  index_group = NULL
+)
 }
 \arguments{
 \item{filter}{A \code{dust_filter} object, created by
@@ -23,6 +29,10 @@ overhead in runtime and in memory.  History (particle
 trajectories) will be saved at each time in the filter.  If the
 filter was constructed using a non-\code{NULL} \code{index_state} parameter,
 the history is restricted to these states.}
+
+\item{index_group}{An optional vector of group indices to run the
+filter for.  You can use this to run a subset of possible
+groups, though at the moment this will likely crash.}
 }
 \value{
 A vector of likelihood values, with as many elements as

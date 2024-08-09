@@ -4,11 +4,15 @@
 \alias{dust_filter_last_history}
 \title{Fetch last filter history}
 \usage{
-dust_filter_last_history(filter)
+dust_filter_last_history(filter, index_group = NULL)
 }
 \arguments{
 \item{filter}{A \code{dust_filter} object, created by
 \link{dust_filter_create}}
+
+\item{index_group}{An optional vector of group indices to run the
+filter for.  You can use this to run a subset of possible
+groups, though at the moment this will likely crash.}
 }
 \value{
 An array

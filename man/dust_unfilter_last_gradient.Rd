@@ -4,11 +4,15 @@
 \alias{dust_unfilter_last_gradient}
 \title{Fetch last unfilter gradient}
 \usage{
-dust_unfilter_last_gradient(unfilter)
+dust_unfilter_last_gradient(unfilter, index_group = NULL)
 }
 \arguments{
 \item{unfilter}{A \code{dust_unfilter} object, created by
 \link{dust_unfilter_create}}
+
+\item{index_group}{An optional vector of group indices to run the
+filter for.  You can use this to run a subset of possible
+groups, though at the moment this will likely crash.}
 }
 \value{
 A vector (if ungrouped) or a matrix (if grouped).
