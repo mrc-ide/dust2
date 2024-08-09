@@ -14,7 +14,7 @@
 ##'   which case it will be passed into [dust_filter_data] for
 ##'   validation, or it can be a [dust_filter_data]-augmented
 ##'   data.frame.  The times for comparison will be taken from this,
-##'   and `time_start` must be earlier than the earliest time.
+##'   and `time_start` must be no later than than the earliest time.
 ##'
 ##' @param n_particles The number of particles to run.  Larger numbers
 ##'   will give lower variance in the likelihood estimate but run more
