@@ -43,8 +43,10 @@ test_that("can validate time sequence", {
 test_that("check index", {
   expect_no_error(check_index(NULL))
   expect_no_error(check_index(1:4))
-  expect_error(check_index(c(1, 2, 3.4)),
-               "Expected 'index' to be integer")
-  expect_error(check_index(c(1, 2, -3)),
-               "All elements of 'index' must be at least 1")
+  idx <- c(1, 2, 3.4)
+  expect_error(check_index(idx),
+               "Expected 'idx' to be integer")
+  idx <- c(1, 2, -3)
+  expect_error(check_index(idx),
+               "All elements of 'idx' must be at least 1")
 })

@@ -56,7 +56,7 @@ check_time_sequence <- function(time_start, time, call = NULL) {
 check_index <- function(index, max = NULL, unique = FALSE,
                         name = deparse(substitute(index)), call = NULL) {
   if (!is.null(index)) {
-    assert_integer(index, call = call)
+    assert_integer(index, name = name, call = call)
     if (any(index < 1)) {
       cli::cli_abort("All elements of '{name}' must be at least 1",
                      arg = name, call = call)
