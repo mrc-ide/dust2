@@ -108,12 +108,24 @@ public:
   template <typename Iter>
   void export_state(Iter iter, bool reorder,
                     const std::vector<size_t>& index_group) const {
-    if (index_group.size() != n_groups_) {
-      throw std::runtime_error("need to organise filtering");
-    }
     reorder = reorder && n_particles_ > 1 && position_ > 0 &&
+      // tools::any(reorder_);
       std::any_of(reorder_.begin(), reorder_.end(), [](auto v) { return v; });
+
+    auto use_index_group = index_group.size() < n_groups_;
+    if (!use_index_group) {
+      for (size_t i = 0; i < n_groups_; ++i) {
+        if (index_group[i] != i) {
+          use_index_group = true;
+          break;
+        }
+      }
+    }
+
     if (reorder) {
+      if (use_index_group) {
+        throw std::runtime_error("reorder + index_group not yet working\n");
+      }
       // Default index:
       std::vector<size_t> index_particle(n_particles_ * n_groups_);
       for (size_t i = 0, k = 0; i < n_groups_; ++i) {
@@ -138,8 +150,20 @@ public:
         }
       }
     } else {
-      // No reordering is requested or possible so just dump out directly:
-      std::copy_n(state_.begin(), position_ * len_state_, iter);
+      if (use_index_group) {
+        for (size_t i = 0; i < position_; ++i) {
+          const auto iter_state = state_.begin() + i * len_state_;
+          for (auto j : index_group) {
+            const auto offset_state = j * n_state_ * n_particles_;
+            iter = std::copy_n(iter_state + offset_state,
+                               n_state_ * n_particles_,
+                               iter);
+          }
+        }
+      } else {
+        // No reordering is requested or possible so just dump out directly:
+        std::copy_n(state_.begin(), position_ * len_state_, iter);
+      }
     }
   }
 

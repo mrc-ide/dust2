@@ -58,11 +58,12 @@ cpp11::sexp test_history_(cpp11::doubles r_time, cpp11::list r_state,
     }
   }
 
-  cpp11::writable::doubles ret_time(static_cast<int>(h.size_time()));
-  cpp11::writable::doubles ret_state(static_cast<int>(h.size_state()));
+  cpp11::writable::doubles ret_time(static_cast<int>(n_times));
+  const size_t len = n_state * n_particles * n_groups * n_times;
+  cpp11::writable::doubles ret_state(static_cast<int>(len));
   h.export_time(REAL(ret_time));
   h.export_state(REAL(ret_state), reorder, index_group);
-  dust2::r::set_array_dims(ret_state, {n_state, n_particles, n_groups, h.size_time()});
+  dust2::r::set_array_dims(ret_state, {n_state, n_particles, n_groups, n_times});
 
   return cpp11::writable::list{ret_time, ret_state};
 }

@@ -136,3 +136,28 @@ test_that("can reorder history on the way out", {
   expect_equal(test_history(time, state, order = order, reorder = TRUE),
                list(time, true))
 })
+
+
+test_that("can extract history with group index, no reordering", {
+  time <- seq(0, 10, length.out = 11)
+  n_state <- 5
+  n_particles <- 7
+  n_groups <- 3
+  n_time <- length(time)
+  s <- lapply(seq_along(time), function(i) {
+    array(runif(n_state * n_particles * n_groups),
+          c(n_state, n_particles, n_groups))
+  })
+
+  s_arr <- array(unlist(s), c(n_state, n_particles, n_groups, n_time))
+
+  expect_equal(test_history(time, s, index_group = NULL),
+               list(time, s_arr))
+  expect_equal(test_history(time, s, index_group = seq_len(n_groups)),
+               list(time, s_arr))
+
+  expect_equal(test_history(time, s, index_group = 2),
+               list(time, s_arr[, , 2, , drop = FALSE]))
+  expect_equal(test_history(time, s, index_group = c(3, 1)),
+               list(time, s_arr[, , c(3, 1), , drop = FALSE]))
+})
