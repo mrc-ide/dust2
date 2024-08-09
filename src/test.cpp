@@ -24,10 +24,10 @@ cpp11::list test_scale_log_weights(std::vector<double> w) {
 // Simple driver for exercising the history saving outside of any
 // particle filter.
 [[cpp11::register]]
-cpp11::sexp test_history(cpp11::doubles r_time, cpp11::list r_state,
-                         cpp11::sexp r_order,
-                         cpp11::sexp r_index_group,
-                         bool reorder) {
+cpp11::sexp test_history_(cpp11::doubles r_time, cpp11::list r_state,
+                          cpp11::sexp r_order,
+                          cpp11::sexp r_index_group,
+                          bool reorder) {
   const size_t n_times = r_time.size();
   cpp11::sexp el0 = r_state[0];
   auto r_dim = cpp11::as_cpp<cpp11::integers>(el0.attr("dim"));
