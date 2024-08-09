@@ -294,3 +294,89 @@ test_that("validate the starting time", {
     "'time_start' (6) is later than the first time in 'data' (4)",
     fixed = TRUE)
 })
+
+
+test_that("can extract a subset of an filter run in its entirety", {
+  pars <- list(
+    list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6),
+    list(beta = 0.2, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6))
+  time_start <- 0
+  n_particles <- 100
+  data <- data.frame(time = rep(c(4, 8, 12, 16), 2),
+                     group = rep(1:2, each = 4),
+                     incidence = 1:8)
+  obj <- dust_filter_create(sir(), time_start, data, n_particles = n_particles,
+                            seed = 42)
+  dust_filter_run(obj, pars, save_history = TRUE)
+  h1 <- dust_filter_last_history(obj, index_group = 1)
+  h2 <- dust_filter_last_history(obj, index_group = 2)
+  h <- dust_filter_last_history(obj)
+  expect_equal(h1, h[, , 1, , drop = FALSE])
+  expect_equal(h2, h[, , 2, , drop = FALSE])
+})
+
+
+test_that("can extract a state-filtered subset of an filter run", {
+  pars <- list(
+    list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6),
+    list(beta = 0.2, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6))
+  time_start <- 0
+  n_particles <- 100
+  data <- data.frame(time = rep(c(4, 8, 12, 16), 2),
+                     group = rep(1:2, each = 4),
+                     incidence = 1:8)
+  obj <- dust_filter_create(sir(), time_start, data, n_groups = 2,
+                            n_particles = n_particles,
+                            index_state = c(1, 3, 5),
+                            seed = 42)
+  dust_filter_run(obj, pars, save_history = TRUE)
+  h1 <- dust_filter_last_history(obj, index_group = 1)
+  h2 <- dust_filter_last_history(obj, index_group = 2)
+  h <- dust_filter_last_history(obj)
+  expect_equal(h1, h[, , 1, , drop = FALSE])
+  expect_equal(h2, h[, , 2, , drop = FALSE])
+})
+
+
+test_that("can run a subset of an filter", {
+  pars0 <- rep(
+    list(list(beta = 0.01, gamma = 0.01, N = 100, I0 = 1, exp_noise = 1e6)),
+    3)
+  pars1 <- list(
+    list(beta = 0.1, gamma = 0.2, I0 = 10, exp_noise = 1e6),
+    list(beta = 0.2, gamma = 0.2, I0 = 10, exp_noise = 1e6),
+    list(beta = 0.3, gamma = 0.2, I0 = 10, exp_noise = 1e6))
+
+  time_start <- 0
+  data <- data.frame(time = rep(c(4, 8, 12, 16), 3),
+                     group = rep(1:3, each = 4),
+                     incidence = 1:12)
+
+  obj1 <- dust_filter_create(sir(), time_start, data, n_particles = 100,
+                             seed = 42)
+  ll0 <- dust_filter_run(obj1, pars0)
+  ll1 <- dust_filter_run(obj1, pars1, save_history = TRUE)
+  h1 <- dust_filter_last_history(obj1)
+  ll2 <- dust_filter_run(obj1, pars1, save_history = TRUE)
+  h2 <- dust_filter_last_history(obj1)
+
+  obj2 <- dust_filter_create(sir(), time_start, data, n_particles = 100,
+                             seed = 42)
+  ll0 <- dust_filter_run(obj2, pars0)
+  expect_equal(
+    dust_filter_run(obj2, pars1[3:1], index_group = 3:1, save_history = TRUE),
+    rev(ll1))
+
+  expect_equal(dust_filter_last_history(obj2, index_group = 3:1),
+               h1[, , 3:1, ])
+
+  for (i in 1:3) {
+    ll_i <- dust_filter_run(obj2, pars1[i], index_group = i,
+                            save_history = TRUE)
+    expect_equal(dust_filter_last_history(obj2, index_group = i),
+                 h2[, , i, , drop = FALSE])
+    j <- i %% 3 + 1
+    expect_error(dust_filter_last_history(obj2, index_group = j),
+                 sprintf("History for group '%d' is not current", j))
+  }
+})

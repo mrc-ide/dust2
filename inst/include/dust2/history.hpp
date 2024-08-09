@@ -1,7 +1,6 @@
 #pragma once
 
 #include <algorithm>
-#include <array>
 #include <stdexcept>
 #include <vector>
 
@@ -24,8 +23,7 @@ public:
     times_(n_times_),
     state_(len_state_ * n_times_),
     order_(len_order_ * n_times_),
-    reorder_(n_times),
-    dims_({n_state_, n_particles_, n_groups_, position_}) {
+    reorder_(n_times) {
   }
 
   void resize_state(size_t n_state) {
@@ -102,10 +100,6 @@ public:
 
   auto n_times() const {
     return position_;
-  }
-
-  auto& dims() const {
-    return dims_;
   }
 
   template <typename Iter>
@@ -194,7 +188,6 @@ private:
   std::vector<real_type> state_;
   std::vector<size_t> order_;
   std::vector<bool> reorder_;
-  std::array<size_t, 4> dims_;
 
   // Reference implementation for this is mcstate:::history_single and
   // mcstate::history_multiple
@@ -219,7 +212,6 @@ private:
     times_[position_] = time;
     reorder_[position_] = reorder;
     position_++;
-    dims_[3] = position_;
   }
 
   template <typename IterReal>
