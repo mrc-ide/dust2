@@ -245,3 +245,31 @@ test_that("history output can have dimensions preserved", {
   expect_equal(dim(h4), c(5, 1, 1, 4))
   expect_equal(drop(h4), h1)
 })
+
+
+test_that("can run a subset of an unfilter", {
+  pars <- list(
+    list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6),
+    list(beta = 0.2, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6),
+    list(beta = 0.3, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6))
+
+  time_start <- 0
+  data <- data.frame(time = rep(c(4, 8, 12, 16), 3),
+                     group = rep(1:3, each = 4),
+                     incidence = 1:12)
+
+  obj <- dust_unfilter_create(sir(), time_start, data)
+  ll1 <- dust_unfilter_run(obj, pars)
+  expect_length(ll1, 3)
+
+  expect_equal(
+    dust_unfilter_run(obj, pars, index_group = 1:3),
+    ll1)
+  expect_equal(
+    dust_unfilter_run(obj, pars[3:1], index_group = 3:1),
+    rev(ll1))
+
+  expect_equal(
+    vnapply(1:3, function(i) dust_unfilter_run(obj, pars[i], index_group = i)),
+    ll1)
+})
