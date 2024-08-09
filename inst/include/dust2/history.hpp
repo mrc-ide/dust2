@@ -96,6 +96,14 @@ public:
     return position_ * len_order_;
   }
 
+  auto n_state() const {
+    return n_state_;
+  }
+
+  auto n_times() const {
+    return position_;
+  }
+
   auto& dims() const {
     return dims_;
   }

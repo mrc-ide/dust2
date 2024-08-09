@@ -152,7 +152,7 @@ dust_unfilter_last_history <- function(unfilter, index_group = NULL) {
       "History is not current",
       i = "Unfilter has not yet been run"))
   }
-  index_group <- check_index(index_group, max = filter$n_groups,
+  index_group <- check_index(index_group, max = unfilter$n_groups,
                              unique = TRUE)
   unfilter$methods$last_history(unfilter$ptr,
                                 index_group,
@@ -181,7 +181,7 @@ dust_unfilter_last_gradient <- function(unfilter, index_group = NULL) {
       "Gradient is not current",
       i = "Unfilter has not yet been run"))
   }
-  index_group <- check_index(index_group, max = filter$n_groups,
+  index_group <- check_index(index_group, max = unfilter$n_groups,
                              unique = TRUE)
   unfilter$methods$last_gradient(unfilter$ptr,
                                  index_group,
