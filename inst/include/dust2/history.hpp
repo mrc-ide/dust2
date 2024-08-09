@@ -131,10 +131,8 @@ public:
     }
 
     if (reorder) {
-      if (use_index_group) {
-        throw std::runtime_error("reorder + index_group not yet working\n");
-      }
-      // Default index:
+      // Default index - we can improve this by fixing k to be an
+      // offset, and also by saving this within this history object.
       std::vector<size_t> index_particle(n_particles_ * n_groups_);
       for (size_t i = 0, k = 0; i < n_groups_; ++i) {
         for (size_t j = 0; j < n_particles_; ++j, ++k) {
@@ -142,18 +140,22 @@ public:
         }
       }
 
+      const auto len_state_output =
+        n_state_ * n_particles_ * index_group.size();
       for (size_t irev = 0; irev < position_; ++irev) {
-        const auto i = position_ - irev - 1; // can move this to be the loop
+        const auto i = position_ - irev - 1;
         const auto iter_order = order_.begin() + i * len_order_;
         const auto iter_state = state_.begin() + i * len_state_;
-        // This bit here is independent among groups
-        for (size_t j = 0; j < n_groups_; j++) {
-          const auto offset_state = j * n_state_ * n_particles_;
-          const auto offset_index = j * n_particles_;
+        for (size_t j = 0; j < index_group.size(); ++j) {
+          const auto k = index_group[j];
+          const auto offset_state = k * n_state_ * n_particles_;
+          const auto offset_index = k * n_particles_;
+          const auto offset_output =
+            i * len_state_output + j * n_state_ * n_particles_;
           reorder_group_(iter_state + offset_state,
                          iter_order + offset_index,
                          reorder_[i],
-                         iter + i * len_state_ + offset_state,
+                         iter + offset_output,
                          index_particle.begin() + offset_index);
         }
       }
