@@ -112,8 +112,8 @@ dust2_system_sir_compare_data <- function(ptr, r_data, preserve_particle_dimensi
   .Call(`_dust2_dust2_system_sir_compare_data`, ptr, r_data, preserve_particle_dimension, preserve_group_dimension)
 }
 
-dust2_unfilter_sir_update_pars <- function(ptr, r_pars) {
-  .Call(`_dust2_dust2_unfilter_sir_update_pars`, ptr, r_pars)
+dust2_unfilter_sir_update_pars <- function(ptr, r_pars, r_index_group) {
+  .Call(`_dust2_dust2_unfilter_sir_update_pars`, ptr, r_pars, r_index_group)
 }
 
 dust2_unfilter_sir_run <- function(ptr, r_initial, save_history, adjoint, r_index_group, preserve_particle_dimension, preserve_group_dimension) {
@@ -124,8 +124,8 @@ dust2_unfilter_sir_last_history <- function(ptr, r_index_group, preserve_particl
   .Call(`_dust2_dust2_unfilter_sir_last_history`, ptr, r_index_group, preserve_particle_dimension, preserve_group_dimension)
 }
 
-dust2_filter_sir_update_pars <- function(ptr, r_pars) {
-  .Call(`_dust2_dust2_filter_sir_update_pars`, ptr, r_pars)
+dust2_filter_sir_update_pars <- function(ptr, r_pars, r_index_group) {
+  .Call(`_dust2_dust2_filter_sir_update_pars`, ptr, r_pars, r_index_group)
 }
 
 dust2_filter_sir_run <- function(ptr, r_initial, save_history, index_group, preserve_group_dimension) {

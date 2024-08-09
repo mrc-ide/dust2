@@ -116,7 +116,7 @@ dust_unfilter_run <- function(unfilter, pars, initial = NULL,
     }
     unfilter_create(unfilter, pars)
   } else if (!is.null(pars)) {
-    unfilter$methods$update_pars(unfilter$ptr, pars)
+    unfilter$methods$update_pars(unfilter$ptr, pars, index_group)
   }
   unfilter$methods$run(unfilter$ptr,
                        initial,

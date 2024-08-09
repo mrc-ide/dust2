@@ -4,8 +4,8 @@ SEXP dust2_system_{{name}}_compare_data(cpp11::sexp ptr, cpp11::list r_data, boo
 }
 
 [[cpp11::register]]
-SEXP dust2_unfilter_{{name}}_update_pars(cpp11::sexp ptr, cpp11::list r_pars) {
-  return dust2::r::dust2_unfilter_update_pars<dust2::dust_{{time_type}}<{{class}}>>(ptr, r_pars);
+SEXP dust2_unfilter_{{name}}_update_pars(cpp11::sexp ptr, cpp11::list r_pars, cpp11::sexp r_index_group) {
+  return dust2::r::dust2_unfilter_update_pars<dust2::dust_{{time_type}}<{{class}}>>(ptr, r_pars, r_index_group);
 }
 
 [[cpp11::register]]
@@ -19,8 +19,8 @@ SEXP dust2_unfilter_{{name}}_last_history(cpp11::sexp ptr, cpp11::sexp r_index_g
 }
 
 [[cpp11::register]]
-SEXP dust2_filter_{{name}}_update_pars(cpp11::sexp ptr, cpp11::list r_pars) {
-  return dust2::r::dust2_filter_update_pars<dust2::dust_{{time_type}}<{{class}}>>(ptr, r_pars);
+SEXP dust2_filter_{{name}}_update_pars(cpp11::sexp ptr, cpp11::list r_pars, cpp11::sexp r_index_group) {
+  return dust2::r::dust2_filter_update_pars<dust2::dust_{{time_type}}<{{class}}>>(ptr, r_pars, r_index_group);
 }
 
 [[cpp11::register]]

@@ -166,7 +166,7 @@ dust_filter_run <- function(filter, pars, initial = NULL,
     }
     filter_create(filter, pars)
   } else if (!is.null(pars)) {
-    filter$methods$update_pars(filter$ptr, pars)
+    filter$methods$update_pars(filter$ptr, pars, index_group)
   }
   filter$methods$run(filter$ptr, initial, save_history, index_group,
                      filter$preserve_group_dimension)

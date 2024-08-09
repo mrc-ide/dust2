@@ -241,16 +241,18 @@ std::vector<typename T::internal_state> build_internal(std::vector<typename T::s
 }
 
 template <typename T>
-void update_pars(T& obj, cpp11::list r_pars) {
+void update_pars(T& obj, cpp11::list r_pars, const std::vector<size_t>& index_group) {
   using system_type = typename T::system_type;
-  const auto n_groups = obj.n_groups();
+
+  const auto n_groups = index_group.size();
   if (r_pars.size() != static_cast<int>(n_groups)) {
-    cpp11::stop("Expected 'pars' to have length %d to match 'n_groups'",
-		static_cast<int>(n_groups));
+    cpp11::stop("Expected 'pars' to have length %d to match '%s'",
+                static_cast<int>(n_groups),
+                index_group.size() == obj.n_groups() ? "n_groups" : "index_group");
   }
   for (size_t i = 0; i < n_groups; ++i) {
     cpp11::list r_pars_i = r_pars[i];
-    obj.update_shared(i, [&] (auto& shared) {
+    obj.update_shared(index_group[i], [&] (auto& shared) {
       system_type::update_shared(r_pars_i, shared);
     });
   }

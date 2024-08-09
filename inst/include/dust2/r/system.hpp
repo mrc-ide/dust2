@@ -192,7 +192,7 @@ SEXP dust2_system_set_time(cpp11::sexp ptr, cpp11::sexp r_time) {
 template <typename T>
 SEXP dust2_system_update_pars(cpp11::sexp ptr, cpp11::list r_pars) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
-  update_pars(*obj, r_pars);
+  update_pars(*obj, r_pars, obj->all_groups());
   return R_NilValue;
 }
 

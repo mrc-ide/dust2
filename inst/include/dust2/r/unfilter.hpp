@@ -9,10 +9,13 @@ namespace r {
 
 template <typename T>
 cpp11::sexp dust2_unfilter_update_pars(cpp11::sexp ptr,
-                                       cpp11::list r_pars) {
+                                       cpp11::list r_pars,
+                                       cpp11::sexp r_index_group) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
-  update_pars(obj->sys, r_pars);
+  const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
+    check_index(r_index_group, obj->sys.n_groups(), "index_group");
+  update_pars(obj->sys, r_pars, index_group);
   return R_NilValue;
 }
 

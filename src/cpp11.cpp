@@ -202,10 +202,10 @@ extern "C" SEXP _dust2_dust2_system_sir_compare_data(SEXP ptr, SEXP r_data, SEXP
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_unfilter_sir_update_pars(cpp11::sexp ptr, cpp11::list r_pars);
-extern "C" SEXP _dust2_dust2_unfilter_sir_update_pars(SEXP ptr, SEXP r_pars) {
+SEXP dust2_unfilter_sir_update_pars(cpp11::sexp ptr, cpp11::list r_pars, cpp11::sexp r_index_group);
+extern "C" SEXP _dust2_dust2_unfilter_sir_update_pars(SEXP ptr, SEXP r_pars, SEXP r_index_group) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_unfilter_sir_update_pars(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars)));
+    return cpp11::as_sexp(dust2_unfilter_sir_update_pars(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group)));
   END_CPP11
 }
 // sir.cpp
@@ -223,10 +223,10 @@ extern "C" SEXP _dust2_dust2_unfilter_sir_last_history(SEXP ptr, SEXP r_index_gr
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_filter_sir_update_pars(cpp11::sexp ptr, cpp11::list r_pars);
-extern "C" SEXP _dust2_dust2_filter_sir_update_pars(SEXP ptr, SEXP r_pars) {
+SEXP dust2_filter_sir_update_pars(cpp11::sexp ptr, cpp11::list r_pars, cpp11::sexp r_index_group);
+extern "C" SEXP _dust2_dust2_filter_sir_update_pars(SEXP ptr, SEXP r_pars, SEXP r_index_group) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_filter_sir_update_pars(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars)));
+    return cpp11::as_sexp(dust2_filter_sir_update_pars(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group)));
   END_CPP11
 }
 // sir.cpp
@@ -468,7 +468,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_filter_sir_rng_state",              (DL_FUNC) &_dust2_dust2_filter_sir_rng_state,               1},
     {"_dust2_dust2_filter_sir_run",                    (DL_FUNC) &_dust2_dust2_filter_sir_run,                     5},
     {"_dust2_dust2_filter_sir_set_rng_state",          (DL_FUNC) &_dust2_dust2_filter_sir_set_rng_state,           2},
-    {"_dust2_dust2_filter_sir_update_pars",            (DL_FUNC) &_dust2_dust2_filter_sir_update_pars,             2},
+    {"_dust2_dust2_filter_sir_update_pars",            (DL_FUNC) &_dust2_dust2_filter_sir_update_pars,             3},
     {"_dust2_dust2_system_logistic_alloc",             (DL_FUNC) &_dust2_dust2_system_logistic_alloc,              8},
     {"_dust2_dust2_system_logistic_internals",         (DL_FUNC) &_dust2_dust2_system_logistic_internals,          2},
     {"_dust2_dust2_system_logistic_reorder",           (DL_FUNC) &_dust2_dust2_system_logistic_reorder,            2},
@@ -524,7 +524,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_unfilter_sir_last_gradient",        (DL_FUNC) &_dust2_dust2_unfilter_sir_last_gradient,         4},
     {"_dust2_dust2_unfilter_sir_last_history",         (DL_FUNC) &_dust2_dust2_unfilter_sir_last_history,          4},
     {"_dust2_dust2_unfilter_sir_run",                  (DL_FUNC) &_dust2_dust2_unfilter_sir_run,                   7},
-    {"_dust2_dust2_unfilter_sir_update_pars",          (DL_FUNC) &_dust2_dust2_unfilter_sir_update_pars,           2},
+    {"_dust2_dust2_unfilter_sir_update_pars",          (DL_FUNC) &_dust2_dust2_unfilter_sir_update_pars,           3},
     {"_dust2_test_history_",                           (DL_FUNC) &_dust2_test_history_,                            5},
     {"_dust2_test_resample_weight",                    (DL_FUNC) &_dust2_test_resample_weight,                     2},
     {"_dust2_test_scale_log_weights",                  (DL_FUNC) &_dust2_test_scale_log_weights,                   1},
