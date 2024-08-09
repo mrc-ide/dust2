@@ -50,7 +50,7 @@ cpp11::sexp dust2_unfilter_last_history(cpp11::sexp ptr,
 					bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
-  if (!obj->last_history_is_current()) {
+  if (!tools::all(obj->last_history_is_current())) {
     cpp11::stop("History is not current");
   }
 
@@ -82,7 +82,7 @@ cpp11::sexp dust2_discrete_unfilter_last_gradient(cpp11::sexp ptr,
                                                   bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
-  if (!obj->adjoint_is_current()) {
+  if (!tools::all(obj->adjoint_is_current())) {
     cpp11::stop("System was not run with 'adjoint = TRUE'");
   }
   const auto n_state = obj->sys.n_state();

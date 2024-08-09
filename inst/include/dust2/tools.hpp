@@ -34,5 +34,10 @@ inline size_t thread_index() {
 #endif
 }
 
+template <typename T>
+bool all(const T& x) {
+  return std::all_of(x.begin(), x.end(), [](auto v) { return v; });
+}
+
 }
 }
