@@ -10,23 +10,19 @@
 ##'   typically before the first data point.  Must be an integer-like
 ##'   value.
 ##'
-##' @param time A vector of times, each of which has a corresponding
-##'   entry in `data`.  The system will stop at each of these times to
-##'   compute the likelihood using the compare function.
-##'
-##' @param data The data to compare against.  This must be a list with
-##'   the same length as `time`, each element of which corresponds to
-##'   the data required for the system.  If the system is ungrouped then
-##'   each element of `data` is a list with elements corresponding to
-##'   whatever your system requires.  If your system is grouped, this
-##'   should be a list with as many elements as your system has groups,
-##'   with each element corresponding to the data your system requires.
-##'   We will likely introduce a friendlier data.frame based input
-##'   soon.
+##' @param data The data to fit to.  This can be a `data.frame`, in
+##'   which case it will be passed into [dust_filter_data] for
+##'   validation, or it can be a [dust_filter_data]-augmented
+##'   data.frame.  The times for comparison will be taken from this,
+##'   and `time_start` must be no later than than the earliest time.
 ##'
 ##' @param n_particles The number of particles to run.  Larger numbers
 ##'   will give lower variance in the likelihood estimate but run more
 ##'   slowly.
+##'
+##' @param n_groups The number of parameter groups.  If `NULL`, this
+##'   will be taken from `data`.  If given, then the number of groups
+##'   in `data` will be checked against this number.
 ##'
 ##' @inheritParams dust_system_create
 ##' @inheritParams dust_system_simulate
@@ -35,32 +31,32 @@
 ##'   [dust_unfilter_run]
 ##'
 ##' @export
-dust_filter_create <- function(generator, time_start, time, data,
-                               n_particles, n_groups = 1, dt = 1,
+dust_filter_create <- function(generator, time_start, data,
+                               n_particles, n_groups = NULL, dt = 1,
                                index_state = NULL, n_threads = 1,
                                preserve_group_dimension = FALSE,
                                seed = NULL) {
   call <- environment()
   check_generator_for_filter(generator, "filter", call = call)
   assert_scalar_size(n_particles, allow_zero = FALSE, call = call)
-  assert_scalar_size(n_groups, allow_zero = FALSE, call = call)
   assert_scalar_logical(preserve_group_dimension, call = call)
-  preserve_group_dimension <- preserve_group_dimension || n_groups > 1
+
+  data <- prepare_data(data, n_groups, call = call)
+  time_start <- check_time_start(time_start, data$time, call = call)
+  dt <- check_dt(dt, call = call)
 
   ## NOTE: there is no preserve_particle_dimension option here because
   ## we will always preserve this dimension.
+  n_groups <- data$n_groups
+  preserve_group_dimension <- preserve_group_dimension || n_groups > 1
 
-  time <- check_time_sequence(time_start, time, call = call)
-  dt <- check_dt(dt, call = call)
-  data <- check_data(data, length(time), n_groups, preserve_group_dimension,
-                     call = call)
   index_state <- check_index(index_state, call = call)
   n_threads <- check_n_threads(n_threads, n_particles, n_groups)
 
   inputs <- list(time_start = time_start,
-                 time = time,
+                 time = data$time,
                  dt = dt,
-                 data = data,
+                 data = data$data,
                  n_particles = n_particles,
                  n_groups = n_groups,
                  n_threads = n_threads,
@@ -70,8 +66,8 @@ dust_filter_create <- function(generator, time_start, time, data,
   res <- list2env(
     list(inputs = inputs,
          initial_rng_state = filter_rng_state(n_particles, n_groups, seed),
-         n_particles = as.integer(n_particles),
-         n_groups = as.integer(max(n_groups), 1),
+         n_particles = n_particles,
+         n_groups = n_groups,
          deterministic = FALSE,
          methods = generator$methods$filter,
          index_state = index_state,

@@ -41,6 +41,9 @@ reference:
       - dust_filter_rng_state
       - dust_filter_set_rng_state
       - dust_filter_copy
+  - subtitle: Helpers
+    contents:
+      - dust_filter_data
   - title: Creation
     contents:
       - dust_compile

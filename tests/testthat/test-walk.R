@@ -480,13 +480,12 @@ test_that("can't compare walk to data", {
 test_that("can't create filter with walk system", {
   pars <- list(sd = 1)
   time_start <- 0
-  time <- 1:4
-  data <- vector("list", length(time))
+  data <- list(time = 1:4, d = 1:4)
   expect_error(
-    dust_unfilter_create(walk(), pars, time_start, time, data),
+    dust_unfilter_create(walk(), pars, time_start, data),
     "Can't create unfilter; the 'walk' system does not have 'compare_data'")
   expect_error(
-    dust_filter_create(walk(), pars, time_start, time, data, 10),
+    dust_filter_create(walk(), pars, time_start, data, 10),
     "Can't create filter; the 'walk' system does not have 'compare_data'")
 })
 

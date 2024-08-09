@@ -2,32 +2,30 @@ test_that("can run particle filter", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
 
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) list(incidence = i))
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
   dt <- 1
   n_particles <- 100
   seed <- 42
 
-  obj <- dust_filter_create(sir(), time_start, time, data,
+  obj <- dust_filter_create(sir(), time_start, data, dt = dt,
                             n_particles = n_particles, seed = seed)
   res <- replicate(20, dust_filter_run(obj, pars))
 
   cmp_filter <- sir_filter_manual(
-    pars, time_start, time, dt, data, n_particles, seed)
+    pars, time_start, data, dt, n_particles, seed)
   expect_equal(res, replicate(20, cmp_filter(NULL)$log_likelihood))
 })
 
 
 test_that("can only use pars = NULL on initialised filter", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
-  time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) list(incidence = i))
-  dt <- 1
 
-  obj1 <- dust_filter_create(sir(), time_start, time, data, n_particles = 100,
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+
+  obj1 <- dust_filter_create(sir(), time_start, data, n_particles = 100,
                              seed = 42)
-  obj2 <- dust_filter_create(sir(), time_start, time, data, n_particles = 100,
+  obj2 <- dust_filter_create(sir(), time_start, data, n_particles = 100,
                              seed = 42)
   expect_error(dust_filter_run(obj1, NULL),
                "'pars' cannot be NULL, as filter is not initialised")
@@ -42,13 +40,12 @@ test_that("can run particle filter and save history", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
 
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) list(incidence = i))
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
   dt <- 1
   n_particles <- 100
   seed <- 42
 
-  obj <- dust_filter_create(sir(), time_start, time, data,
+  obj <- dust_filter_create(sir(), time_start, data,
                             n_particles = n_particles, seed = seed)
   expect_error(dust_filter_last_history(obj), "History is not current")
   res1 <- dust_filter_run(obj, pars)
@@ -60,7 +57,7 @@ test_that("can run particle filter and save history", {
   expect_error(dust_filter_last_history(obj), "History is not current")
 
   cmp_filter <- sir_filter_manual(
-    pars, time_start, time, dt, data, n_particles, seed)
+    pars, time_start, data, dt, n_particles, seed)
   cmp1 <- cmp_filter(NULL)
   cmp2 <- cmp_filter(NULL, save_history = TRUE)
   cmp3 <- cmp_filter(NULL)
@@ -76,17 +73,15 @@ test_that("can get partial filter history", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
 
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) list(incidence = i))
-  dt <- 1
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
   n_particles <- 100
   seed <- 42
 
-  obj1 <- dust_filter_create(sir(), time_start, time, data,
+  obj1 <- dust_filter_create(sir(), time_start, data,
                              n_particles = n_particles, seed = seed)
-  obj2 <- dust_filter_create(sir(), time_start, time, data,
+  obj2 <- dust_filter_create(sir(), time_start, data,
                              n_particles = n_particles, seed = seed,
-                             index = c(2, 4))
+                             index_state = c(2, 4))
 
   expect_equal(dust_filter_run(obj1, pars, save_history = TRUE),
                dust_filter_run(obj2, pars, save_history = TRUE))
@@ -105,15 +100,13 @@ test_that("can run a nested particle filter and get the same result", {
     list(beta = 0.2, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6))
 
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) {
-    list(list(incidence = i), list(incidence = i + 1))
-  })
-  dt <- 1
+  data <- data.frame(time = rep(c(4, 8, 12, 16), 2),
+                     group = rep(1:2, each = 4),
+                     incidence = c(1:4, 2:5))
   n_particles <- 100
   seed <- 42
 
-  obj <- dust_filter_create(sir(), time_start, time, data,
+  obj <- dust_filter_create(sir(), time_start, data,
                             n_particles = n_particles, n_groups = 2,
                             seed = seed)
 
@@ -127,9 +120,9 @@ test_that("can run a nested particle filter and get the same result", {
 
   res <- replicate(20, dust_filter_run(obj, pars, save_history = TRUE))
 
-  ## now compare:
-  data1 <- lapply(data, "[[", 1)
-  obj1 <- dust_filter_create(sir(), time_start, time, data1,
+  ## now compare
+  data1 <- data[data$group == 1, -2]
+  obj1 <- dust_filter_create(sir(), time_start, data1,
                              n_particles = n_particles, seed = seed)
   s1 <- dust_filter_rng_state(obj1)
   res1 <- replicate(20, dust_filter_run(obj1, pars[[1]], save_history = TRUE))
@@ -137,8 +130,8 @@ test_that("can run a nested particle filter and get the same result", {
   expect_equal(s1, s[1:3232])
 
   seed2 <- r[3233:3264]
-  data2 <- lapply(data, "[[", 2)
-  obj2 <- dust_filter_create(sir(), time_start, time, data2,
+  data2 <- data[data$group == 2, -2]
+  obj2 <- dust_filter_create(sir(), time_start, data2,
                              n_particles = n_particles, seed = seed2)
   s2 <- dust_filter_rng_state(obj2)
   res2 <- replicate(20, dust_filter_run(obj2, pars[[2]], save_history = TRUE))
@@ -158,15 +151,13 @@ test_that("can run filter and change parameters", {
   pars <- modifyList(base, update)
 
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) list(incidence = i))
-  dt <- 1
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
   n_particles <- 100
   seed <- 42
 
-  obj1 <- dust_filter_create(sir(), time_start, time, data,
+  obj1 <- dust_filter_create(sir(), time_start, data,
                              n_particles = n_particles, seed = seed)
-  obj2 <- dust_filter_create(sir(), time_start, time, data,
+  obj2 <- dust_filter_create(sir(), time_start, data,
                              n_particles = n_particles, seed = seed)
 
   expect_equal(dust_filter_run(obj1, base),
@@ -181,18 +172,17 @@ test_that("can run particle filter with manual initial state", {
   state <- matrix(c(1000 - 17, 17, 0, 0, 0), ncol = 1)
 
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) list(incidence = i))
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
   dt <- 1
   n_particles <- 100
   seed <- 42
 
-  obj <- dust_filter_create(sir(), time_start, time, data,
+  obj <- dust_filter_create(sir(), time_start, data,
                             n_particles = n_particles, seed = seed)
   res <- replicate(20, dust_filter_run(obj, pars, initial = state))
 
   cmp_filter <- sir_filter_manual(
-    pars, time_start, time, dt, data, n_particles, seed)
+    pars, time_start, data, dt, n_particles, seed)
   expect_equal(res, replicate(20, cmp_filter(NULL, state)$log_likelihood))
 })
 
@@ -203,18 +193,16 @@ test_that("can set rng state into the filter before running", {
     list(beta = 0.2, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6))
 
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) {
-    list(list(incidence = i), list(incidence = i + 1))
-  })
-  dt <- 1
+  data <- data.frame(time = rep(c(4, 8, 12, 16), 2),
+                     group = rep(1:2, each = 4),
+                     incidence = c(1:4, 2:5))
   n_particles <- 100
   seed <- 42
 
-  obj1 <- dust_filter_create(sir(), time_start, time, data,
+  obj1 <- dust_filter_create(sir(), time_start, data,
                              n_particles = n_particles, n_groups = 2,
                              seed = 42)
-  obj2 <- dust_filter_create(sir(), time_start, time, data,
+  obj2 <- dust_filter_create(sir(), time_start, data,
                              n_particles = n_particles, n_groups = 2,
                              seed = 43)
   s1 <- dust_filter_rng_state(obj1)
@@ -233,18 +221,16 @@ test_that("can set rng state into the filter after running", {
     list(beta = 0.2, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6))
 
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) {
-    list(list(incidence = i), list(incidence = i + 1))
-  })
-  dt <- 1
+  data <- data.frame(time = rep(c(4, 8, 12, 16), 2),
+                     group = rep(1:2, each = 4),
+                     incidence = c(1:4, 2:5))
   n_particles <- 100
   seed <- 42
 
-  obj1 <- dust_filter_create(sir(), time_start, time, data,
+  obj1 <- dust_filter_create(sir(), time_start, data,
                              n_particles = n_particles, n_groups = 2,
                              seed = 42)
-  obj2 <- dust_filter_create(sir(), time_start, time, data,
+  obj2 <- dust_filter_create(sir(), time_start, data,
                              n_particles = n_particles, n_groups = 2,
                              seed = 43)
   expect_false(identical(dust_filter_run(obj1, pars),
@@ -264,13 +250,11 @@ test_that("can create a new filter via copying", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
 
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) list(incidence = i))
-  dt <- 1
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
   n_particles <- 100
   seed <- 42
 
-  obj1 <- dust_filter_create(sir(), time_start, time, data,
+  obj1 <- dust_filter_create(sir(), time_start, data,
                              n_particles = n_particles, seed = seed)
   obj2 <- dust_filter_copy(obj1)
   obj3 <- dust_filter_copy(obj1, seed = seed)
@@ -290,4 +274,23 @@ test_that("can create a new filter via copying", {
 
   expect_false(identical(ll1, ll2))
   expect_identical(ll1, ll3)
+})
+
+
+test_that("validate the number of groups in a data set", {
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  expect_error(
+    dust_filter_create(sir(), time_start, data, n_particles = 10, n_groups = 2),
+    "Expected 'data' to have 2 groups, but it had 1")
+})
+
+
+test_that("validate the starting time", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  expect_error(
+    dust_filter_create(sir(), 6, data, n_particles = 10),
+    "'time_start' (6) is later than the first time in 'data' (4)",
+    fixed = TRUE)
 })

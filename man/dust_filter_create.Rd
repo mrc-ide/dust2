@@ -7,10 +7,9 @@
 dust_filter_create(
   generator,
   time_start,
-  time,
   data,
   n_particles,
-  n_groups = 1,
+  n_groups = NULL,
   dt = 1,
   index_state = NULL,
   n_threads = 1,
@@ -27,25 +26,19 @@ to be used with this function.}
 typically before the first data point.  Must be an integer-like
 value.}
 
-\item{time}{A vector of times, each of which has a corresponding
-entry in \code{data}.  The system will stop at each of these times to
-compute the likelihood using the compare function.}
-
-\item{data}{The data to compare against.  This must be a list with
-the same length as \code{time}, each element of which corresponds to
-the data required for the system.  If the system is ungrouped then
-each element of \code{data} is a list with elements corresponding to
-whatever your system requires.  If your system is grouped, this
-should be a list with as many elements as your system has groups,
-with each element corresponding to the data your system requires.
-We will likely introduce a friendlier data.frame based input
-soon.}
+\item{data}{The data to fit to.  This can be a \code{data.frame}, in
+which case it will be passed into \link{dust_filter_data} for
+validation, or it can be a \link{dust_filter_data}-augmented
+data.frame.  The times for comparison will be taken from this,
+and \code{time_start} must be no later than than the earliest time.}
 
 \item{n_particles}{The number of particles to run.  Larger numbers
 will give lower variance in the likelihood estimate but run more
 slowly.}
 
-\item{n_groups}{Optionally, the number of parameter groups}
+\item{n_groups}{The number of parameter groups.  If \code{NULL}, this
+will be taken from \code{data}.  If given, then the number of groups
+in \code{data} will be checked against this number.}
 
 \item{dt}{The time step for discrete time systems, defaults to 1
 if not given.  It is an error to provide a non-NULL argument

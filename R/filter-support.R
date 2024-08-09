@@ -53,42 +53,6 @@ check_time_sequence <- function(time_start, time, call = NULL) {
 }
 
 
-check_data <- function(data, n_time, n_groups, preserve_group_dimension,
-                       call = NULL) {
-  assert_list(data, call = call)
-  assert_length(data, n_time, call = call)
-  if (preserve_group_dimension) {
-    len <- lengths(data)
-    err <- len != n_groups
-    if (any(err)) {
-      detail <- sprintf("Error for element %d, which has length %d",
-                        which(err), len[err])
-      if (length(detail) > 5) {
-        detail <- c(
-          detail[1:4],
-          sprintf("...and %d other elements", sum(err) - 4))
-      }
-      if (n_groups > 1) {
-        justification <- "'n_groups' is greater than one"
-      } else {
-        justification <- "'preserve_group_dimension' was TRUE"
-      }
-      cli::cli_abort(
-        c("Expected all elements of 'data' to have length {n_groups}",
-          i = paste(
-            "You have a grouped system ({justification})",
-            "so each element in data must be a list with data for each group",
-            "in turn"),
-          set_names(detail, "x")),
-        arg = "data", call = call)
-    }
-  } else {
-    data <- lapply(data, function(el) list(el))
-  }
-  data
-}
-
-
 check_index <- function(index, call = NULL) {
   if (!is.null(index)) {
     assert_integer(index, call = call)
@@ -98,4 +62,16 @@ check_index <- function(index, call = NULL) {
     }
   }
   index
+}
+
+
+check_time_start <- function(time_start, time, call = NULL) {
+  assert_scalar_integer(time_start, call = call)
+  if (time_start > time[[1]]) {
+    cli::cli_abort(
+      paste("'time_start' ({time_start}) is later than the first time",
+            "in 'data' ({time[[1]]})"),
+      call = call)
+  }
+  time_start
 }

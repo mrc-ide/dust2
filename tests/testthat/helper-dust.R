@@ -2,7 +2,7 @@
 ## system; once we have a generic system interface we can make this more
 ## generic.  It just redoes the same logic as in the C++ code but is
 ## easier to read (and quite a lot slower due to churn in state).
-sir_filter_manual <- function(pars, time_start, time, dt, data, n_particles,
+sir_filter_manual <- function(pars, time_start, data, dt, n_particles,
                               seed) {
   r <- mcstate2::mcstate_rng$new(n_streams = 1, seed = seed)
   seed <- mcstate2::mcstate_rng$new(n_streams = 1, seed = seed)$jump()$state()
@@ -10,7 +10,8 @@ sir_filter_manual <- function(pars, time_start, time, dt, data, n_particles,
   obj <- dust_system_create(sir(), pars, n_particles,
                             time = time_start, dt = dt, seed = seed)
   n_state <- nrow(dust_system_state(obj))
-  n_time <- length(time)
+  n_time <- nrow(data)
+  time <- data$time
 
   function(pars, initial = NULL, save_history = FALSE) {
     if (!is.null(pars)) {
@@ -26,7 +27,7 @@ sir_filter_manual <- function(pars, time_start, time, dt, data, n_particles,
     history <- array(NA_real_, c(n_state, n_particles, n_time))
     for (i in seq_along(time)) {
       dust_system_run_to_time(obj, time[[i]])
-      tmp <- dust_system_compare_data(obj, data[[i]])
+      tmp <- dust_system_compare_data(obj, as.list(data[i, ]))
       w <- exp(tmp - max(tmp))
       ll <- ll + log(mean(w)) + max(tmp)
       u <- r$random_real(1)

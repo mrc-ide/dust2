@@ -7,10 +7,9 @@
 dust_unfilter_create(
   generator,
   time_start,
-  time,
   data,
   n_particles = 1,
-  n_groups = 1,
+  n_groups = NULL,
   dt = 1,
   n_threads = 1,
   index_state = NULL,
@@ -26,17 +25,11 @@ dust_unfilter_create(
 typically before the first data point.  Must be an integer-like
 value.}
 
-\item{time}{The initial time, defaults to 0}
-
-\item{data}{The data to compare against.  This must be a list with
-the same length as \code{time}, each element of which corresponds to
-the data required for the system.  If the system is ungrouped then
-each element of \code{data} is a list with elements corresponding to
-whatever your system requires.  If your system is grouped, this
-should be a list with as many elements as your system has groups,
-with each element corresponding to the data your system requires.
-We will likely introduce a friendlier data.frame based input
-soon.}
+\item{data}{The data to fit to.  This can be a \code{data.frame}, in
+which case it will be passed into \link{dust_filter_data} for
+validation, or it can be a \link{dust_filter_data}-augmented
+data.frame.  The times for comparison will be taken from this,
+and \code{time_start} must be no later than than the earliest time.}
 
 \item{n_particles}{The number of particles to run.  Typically this
 is 1, but you can run with more than 1 if you want - currently

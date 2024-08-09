@@ -2,10 +2,9 @@ test_that("can run an unfilter via the adjoint method", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
 
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) list(incidence = i))
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
 
-  obj <- dust_unfilter_create(sir(), time_start, time, data)
+  obj <- dust_unfilter_create(sir(), time_start, data)
   ll1 <- dust_unfilter_run(obj, pars)
   ll2 <- dust_unfilter_run(obj, pars, adjoint = TRUE)
   expect_identical(ll2, ll1)
@@ -14,10 +13,9 @@ test_that("can run an unfilter via the adjoint method", {
 
 test_that("can run the adjoint model", {
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) list(incidence = i))
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
 
-  obj <- dust_unfilter_create(sir(), time_start, time, data)
+  obj <- dust_unfilter_create(sir(), time_start, data)
   x <- c(beta = 0.1, gamma = 0.2, I0 = 10)
   ll <- dust_unfilter_run(obj, as.list(x), adjoint = TRUE)
   gr <- dust_unfilter_last_gradient(obj)
@@ -33,12 +31,11 @@ test_that("can't compute adjoint where it was not enabled in the unfilter", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
 
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) list(incidence = i))
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
 
   ## TODO: these errors end up quite different, but that's
   ## unavoidable?
-  obj <- dust_unfilter_create(sir(), time_start, time, data)
+  obj <- dust_unfilter_create(sir(), time_start, data)
   expect_error(dust_unfilter_last_gradient(obj),
                "Gradient is not current")
   ll1 <- dust_unfilter_run(obj, pars)
@@ -54,16 +51,14 @@ test_that("can compute multiple gradients at once", {
                  function(i) modifyList(base, list(beta = i * 0.1)))
 
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) {
-    lapply(seq_len(n_groups), function(j) list(incidence = 2 * (i - 1) + j))
-  })
+  data <- data.frame(time = rep(c(4, 8, 12, 16), n_groups),
+                     group = rep(1:4, each = n_groups),
+                     incidence = seq_len(4 * n_groups))
   dt <- 1
 
-  obj1 <- dust_unfilter_create(sir(), time_start, time, data, n_groups = 4)
+  obj1 <- dust_unfilter_create(sir(), time_start, data)
   obj2 <- lapply(1:4, function(i) {
-    data_i <- lapply(data, function(x) x[[i]])
-    dust_unfilter_create(sir(), time_start, time, data_i)
+    dust_unfilter_create(sir(), time_start, data[data$group == i, -2])
   })
 
   ll1 <- dust_unfilter_run(obj1, pars)
@@ -77,7 +72,7 @@ test_that("can compute multiple gradients at once", {
 
   expect_equal(dust_unfilter_last_gradient(obj1), cmp)
 
-  obj3 <- dust_unfilter_create(sir(), time_start, time, data, n_groups = 4,
+  obj3 <- dust_unfilter_create(sir(), time_start, data, n_groups = 4,
                                preserve_particle_dimension = TRUE)
   ll3 <- dust_unfilter_run(obj3, pars, adjoint = TRUE)
   expect_equal(dim(ll3), c(1, 4))
@@ -91,10 +86,9 @@ test_that("can save history while running unfilter with adjoint", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
 
   time_start <- 0
-  time <- c(4, 8, 12, 16)
-  data <- lapply(1:4, function(i) list(incidence = i))
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
 
-  obj <- dust_unfilter_create(sir(), time_start, time, data)
+  obj <- dust_unfilter_create(sir(), time_start, data)
   ll1 <- dust_unfilter_run(obj, pars, save_history = TRUE)
   h1 <- dust_unfilter_last_history(obj)
 
@@ -107,10 +101,9 @@ test_that("can save history while running unfilter with adjoint", {
 
 test_that("can run the adjoint model with an odd number of steps", {
   time_start <- 0
-  time <- c(3, 6, 9, 12)
-  data <- lapply(1:4, function(i) list(incidence = i))
+  data <- data.frame(time = c(3, 6, 9, 12), incidence = 1:4)
 
-  obj <- dust_unfilter_create(sir(), time_start, time, data)
+  obj <- dust_unfilter_create(sir(), time_start, data)
   x <- c(beta = 0.1, gamma = 0.2, I0 = 10)
   ll <- dust_unfilter_run(obj, as.list(x), adjoint = TRUE)
   gr <- dust_unfilter_last_gradient(obj)
