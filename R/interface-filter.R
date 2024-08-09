@@ -144,12 +144,16 @@ filter_create <- function(filter, pars) {
 ##'   filter was constructed using a non-`NULL` `index_state` parameter,
 ##'   the history is restricted to these states.
 ##'
+##' @param index_group An optional vector of group indices to run the
+##'   filter for.  You can use this to run a subset of possible
+##'   groups, though at the moment this will likely crash.
+##'
 ##' @return A vector of likelihood values, with as many elements as
 ##'   there are groups.
 ##'
 ##' @export
 dust_filter_run <- function(filter, pars, initial = NULL,
-                            save_history = FALSE) {
+                            save_history = FALSE, index_group = NULL) {
   check_is_dust_filter(filter)
   if (!is.null(pars)) {
     pars <- check_pars(pars, filter$n_groups,
@@ -164,7 +168,7 @@ dust_filter_run <- function(filter, pars, initial = NULL,
   } else if (!is.null(pars)) {
     filter$methods$update_pars(filter$ptr, pars)
   }
-  filter$methods$run(filter$ptr, initial, save_history,
+  filter$methods$run(filter$ptr, initial, save_history, index_group,
                      filter$preserve_group_dimension)
 }
 
@@ -180,14 +184,15 @@ dust_filter_run <- function(filter, pars, initial = NULL,
 ##' @return An array
 ##'
 ##' @export
-dust_filter_last_history <- function(filter) {
+dust_filter_last_history <- function(filter, index_group = NULL) {
   check_is_dust_filter(filter)
   if (is.null(filter$ptr)) {
     cli::cli_abort(c(
       "History is not current",
       i = "Filter has not yet been run"))
   }
-  filter$methods$last_history(filter$ptr, filter$preserve_group_dimension)
+  filter$methods$last_history(filter$ptr, index_group,
+                              filter$preserve_group_dimension)
 }
 
 

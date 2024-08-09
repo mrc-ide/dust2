@@ -24,7 +24,7 @@ cpp11::sexp dust2_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
 			       bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
-  const auto index_group = r_index_group == R_NilValue ? obj->all_groups() :
+  const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
     check_index(r_index_group, obj->sys.n_groups(), "index_group");
 
   if (r_initial != R_NilValue) {
@@ -57,7 +57,7 @@ cpp11::sexp dust2_unfilter_last_history(cpp11::sexp ptr,
 					bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
-  const auto index_group = r_index_group == R_NilValue ? obj->all_groups() :
+  const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
     check_index(r_index_group, obj->sys.n_groups(), "index_group");
   const auto& is_current = obj->last_history_is_current();
   for (auto i : index_group) {
@@ -103,7 +103,7 @@ cpp11::sexp dust2_discrete_unfilter_last_gradient(cpp11::sexp ptr,
                                                   bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
-  const auto index_group = r_index_group == R_NilValue ? obj->all_groups() :
+  const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
     check_index(r_index_group, obj->sys.n_groups(), "index_group");
   const auto& is_current = obj->adjoint_is_current();
   for (auto i : index_group) {

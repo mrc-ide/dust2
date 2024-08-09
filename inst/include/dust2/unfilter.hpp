@@ -139,10 +139,6 @@ public:
     return adjoint_is_current_;
   }
 
-  auto& all_groups() const {
-    return sys.all_groups();
-  }
-
   template <typename Iter>
   void last_gradient(Iter iter, const std::vector<size_t>& groups) {
     if (!gradient_is_current_) {

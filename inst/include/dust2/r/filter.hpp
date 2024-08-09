@@ -18,29 +18,49 @@ cpp11::sexp dust2_filter_update_pars(cpp11::sexp ptr,
 
 template <typename T>
 cpp11::sexp dust2_filter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
-                             bool save_history, bool preserve_group_dimension) {
+                             bool save_history,
+                             cpp11::sexp r_index_group,
+                             bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
+  const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
+    check_index(r_index_group, obj->sys.n_groups(), "index_group");
   if (r_initial != R_NilValue) {
     set_state(obj->sys, r_initial, preserve_group_dimension);
   }
-  obj->run(r_initial == R_NilValue, save_history);
+  obj->run(r_initial == R_NilValue, save_history, index_group);
 
   const auto& ll = obj->last_log_likelihood();
-  cpp11::writable::doubles ret(obj->sys.n_groups());
-  std::copy_n(ll.begin(), ret.size(), REAL(ret));
+  cpp11::writable::doubles ret(index_group.size());
+  auto iter = REAL(ret);
+  for (auto i : index_group) {
+    *iter = ll[i];
+    iter++;
+  }
   return ret;
 }
 
 // Can collapse with above
 template <typename T>
 cpp11::sexp dust2_filter_last_history(cpp11::sexp ptr,
+                                      cpp11::sexp r_index_group,
 				      bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
-  if (!obj->last_history_is_current()) {
-    cpp11::stop("History is not current");
+  const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
+    check_index(r_index_group, obj->sys.n_groups(), "index_group");
+  const auto& is_current = obj->last_history_is_current();
+  for (auto i : index_group) {
+    if (!is_current[i]) {
+      if (!tools::any(is_current)) {
+        cpp11::stop("History is not current");
+      } else {
+        cpp11::stop("History for group '%d' is not current",
+                    static_cast<int>(i + 1));
+      }
+    }
   }
+
   // We might relax this later, but will require some tools to work
   // with the output, really.
   constexpr bool reorder = true;
@@ -54,7 +74,7 @@ cpp11::sexp dust2_filter_last_history(cpp11::sexp ptr,
   const auto n_times = dims[3];
   const auto len = n_state * n_particles * n_groups * n_times;
   cpp11::sexp ret = cpp11::writable::doubles(len);
-  history.export_state(REAL(ret), reorder, obj->sys.all_groups());
+  history.export_state(REAL(ret), reorder, index_group);
   if (preserve_group_dimension) {
     set_array_dims(ret, {n_state, n_particles, n_groups, n_times});
   } else {

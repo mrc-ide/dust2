@@ -36,7 +36,7 @@ public:
     history_index_state_(history_index_state),
     history_(history_index_state_.size() > 0 ? history_index_state_.size() : n_state_,
              n_particles_, n_groups_, time_.size()),
-    history_is_current_(false) {
+    history_is_current_(n_groups_, false) {
   }
 
   void run(bool set_initial, bool save_history) {
@@ -91,7 +91,11 @@ public:
       // save snapshots (perhaps)
     }
 
-    history_is_current_ = save_history;
+    if (save_history) {
+      for (auto i : groups) {
+        history_is_current_[i] = true;
+      }
+    }
   }
 
   auto& last_log_likelihood() const {
@@ -102,7 +106,7 @@ public:
     return history_;
   }
 
-  bool last_history_is_current() const {
+  auto& last_history_is_current() const {
     return history_is_current_;
   }
 
@@ -126,10 +130,10 @@ private:
   std::vector<real_type> ll_step_;
   std::vector<size_t> history_index_state_;
   history<real_type> history_;
-  bool history_is_current_;
+  std::vector<bool> history_is_current_;
 
   void reset(bool set_initial, bool save_history) {
-    history_is_current_ = false;
+    std::fill(history_is_current_.begin(), history_is_current_.end(), false);
     if (save_history) {
       history_.reset();
     }
