@@ -21,7 +21,7 @@ public:
          real_type time_start,
          std::vector<real_type> time,
          std::vector<data_type> data,
-         std::vector<size_t> history_index,
+         std::vector<size_t> history_index_state,
          const std::vector<rng_int_type>& seed) :
     sys(sys_),
     time_start_(time_start),
@@ -31,39 +31,31 @@ public:
     n_particles_(sys.n_particles()),
     n_groups_(sys.n_groups()),
     rng_(n_groups_, seed, false),
-    ll_(n_groups_ * n_particles_, 0),
+    ll_(n_groups_, 0),
     ll_step_(n_groups_ * n_particles_, 0),
-    history_index_(history_index),
-    history_(history_index_.size() > 0 ? history_index_.size() : n_state_,
+    history_index_state_(history_index_state),
+    history_(history_index_state_.size() > 0 ? history_index_state_.size() : n_state_,
              n_particles_, n_groups_, time_.size()),
-    history_is_current_(false) {
+    history_is_current_(n_groups_, false) {
   }
 
-  void run(bool set_initial, bool save_history) {
-    history_is_current_ = false;
-    if (save_history) {
-      history_.reset();
-    }
+  void run(bool set_initial, bool save_history,
+           const std::vector<size_t>& index_group) {
+    reset(set_initial, save_history);
     const auto n_times = time_.size();
-
-    sys.set_time(time_start_);
-    if (set_initial) {
-      sys.set_state_initial();
-    }
-    std::fill(ll_.begin(), ll_.end(), 0);
 
     // Just store this here; later once we have state to save we can
     // probably use that vector instead.
     std::vector<size_t> index(n_particles_ * n_groups_);
 
-    const bool use_index = history_index_.size() > 0;
+    const bool use_index = history_index_state_.size() > 0;
 
     auto it_data = data_.begin();
     for (size_t i = 0; i < n_times; ++i, it_data += n_groups_) {
-      sys.run_to_time(time_[i]);
-      sys.compare_data(it_data, ll_step_.begin());
+      sys.run_to_time(time_[i], index_group);
+      sys.compare_data(it_data, index_group, ll_step_.begin());
 
-      for (size_t i = 0; i < n_groups_; ++i) {
+      for (auto i : index_group) {
         const auto offset = i * n_particles_;
         const auto w = ll_step_.begin() + offset;
         ll_[i] += details::scale_log_weights<real_type>(n_particles_, w);
@@ -74,7 +66,7 @@ public:
       // this requires some fiddling.
 
       // This can be parallelised across groups
-      for (size_t i = 0; i < n_groups_; ++i) {
+      for (auto i : index_group) {
         const auto offset = i * n_particles_;
         const auto w = ll_step_.begin() + offset;
         const auto idx = index.begin() + offset;
@@ -82,32 +74,37 @@ public:
         details::resample_weight(n_particles_, w, u, idx);
       }
 
-      sys.reorder(index.begin());
+      sys.reorder(index.begin(), index_group);
 
       if (save_history) {
         if (use_index) {
           history_.add_with_index(time_[i], sys.state().begin(), index.begin(),
-                                  history_index_.begin(), n_state_);
+                                  history_index_state_.begin(), n_state_,
+                                  index_group);
         } else {
-          history_.add(time_[i], sys.state().begin(), index.begin());
+          history_.add(time_[i], sys.state().begin(), index.begin(),
+                       index_group);
         }
       }
       // save snapshots (perhaps)
     }
 
-    history_is_current_ = save_history;
+    if (save_history) {
+      for (auto i : index_group) {
+        history_is_current_[i] = true;
+      }
+    }
   }
 
-  template <typename It>
-  void last_log_likelihood(It it) {
-    std::copy_n(ll_.begin(), n_groups_, it);
+  auto& last_log_likelihood() const {
+    return ll_;
   }
 
   auto& last_history() const {
     return history_;
   }
 
-  bool last_history_is_current() const {
+  auto& last_history_is_current() const {
     return history_is_current_;
   }
 
@@ -129,9 +126,21 @@ private:
   mcstate::random::prng<rng_state_type> rng_;
   std::vector<real_type> ll_;
   std::vector<real_type> ll_step_;
-  std::vector<size_t> history_index_;
+  std::vector<size_t> history_index_state_;
   history<real_type> history_;
-  bool history_is_current_;
+  std::vector<bool> history_is_current_;
+
+  void reset(bool set_initial, bool save_history) {
+    std::fill(history_is_current_.begin(), history_is_current_.end(), false);
+    if (save_history) {
+      history_.reset();
+    }
+    std::fill(ll_.begin(), ll_.end(), 0);
+    sys.set_time(time_start_);
+    if (set_initial) {
+      sys.set_state_initial(sys.all_groups());
+    }
+  }
 };
 
 }

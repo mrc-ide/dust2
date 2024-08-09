@@ -33,13 +33,14 @@ test_that("can use history", {
           c(n_state, n_particles, n_groups))
   })
   s_arr <- array(unlist(s), c(n_state, n_particles, n_groups, n_time))
-  expect_equal(test_history(time, s, NULL, TRUE),
+  expect_equal(test_history(time, s, reorder = TRUE),
                list(time, s_arr))
-  expect_equal(test_history(time, s, NULL, FALSE),
+  expect_equal(test_history(time, s, reorder = FALSE),
                list(time, s_arr))
-  expect_equal(test_history(time, s[1:3], NULL, TRUE),
+  expect_equal(test_history(time, s[1:3], reorder = TRUE),
                list(time[1:3], s_arr[, , , 1:3]))
-  expect_equal(test_history(time, s, vector("list", length(time)), TRUE),
+  expect_equal(test_history(time, s, order = vector("list", length(time)),
+                            reorder = TRUE),
                list(time, s_arr))
 })
 
@@ -84,18 +85,22 @@ test_that("can reorder history with no groups", {
   state_arr <- array(unlist(state), dim(true))
 
   ## Pass in, but ignore index
-  expect_equal(test_history(time, state, order, FALSE),
-               list(time, state_arr))
+  expect_equal(
+    test_history(time, state, order = order, reorder = FALSE),
+    list(time, state_arr))
 
   ## Really simple, add an index that does not reorder anything:
-  expect_equal(test_history(time, state[1], order[1], TRUE),
-               list(time[1], state_arr[, , , 1, drop = FALSE]))
-  expect_equal(test_history(time, state[1:2], list(NULL, 0:6), TRUE),
-               list(time[1:2], state_arr[, , , 1:2, drop = FALSE]))
+  expect_equal(
+    test_history(time, state[1], order = order[1], reorder = TRUE),
+    list(time[1], state_arr[, , , 1, drop = FALSE]))
+  expect_equal(
+    test_history(time, state[1:2], order = list(NULL, 0:6), reorder = TRUE),
+    list(time[1:2], state_arr[, , , 1:2, drop = FALSE]))
 
   ## Proper reordering with the full index:
-  expect_equal(test_history(time, state, order, TRUE),
-               list(time, true))
+  expect_equal(
+    test_history(time, state, order = order, reorder = TRUE),
+    list(time, true))
 })
 
 
@@ -126,8 +131,8 @@ test_that("can reorder history on the way out", {
   }
 
   state_arr <- array(unlist(state), dim(true))
-  expect_equal(test_history(time, state, order, FALSE),
+  expect_equal(test_history(time, state, order = order, reorder = FALSE),
                list(time, state_arr))
-  expect_equal(test_history(time, state, order, TRUE),
+  expect_equal(test_history(time, state, order = order, reorder = TRUE),
                list(time, true))
 })

@@ -269,8 +269,8 @@ SEXP dust2_system_sir_update_pars(cpp11::sexp ptr, cpp11::list pars) {
 }
 
 [[cpp11::register]]
-SEXP dust2_system_sir_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::sexp r_index, bool preserve_particle_dimension, bool preserve_group_dimension) {
-  return dust2::r::dust2_system_simulate<dust2::dust_discrete<sir>>(ptr, r_times, r_index, preserve_particle_dimension, preserve_group_dimension);
+SEXP dust2_system_sir_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::sexp r_index_state, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_system_simulate<dust2::dust_discrete<sir>>(ptr, r_times, r_index_state, preserve_particle_dimension, preserve_group_dimension);
 }
 
 [[cpp11::register]]
@@ -288,33 +288,33 @@ SEXP dust2_system_sir_compare_data(cpp11::sexp ptr, cpp11::list r_data, bool pre
 }
 
 [[cpp11::register]]
-SEXP dust2_unfilter_sir_update_pars(cpp11::sexp ptr, cpp11::list r_pars) {
-  return dust2::r::dust2_unfilter_update_pars<dust2::dust_discrete<sir>>(ptr, r_pars);
+SEXP dust2_unfilter_sir_update_pars(cpp11::sexp ptr, cpp11::list r_pars, cpp11::sexp r_index_group) {
+  return dust2::r::dust2_unfilter_update_pars<dust2::dust_discrete<sir>>(ptr, r_pars, r_index_group);
 }
 
 [[cpp11::register]]
-SEXP dust2_unfilter_sir_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, bool preserve_particle_dimension, bool preserve_group_dimension) {
-  return dust2::r::dust2_unfilter_run<dust2::dust_discrete<sir>>(ptr, r_initial, save_history, adjoint, preserve_particle_dimension, preserve_group_dimension);
+SEXP dust2_unfilter_sir_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, cpp11::sexp r_index_group, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_unfilter_run<dust2::dust_discrete<sir>>(ptr, r_initial, save_history, adjoint, r_index_group, preserve_particle_dimension, preserve_group_dimension);
 }
 
 [[cpp11::register]]
-SEXP dust2_unfilter_sir_last_history(cpp11::sexp ptr, bool preserve_particle_dimension, bool preserve_group_dimension) {
-  return dust2::r::dust2_unfilter_last_history<dust2::dust_discrete<sir>>(ptr, preserve_particle_dimension, preserve_group_dimension);
+SEXP dust2_unfilter_sir_last_history(cpp11::sexp ptr, cpp11::sexp r_index_group, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_unfilter_last_history<dust2::dust_discrete<sir>>(ptr, r_index_group, preserve_particle_dimension, preserve_group_dimension);
 }
 
 [[cpp11::register]]
-SEXP dust2_filter_sir_update_pars(cpp11::sexp ptr, cpp11::list r_pars) {
-  return dust2::r::dust2_filter_update_pars<dust2::dust_discrete<sir>>(ptr, r_pars);
+SEXP dust2_filter_sir_update_pars(cpp11::sexp ptr, cpp11::list r_pars, cpp11::sexp r_index_group) {
+  return dust2::r::dust2_filter_update_pars<dust2::dust_discrete<sir>>(ptr, r_pars, r_index_group);
 }
 
 [[cpp11::register]]
-SEXP dust2_filter_sir_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool preserve_group_dimension) {
-  return dust2::r::dust2_filter_run<dust2::dust_discrete<sir>>(ptr, r_initial, save_history, preserve_group_dimension);
+SEXP dust2_filter_sir_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, cpp11::sexp index_group, bool preserve_group_dimension) {
+  return dust2::r::dust2_filter_run<dust2::dust_discrete<sir>>(ptr, r_initial, save_history, index_group, preserve_group_dimension);
 }
 
 [[cpp11::register]]
-SEXP dust2_filter_sir_last_history(cpp11::sexp ptr, bool preserve_group_dimension) {
-  return dust2::r::dust2_filter_last_history<dust2::dust_discrete<sir>>(ptr, preserve_group_dimension);
+SEXP dust2_filter_sir_last_history(cpp11::sexp ptr, cpp11::sexp r_index_group, bool preserve_group_dimension) {
+  return dust2::r::dust2_filter_last_history<dust2::dust_discrete<sir>>(ptr, r_index_group, preserve_group_dimension);
 }
 
 [[cpp11::register]]
@@ -328,6 +328,6 @@ SEXP dust2_filter_sir_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
 }
 
 [[cpp11::register]]
-SEXP dust2_unfilter_sir_last_gradient(cpp11::sexp ptr, bool preserve_particle_dimension, bool preserve_group_dimension) {
-  return dust2::r::dust2_discrete_unfilter_last_gradient<dust2::dust_discrete<sir>>(ptr, preserve_particle_dimension, preserve_group_dimension);
+SEXP dust2_unfilter_sir_last_gradient(cpp11::sexp ptr, cpp11::sexp r_index_group, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_discrete_unfilter_last_gradient<dust2::dust_discrete<sir>>(ptr, r_index_group, preserve_particle_dimension, preserve_group_dimension);
 }

@@ -4,6 +4,7 @@
 #include <omp.h>
 #endif
 
+#include <algorithm>
 #include <cmath>
 
 namespace dust2 {
@@ -32,6 +33,16 @@ inline size_t thread_index() {
 #else
   return 0;
 #endif
+}
+
+template <typename T>
+bool all(const T& x) {
+  return std::all_of(x.begin(), x.end(), [](auto v) { return v; });
+}
+
+template <typename T>
+bool any(const T& x) {
+  return std::any_of(x.begin(), x.end(), [](auto v) { return v; });
 }
 
 }

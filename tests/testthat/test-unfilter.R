@@ -53,7 +53,7 @@ test_that("can get unfilter history", {
   expect_error(
     dust_unfilter_last_history(obj),
     "History is not current")
- dust_unfilter_run(obj, pars)
+  dust_unfilter_run(obj, pars)
   expect_error(
     dust_unfilter_last_history(obj),
     "History is not current")

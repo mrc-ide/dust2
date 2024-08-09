@@ -16,16 +16,18 @@ namespace dust2 {
 template <typename real_type>
 class adjoint_data {
 public:
-  adjoint_data(size_t n_state, size_t n_particles) :
+  adjoint_data(size_t n_state, size_t n_particles, size_t n_groups) :
     n_state_(n_state),
     n_adjoint_(0),
     n_particles_(n_particles),
+    n_groups_(n_groups),
+    n_particles_total_(n_particles_ * n_groups_),
     n_steps_(0) {
   }
 
   void init_history(size_t n_steps) {
     if (n_steps_ != n_steps) {
-      state_.resize(n_state_ * n_particles_ * (n_steps + 1));
+      state_.resize(n_state_ * n_particles_total_ * (n_steps + 1));
       n_steps_ = n_steps;
     }
     reset();
@@ -33,7 +35,7 @@ public:
 
   void init_adjoint(size_t n_adjoint) {
     if (n_adjoint_ != n_adjoint) {
-      adjoint_curr_.resize(n_adjoint * n_particles_);
+      adjoint_curr_.resize(n_adjoint * n_particles_total_);
       adjoint_next_.resize(adjoint_curr_.size());
       n_adjoint_ = n_adjoint;
     }
@@ -58,11 +60,13 @@ public:
   }
 
   template <typename Iter>
-  void gradient(Iter iter) {
+  void gradient(Iter iter, const std::vector<size_t>& index_group) {
     auto iter_src = adjoint_curr_.begin() + n_state_;
     const auto n_gradient = n_adjoint_ - n_state_;
-    for (size_t i = 0; i < n_particles_; ++i, iter_src += n_adjoint_) {
-      iter = std::copy_n(iter_src, n_gradient, iter);
+    for (auto i : index_group) {
+      for (size_t j = 0; j < n_particles_; ++j) {
+        iter = std::copy_n(iter_src + n_adjoint_ * n_particles_ * i, n_gradient * n_particles_, iter);
+      }
     }
   }
 
@@ -70,6 +74,8 @@ private:
   size_t n_state_;
   size_t n_adjoint_;
   size_t n_particles_;
+  size_t n_groups_;
+  size_t n_particles_total_;
   size_t n_steps_;
   std::vector<real_type> state_;
   std::vector<real_type> adjoint_curr_;

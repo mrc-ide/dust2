@@ -241,16 +241,18 @@ std::vector<typename T::internal_state> build_internal(std::vector<typename T::s
 }
 
 template <typename T>
-void update_pars(T& obj, cpp11::list r_pars) {
+void update_pars(T& obj, cpp11::list r_pars, const std::vector<size_t>& index_group) {
   using system_type = typename T::system_type;
-  const auto n_groups = obj.n_groups();
+
+  const auto n_groups = index_group.size();
   if (r_pars.size() != static_cast<int>(n_groups)) {
-    cpp11::stop("Expected 'pars' to have length %d to match 'n_groups'",
-		static_cast<int>(n_groups));
+    cpp11::stop("Expected 'pars' to have length %d to match '%s'",
+                static_cast<int>(n_groups),
+                index_group.size() == obj.n_groups() ? "n_groups" : "index_group");
   }
   for (size_t i = 0; i < n_groups; ++i) {
     cpp11::list r_pars_i = r_pars[i];
-    obj.update_shared(i, [&] (auto& shared) {
+    obj.update_shared(index_group[i], [&] (auto& shared) {
       system_type::update_shared(r_pars_i, shared);
     });
   }
@@ -282,7 +284,8 @@ std::vector<typename T::data_type> check_data(cpp11::list r_data,
 }
 
 template <typename T>
-void set_state(T& obj, cpp11::sexp r_state, bool preserve_group_dimension) {
+void set_state(T& obj, cpp11::sexp r_state, bool preserve_group_dimension,
+               const std::vector<size_t>& index_group) {
   // Suppose that we have a n_state x n_particles x n_groups grouped
   // system, we then require that we have a state array with rank 3;
   // for an ungrouped system this will be rank 2 array.
@@ -299,7 +302,7 @@ void set_state(T& obj, cpp11::sexp r_state, bool preserve_group_dimension) {
   const int n_particles =
     preserve_group_dimension ? obj.n_particles() :
     obj.n_particles() * obj.n_groups();
-  const int n_groups = preserve_group_dimension ? obj.n_groups() : 1;
+  const int n_groups = index_group.size();
   if (dim[0] != n_state) {
     cpp11::stop("Expected the first dimension of 'state' to have size %d",
                 n_state);
@@ -316,7 +319,8 @@ void set_state(T& obj, cpp11::sexp r_state, bool preserve_group_dimension) {
     cpp11::stop("Expected the third dimension of 'state' to have size %d or 1",
                 n_groups);
   }
-  obj.set_state(REAL(r_state), recycle_particle, recycle_group);
+  obj.set_state(REAL(r_state), recycle_particle, recycle_group,
+                index_group);
 }
 
 template <typename T>

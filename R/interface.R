@@ -402,7 +402,9 @@ dust_system_run_to_time <- function(sys, time) {
 dust_system_simulate <- function(sys, times, index_state = NULL) {
   check_is_dust_system(sys)
   ## TODO: check time sequence, except for the first?
-  ret <- sys$methods$simulate(sys$ptr, times, index_state,
+  ret <- sys$methods$simulate(sys$ptr,
+                              times,
+                              index_state,
                               sys$preserve_particle_dimension,
                               sys$preserve_group_dimension)
   if (!is.null(index_state) && !is.null(names(index_state))) {

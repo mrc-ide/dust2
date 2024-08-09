@@ -9,7 +9,8 @@ dust_unfilter_run(
   pars,
   initial = NULL,
   save_history = FALSE,
-  adjoint = FALSE
+  adjoint = FALSE,
+  index_group = NULL
 )
 }
 \arguments{
@@ -34,6 +35,10 @@ the history is restricted to these states.}
 history saving.  This can be enabled even when your model does not
 support adjoints!  But you will not be able to compute
 gradients.}
+
+\item{index_group}{An optional vector of group indices to run the
+filter for.  You can use this to run a subset of possible
+groups, though at the moment this will likely crash.}
 }
 \value{
 A vector of likelihood values, with as many elements as
