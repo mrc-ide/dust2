@@ -76,16 +76,13 @@ cpp11::sexp dust2_unfilter_last_history(cpp11::sexp ptr,
 
   constexpr bool reorder = false; // never needed
 
-  // TODO: this needs an overhaul to work this way, because the
-  // history dims here from the history object is no longer correct -
-  // we'll want this now to come from us.
   const auto& history = obj->last_history();
-  const auto& dims = history.dims();
-  // Could use destructured bind here in recent C++?
-  const auto n_state = dims[0];
-  const auto n_particles = dims[1];
-  const auto n_groups = dims[2];
-  const auto n_times = dims[3];
+
+  const auto n_state = history.n_state(); // might be filtered
+  const auto n_particles = obj->sys.n_particles();
+  const auto n_groups = index_group.size();
+  const auto n_times = history.n_times();
+
   const auto len = n_state * n_particles * n_groups * n_times;
   cpp11::sexp ret = cpp11::writable::doubles(len);
   history.export_state(REAL(ret), reorder, index_group);

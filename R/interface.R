@@ -156,7 +156,7 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
   preserve_particle_dimension <- preserve_particle_dimension || n_particles > 1
   preserve_group_dimension <- preserve_group_dimension || n_groups > 1
 
-  pars <- check_pars(pars, n_groups, preserve_group_dimension)
+  pars <- check_pars(pars, n_groups, NULL, preserve_group_dimension)
   if (generator$properties$time_type == "discrete") {
     if (!is.null(ode_control)) {
       cli::cli_abort("Can't use 'ode_control' with discrete-time systems")
@@ -350,7 +350,7 @@ dust_system_set_rng_state <- function(sys, rng_state) {
 ##' @export
 dust_system_update_pars <- function(sys, pars) {
   check_is_dust_system(sys)
-  pars <- check_pars(pars, sys$n_groups, sys$preserve_group_dimension)
+  pars <- check_pars(pars, sys$n_groups, NULL, sys$preserve_group_dimension)
   sys$methods$update_pars(sys$ptr, pars)
   invisible()
 }

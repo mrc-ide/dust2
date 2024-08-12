@@ -1,7 +1,6 @@
 #pragma once
 
 #include <algorithm>
-#include <array>
 #include <stdexcept>
 #include <vector>
 
@@ -24,8 +23,7 @@ public:
     times_(n_times_),
     state_(len_state_ * n_times_),
     order_(len_order_ * n_times_),
-    reorder_(n_times),
-    dims_({n_state_, n_particles_, n_groups_, position_}) {
+    reorder_(n_times) {
   }
 
   void resize_state(size_t n_state) {
@@ -96,8 +94,12 @@ public:
     return position_ * len_order_;
   }
 
-  auto& dims() const {
-    return dims_;
+  auto n_state() const {
+    return n_state_;
+  }
+
+  auto n_times() const {
+    return position_;
   }
 
   template <typename Iter>
@@ -108,13 +110,23 @@ public:
   template <typename Iter>
   void export_state(Iter iter, bool reorder,
                     const std::vector<size_t>& index_group) const {
-    if (index_group.size() != n_groups_) {
-      throw std::runtime_error("need to organise filtering");
-    }
     reorder = reorder && n_particles_ > 1 && position_ > 0 &&
+      // tools::any(reorder_);
       std::any_of(reorder_.begin(), reorder_.end(), [](auto v) { return v; });
+
+    auto use_index_group = index_group.size() < n_groups_;
+    if (!use_index_group) {
+      for (size_t i = 0; i < n_groups_; ++i) {
+        if (index_group[i] != i) {
+          use_index_group = true;
+          break;
+        }
+      }
+    }
+
     if (reorder) {
-      // Default index:
+      // Default index - we can improve this by fixing k to be an
+      // offset, and also by saving this within this history object.
       std::vector<size_t> index_particle(n_particles_ * n_groups_);
       for (size_t i = 0, k = 0; i < n_groups_; ++i) {
         for (size_t j = 0; j < n_particles_; ++j, ++k) {
@@ -122,24 +134,40 @@ public:
         }
       }
 
+      const auto len_state_output =
+        n_state_ * n_particles_ * index_group.size();
       for (size_t irev = 0; irev < position_; ++irev) {
-        const auto i = position_ - irev - 1; // can move this to be the loop
+        const auto i = position_ - irev - 1;
         const auto iter_order = order_.begin() + i * len_order_;
         const auto iter_state = state_.begin() + i * len_state_;
-        // This bit here is independent among groups
-        for (size_t j = 0; j < n_groups_; j++) {
-          const auto offset_state = j * n_state_ * n_particles_;
-          const auto offset_index = j * n_particles_;
+        for (size_t j = 0; j < index_group.size(); ++j) {
+          const auto k = index_group[j];
+          const auto offset_state = k * n_state_ * n_particles_;
+          const auto offset_index = k * n_particles_;
+          const auto offset_output =
+            i * len_state_output + j * n_state_ * n_particles_;
           reorder_group_(iter_state + offset_state,
                          iter_order + offset_index,
                          reorder_[i],
-                         iter + i * len_state_ + offset_state,
+                         iter + offset_output,
                          index_particle.begin() + offset_index);
         }
       }
     } else {
-      // No reordering is requested or possible so just dump out directly:
-      std::copy_n(state_.begin(), position_ * len_state_, iter);
+      if (use_index_group) {
+        for (size_t i = 0; i < position_; ++i) {
+          const auto iter_state = state_.begin() + i * len_state_;
+          for (auto j : index_group) {
+            const auto offset_state = j * n_state_ * n_particles_;
+            iter = std::copy_n(iter_state + offset_state,
+                               n_state_ * n_particles_,
+                               iter);
+          }
+        }
+      } else {
+        // No reordering is requested or possible so just dump out directly:
+        std::copy_n(state_.begin(), position_ * len_state_, iter);
+      }
     }
   }
 
@@ -160,7 +188,6 @@ private:
   std::vector<real_type> state_;
   std::vector<size_t> order_;
   std::vector<bool> reorder_;
-  std::array<size_t, 4> dims_;
 
   // Reference implementation for this is mcstate:::history_single and
   // mcstate::history_multiple
@@ -185,7 +212,6 @@ private:
     times_[position_] = time;
     reorder_[position_] = reorder;
     position_++;
-    dims_[3] = position_;
   }
 
   template <typename IterReal>
