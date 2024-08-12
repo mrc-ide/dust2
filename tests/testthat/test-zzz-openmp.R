@@ -6,7 +6,7 @@ test_that("can compile and run with openmp", {
   obj <- dust_system_create(gen(), list(), n_particles = 10, seed = 1)
   dust_system_set_state_initial(obj)
   s <- dust_system_state(obj)
-  has_openmp <- all(s > 0)
+  has_openmp <- all(s >= 0)
   if (!has_openmp) {
     testthat::skip("no openmp support")
   }
