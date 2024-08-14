@@ -7,6 +7,7 @@
 #include <map>
 #include <vector>
 #include <dust2/errors.hpp>
+#include <dust2/packing.hpp>
 #include <dust2/tools.hpp>
 #include <dust2/zero.hpp>
 #include <mcstate/random/random.hpp>
@@ -33,7 +34,8 @@ public:
                 const std::vector<rng_int_type>& seed,
                 bool deterministic,
 		size_t n_threads) :
-    n_state_(T::size_state(shared[0])),
+    packing_state_(T::packing_state(shared[0])),
+    n_state_(packing_state_.size()),
     n_particles_(n_particles),
     n_groups_(shared.size()),
     n_particles_total_(n_particles_ * n_groups_),
@@ -213,6 +215,10 @@ public:
     return all_groups_;
   }
 
+  auto& packing_state() const {
+    return packing_state_;
+  }
+
   void set_time(real_type time) {
     time_ = time;
   }
@@ -362,6 +368,7 @@ public:
   }
 
 private:
+  dust2::packing packing_state_;
   size_t n_state_;
   size_t n_particles_;
   size_t n_groups_;

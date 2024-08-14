@@ -212,6 +212,7 @@ std::vector<typename T::shared_state> build_shared(cpp11::list r_pars,
   shared.reserve(n_groups);
 
   size_t size = 0;
+  // TODO: avoid T::size_state() here.
   for (size_t i = 0; i < n_groups; ++i) {
     shared.push_back(T::build_shared(r_pars[i]));
     const auto size_i = T::size_state(shared[i]);

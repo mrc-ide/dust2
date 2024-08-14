@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <numeric>
 
 namespace dust2 {
 namespace tools {
@@ -43,6 +44,11 @@ bool all(const T& x) {
 template <typename T>
 bool any(const T& x) {
   return std::any_of(x.begin(), x.end(), [](auto v) { return v; });
+}
+
+template <typename T>
+T prod(const std::vector<T>& x) {
+  return std::accumulate(x.begin(), x.end(), 1, std::multiplies<>{});
 }
 
 }

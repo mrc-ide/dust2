@@ -30,6 +30,10 @@ public:
     return 1;
   }
 
+  static dust2::packing packing_state(const shared_state& shared) {
+    return dust2::packing{{"", {}}};
+  }
+
   static void update_shared(cpp11::list pars, shared_state& shared) {
   }
 

@@ -33,6 +33,10 @@ public:
     return 5;
   }
 
+  static dust2::packing packing_state(const shared_state& shared) {
+    return dust2::packing{{"S", {}}, {"I", {}}, {"R", {}}, {"cases_cumul", {}}, {"cases_inc", {}}};
+  }
+
   static void initial(real_type time,
                       const shared_state& shared,
                       internal_state& internal,
