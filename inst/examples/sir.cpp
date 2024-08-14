@@ -121,7 +121,7 @@ public:
       return 0;
     }
     const auto noise =
-      mcstate::random::exponential(rng_state, shared.exp_noise);
+      mcstate::random::exponential_rate(rng_state, shared.exp_noise);
     const auto incidence_modelled = state[4];
     const auto lambda = incidence_modelled + noise;
     return mcstate::density::poisson(incidence_observed, lambda, true);
