@@ -41,10 +41,6 @@ public:
     }
   }
 
-  auto empty() const {
-    return n_adjoint_ == 0;
-  }
-
   auto state() {
     return state_.data();
   }
@@ -55,10 +51,6 @@ public:
 
   auto next() {
     return adjoint_next_.data();
-  }
-
-  auto n_adjoint() const {
-    return n_adjoint_;
   }
 
   void reset() {

@@ -180,10 +180,8 @@ private:
 
   void compute_gradient_(const std::vector<size_t>& index_group) {
     const auto n_times = time_.size();
-    if (adjoint_.empty()) {
-      adjoint_.init_adjoint(sys.n_adjoint());
-    }
-    const auto n_adjoint = adjoint_.n_adjoint();
+    const auto n_adjoint = sys.n_adjoint();
+    adjoint_.init_adjoint(n_adjoint);
     auto adjoint_curr = adjoint_.curr();
     auto adjoint_next = adjoint_.next();
 
