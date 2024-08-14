@@ -179,6 +179,7 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
   }
   ## Here, we augment things slightly
   res$name <- generator$name
+  res$packer_state <- packer(res$packing_state)
   res$n_particles <- as.integer(n_particles)
   res$n_groups <- as.integer(n_groups)
   res$n_threads <- check_n_threads(n_threads, n_particles, n_groups)
@@ -616,4 +617,16 @@ is_uncalled_generator <- function(sys) {
   rlang::is_call(code, "{") &&
     length(code) == 2 &&
     rlang::is_call(code[[2]], "dust_system")
+}
+
+
+## This will move into mcstate eventually, but this will let us pack
+## and unpack state, once we work out what we need to do with it.
+## There are a few options here such as:
+##
+## * give me the indices of logical compartments 'a', 'b' and 'c'
+## * convert this vector/array into a list of vectors/arrays
+packer <- function(packing_state) {
+  i <- lengths(packing_state) == 0
+  mcstate2::mcstate_packer(names(packing_state)[i], packing_state[!i])
 }

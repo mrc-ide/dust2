@@ -15,29 +15,35 @@ public:
   packing(std::initializer_list<mapping_type> data)
     : data_(data) {
     len_.reserve(data_.size());
+    bool require_nonscalar = false;
     for (auto& el : data_) {
+      // This check is due to matching the current mcstate interface
+      // for packer, we may relax this later.
+      if (el.second.empty() && require_nonscalar) {
+        throw std::runtime_error("Invalid packing");
+      } else {
+        require_nonscalar = !el.second.empty();
+      }
       len_.push_back(tools::prod(el.second));
     }
     size_ = std::accumulate(len_.begin(), len_.end(), 0);
   }
 
-  void add(mapping_type x) {
-    data_.push_back(x);
-    len_.push_back(tools::prod(data_.back().second));
-    size_ += len_.back();
-  }
-
-  auto names() const {
-    std::vector<std::string> ret;
-    ret.reserve(data_.size());
-    for (const auto& el : data_) {
-      ret.push_back(el.first);
-    }
-    return ret;
-  }
+  // We can support an incremental interface easily enough like this
+  // if the initializer list version proves too annoying:
+  //
+  // void add(mapping_type x) {
+  //   data_.push_back(x);
+  //   len_.push_back(tools::prod(data_.back().second));
+  //   size_ += len_.back();
+  // }
 
   auto size() const {
     return size_;
+  }
+
+  auto& data() const {
+    return data_;
   }
 
 private:

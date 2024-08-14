@@ -29,7 +29,7 @@ public:
   }
 
   static dust2::packing packing_state(const shared_state& shared) {
-    return dust2::packing{{"", {shared.n}}};
+    return dust2::packing{{"x", {shared.n}}};
   }
 
   static size_t size_output(const shared_state& shared) {

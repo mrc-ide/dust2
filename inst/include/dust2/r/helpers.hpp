@@ -437,5 +437,17 @@ void read_real_vector(cpp11::list args, size_t len, real_type * dest,
   }
 }
 
+inline cpp11::list packing_to_r(const dust2::packing& packing_info) {
+  using namespace cpp11::literals;
+  cpp11::writable::list ret;
+  cpp11::writable::strings nms;
+  for (const auto& el : packing_info.data()) {
+    nms.push_back(el.first);
+    ret.push_back(cpp11::writable::integers(el.second.begin(), el.second.end()));
+  }
+  ret.attr("names") = nms;
+  return ret;
+}
+
 }
 }

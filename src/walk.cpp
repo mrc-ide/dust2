@@ -46,7 +46,7 @@ public:
   }
 
   static dust2::packing packing_state(const shared_state& shared) {
-    return dust2::packing{{"", {shared.len}}};
+    return dust2::packing{{"x", {shared.len}}};
   }
 
   // This is the bit that we'll use to do fast parameter updating, and
