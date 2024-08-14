@@ -32,7 +32,7 @@ test_that("can compare to data", {
   d <- list(incidence = 30)
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
-  eps <- drop(r$exponential(1, 0.5))
+  eps <- drop(r$exponential_rate(1, 0.5))
 
   expect_equal(
     dust_system_compare_data(obj, d),
@@ -72,7 +72,7 @@ test_that("can compare against multple parameter groups at once", {
 
   r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10 * 4)
   rate <- rep(10^(1:4), each = 10)
-  eps <- matrix(r$exponential(1, 1) /  rate, 10, 4)
+  eps <- matrix(r$exponential_rate(1, 1) /  rate, 10, 4)
   expect_equal(
     res,
     matrix(dpois(rep(31:34, each = 10), s[5, , ] + eps, log = TRUE), 10, 4))
