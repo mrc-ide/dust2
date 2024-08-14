@@ -116,10 +116,7 @@ cpp11::sexp dust2_discrete_unfilter_last_gradient(cpp11::sexp ptr,
       }
     }
   }
-  const auto n_state = obj->sys.n_state();
-  const auto n_adjoint = obj->sys.n_adjoint();
-  const auto n_gradient = n_adjoint - n_state;
-
+  const auto n_gradient = obj->sys.packing_gradient().size();
   const auto n_particles = obj->sys.n_particles();
   const auto n_groups = index_group.size();
   const auto len = n_gradient * n_particles * n_groups;

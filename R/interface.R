@@ -180,6 +180,9 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
   ## Here, we augment things slightly
   res$name <- generator$name
   res$packer_state <- packer(res$packing_state)
+  if (!is.null(res$packing_gradient)) {
+    res$packer_gradient <- packer(res$packing_gradient)
+  }
   res$n_particles <- as.integer(n_particles)
   res$n_groups <- as.integer(n_groups)
   res$n_threads <- check_n_threads(n_threads, n_particles, n_groups)

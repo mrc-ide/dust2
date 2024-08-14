@@ -31,7 +31,11 @@ public:
   }
 
   static dust2::packing packing_state(const shared_state& shared) {
-    return dust2::packing{{"", {}}};
+    return dust2::packing{{"x", {}}};
+  }
+
+  static dust2::packing packing_gradient(const shared_state& shared) {
+    return dust2::packing{};
   }
 
   static void update_shared(cpp11::list pars, shared_state& shared) {

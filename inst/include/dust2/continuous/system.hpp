@@ -35,6 +35,7 @@ public:
                   const std::vector<rng_int_type>& seed,
                   bool deterministic, size_t n_threads) :
     packing_state_(T::packing_state(shared[0])),
+    packing_gradient_(T::packing_gradient(shared[0])),
     n_state_(packing_state_.size()),
     n_particles_(n_particles),
     n_groups_(shared.size()),
@@ -215,6 +216,10 @@ public:
     return packing_state_;
   }
 
+  auto& packing_gradient() const {
+    return packing_gradient_;
+  }
+
   void set_time(real_type time) {
     time_ = time;
   }
@@ -271,6 +276,7 @@ public:
 
 private:
   dust2::packing packing_state_;
+  dust2::packing packing_gradient_;
   size_t n_state_;
   size_t n_particles_;
   size_t n_groups_;

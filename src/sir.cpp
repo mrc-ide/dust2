@@ -129,8 +129,8 @@ public:
     return mcstate::density::poisson(incidence_observed, lambda, true);
   }
 
-  static size_t adjoint_size(const shared_state& shared) {
-    return 8;
+  static dust2::packing packing_gradient(const shared_state& shared) {
+    return dust2::packing{{"beta", {}}, {"gamma", {}}, {"I0", {}}};
   }
 
   static void adjoint_initial(real_type time,

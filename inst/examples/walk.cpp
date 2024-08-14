@@ -43,6 +43,10 @@ public:
     return dust2::packing{{"x", {shared.len}}};
   }
 
+  static dust2::packing packing_gradient(const shared_state& shared) {
+    return dust2::packing{};
+  }
+
   // This is the bit that we'll use to do fast parameter updating, and
   // we'll guarantee somewhere that the size does not change.
   static void update_shared(cpp11::list pars, shared_state& shared) {

@@ -211,6 +211,8 @@ std::vector<typename T::shared_state> build_shared(cpp11::list r_pars,
   std::vector<typename T::shared_state> shared;
   shared.reserve(n_groups);
 
+  // TODO: we could check gradient here too but it seems a bit over
+  // the top.
   dust2::packing packing{};
   for (size_t i = 0; i < n_groups; ++i) {
     shared.push_back(T::build_shared(r_pars[i]));
@@ -222,7 +224,8 @@ std::vector<typename T::shared_state> build_shared(cpp11::list r_pars,
       const auto size = packing.size();
       // Later, we might do better with these errors, but practically
       // this means throwing an R error from C++ so that we can get
-      // this data on that side.
+      // this data there to do the comparison with and build strings
+      // from.
       if (size_i != size) {
         cpp11::stop("State length for group %d was different to previous groups; total length was expected to be %d but it was %d",
                     i + 1, size, size_i);
@@ -446,13 +449,20 @@ void read_real_vector(cpp11::list args, size_t len, real_type * dest,
   }
 }
 
-inline cpp11::list packing_to_r(const dust2::packing& packing_info) {
+inline cpp11::sexp packing_to_r(const dust2::packing& packing_info) {
+  if (packing_info.size() == 0) {
+    return R_NilValue;
+  }
   using namespace cpp11::literals;
-  cpp11::writable::list ret;
-  cpp11::writable::strings nms;
-  for (const auto& el : packing_info.data()) {
-    nms.push_back(el.first);
-    ret.push_back(cpp11::writable::integers(el.second.begin(), el.second.end()));
+
+  const auto& data = packing_info.data();
+  const auto len = data.size();
+  cpp11::writable::list ret(len);
+  cpp11::writable::strings nms(len);
+  for (size_t i = 0; i < len; ++i) {
+    nms[i] = data[i].first;
+    ret[i] = cpp11::writable::integers(data[i].second.begin(),
+                                       data[i].second.end());
   }
   ret.attr("names") = nms;
   return ret;
