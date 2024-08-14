@@ -193,7 +193,8 @@ test_that("prevent systems from having different state lengths", {
                list(sd = 3, len = 3))
   expect_error(
     dust_system_create(walk(), pars, n_particles = 10, n_groups = 3),
-    "Expected state length for group 3 to be 2, but it was 3")
+    paste("State length for group 3 was different to previous groups; total",
+          "length was expected to be 2 but it was 3"))
 })
 
 

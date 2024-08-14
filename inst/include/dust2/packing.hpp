@@ -46,6 +46,10 @@ public:
     return data_;
   }
 
+  bool operator!=(const packing& other) const {
+    return data_ != other.data();
+  }
+
 private:
   std::vector<mapping_type> data_;
   std::vector<size_t> len_;

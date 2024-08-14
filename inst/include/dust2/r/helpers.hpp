@@ -211,16 +211,25 @@ std::vector<typename T::shared_state> build_shared(cpp11::list r_pars,
   std::vector<typename T::shared_state> shared;
   shared.reserve(n_groups);
 
-  size_t size = 0;
-  // TODO: avoid T::size_state() here.
+  dust2::packing packing{};
   for (size_t i = 0; i < n_groups; ++i) {
     shared.push_back(T::build_shared(r_pars[i]));
-    const auto size_i = T::size_state(shared[i]);
+    const auto packing_i = T::packing_state(shared[i]);
     if (i == 0) {
-      size = size_i;
-    } else if (size_i != size) {
-      cpp11::stop("Expected state length for group %d to be %d, but it was %d",
-		  i + 1, size, size_i);
+      packing = packing_i;
+    } else if (packing_i != packing) {
+      const auto size_i = packing_i.size();
+      const auto size = packing.size();
+      // Later, we might do better with these errors, but practically
+      // this means throwing an R error from C++ so that we can get
+      // this data on that side.
+      if (size_i != size) {
+        cpp11::stop("State length for group %d was different to previous groups; total length was expected to be %d but it was %d",
+                    i + 1, size, size_i);
+      } else {
+        cpp11::stop("State length for group %d was different to previous groups; total length %d as expected, but the internal structure was different",
+                    i + 1, size);
+      }
     }
   }
 
