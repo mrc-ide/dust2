@@ -89,18 +89,55 @@ dust_filter_mcstate <- function(filter, packer, initial = NULL,
   properties <- mcstate2::mcstate_model_properties(
     is_stochastic = !filter$deterministic,
     has_direct_sample = FALSE,
-    has_gradient = FALSE,
+    has_gradient = filter$deterministic && filter$has_adjoint,
     has_parameter_groups = FALSE)
 
-  ## I think this really suggests that our filter and unfilter might
-  ## be best to share a common interface (mrc-5503)
-  dust_run <- if (filter$deterministic) dust_unfilter_run else dust_filter_run
+  gradient <- NULL
 
-  density <- function(x) {
-    pars <- packer$unpack(x)
-    dust_run(filter,
-             pars,
-             initial = if (is.null(initial)) NULL else initial(pars))
+  if (filter$deterministic) {
+    ## We might move this cache into the unfilter itself, but that
+    ## will take a bit of an effort to get right.  The other option
+    ## will be a `dust_unfilter_gradient` function but that then
+    ## requires that we have another one for getting the last density
+    ## back out!
+    ##
+    ## The main issue here is if two different bits of code are
+    ## manipulating the filter, then we might end up with different
+    ## parameters in the cache, so rather than using an environment
+    ## for the cache, we store them against the filter's ptr field,
+    ## which ensures that the internal structure is always in sync -
+    ## we can change this later with no obvious external effect, noone
+    ## but us should be depending on the internal structures of
+    ## filter.
+    density <- function(x) {
+      if (!identical(x, attr(filter$ptr, "last_pars"))) {
+        ret <- dust_unfilter_run(
+          filter,
+          pars,
+          initial = if (is.null(initial)) NULL else initial(pars))
+        attr(filter$ptr, "last_density") <- ret
+        attr(filter$ptr, "last_gradient") <- NULL
+      }
+      attr(filter$ptr, "last_density")
+    }
+
+    if (properties$has_gradient) {
+      gradient <- function(x) {
+        density(x)
+        if (is.null(attr(filter$ptr, "last_gradient"))) {
+          attr(filter$ptr, "last_gradient") <-
+            dust_unfilter_last_gradient(filter)
+        }
+        attr(filter$ptr, "last_gradient")
+      }
+    }
+  } else {
+    density <- function(x) {
+      dust_filter_run(
+        filter,
+        pars,
+        initial = if (is.null(initial)) NULL else initial(pars))
+    }
   }
 
   if (failure_is_impossible) {
@@ -132,6 +169,7 @@ dust_filter_mcstate <- function(filter, packer, initial = NULL,
     list(filter = filter,
          density = density,
          direct_sample = NULL,
+         gradient = gradient,
          parameters = packer$parameters,
          domain = domain,
          get_rng_state = get_rng_state,
