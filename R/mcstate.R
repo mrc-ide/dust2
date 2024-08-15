@@ -110,6 +110,7 @@ dust_filter_mcstate <- function(filter, packer, initial = NULL,
     ## but us should be depending on the internal structures of
     ## filter.
     density <- function(x) {
+      pars <- packer$unpack(x)
       if (!identical(x, attr(filter$ptr, "last_pars"))) {
         ret <- dust_unfilter_run(
           filter,
@@ -133,6 +134,7 @@ dust_filter_mcstate <- function(filter, packer, initial = NULL,
     }
   } else {
     density <- function(x) {
+      pars <- packer$unpack(x)
       dust_filter_run(
         filter,
         pars,
