@@ -538,14 +538,7 @@ dust_system_compare_data <- function(sys, data) {
 ##' @export
 print.dust_system <- function(x, ...) {
   cli::cli_h1("<dust_system: {x$name}>")
-  ## TODO: Special treatment if not preserve particle dimension
-  if (x$preserve_group_dimension) {
-    cli::cli_alert_info(paste(
-      "{x$n_state} state x {x$n_particles} particle{?s} x",
-      "{x$n_groups} group{?s}"))
-  } else {
-    cli::cli_alert_info("{x$n_state} state x {x$n_particles} particle{?s}")
-  }
+  cli::cli_alert_info(format_dimensions(x))
   if (x$deterministic) {
     cli::cli_bullets(c(
       i = "This system is deterministic"))
@@ -560,9 +553,6 @@ print.dust_system <- function(x, ...) {
   }
   cli::cli_bullets(c(
     i = "This system runs in {x$properties$time_type} time"))
-  ## Later, we might print some additional capabilities of the system
-  ## here, such as if it can be used with a filter, a summary of its
-  ## parameters (once we know how to access that), etc.
   invisible(x)
 }
 
@@ -570,9 +560,6 @@ print.dust_system <- function(x, ...) {
 ##' @export
 print.dust_system_generator <- function(x, ...) {
   cli::cli_h1("<dust_system_generator: {x$name}>")
-  ## Later, we might print some additional capabilities of the system
-  ## here, such as if it can be used with a filter, a summary of its
-  ## parameters (once we know how to access that), etc.
   cli::cli_alert_info(
     "Use 'dust2::dust_system_create()' to create a system with this generator")
   if (x$properties$has_compare) {
@@ -625,4 +612,36 @@ is_uncalled_generator <- function(sys) {
   rlang::is_call(code, "{") &&
     length(code) == 2 &&
     rlang::is_call(code[[2]], "dust_system")
+}
+
+
+format_dimensions <- function(x) {
+  if (is.null(x$n_state)) {
+    if (x$preserve_group_dimension && x$preserve_particle_dimension) {
+      cli::format_inline(paste(
+        "{x$n_particles} particle{?s} x {x$n_groups} group{?s}"))
+    } else if (x$preserve_group_dimension) {
+      cli::format_inline(
+        "{x$n_groups} group{?s}")
+    } else if (!isFALSE(x$preserve_particle_dimension)) {
+      cli::format_inline(
+        "{x$n_particles} particle{?s}")
+    } else {
+      cli::format_inline("single particle")
+    }
+  } else {
+    if (x$preserve_group_dimension && x$preserve_particle_dimension) {
+      cli::format_inline(paste(
+        "{x$n_state} state x {x$n_particles} particle{?s} x",
+        "{x$n_groups} group{?s}"))
+    } else if (x$preserve_group_dimension) {
+      cli::format_inline(
+        "{x$n_state} state x {x$n_groups} group{?s}")
+    } else if (!isFALSE(x$preserve_particle_dimension)) {
+      cli::format_inline(
+        "{x$n_state} state x {x$n_particles} particle{?s}")
+    } else {
+      cli::format_inline("single particle with {x$n_state} state")
+    }
+  }
 }

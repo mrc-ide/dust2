@@ -55,6 +55,7 @@ dust_unfilter_create <- function(generator, time_start, data,
          n_groups = as.integer(n_groups),
          deterministic = TRUE,
          has_adjoint = generator$properties$has_adjoint,
+         generator = generator,
          methods = generator$methods$unfilter,
          index_state = index_state,
          preserve_particle_dimension = preserve_particle_dimension,
@@ -202,4 +203,14 @@ check_is_dust_unfilter <- function(unfilter, call = parent.frame()) {
     cli::cli_abort("Expected 'unfilter' to be a 'dust_unfilter' object",
                    arg = "unfilter", call = call)
   }
+}
+
+
+##' @export
+print.dust_unfilter <- function(x, ...) {
+  cli::cli_h1("<dust_unfilter ({x$generator$name})>")
+  cli::cli_alert_info(format_dimensions(x))
+  cli::cli_bullets(c(
+    i = "This unfilter runs in {x$generator$properties$time_type} time"))
+  invisible(x)
 }

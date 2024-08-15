@@ -323,3 +323,17 @@ test_that("can run a subset of an unfilter", {
                  sprintf("History for group '%d' is not current", j))
   }
 })
+
+
+test_that("can print an unfilter", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  obj <- dust_unfilter_create(sir(), time_start, data, n_particles = 5)
+  res <- evaluate_promise(withVisible(print(obj)))
+  expect_mapequal(res$result,
+                  list(value = obj, visible = FALSE))
+  expect_match(res$messages, "<dust_unfilter (sir)>",
+               fixed = TRUE, all = FALSE)
+  expect_match(res$messages, "5 particles", all = FALSE)
+})

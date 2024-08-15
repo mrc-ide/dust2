@@ -69,6 +69,7 @@ dust_filter_create <- function(generator, time_start, data,
          n_particles = n_particles,
          n_groups = n_groups,
          deterministic = FALSE,
+         generator = generator,
          methods = generator$methods$filter,
          index_state = index_state,
          preserve_group_dimension = preserve_group_dimension),
@@ -258,4 +259,14 @@ check_is_dust_filter <- function(filter, call = parent.frame()) {
 filter_rng_state <- function(n_particles, n_groups, seed) {
   n_streams <- max(n_groups, 1) * (1 + n_particles)
   mcstate2::mcstate_rng$new(n_streams = n_streams, seed = seed)$state()
+}
+
+
+##' @export
+print.dust_filter <- function(x, ...) {
+  cli::cli_h1("<dust_filter ({x$generator$name})>")
+  cli::cli_alert_info(format_dimensions(x))
+  cli::cli_bullets(c(
+    i = "This filter runs in {x$generator$properties$time_type} time"))
+  invisible(x)
 }
