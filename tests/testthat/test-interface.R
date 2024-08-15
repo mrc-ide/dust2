@@ -35,6 +35,10 @@ test_that("can print information about dust systems", {
   }
 
   expect_match(msgs(list(), n_particles = 1),
+               "single particle with 5 state\\b",
+               all = FALSE)
+  expect_match(msgs(list(), n_particles = 1,
+                    preserve_particle_dimension = TRUE),
                "5 state x 1 particle\\b",
                all = FALSE)
   expect_match(msgs(list(), n_particles = 10),

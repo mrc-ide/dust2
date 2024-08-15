@@ -95,7 +95,7 @@ dust_filter_create <- function(generator, time_start, data,
 dust_filter_copy <- function(filter, seed = NULL) {
   dst <- new.env(parent = emptyenv())
   nms <- c("inputs", "n_particles", "n_groups", "deterministic", "methods",
-           "index_state", "preserve_group_dimension")
+           "index_state", "preserve_group_dimension", "generator")
   for (nm in nms) {
     dst[[nm]] <- filter[[nm]]
   }
