@@ -42,7 +42,6 @@ public:
   void run(bool set_initial, bool save_history,
            const std::vector<size_t>& index_group) {
     reset(set_initial, save_history);
-    const auto n_times = time_.size();
 
     // Just store this here; later once we have state to save we can
     // probably use that vector instead.
@@ -51,41 +50,49 @@ public:
     const bool use_index = history_index_state_.size() > 0;
 
     auto it_data = data_.begin();
-    for (size_t i = 0; i < n_times; ++i, it_data += n_groups_) {
-      sys.run_to_time(time_[i], index_group);
+    for (auto time : time_) {
+      sys.run_to_time(time, index_group);
       sys.compare_data(it_data, index_group, ll_step_.begin());
+      it_data += n_groups_;
 
+      // This looks like it's just not capturing the jump properly
+      // perhaps?  Better would be to return nan from the comparison
+      // and cope with that accordingly - all nan is missing, some nan
+      // is failure?
       for (auto i : index_group) {
         const auto offset = i * n_particles_;
         const auto w = ll_step_.begin() + offset;
-        ll_[i] += details::scale_log_weights<real_type>(n_particles_, w);
-      }
+	const auto idx = index.begin() + offset;
 
-      // early exit here, once enabled, setting and checking a
-      // threshhold log likelihood below which we're uninterested;
-      // this requires some fiddling.
-
-      // This can be parallelised across groups
-      for (auto i : index_group) {
-        const auto offset = i * n_particles_;
-        const auto w = ll_step_.begin() + offset;
-        const auto idx = index.begin() + offset;
-        const auto u = mcstate::random::random_real<real_type>(rng_.state(i));
-        details::resample_weight(n_particles_, w, u, idx);
+	// Only reorder a group if any value has done a comparison (in
+	// the case where all ll values are exactly zero we take this
+	// as the case where data was all empty).
+	const bool reorder_this_group =
+	  std::any_of(w, w + n_particles_, [](auto v) { return v != 0; });
+	if (reorder_this_group) {
+	  ll_[i] += details::scale_log_weights<real_type>(n_particles_, w);
+	  const auto u = mcstate::random::random_real<real_type>(rng_.state(i));
+	  details::resample_weight(n_particles_, w, u, idx);
+	} else {
+	  for (size_t j = 0; j < n_particles_; ++j) {
+	    *(idx + j) = j;
+	  }
+	}
       }
 
       sys.reorder(index.begin(), index_group);
 
       if (save_history) {
         if (use_index) {
-          history_.add_with_index(time_[i], sys.state().begin(), index.begin(),
+          history_.add_with_index(time, sys.state().begin(), index.begin(),
                                   history_index_state_.begin(), n_state_,
                                   index_group);
         } else {
-          history_.add(time_[i], sys.state().begin(), index.begin(),
+          history_.add(time, sys.state().begin(), index.begin(),
                        index_group);
         }
       }
+      // early exit (perhaps)
       // save snapshots (perhaps)
     }
 

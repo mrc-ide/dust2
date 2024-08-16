@@ -380,3 +380,60 @@ test_that("can run a subset of an filter", {
                  sprintf("History for group '%d' is not current", j))
   }
 })
+
+
+test_that("can run particle filter with missing data", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+
+  time_start <- 0
+  data1 <- data.frame(time = c(4, 8, 12, 16), incidence = c(1, 2, NA, 4))
+  data2 <- data1[complete.cases(data1), ]
+  dt <- 1
+  n_particles <- 100
+  seed <- 42
+
+  obj1 <- dust_filter_create(sir(), time_start, data1, dt = dt,
+                             n_particles = n_particles,s eed = seed)
+  obj2 <- dust_filter_create(sir(), time_start, data2, dt = dt,
+                             n_particles = n_particles, seed = seed)
+  ll1 <- replicate(10, dust_filter_run(obj1, pars))
+  ll2 <- replicate(10, dust_filter_run(obj2, pars))
+  expect_identical(ll1, ll2,
+                   replicate(10, dust_filter_run(obj2, pars)))
+})
+
+
+test_that("can skip over just some groups with missing data", {
+  pars <- list(
+    list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6),
+    list(beta = 0.2, gamma = 0.1, N = 1000, I0 = 10, exp_noise = 1e6))
+
+  time_start <- 0
+  data <- data.frame(time = rep(c(4, 8, 12, 16, 20), 2),
+                     group = rep(1:2, each = 5),
+                     incidence = c(1, 2,  NA, NA, 5,
+                                   2, NA, 4,  NA, 6))
+  data1 <- data[data$group == 1, -2]
+  data2 <- data[data$group == 2, -2]
+  dt <- 1
+  n_particles <- 100
+  seed <- 42
+
+  ## see test some way above for this:
+  n_streams <- (n_particles + 1) * 2
+  r <- mcstate2::mcstate_rng$new(n_streams = n_streams, seed = seed)$state()
+  seed2 <- r[3233:3264]
+
+  obj <- dust_filter_create(sir(), time_start, data, dt = dt,
+                            n_particles = n_particles, seed = seed)
+  obj1 <- dust_filter_create(sir(), time_start, data1, dt = dt,
+                             n_particles = n_particles, seed = seed)
+  obj2 <- dust_filter_create(sir(), time_start, data2, dt = dt,
+                             n_particles = n_particles, seed = seed2)
+
+  ll <- replicate(10, dust_filter_run(obj, pars))
+  ll1 <- replicate(10, dust_filter_run(obj1, pars[[1]]))
+  ll2 <- replicate(10, dust_filter_run(obj2, pars[[2]]))
+  expect_identical(ll[1, ], ll1)
+  expect_identical(ll[2, ], ll2)
+})
