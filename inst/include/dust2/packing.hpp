@@ -18,13 +18,6 @@ public:
     len_.reserve(data_.size());
     bool require_nonscalar = false;
     for (auto& el : data_) {
-      // This check is due to matching the current mcstate interface
-      // for packer, we may relax this later.
-      if (el.second.empty() && require_nonscalar) {
-        throw std::runtime_error("Invalid packing");
-      } else {
-        require_nonscalar = !el.second.empty();
-      }
       len_.push_back(tools::prod(el.second));
     }
     size_ = std::accumulate(len_.begin(), len_.end(), 0);
