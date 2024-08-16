@@ -16,7 +16,6 @@ public:
   packing(std::initializer_list<mapping_type> data)
     : data_(data) {
     len_.reserve(data_.size());
-    bool require_nonscalar = false;
     for (auto& el : data_) {
       len_.push_back(tools::prod(el.second));
     }
