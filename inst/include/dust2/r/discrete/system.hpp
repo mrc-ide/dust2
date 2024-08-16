@@ -45,12 +45,12 @@ SEXP dust2_discrete_alloc(cpp11::list r_pars,
                                   seed, deterministic, n_threads);
   cpp11::external_pointer<dust_discrete<T>> ptr(obj, true, false);
 
-  // Later, we'll export information about how systems structure
-  // variables (mrc-5422, with support needed from mcstate2)
   cpp11::sexp r_n_state = cpp11::as_sexp(obj->n_state());
+  cpp11::sexp r_packing_state = packing_to_r(obj->packing_state());
+  cpp11::sexp r_packing_gradient = packing_to_r(obj->packing_gradient());
 
   using namespace cpp11::literals;
-  return cpp11::writable::list{"ptr"_nm = ptr, "n_state"_nm = r_n_state};
+  return cpp11::writable::list{"ptr"_nm = ptr, "n_state"_nm = r_n_state, "packing_state"_nm = r_packing_state, "packing_gradient"_nm = r_packing_gradient};
 }
 
 }

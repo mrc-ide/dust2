@@ -22,8 +22,12 @@ public:
   using data_type = dust2::no_data;
   using rng_state_type = mcstate::random::generator<real_type>;
 
-  static size_t size_state(const shared_state& shared) {
-    return shared.n;
+  static dust2::packing packing_state(const shared_state& shared) {
+    return dust2::packing{{"x", {shared.n}}};
+  }
+
+  static dust2::packing packing_gradient(const shared_state& shared) {
+    return dust2::packing{};
   }
 
   static size_t size_output(const shared_state& shared) {

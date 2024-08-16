@@ -45,9 +45,11 @@ SEXP dust2_continuous_alloc(cpp11::list r_pars,
   // systems need to provide information about how they organise
   // variables.
   cpp11::sexp r_n_state = cpp11::as_sexp(obj->n_state());
+  cpp11::sexp r_packing_state = packing_to_r(obj->packing_state());
+  cpp11::sexp r_packing_gradient = packing_to_r(obj->packing_gradient());
 
   using namespace cpp11::literals;
-  return cpp11::writable::list{"ptr"_nm = ptr, "n_state"_nm = r_n_state};
+  return cpp11::writable::list{"ptr"_nm = ptr, "n_state"_nm = r_n_state, "packing_state"_nm = r_packing_state, "packing_gradient"_nm = r_packing_gradient};
 }
 
 template <typename real_type>

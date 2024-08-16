@@ -31,8 +31,8 @@ public:
 
   using rng_state_type = mcstate::random::generator<real_type>;
 
-  static size_t size_state(const shared_state& shared) {
-    return 5;
+  static dust2::packing packing_state(const shared_state& shared) {
+    return dust2::packing{{"S", {}}, {"I", {}}, {"R", {}}, {"cases_cumul", {}}, {"cases_inc", {}}};
   }
 
   static void initial(real_type time,
@@ -127,8 +127,8 @@ public:
     return mcstate::density::poisson(incidence_observed, lambda, true);
   }
 
-  static size_t adjoint_size(const shared_state& shared) {
-    return 8;
+  static dust2::packing packing_gradient(const shared_state& shared) {
+    return dust2::packing{{"beta", {}}, {"gamma", {}}, {"I0", {}}};
   }
 
   static void adjoint_initial(real_type time,

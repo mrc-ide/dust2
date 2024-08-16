@@ -5,6 +5,11 @@ test_that("can run simple sir system", {
   expect_type(obj$ptr, "externalptr")
   expect_equal(obj$n_state, 5)
 
+  expect_equal(obj$packing_state,
+               list(S = integer(), I = integer(), R = integer(),
+                    cases_cumul = integer(), cases_inc = integer()))
+  expect_s3_class(obj$packer_state, "mcstate_packer")
+
   expect_type(dust_system_rng_state(obj), "raw")
   expect_length(dust_system_rng_state(obj), 32 * 10)
 
@@ -279,4 +284,15 @@ test_that("throw nice error on run failure, then prevent access", {
   dust_system_update_pars(obj, list(gamma = 0.2))
   dust_system_set_state_initial(obj)
   expect_equal(dust_system_time(obj), 0)
+})
+
+
+test_that("can unpack state", {
+  set.seed(1)
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  obj <- dust_system_create(sir(), pars, n_particles = 1)
+  dust_system_set_state_initial(obj)
+  m <- dust_system_state(obj)
+  expect_equal(obj$packer_state$unpack(m),
+               list(S = 990, I = 10, R = 0, cases_cumul = 0, cases_inc = 0))
 })

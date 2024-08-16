@@ -193,7 +193,8 @@ test_that("prevent systems from having different state lengths", {
                list(sd = 3, len = 3))
   expect_error(
     dust_system_create(walk(), pars, n_particles = 10, n_groups = 3),
-    "Expected state length for group 3 to be 2, but it was 3")
+    paste("State length for group 3 was different to previous groups; total",
+          "length was expected to be 2 but it was 3"))
 })
 
 
@@ -610,4 +611,15 @@ test_that("can extract subset of state from a grouped system", {
   expect_error(
     dust_system_state(obj, index_group = integer(0)),
     "'index_group' must have nonzero length")
+})
+
+
+test_that("can unpack state", {
+  set.seed(1)
+  pars <- list(len = 5, sd = 1, random_initial = TRUE)
+  obj <- dust_system_create(walk(), pars, n_particles = 1)
+  dust_system_set_state_initial(obj)
+  m <- dust_system_state(obj)
+  expect_equal(obj$packer_state$unpack(m),
+               list(x = m))
 })

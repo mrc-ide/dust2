@@ -7,6 +7,7 @@
 #include <map>
 #include <vector>
 #include <dust2/errors.hpp>
+#include <dust2/packing.hpp>
 #include <dust2/tools.hpp>
 #include <dust2/zero.hpp>
 #include <mcstate/random/random.hpp>
@@ -33,7 +34,9 @@ public:
                 const std::vector<rng_int_type>& seed,
                 bool deterministic,
 		size_t n_threads) :
-    n_state_(T::size_state(shared[0])),
+    packing_state_(T::packing_state(shared[0])),
+    packing_gradient_(T::packing_gradient(shared[0])),
+    n_state_(packing_state_.size()),
     n_particles_(n_particles),
     n_groups_(shared.size()),
     n_particles_total_(n_particles_ * n_groups_),
@@ -206,11 +209,21 @@ public:
   }
 
   auto n_adjoint() const {
-    return T::adjoint_size(shared_[0]);
+    // TODO: we check that the state packing is the same but not the
+    // adjoint packing.  Practically that's fine I expect.
+    return n_state_ + packing_gradient().size();
   }
 
   auto& all_groups() const {
     return all_groups_;
+  }
+
+  auto& packing_state() const {
+    return packing_state_;
+  }
+
+  auto& packing_gradient() const {
+    return packing_gradient_;
   }
 
   void set_time(real_type time) {
@@ -362,6 +375,8 @@ public:
   }
 
 private:
+  dust2::packing packing_state_;
+  dust2::packing packing_gradient_;
   size_t n_state_;
   size_t n_particles_;
   size_t n_groups_;

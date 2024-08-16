@@ -39,8 +39,12 @@ public:
   // This one always feels a bit weird, really.
   using rng_state_type = mcstate::random::generator<real_type>;
 
-  static size_t size_state(const shared_state& shared) {
-    return shared.len;
+  static dust2::packing packing_state(const shared_state& shared) {
+    return dust2::packing{{"x", {shared.len}}};
+  }
+
+  static dust2::packing packing_gradient(const shared_state& shared) {
+    return dust2::packing{};
   }
 
   // This is the bit that we'll use to do fast parameter updating, and
