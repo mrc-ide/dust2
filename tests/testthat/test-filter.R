@@ -393,7 +393,7 @@ test_that("can run particle filter with missing data", {
   seed <- 42
 
   obj1 <- dust_filter_create(sir(), time_start, data1, dt = dt,
-                             n_particles = n_particles,s eed = seed)
+                             n_particles = n_particles, seed = seed)
   obj2 <- dust_filter_create(sir(), time_start, data2, dt = dt,
                              n_particles = n_particles, seed = seed)
   ll1 <- replicate(10, dust_filter_run(obj1, pars))
