@@ -398,8 +398,7 @@ test_that("can run particle filter with missing data", {
                              n_particles = n_particles, seed = seed)
   ll1 <- replicate(10, dust_filter_run(obj1, pars))
   ll2 <- replicate(10, dust_filter_run(obj2, pars))
-  expect_identical(ll1, ll2,
-                   replicate(10, dust_filter_run(obj2, pars)))
+  expect_identical(ll1, ll2)
 })
 
 
