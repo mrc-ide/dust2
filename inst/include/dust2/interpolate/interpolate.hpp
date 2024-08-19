@@ -5,9 +5,9 @@
 #include <sstream>
 #include <vector>
 
-#include <dust/interpolate/spline.hpp>
+#include <dust2/interpolate/spline.hpp>
 
-namespace dust {
+namespace dust2 {
 namespace interpolate {
 
 namespace internal {
@@ -148,5 +148,3 @@ public:
 
 }
 }
-
-#endif

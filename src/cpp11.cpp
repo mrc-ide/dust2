@@ -376,6 +376,34 @@ extern "C" SEXP _dust2_test_history_(SEXP r_time, SEXP r_state, SEXP r_order, SE
     return cpp11::as_sexp(test_history_(cpp11::as_cpp<cpp11::decay_t<cpp11::doubles>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_state), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_order), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(reorder)));
   END_CPP11
 }
+// test_interpolate.cpp
+int test_interpolate_search(double target, std::vector<double> x);
+extern "C" SEXP _dust2_test_interpolate_search(SEXP target, SEXP x) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(test_interpolate_search(cpp11::as_cpp<cpp11::decay_t<double>>(target), cpp11::as_cpp<cpp11::decay_t<std::vector<double>>>(x)));
+  END_CPP11
+}
+// test_interpolate.cpp
+double test_interpolate_constant1(std::vector<double> t, std::vector<double> y, double z);
+extern "C" SEXP _dust2_test_interpolate_constant1(SEXP t, SEXP y, SEXP z) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(test_interpolate_constant1(cpp11::as_cpp<cpp11::decay_t<std::vector<double>>>(t), cpp11::as_cpp<cpp11::decay_t<std::vector<double>>>(y), cpp11::as_cpp<cpp11::decay_t<double>>(z)));
+  END_CPP11
+}
+// test_interpolate.cpp
+double test_interpolate_linear1(std::vector<double> t, std::vector<double> y, double z);
+extern "C" SEXP _dust2_test_interpolate_linear1(SEXP t, SEXP y, SEXP z) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(test_interpolate_linear1(cpp11::as_cpp<cpp11::decay_t<std::vector<double>>>(t), cpp11::as_cpp<cpp11::decay_t<std::vector<double>>>(y), cpp11::as_cpp<cpp11::decay_t<double>>(z)));
+  END_CPP11
+}
+// test_interpolate.cpp
+double test_interpolate_spline1(std::vector<double> t, std::vector<double> y, double z);
+extern "C" SEXP _dust2_test_interpolate_spline1(SEXP t, SEXP y, SEXP z) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(test_interpolate_spline1(cpp11::as_cpp<cpp11::decay_t<std::vector<double>>>(t), cpp11::as_cpp<cpp11::decay_t<std::vector<double>>>(y), cpp11::as_cpp<cpp11::decay_t<double>>(z)));
+  END_CPP11
+}
 // walk.cpp
 SEXP dust2_system_walk_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic, cpp11::sexp r_n_threads);
 extern "C" SEXP _dust2_dust2_system_walk_alloc(SEXP r_pars, SEXP r_time, SEXP r_dt, SEXP r_n_particles, SEXP r_n_groups, SEXP r_seed, SEXP r_deterministic, SEXP r_n_threads) {
@@ -526,6 +554,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_unfilter_sir_run",                  (DL_FUNC) &_dust2_dust2_unfilter_sir_run,                   7},
     {"_dust2_dust2_unfilter_sir_update_pars",          (DL_FUNC) &_dust2_dust2_unfilter_sir_update_pars,           3},
     {"_dust2_test_history_",                           (DL_FUNC) &_dust2_test_history_,                            5},
+    {"_dust2_test_interpolate_constant1",              (DL_FUNC) &_dust2_test_interpolate_constant1,               3},
+    {"_dust2_test_interpolate_linear1",                (DL_FUNC) &_dust2_test_interpolate_linear1,                 3},
+    {"_dust2_test_interpolate_search",                 (DL_FUNC) &_dust2_test_interpolate_search,                  2},
+    {"_dust2_test_interpolate_spline1",                (DL_FUNC) &_dust2_test_interpolate_spline1,                 3},
     {"_dust2_test_resample_weight",                    (DL_FUNC) &_dust2_test_resample_weight,                     2},
     {"_dust2_test_scale_log_weights",                  (DL_FUNC) &_dust2_test_scale_log_weights,                   1},
     {NULL, NULL, 0}

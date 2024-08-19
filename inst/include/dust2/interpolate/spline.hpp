@@ -5,7 +5,7 @@
 #include <tuple>
 #include <vector>
 
-namespace dust {
+namespace dust2 {
 namespace interpolate {
 namespace spline {
 
@@ -91,5 +91,3 @@ void solve_tridiagonal(const tridiagonal<T>& m,
 }
 }
 }
-
-#endif
