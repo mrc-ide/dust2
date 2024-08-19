@@ -19,6 +19,56 @@ inline void check_length(cpp11::sexp x, int len, const char * name) {
   if (LENGTH(x) != len) {
     cpp11::stop("'%s' must have length %d", name, len);
   }
+  const cpp11::sexp dim_x_obj = x.attr("dim");
+  if (dim_x_obj != R_NilValue && LENGTH(dim_x_obj) != 1) {
+    cpp11::stop("'%s' must be a vector, not a matrix or array", name);
+  }
+}
+
+inline void check_dims_matrix(cpp11::sexp x, int nrow, int ncol, const * name) {
+  const cpp11::sexp dim_x_obj = x.attr("dim");
+  const int rank = dim.size();
+  if (dim_x_obj == R_NilValue) {
+    cpp11::stop("'%s' must be a matrix", name);
+  }
+
+  cpp11::sexp dim_x = cpp11::cpp_as<cpp11::integers>(dim_x_obj);
+  if (dim_x.size() != rank) {
+    cpp11::stop("'%s' must be a matrix, but it was an array with %d dimensions", name, dim_x.size());
+  }
+
+  if (dim_x[0] != nrow) {
+    cpp11::stop("Expected '%s' to have have %d rows, but it had %d",
+                name, *iter, dim_x[i]);
+  }
+  if (dim_x[1] != ncol) {
+    cpp11::stop("Expected '%s' to have have %d columns, but it had %d",
+                name, *iter, dim_x[i]);
+  }
+}
+
+inline void check_dims_array(cpp11::sexp x, cpp11::initializer_list<int> dim,
+                             const char *name) {
+  const cpp11::sexp dim_x_obj = x.attr("dim");
+  const int rank = dim.size();
+  if (dim_x_obj == R_NilValue) {
+    cpp11::stop("'%s' must be an array with %d dimensions",
+                name, rank);
+  }
+
+  cpp11::sexp dim_x = cpp11::cpp_as<cpp11::integers>(dim_x_obj);
+  if (dim_x.size() != rank) {
+    cpp11::stop("'%s' must be an array with %d dimensions, but it had %d",
+                name, rank, dim_x.size());
+  }
+
+  auto iter = dim.begin();
+  for (int i = 0; i < rank; ++i, ++iter) {
+    if (dim_x[i] != *iter) {
+      cpp11::stop("Expected dimension %d of '%s' to have length %d but it had length %d",
+                  i, name, *iter, dim_x[i]);
+    }
+  }
 }
 
 inline double to_double(cpp11::sexp x, const char * name) {
@@ -437,6 +487,37 @@ void read_real_vector(cpp11::list args, size_t len, real_type * dest,
     }
   } else {
     check_length(value, len, name);
+    if (TYPEOF(value) == REALSXP) {
+      auto value_dbl = cpp11::as_cpp<cpp11::doubles>(value);
+      std::copy(value_dbl.begin(), value_dbl.end(), dest);
+    } else if (TYPEOF(value) == INTSXP) {
+      auto value_int = cpp11::as_cpp<cpp11::integers>(value);
+      std::copy(value_int.begin(), value_int.end(), dest);
+    } else {
+      cpp11::stop("'%s' must be numeric", name);
+    }
+  }
+}
+
+template <typename real_type>
+void read_real_array(cpp11::list args, std::initializer_list<int> dims,
+                     real_type * dest, const char *name, bool required) {
+  cpp11::sexp value = args[name];
+  if (value == R_NilValue) {
+    if (required) {
+      cpp11::stop("A value is expected for '%s'", name);
+    }
+  } else {
+    if (dims.size() == 1) {
+      const auto len = *(dims.begin());
+      check_length(value, len, name);
+    } else if (dims.size() == 2) {
+      const auto nrow = dims.begin();
+      const auto ncol = nrow + 1;
+      check_dims_matrix(value, *nrow, *ncol, name);
+    } else {
+      check_dims_matrix(value, dims, name);
+    }
     if (TYPEOF(value) == REALSXP) {
       auto value_dbl = cpp11::as_cpp<cpp11::doubles>(value);
       std::copy(value_dbl.begin(), value_dbl.end(), dest);
