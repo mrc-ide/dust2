@@ -107,7 +107,7 @@ public:
 
   static data_type build_data(cpp11::list r_data) {
     auto data = static_cast<cpp11::list>(r_data);
-    auto incidence = dust2::r::read_real(data, "incidence");
+    auto incidence = dust2::r::read_real(data, "incidence", NA_REAL);
     return data_type{incidence};
   }
 

@@ -21,13 +21,28 @@ inline void check_length(cpp11::sexp x, int len, const char * name) {
   }
 }
 
-inline double to_double(cpp11::sexp x, const char * name) {
+inline double to_double(cpp11::sexp x, bool allow_na, const char * name) {
   check_scalar(x, name);
   if (TYPEOF(x) == REALSXP) {
-    return REAL(x)[0];
+    double ret = REAL(x)[0];
+    if (!allow_na && ISNA(ret)) {
+      cpp11::stop("'%s' must not be a missing value (NA)", name);
+    }
+    return ret;
   }
   if (TYPEOF(x) == INTSXP) {
-    return INTEGER(x)[0];
+    int ret = INTEGER(x)[0];
+    if (ISNA(ret)) {
+      if (allow_na) {
+	return NA_REAL;
+      } else {
+	cpp11::stop("'%s' must not be a missing value (NA)", name);
+      }
+    }
+    return static_cast<double>(ret);
+  }
+  if (allow_na && TYPEOF(x) == LGLSXP && ISNA(INTEGER(x)[0])) {
+    return NA_REAL;
   }
   cpp11::stop("'%s' must be scalar numeric", name);
 }
@@ -100,7 +115,8 @@ inline cpp11::integers as_integers(cpp11::doubles x, const char * name) {
 }
 
 inline double check_time(cpp11::sexp r_time, const char * name) {
-  const auto time = to_double(r_time, name);
+  const auto allow_na = false;
+  const auto time = to_double(r_time, allow_na, name);
   const auto eps = 1e-8;
   // We can relax this later and carefully align time onto a grid
   if (!is_integer_like(time, eps)) {
@@ -110,7 +126,8 @@ inline double check_time(cpp11::sexp r_time, const char * name) {
 }
 
 inline double check_dt(cpp11::sexp r_dt) {
-  const auto dt = to_double(r_dt, "dt");
+  const auto allow_na = false;
+  const auto dt = to_double(r_dt, allow_na, "dt");
   const auto eps = 1e-8;
   if (dt <= 0) {
     cpp11::stop("Expected 'dt' to be greater than 0");
@@ -372,17 +389,19 @@ inline auto check_rng_state(cpp11::sexp r_rng_state,
 }
 
 inline double read_real(cpp11::list args, const char * name) {
+  const bool allow_na = false;
   cpp11::sexp value = args[name];
   if (value == R_NilValue) {
     cpp11::stop("A value is expected for '%s'", name);
   }
-  return to_double(value, name);
+  return to_double(value, allow_na, name);
 }
 
 inline double read_real(cpp11::list args, const char * name,
                         double default_value) {
+  const bool allow_na = ISNA(default_value);
   cpp11::sexp value = args[name];
-  return value == R_NilValue ? default_value : to_double(value, name);
+  return value == R_NilValue ? default_value : to_double(value, allow_na, name);
 }
 
 inline int read_int(cpp11::list args, const char * name) {
