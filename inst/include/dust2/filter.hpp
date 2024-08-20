@@ -123,6 +123,11 @@ public:
     return rng_.import_state(rng_state);
   }
 
+  auto select_random_particle(size_t group) {
+    const auto u = mcstate::random::random_real<real_type>(rng_.state(group));
+    return static_cast<size_t>(std::floor(u * n_particles_));
+  }
+
 private:
   real_type time_start_;
   std::vector<real_type> time_;

@@ -85,7 +85,7 @@ cpp11::sexp dust2_unfilter_last_history(cpp11::sexp ptr,
 
   const auto len = n_state * n_particles * n_groups * n_times;
   cpp11::sexp ret = cpp11::writable::doubles(len);
-  history.export_state(REAL(ret), reorder, index_group);
+  history.export_state(REAL(ret), reorder, index_group, {});
   if (preserve_group_dimension && preserve_particle_dimension) {
     set_array_dims(ret, {n_state, n_particles, n_groups, n_times});
   } else if (preserve_group_dimension || preserve_particle_dimension) {

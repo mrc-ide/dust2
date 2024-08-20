@@ -193,10 +193,22 @@ dust_filter_run <- function(filter, pars, initial = NULL,
 ##'
 ##' @inheritParams dust_filter_run
 ##'
-##' @return An array
+##' @inheritParams select_random_particle Logical, indicating if we
+##'   should return a history for one randomly selected particle
+##'   (rather than the entire history).  If this is `TRUE`, the
+##'   particle will be selected independently for each group, if the
+##'   filter is grouped.  This option is intended to help select a
+##'   representative trajectory during an MCMC.  When `TRUE`, we drop
+##'   the `particle` dimension of the return value.
+##'
+##' @return An array.  If ungrouped this will have dimensions `state`
+##'   x `particle` x `time`, and if grouped then `state` x `particle`
+##'   x `group` x `time`.  If `select_random_particle = TRUE`, the
+##'   second (particle) dimension will be dropped.
 ##'
 ##' @export
-dust_filter_last_history <- function(filter, index_group = NULL) {
+dust_filter_last_history <- function(filter, index_group = NULL,
+                                     select_random_particle = FALSE) {
   check_is_dust_filter(filter)
   if (is.null(filter$ptr)) {
     cli::cli_abort(c(
@@ -205,7 +217,9 @@ dust_filter_last_history <- function(filter, index_group = NULL) {
   }
   index_group <- check_index(index_group, max = filter$n_groups,
                              unique = TRUE)
+  assert_scalar_logical(select_random_particle)
   filter$methods$last_history(filter$ptr, index_group,
+                              select_random_particle,
                               filter$preserve_group_dimension)
 }
 

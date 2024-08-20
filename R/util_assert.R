@@ -86,7 +86,7 @@ assert_scalar_numeric <- function(x, name = deparse(substitute(x)),
 
 
 assert_scalar_logical <- function(x, name = deparse(substitute(x)),
-                                  arg = name, call = NULL) {
+                                  arg = name, call = parent.frame()) {
   assert_scalar(x, name, arg = arg, call = call)
   assert_logical(x, name, arg = arg, call = call)
   assert_nonmissing(x, name, arg = arg, call = call)

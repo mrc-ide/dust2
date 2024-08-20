@@ -27,6 +27,7 @@ cpp11::list test_scale_log_weights(std::vector<double> w) {
 cpp11::sexp test_history_(cpp11::doubles r_time, cpp11::list r_state,
                           cpp11::sexp r_order,
                           cpp11::sexp r_index_group,
+			  cpp11::sexp r_index_particle,
                           bool reorder) {
   const size_t n_times = r_time.size();
   cpp11::sexp el0 = r_state[0];
@@ -38,11 +39,21 @@ cpp11::sexp test_history_(cpp11::doubles r_time, cpp11::list r_state,
     all_groups.push_back(i);
   }
 
-  const auto index_group = r_index_group == R_NilValue ? all_groups :
-    dust2::r::check_index(r_index_group, all_groups.size(), "index_group");
   const size_t n_state = r_dim[0];
   const size_t n_particles = r_dim[1];
+
+  const auto index_group = r_index_group == R_NilValue ? all_groups :
+    dust2::r::check_index(r_index_group, all_groups.size(), "index_group");
+  std::vector<size_t> index_particle;
+  if (r_index_particle != R_NilValue) {
+    dust2::r::check_length(r_index_particle, all_groups.size(),
+			   "index_particle");
+    index_particle = dust2::r::check_index(r_index_particle, n_particles,
+					   "index_particle");
+  }
+
   const size_t n_groups = index_group.size();
+  const size_t n_particles_out = index_particle.empty() ? n_particles : 1;
 
   dust2::history<double> h(n_state, n_particles, n_groups_all, n_times);
   for (size_t i = 0; i < static_cast<size_t>(r_state.size()); ++i) {
@@ -60,11 +71,11 @@ cpp11::sexp test_history_(cpp11::doubles r_time, cpp11::list r_state,
 
   const auto n_times_out = h.n_times();
   cpp11::writable::doubles ret_time(static_cast<int>(n_times_out));
-  const size_t len = n_state * n_particles * n_groups * n_times_out;
+  const size_t len = n_state * n_particles_out * n_groups * n_times_out;
   cpp11::writable::doubles ret_state(static_cast<int>(len));
   h.export_time(REAL(ret_time));
-  h.export_state(REAL(ret_state), reorder, index_group);
-  dust2::r::set_array_dims(ret_state, {n_state, n_particles, n_groups, n_times_out});
+  h.export_state(REAL(ret_state), reorder, index_group, index_particle);
+  dust2::r::set_array_dims(ret_state, {n_state, n_particles_out, n_groups, n_times_out});
 
   return cpp11::writable::list{ret_time, ret_state};
 }

@@ -132,8 +132,8 @@ dust2_filter_sir_run <- function(ptr, r_initial, save_history, index_group, pres
   .Call(`_dust2_dust2_filter_sir_run`, ptr, r_initial, save_history, index_group, preserve_group_dimension)
 }
 
-dust2_filter_sir_last_history <- function(ptr, r_index_group, preserve_group_dimension) {
-  .Call(`_dust2_dust2_filter_sir_last_history`, ptr, r_index_group, preserve_group_dimension)
+dust2_filter_sir_last_history <- function(ptr, r_index_group, select_random_particle, preserve_group_dimension) {
+  .Call(`_dust2_dust2_filter_sir_last_history`, ptr, r_index_group, select_random_particle, preserve_group_dimension)
 }
 
 dust2_filter_sir_rng_state <- function(ptr) {
@@ -208,8 +208,8 @@ test_scale_log_weights <- function(w) {
   .Call(`_dust2_test_scale_log_weights`, w)
 }
 
-test_history_ <- function(r_time, r_state, r_order, r_index_group, reorder) {
-  .Call(`_dust2_test_history_`, r_time, r_state, r_order, r_index_group, reorder)
+test_history_ <- function(r_time, r_state, r_order, r_index_group, r_index_particle, reorder) {
+  .Call(`_dust2_test_history_`, r_time, r_state, r_order, r_index_group, r_index_particle, reorder)
 }
 
 test_interpolate_search <- function(target, x) {
