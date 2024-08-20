@@ -76,3 +76,35 @@ test_that("can avoid errors by converting to impossible density", {
                "Invalid call to binomial")
   expect_equal(m2$density(c(-1, -1)), -Inf)
 })
+
+
+test_that("can create wrapper around filter with multiple pars", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+
+  time_start <- 0
+  data <- data.frame(group = rep(1:2, each = 4),
+                     time = rep(c(4, 8, 12, 16), 2),
+                     incidence = c(1:4, 2:5))
+
+  obj <- dust_filter_create(sir(), time_start, data, n_particles = 100,
+                            seed = 42)
+  obj1 <- dust_filter_create(sir(), time_start, data[data$group == 1, ],
+                             n_particles = 100, seed = 42)
+  packer <- mcstate2::mcstate_packer(
+    c("beta", "gamma"),
+    fixed = list(N = 1000, I0 = 10, exp_noise = 1e6))
+
+  m <- dust_filter_mcstate(obj, packer)
+  expect_true(m$properties$allow_multiple_parameters)
+  expect_true(m$properties$is_stochastic)
+
+  m1 <- dust_filter_mcstate(obj1, packer)
+  expect_false(m1$properties$allow_multiple_parameters)
+
+  p <- cbind(c(0.2, 0.1), c(0.25, 0.1))
+
+  ll <- mcstate2::mcstate_model_density(m, p)
+  ll1 <- mcstate2::mcstate_model_density(m1, p[, 1])
+  expect_length(ll, 2)
+  expect_equal(ll[[1]], ll1)
+})

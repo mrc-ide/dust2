@@ -90,6 +90,7 @@ dust_filter_mcstate <- function(filter, packer, initial = NULL,
     is_stochastic = !filter$deterministic,
     has_direct_sample = FALSE,
     has_gradient = filter$deterministic && filter$has_adjoint,
+    allow_multiple_parameters = filter$preserve_group_dimension,
     has_parameter_groups = FALSE)
 
   gradient <- NULL
@@ -110,7 +111,7 @@ dust_filter_mcstate <- function(filter, packer, initial = NULL,
     ## but us should be depending on the internal structures of
     ## filter.
     density <- function(x) {
-      pars <- packer$unpack(x)
+      pars <- packer_unpack(packer, x)
       if (!identical(x, attr(filter$ptr, "last_pars"))) {
         ret <- dust_unfilter_run(
           filter,
@@ -134,7 +135,7 @@ dust_filter_mcstate <- function(filter, packer, initial = NULL,
     }
   } else {
     density <- function(x) {
-      pars <- packer$unpack(x)
+      pars <- packer_unpack(packer, x)
       dust_filter_run(
         filter,
         pars,
@@ -177,4 +178,13 @@ dust_filter_mcstate <- function(filter, packer, initial = NULL,
          get_rng_state = get_rng_state,
          set_rng_state = set_rng_state),
     properties)
+}
+
+
+packer_unpack <- function(packer, x) {
+  if (is.matrix(x)) {
+    lapply(seq_len(ncol(x)), function(i) packer$unpack(x[, i]))
+  } else {
+    packer$unpack(x)
+  }
 }
