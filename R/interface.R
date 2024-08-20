@@ -554,6 +554,10 @@ print.dust_system <- function(x, ...) {
     cli::cli_bullets(c(
       i = "This system has 'compare_data' support"))
   }
+  if (x$properties$has_adjoint) {
+    cli::cli_bullets(c(
+      i = "This system has 'adjoint' support, and can compute gradients"))
+  }
   cli::cli_bullets(c(
     i = "This system runs in {x$properties$time_type} time"))
   ## Later, we might print some additional capabilities of the system

@@ -5,7 +5,7 @@ test_that("can run an unfilter via the adjoint method", {
   data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
 
   obj <- dust_unfilter_create(sir(), time_start, data)
-  ll1 <- dust_unfilter_run(obj, pars)
+  ll1 <- dust_unfilter_run(obj, pars, adjoint = FALSE)
   ll2 <- dust_unfilter_run(obj, pars, adjoint = TRUE)
   expect_identical(ll2, ll1)
 })
@@ -38,9 +38,25 @@ test_that("can't compute adjoint where it was not enabled in the unfilter", {
   obj <- dust_unfilter_create(sir(), time_start, data)
   expect_error(dust_unfilter_last_gradient(obj),
                "Gradient is not current")
-  ll1 <- dust_unfilter_run(obj, pars)
+  ll1 <- dust_unfilter_run(obj, pars, adjoint = FALSE)
   expect_error(dust_unfilter_last_gradient(obj),
                "System was not run with 'adjoint = TRUE'")
+})
+
+
+test_that("adjoint is enabled in unfilter by default", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+
+  ## TODO: these errors end up quite different, but that's
+  ## unavoidable?
+  obj <- dust_unfilter_create(sir(), time_start, data)
+  expect_error(dust_unfilter_last_gradient(obj),
+               "Gradient is not current")
+  ll <- dust_unfilter_run(obj, pars)
+  expect_length(dust_unfilter_last_gradient(obj), 3)
 })
 
 
@@ -61,7 +77,7 @@ test_that("can compute multiple gradients at once", {
     dust_unfilter_create(sir(), time_start, data[data$group == i, -2])
   })
 
-  ll1 <- dust_unfilter_run(obj1, pars)
+  ll1 <- dust_unfilter_run(obj1, pars, adjoint = FALSE)
   ll2 <- dust_unfilter_run(obj1, pars, adjoint = TRUE)
   expect_equal(ll1, ll2)
 
@@ -89,7 +105,7 @@ test_that("can save history while running unfilter with adjoint", {
   data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
 
   obj <- dust_unfilter_create(sir(), time_start, data)
-  ll1 <- dust_unfilter_run(obj, pars, save_history = TRUE)
+  ll1 <- dust_unfilter_run(obj, pars, adjoint = FALSE, save_history = TRUE)
   h1 <- dust_unfilter_last_history(obj)
 
   ll2 <- dust_unfilter_run(obj, pars, adjoint = TRUE, save_history = TRUE)

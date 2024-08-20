@@ -54,6 +54,7 @@ dust_unfilter_create <- function(generator, time_start, data,
          n_particles = as.integer(n_particles),
          n_groups = as.integer(n_groups),
          deterministic = TRUE,
+         has_adjoint = generator$properties$has_adjoint,
          methods = generator$methods$unfilter,
          index_state = index_state,
          preserve_particle_dimension = preserve_particle_dimension,
@@ -89,10 +90,11 @@ unfilter_create <- function(unfilter, pars) {
 ##' @param unfilter A `dust_unfilter` object, created by
 ##'   [dust_unfilter_create]
 ##'
-##' @param adjoint Logical, indicating if we should enable adjoint
-##'   history saving.  This can be enabled even when your model does not
-##'   support adjoints!  But you will not be able to compute
-##'   gradients.
+##' @param adjoint Optional logical, indicating if we should enable
+##'   adjoint history saving.  This is enabled by default if your
+##'   model has an adjoint, but can be disabled or enabled even when
+##'   your model does not support adjoints!  But if you don't actually
+##'   have an adjoint you will not be able to compute gradients.
 ##'
 ##' @inheritParams dust_filter_run
 ##'
@@ -101,7 +103,7 @@ unfilter_create <- function(unfilter, pars) {
 ##'
 ##' @export
 dust_unfilter_run <- function(unfilter, pars, initial = NULL,
-                              save_history = FALSE, adjoint = FALSE,
+                              save_history = FALSE, adjoint = NULL,
                               index_group = NULL) {
   check_is_dust_unfilter(unfilter)
   index_group <- check_index(index_group, max = unfilter$n_groups,
@@ -123,6 +125,11 @@ dust_unfilter_run <- function(unfilter, pars, initial = NULL,
     unfilter_create(unfilter, pars)
   } else if (!is.null(pars)) {
     unfilter$methods$update_pars(unfilter$ptr, pars, index_group)
+  }
+  if (is.null(adjoint)) {
+    adjoint <- unfilter$has_adjoint
+  } else {
+    assert_scalar_logical(adjoint, call = environment())
   }
   unfilter$methods$run(unfilter$ptr,
                        initial,

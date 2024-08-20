@@ -42,6 +42,10 @@ test_that("can create deterministic model", {
 
   m <- dust_filter_mcstate(obj, packer)
   expect_false(m$properties$is_stochastic)
+  expect_true(m$properties$has_gradient)
+
+  expect_length(m$density(c(0.2, 0.1)), 1)
+  expect_length(m$gradient(c(0.2, 0.1)), 3)
 
   expect_s3_class(m, "mcstate_model")
   sampler <- mcstate2::mcstate_sampler_random_walk(diag(2) * c(0.02, 0.02))
