@@ -42,6 +42,12 @@ test_that("can use history", {
   expect_equal(test_history(time, s, order = vector("list", length(time)),
                             reorder = TRUE),
                list(time, s_arr))
+
+  res <- test_history(time, s, index_particle = c(6, 4, 2))[[2]]
+  expect_equal(dim(res), c(n_state, n_groups, n_time))
+  expect_equal(res[, 1, ], s_arr[, 6, 1, ])
+  expect_equal(res[, 2, ], s_arr[, 4, 2, ])
+  expect_equal(res[, 3, ], s_arr[, 2, 3, ])
 })
 
 

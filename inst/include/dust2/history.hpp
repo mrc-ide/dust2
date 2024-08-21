@@ -176,8 +176,8 @@ public:
 	for (auto j : index_group) {
 	  const auto offset_state = j * n_state_ * n_particles_;
 	  if (use_select_particle) {
-	    const auto offset_i = select_particle[i] * n_state_;
-	    iter = std::copy_n(iter_state + offset_state + offset_i,
+	    const auto offset_j = select_particle[j] * n_state_;
+	    iter = std::copy_n(iter_state + offset_state + offset_j,
 			       n_state_,
 			       iter);
 	  } else {

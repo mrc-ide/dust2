@@ -45,7 +45,8 @@ cpp11::sexp test_history_(cpp11::doubles r_time, cpp11::list r_state,
   const auto index_group = r_index_group == R_NilValue ? all_groups :
     dust2::r::check_index(r_index_group, all_groups.size(), "index_group");
   std::vector<size_t> index_particle;
-  if (r_index_particle != R_NilValue) {
+  const bool use_index_particle = r_index_particle != R_NilValue;
+  if (use_index_particle) {
     dust2::r::check_length(r_index_particle, all_groups.size(),
 			   "index_particle");
     index_particle = dust2::r::check_index(r_index_particle, n_particles,
@@ -75,7 +76,12 @@ cpp11::sexp test_history_(cpp11::doubles r_time, cpp11::list r_state,
   cpp11::writable::doubles ret_state(static_cast<int>(len));
   h.export_time(REAL(ret_time));
   h.export_state(REAL(ret_state), reorder, index_group, index_particle);
-  dust2::r::set_array_dims(ret_state, {n_state, n_particles_out, n_groups, n_times_out});
+
+  if (use_index_particle) {
+    dust2::r::set_array_dims(ret_state, {n_state, n_particles_out * n_groups, n_times_out});
+  } else {
+    dust2::r::set_array_dims(ret_state, {n_state, n_particles_out, n_groups, n_times_out});
+  }
 
   return cpp11::writable::list{ret_time, ret_state};
 }
