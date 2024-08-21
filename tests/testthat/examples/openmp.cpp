@@ -24,7 +24,7 @@ public:
   struct shared_state {};
   using internal_state = dust2::no_internal_state;
   using data_type = dust2::no_data;
-  using rng_state_type = mcstate::random::generator<real_type>;
+  using rng_state_type = monty::random::generator<real_type>;
 
   static dust2::packing packing_state(const shared_state& shared) {
     return dust2::packing{{"x", {}}};

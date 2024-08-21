@@ -27,8 +27,8 @@ The relevant section of the `update()` method looks like this:
 ```c++
 const auto S = state[0];
 const auto I = state[1];
-const auto p_SI = 1 - mcstate::math::exp(-shared.beta * I / shared.N * dt);
-const auto n_SI = mcstate::random::binomial<real_type>(rng_state, S, p_SI);
+const auto p_SI = 1 - monty::math::exp(-shared.beta * I / shared.N * dt);
+const auto n_SI = monty::random::binomial<real_type>(rng_state, S, p_SI);
 state_next[4] += n_SI;
 ```
 

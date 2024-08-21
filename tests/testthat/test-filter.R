@@ -112,7 +112,7 @@ test_that("can run a nested particle filter and get the same result", {
 
   ## Here, we can check the layout of the rng within the filter and system:
   n_streams <- (n_particles + 1) * 2
-  r <- mcstate2::mcstate_rng$new(n_streams = n_streams, seed = seed)$state()
+  r <- monty::monty_rng$new(n_streams = n_streams, seed = seed)$state()
   s <- dust_filter_rng_state(obj)
   expect_equal(s, r)
 
@@ -420,7 +420,7 @@ test_that("can skip over just some groups with missing data", {
 
   ## see test some way above for this:
   n_streams <- (n_particles + 1) * 2
-  r <- mcstate2::mcstate_rng$new(n_streams = n_streams, seed = seed)$state()
+  r <- monty::monty_rng$new(n_streams = n_streams, seed = seed)$state()
   seed2 <- r[3233:3264]
 
   obj <- dust_filter_create(sir(), time_start, data, dt = dt,

@@ -27,7 +27,7 @@ public:
     real_type incidence;
   };
 
-  using rng_state_type = mcstate::random::generator<real_type>;
+  using rng_state_type = monty::random::generator<real_type>;
 
   static dust2::packing packing_state(const shared_state& shared) {
     return dust2::packing{{"S", {}}, {"I", {}}, {"R", {}}, {"cases_cumul", {}}, {"cases_inc", {}}};

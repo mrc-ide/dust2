@@ -179,10 +179,10 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
   }
   ## Here, we augment things slightly
   res$name <- generator$name
-  res$packer_state <- mcstate2::mcstate_packer(array = res$packing_state)
+  res$packer_state <- monty::monty_packer(array = res$packing_state)
   if (!is.null(res$packing_gradient)) {
     res$packer_gradient <-
-      mcstate2::mcstate_packer(array = res$packing_gradient)
+      monty::monty_packer(array = res$packing_gradient)
   }
   res$n_particles <- as.integer(n_particles)
   res$n_groups <- as.integer(n_groups)

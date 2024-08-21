@@ -189,7 +189,7 @@ private:
   std::vector<size_t> order_;
   std::vector<bool> reorder_;
 
-  // Reference implementation for this is mcstate:::history_single and
+  // Reference implementation for this is mcstate::history_single and
   // mcstate::history_multiple
   template <typename Iter>
   void reorder_group_(typename std::vector<real_type>::const_iterator iter_state,

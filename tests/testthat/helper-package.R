@@ -9,7 +9,7 @@ create_test_package <- function(path, name = "pkg",
   desc <- c(
     sprintf("Package: %s", name),
     "Imports: dust2",
-    "LinkingTo: cpp11, dust2, mcstate2",
+    "LinkingTo: cpp11, dust2, monty",
     "Version: 0.0.1",
     "Authors@R: c(person('A', 'Person', role = c('aut', 'cre'),",
     "                    email = 'person@example.com'))",

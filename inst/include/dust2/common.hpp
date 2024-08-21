@@ -2,8 +2,8 @@
 
 // This will likely move around a bit.  Also note that we have an odd
 // choice of directory here.
-#include <mcstate/random/random.hpp>
-#include <mcstate/random/density.hpp>
+#include <monty/random/random.hpp>
+#include <monty/random/density.hpp>
 #include <dust2/packing.hpp>
 #include <dust2/tools.hpp>
 #include <dust2/zero.hpp>

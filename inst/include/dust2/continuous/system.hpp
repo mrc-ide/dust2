@@ -12,7 +12,7 @@
 #include <dust2/packing.hpp>
 #include <dust2/tools.hpp>
 #include <dust2/zero.hpp>
-#include <mcstate/random/random.hpp>
+#include <monty/random/random.hpp>
 
 namespace dust2 {
 
@@ -297,7 +297,7 @@ private:
   real_type time_;
   std::vector<zero_every_type<real_type>> zero_every_;
   dust2::utils::errors errors_;
-  mcstate::random::prng<rng_state_type> rng_;
+  monty::random::prng<rng_state_type> rng_;
   ode::solver<real_type> solver_;
   size_t n_threads_;
 

@@ -4,8 +4,8 @@
 ## easier to read (and quite a lot slower due to churn in state).
 sir_filter_manual <- function(pars, time_start, data, dt, n_particles,
                               seed) {
-  r <- mcstate2::mcstate_rng$new(n_streams = 1, seed = seed)
-  seed <- mcstate2::mcstate_rng$new(n_streams = 1, seed = seed)$jump()$state()
+  r <- monty::monty_rng$new(n_streams = 1, seed = seed)
+  seed <- monty::monty_rng$new(n_streams = 1, seed = seed)$jump()$state()
 
   obj <- dust_system_create(sir(), pars, n_particles,
                             time = time_start, dt = dt, seed = seed)

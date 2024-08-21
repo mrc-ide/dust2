@@ -1,7 +1,7 @@
 #pragma once
 
 #include <dust2/r/helpers.hpp>
-#include <mcstate/r/random.hpp>
+#include <monty/r/random.hpp>
 #include <dust2/r/system.hpp>
 #include <dust2/r/continuous/control.hpp>
 
@@ -31,7 +31,7 @@ SEXP dust2_continuous_alloc(cpp11::list r_pars,
   const auto shared = build_shared<T>(r_pars, n_groups);
   const auto internal = build_internal<T>(shared, n_threads);
 
-  auto seed = mcstate::random::r::as_rng_seed<rng_state_type>(r_seed);
+  auto seed = monty::random::r::as_rng_seed<rng_state_type>(r_seed);
   auto deterministic = to_bool(r_deterministic, "deterministic");
   auto ode_control = validate_ode_control<real_type>(r_ode_control);
 

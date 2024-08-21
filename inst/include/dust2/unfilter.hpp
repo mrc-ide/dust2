@@ -3,7 +3,7 @@
 #include <dust2/adjoint_data.hpp>
 #include <dust2/filter_details.hpp>
 #include <dust2/history.hpp>
-#include <mcstate/random/random.hpp>
+#include <monty/random/random.hpp>
 
 namespace dust2 {
 

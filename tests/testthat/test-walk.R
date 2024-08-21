@@ -12,7 +12,7 @@ test_that("can run simple walk system", {
   expect_null(dust_system_run_to_time(obj, 3))
   s <- dust_system_state(obj)
 
-  r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
+  r <- monty::monty_rng$new(seed = 42, n_streams = 10)
   expect_equal(s, rbind(colSums(r$normal(3, 0, 1))))
   expect_equal(dust_system_time(obj), 3)
 
@@ -29,7 +29,7 @@ test_that("can set system state from a vector", {
 
   expect_null(dust_system_run_to_time(obj, 3))
 
-  r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
+  r <- monty::monty_rng$new(seed = 42, n_streams = 10)
   expect_equal(dust_system_state(obj),
                colSums(r$normal(3, 0, 1)) + s)
 })
@@ -39,7 +39,7 @@ test_that("can set system state from initial conditions", {
   pars <- list(sd = 1, random_initial = TRUE)
   obj <- dust_system_create(walk(), pars, n_particles = 10, seed = 42)
   expect_null(dust_system_set_state_initial(obj))
-  r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
+  r <- monty::monty_rng$new(seed = 42, n_streams = 10)
   expect_equal(dust_system_state(obj),
                r$normal(1, 0, 1))
 })
@@ -157,7 +157,7 @@ test_that("can initialise multiple groups with different parameter sets", {
   expect_null(dust_system_run_to_time(obj, 3))
   s <- dust_system_state(obj)
 
-  r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 40)
+  r <- monty::monty_rng$new(seed = 42, n_streams = 40)
   expect_equal(
     s,
     array(colSums(r$normal(3, 0, 1)) * rep(1:4, each = 10), c(1, 10, 4)))
@@ -174,7 +174,7 @@ test_that("can create multi-state walk system", {
   expect_equal(dust_system_state(obj), array(0, c(3, 10)))
   expect_null(dust_system_set_state_initial(obj))
 
-  r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
+  r <- monty::monty_rng$new(seed = 42, n_streams = 10)
   s0 <- dust_system_state(obj)
   expect_equal(s0, r$normal(3, 0, 1))
 
@@ -231,7 +231,7 @@ test_that("can update parameters", {
   expect_null(dust_system_run_to_time(obj, 2))
   s2 <- dust_system_state(obj)
 
-  r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
+  r <- monty::monty_rng$new(seed = 42, n_streams = 10)
   expect_equal(s1, r$normal(1, 0, 1))
   expect_equal(s2, s1 + r$normal(1, 0, 10))
 })
@@ -251,7 +251,7 @@ test_that("can update parameters for grouped systems", {
   expect_null(dust_system_run_to_time(obj, 2))
   s2 <- dust_system_state(obj)
 
-  r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 40)
+  r <- monty::monty_rng$new(seed = 42, n_streams = 40)
   expect_equal(s1, array(r$normal(1, 0, 1) * rep(1:4, each = 10),
                          c(1, 10, 4)))
   expect_equal(s2, array(s1 + drop(r$normal(1, 0, 10)) * rep(1:4, each = 10),

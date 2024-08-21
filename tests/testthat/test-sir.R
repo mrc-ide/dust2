@@ -8,7 +8,7 @@ test_that("can run simple sir system", {
   expect_equal(obj$packing_state,
                list(S = integer(), I = integer(), R = integer(),
                     cases_cumul = integer(), cases_inc = integer()))
-  expect_s3_class(obj$packer_state, "mcstate_packer")
+  expect_s3_class(obj$packer_state, "monty_packer")
 
   expect_type(dust_system_rng_state(obj), "raw")
   expect_length(dust_system_rng_state(obj), 32 * 10)
@@ -36,7 +36,7 @@ test_that("can compare to data", {
   dust_system_set_state(obj, s)
   d <- list(incidence = 30)
 
-  r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
+  r <- monty::monty_rng$new(seed = 42, n_streams = 10)
   eps <- drop(r$exponential_rate(1, 0.5))
 
   expect_equal(
@@ -53,7 +53,7 @@ test_that("can compare to data when missing", {
   dust_system_set_state(obj, s)
   d <- list(incidence = NA_real_)
 
-  r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10)
+  r <- monty::monty_rng$new(seed = 42, n_streams = 10)
   expect_equal(
     dust_system_compare_data(obj, d),
     rep(0, 10))
@@ -75,7 +75,7 @@ test_that("can compare against multple parameter groups at once", {
   d <- lapply(1:4, function(i) list(incidence = 30 + i))
   res <- dust_system_compare_data(obj, d)
 
-  r <- mcstate2::mcstate_rng$new(seed = 42, n_streams = 10 * 4)
+  r <- monty::monty_rng$new(seed = 42, n_streams = 10 * 4)
   rate <- rep(10^(1:4), each = 10)
   eps <- matrix(r$exponential_rate(1, 1) /  rate, 10, 4)
   expect_equal(
