@@ -48,9 +48,9 @@ reference:
     contents:
       - dust_compile
       - dust_package
-  - title: Interface to mcstate2
+  - title: Interface to monty
     contents:
-      - dust_filter_mcstate
+      - dust_filter_monty
 
 articles:
   - title: Details

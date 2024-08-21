@@ -109,7 +109,7 @@ package_validate_root <- function(path, call) {
     package_validate_has_dep(desc, "dust2", "LinkingTo")
   }
   package_validate_has_dep(desc, "cpp11", "LinkingTo")
-  package_validate_has_dep(desc, "mcstate2", "LinkingTo")
+  package_validate_has_dep(desc, "monty", "LinkingTo")
 
   name <- desc$get_field("Package")
   if (grepl("[._]+", name)) {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mcstate/r/random.hpp>
+#include <monty/r/random.hpp>
 #include <dust2/r/helpers.hpp>
 #include <dust2/r/filter.hpp>
 #include <dust2/filter.hpp>
@@ -37,12 +37,12 @@ cpp11::sexp dust2_discrete_filter_alloc(cpp11::list r_pars,
   // deterministic here?  Though nooone can think of a case where
   // that's actually the behaviour wanted.  For now let's go fully
   // deterministic.
-  auto seed = mcstate::random::r::as_rng_seed<rng_state_type>(r_seed);
+  auto seed = monty::random::r::as_rng_seed<rng_state_type>(r_seed);
   const auto deterministic = false;
 
   // Create all the required rng states across the filter and the
   // system, in a reasonable way.  We need to make this slightly easier
-  // to do from mcstate really.  Expand the state to give all the
+  // to do from monty really.  Expand the state to give all the
   // state required by the filter (n_groups streams worth) and the
   // system (n_groups * n_particles worth, though the last bit of
   // expansion could be done by the system itself instead?)
@@ -62,7 +62,7 @@ cpp11::sexp dust2_discrete_filter_alloc(cpp11::list r_pars,
   // the results, though we can't change the number of particles as
   // easily.
   const auto n_streams = n_groups * (n_particles + 1);
-  const auto rng_state = mcstate::random::prng<rng_state_type>(n_streams, seed, deterministic).export_state();
+  const auto rng_state = monty::random::prng<rng_state_type>(n_streams, seed, deterministic).export_state();
   const auto rng_len = rng_state_type::size();
   rng_seed_type seed_filter;
   rng_seed_type seed_system;

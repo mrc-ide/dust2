@@ -1,10 +1,10 @@
-##' Create a [mcstate_model] from a `dust_filter` object.
+##' Create a [monty_model] from a `dust_filter` object.
 ##'
 ##' # Random number streams
 ##'
 ##' The short version: the seed argument that you may have passed to
 ##' [dust_filter_create] will be ignored when using a
-##' `dust_filter_mcstate` model with algorithms from mcstate2.  You
+##' `dust_filter_monty` model with algorithms from monty.  You
 ##' should generally not worry about this, it is expected.
 ##'
 ##' When you initialise a filter, you provide a random number seed
@@ -12,18 +12,18 @@
 ##' streams (one for the filter for each group, then for each group
 ##' one per particle).  If you run the filter directly (e.g., with
 ##' [dust_filter_run] then you will advance the state of the filter).
-##' However, if you use the filter with mcstate2 (which is why you're
-##' using `dust_filter_mcstate`) we will ignore this seeding.
+##' However, if you use the filter with monty (which is why you're
+##' using `dust_filter_monty`) we will ignore this seeding.
 ##'
 ##' When running mcmc with `n_chains` chains, we need `n_chains *
 ##' n_groups * (n_particles + 1)` random number streams - that is
 ##' enough streams for every chain to have a filter with its own set
-##' of chains.  mcstate2 will look after this for us, but the upshot
+##' of chains.  monty will look after this for us, but the upshot
 ##' is that the random number state that you may have previously set
 ##' when building the filter will be ignored as we need to create a
 ##' series of suitable seeds.
 ##'
-##' The seeds provided by mcstate will start at some point in the RNG
+##' The seeds provided by monty will start at some point in the RNG
 ##' state space (2^256 possible states by default).  In an MCMC, each
 ##' chain will have a seed that is created by performing a
 ##' "long jump", moving 2^192 steps along the chain.  Then within each
@@ -31,11 +31,11 @@
 ##' the streams we need across the groups, filters and particles.
 ##' This ensures independence across the stochastic components of the
 ##' system but also the reproducibility and predictability of the
-##' system.  The initial seeding performed by mcstate2 will respond to
+##' system.  The initial seeding performed by monty will respond to
 ##' R's RNG (i.e., it will follow `set.seed`) if an explicit seed is
 ##' not given.
 ##'
-##' @title Create mcstate model
+##' @title Create monty model
 ##'
 ##' @param filter A `dust_filter` object, created from [dust_filter_create]
 ##'
@@ -52,7 +52,7 @@
 ##'   column representing the lower bound and the second column
 ##'   representing the upper bound.  You do not need to specify
 ##'   parameters that have a domain of `(-Inf, Inf)` as this is
-##'   assumed.  We use [mcstate2::mcstate_domain_expand] to expand
+##'   assumed.  We use [monty::monty_domain_expand] to expand
 ##'   logical parameters, so if you have a vector-valued parameter `b`
 ##'   and a domain entry called `b` we will expand this to all
 ##'   elements of `b`.
@@ -67,16 +67,16 @@
 ##'   parameter sets where, once you understand the model, giving up
 ##'   on that parameter set and continuing is the best option.
 ##'
-##' @return A [mcstate2::mcstate_model] object
+##' @return A [monty::monty_model] object
 ##'
 ##' @export
-dust_filter_mcstate <- function(filter, packer, initial = NULL,
-                                domain = NULL, failure_is_impossible = FALSE) {
+dust_filter_monty <- function(filter, packer, initial = NULL,
+                              domain = NULL, failure_is_impossible = FALSE) {
   call <- environment()
   assert_is(filter, c("dust_filter", "dust_unfilter"), call = call)
-  assert_is(packer, "mcstate_packer", call = call)
+  assert_is(packer, "monty_packer", call = call)
 
-  domain <- mcstate2::mcstate_domain_expand(domain, packer)
+  domain <- monty::monty_domain_expand(domain, packer)
 
   ## We configure saving trajectories on creation I think, which then
   ## affects density.  Start without trajectories?  Realistically
@@ -84,9 +84,9 @@ dust_filter_mcstate <- function(filter, packer, initial = NULL,
   ## to think about once we sort out how models know about their variables.
 
   ## Supporting parameter groups requires some effort with packers,
-  ## movement there will come from mcstate, and probably we'll end up
+  ## movement there will come from monty, and probably we'll end up
   ## subclassing the packer.
-  properties <- mcstate2::mcstate_model_properties(
+  properties <- monty::monty_model_properties(
     is_stochastic = !filter$deterministic,
     has_direct_sample = FALSE,
     has_gradient = filter$deterministic && filter$has_adjoint,
@@ -152,7 +152,7 @@ dust_filter_mcstate <- function(filter, packer, initial = NULL,
       dust_filter_rng_state(filter)
     }
     set_rng_state <- function(state) {
-      ## We need to expand state here as mcstate will only hand us the
+      ## We need to expand state here as monty will only hand us the
       ## initial seed (i.e., the first 32 bytes of state) and we have
       ## to create the other streams by jumping.
       n_groups <- max(1, filter$n_groups)
@@ -168,7 +168,7 @@ dust_filter_mcstate <- function(filter, packer, initial = NULL,
   ## linkage with the provided filter would be easier to understand,
   ## so that we really copy the filter.  This just requires a copy
   ## method, which feels like it would be fairly easy to implement.
-  mcstate2::mcstate_model(
+  monty::monty_model(
     list(filter = filter,
          density = density,
          direct_sample = NULL,

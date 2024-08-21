@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mcstate/r/random.hpp>
+#include <monty/r/random.hpp>
 #include <dust2/r/helpers.hpp>
 #include <dust2/r/unfilter.hpp>
 #include <dust2/unfilter.hpp>
@@ -36,7 +36,7 @@ cpp11::sexp dust2_discrete_unfilter_alloc(cpp11::list r_pars,
   // deterministic here?  Though nooone can think of a case where
   // that's actually the behaviour wanted.  For now let's go fully
   // deterministic.
-  auto seed = mcstate::random::seed_data<rng_state_type>(42);
+  auto seed = monty::random::seed_data<rng_state_type>(42);
   const auto deterministic = true;
 
   // Then allocate the system; this pulls together almost all the data

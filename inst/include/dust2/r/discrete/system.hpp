@@ -2,7 +2,7 @@
 
 #include <dust2/r/helpers.hpp>
 #include <dust2/r/system.hpp>
-#include <mcstate/r/random.hpp>
+#include <monty/r/random.hpp>
 
 #include <dust2/discrete/system.hpp>
 
@@ -38,7 +38,7 @@ SEXP dust2_discrete_alloc(cpp11::list r_pars,
   const auto n_threads = to_size(r_n_threads, "n_threads");
   const auto shared = build_shared<T>(r_pars, n_groups);
   const auto internal = build_internal<T>(shared, n_threads);
-  auto seed = mcstate::random::r::as_rng_seed<rng_state_type>(r_seed);
+  auto seed = monty::random::r::as_rng_seed<rng_state_type>(r_seed);
   auto deterministic = to_bool(r_deterministic, "deterministic");
 
   auto obj = new dust_discrete<T>(shared, internal, time, dt, n_particles,

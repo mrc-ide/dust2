@@ -37,7 +37,7 @@ public:
   using data_type = dust2::no_data;
 
   // This one always feels a bit weird, really.
-  using rng_state_type = mcstate::random::generator<real_type>;
+  using rng_state_type = monty::random::generator<real_type>;
 
   static dust2::packing packing_state(const shared_state& shared) {
     return dust2::packing{{"x", {shared.len}}};
@@ -70,7 +70,7 @@ public:
     if (shared.random_initial) {
       for (size_t i = 0; i < shared.len; ++i) {
         state_next[i] =
-          mcstate::random::normal<real_type>(rng_state, 0, shared.sd);
+          monty::random::normal<real_type>(rng_state, 0, shared.sd);
       }
     } else {
       std::fill(state_next, state_next + shared.len, 0);
@@ -87,7 +87,7 @@ public:
                      real_type * state_next) {
     for (size_t i = 0; i < shared.len; ++i) {
       state_next[i] =
-        mcstate::random::normal(rng_state, state[i], shared.sd * dt);
+        monty::random::normal(rng_state, state[i], shared.sd * dt);
     }
   }
 

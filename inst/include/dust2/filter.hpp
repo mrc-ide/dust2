@@ -2,7 +2,7 @@
 
 #include <dust2/filter_details.hpp>
 #include <dust2/history.hpp>
-#include <mcstate/random/random.hpp>
+#include <monty/random/random.hpp>
 
 namespace dust2 {
 
@@ -71,7 +71,7 @@ public:
 	  std::any_of(w, w + n_particles_, [](auto v) { return v != 0; });
 	if (reorder_this_group) {
 	  ll_[i] += details::scale_log_weights<real_type>(n_particles_, w);
-	  const auto u = mcstate::random::random_real<real_type>(rng_.state(i));
+	  const auto u = monty::random::random_real<real_type>(rng_.state(i));
 	  details::resample_weight(n_particles_, w, u, idx);
 	} else {
 	  for (size_t j = 0; j < n_particles_; ++j) {
@@ -130,7 +130,7 @@ private:
   size_t n_state_;
   size_t n_particles_;
   size_t n_groups_;
-  mcstate::random::prng<rng_state_type> rng_;
+  monty::random::prng<rng_state_type> rng_;
   std::vector<real_type> ll_;
   std::vector<real_type> ll_step_;
   std::vector<size_t> history_index_state_;

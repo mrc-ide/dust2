@@ -180,7 +180,7 @@ dust_template_data <- function(name,
   if (!is.null(linking_to)) {
     assert_character(linking_to)
   }
-  linking_to <- paste(union(c("cpp11", "dust2", "mcstate2"), linking_to),
+  linking_to <- paste(union(c("cpp11", "dust2", "monty"), linking_to),
                       collapse = ", ")
   cpp_std <- validate_cpp_std(cpp_std)
   compiler_options <- validate_compiler_options(compiler_options,
