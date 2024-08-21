@@ -35,6 +35,10 @@ test_that("can print information about dust systems", {
   }
 
   expect_match(msgs(list(), n_particles = 1),
+               "single particle with 5 state\\b",
+               all = FALSE)
+  expect_match(msgs(list(), n_particles = 1,
+                    preserve_particle_dimension = TRUE),
                "5 state x 1 particle\\b",
                all = FALSE)
   expect_match(msgs(list(), n_particles = 10),
@@ -124,4 +128,69 @@ test_that("can control dropping of all dimensions", {
 
   expect_equal(dust_system_state(obj1), array(r, c(3, 1, 1)))
   expect_equal(dust_system_state(obj2), drop(r))
+})
+
+
+test_that("format dimensions as a string", {
+  expect_equal(
+    format_dimensions(list(preserve_particle_dimension = TRUE,
+                           preserve_group_dimension = TRUE,
+                           n_particles = 5,
+                           n_groups = 3,
+                           n_state = 10)),
+    "10 state x 5 particles x 3 groups")
+  expect_equal(
+    format_dimensions(list(preserve_particle_dimension = TRUE,
+                           preserve_group_dimension = TRUE,
+                           n_particles = 5,
+                           n_groups = 3)),
+    "5 particles x 3 groups")
+
+  expect_equal(
+    format_dimensions(list(preserve_particle_dimension = FALSE,
+                           preserve_group_dimension = TRUE,
+                           n_particles = 1,
+                           n_groups = 3,
+                           n_state = 10)),
+    "10 state x 3 groups")
+  expect_equal(
+    format_dimensions(list(preserve_particle_dimension = FALSE,
+                           preserve_group_dimension = TRUE,
+                           n_particles = 1,
+                           n_groups = 3)),
+    "3 groups")
+
+  expect_equal(
+    format_dimensions(list(preserve_particle_dimension = TRUE,
+                           preserve_group_dimension = FALSE,
+                           n_particles = 5,
+                           n_groups = 1,
+                           n_state = 10)),
+    "10 state x 5 particles")
+  expect_equal(
+    format_dimensions(list(preserve_group_dimension = FALSE,
+                           n_particles = 5,
+                           n_groups = 1,
+                           n_state = 10)),
+    "10 state x 5 particles")
+  expect_equal(
+    format_dimensions(list(preserve_particle_dimension = TRUE,
+                           preserve_group_dimension = FALSE,
+                           n_particles = 5,
+                           n_groups = 1)),
+    "5 particles")
+
+  expect_equal(
+    format_dimensions(list(preserve_particle_dimension = FALSE,
+                           preserve_group_dimension = FALSE,
+                           n_particles = 1,
+                           n_groups = 1,
+                           n_state = 10)),
+    "single particle with 10 state")
+  expect_equal(
+    format_dimensions(list(preserve_particle_dimension = FALSE,
+                           preserve_group_dimension = FALSE,
+                           n_particles = 1,
+                           n_groups = 1)),
+    "single particle")
 })

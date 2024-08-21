@@ -436,3 +436,17 @@ test_that("can skip over just some groups with missing data", {
   expect_identical(ll[1, ], ll1)
   expect_identical(ll[2, ], ll2)
 })
+
+
+test_that("can print a filter", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  obj <- dust_filter_create(sir(), time_start, data, n_particles = 5)
+  res <- evaluate_promise(withVisible(print(obj)))
+  expect_mapequal(res$result,
+                  list(value = obj, visible = FALSE))
+  expect_match(res$messages, "<dust_filter (sir)>",
+               fixed = TRUE, all = FALSE)
+  expect_match(res$messages, "5 particles", all = FALSE)
+})
