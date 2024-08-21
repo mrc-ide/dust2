@@ -107,6 +107,16 @@ test_that("can reorder history with no groups", {
   expect_equal(
     test_history(time, state, order = order, reorder = TRUE),
     list(time, true))
+
+  expect_equal(
+    test_history(time, state, order = order, reorder = FALSE,
+                 index_particle = 3)[[2]],
+    array(state_arr[, 3, , ], c(n_state, n_groups, n_time)))
+  ## Broken on reorder only:
+  ## expect_equal(
+  ##   test_history(time, state, order = order, reorder = TRUE,
+  ##                index_particle = 3)[[2]],
+  ##   array(state_arr[, 3, , ], c(n_state, n_groups, n_time)))
 })
 
 
