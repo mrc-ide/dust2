@@ -237,10 +237,10 @@ extern "C" SEXP _dust2_dust2_filter_sir_run(SEXP ptr, SEXP r_initial, SEXP save_
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_filter_sir_last_history(cpp11::sexp ptr, cpp11::sexp r_index_group, bool preserve_group_dimension);
-extern "C" SEXP _dust2_dust2_filter_sir_last_history(SEXP ptr, SEXP r_index_group, SEXP preserve_group_dimension) {
+SEXP dust2_filter_sir_last_history(cpp11::sexp ptr, cpp11::sexp r_index_group, bool select_random_particle, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_filter_sir_last_history(SEXP ptr, SEXP r_index_group, SEXP select_random_particle, SEXP preserve_group_dimension) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_filter_sir_last_history(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
+    return cpp11::as_sexp(dust2_filter_sir_last_history(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(select_random_particle), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // sir.cpp
@@ -370,10 +370,10 @@ extern "C" SEXP _dust2_test_scale_log_weights(SEXP w) {
   END_CPP11
 }
 // test.cpp
-cpp11::sexp test_history_(cpp11::doubles r_time, cpp11::list r_state, cpp11::sexp r_order, cpp11::sexp r_index_group, bool reorder);
-extern "C" SEXP _dust2_test_history_(SEXP r_time, SEXP r_state, SEXP r_order, SEXP r_index_group, SEXP reorder) {
+cpp11::sexp test_history_(cpp11::doubles r_time, cpp11::list r_state, cpp11::sexp r_order, cpp11::sexp r_index_group, cpp11::sexp r_select_particle, bool reorder);
+extern "C" SEXP _dust2_test_history_(SEXP r_time, SEXP r_state, SEXP r_order, SEXP r_index_group, SEXP r_select_particle, SEXP reorder) {
   BEGIN_CPP11
-    return cpp11::as_sexp(test_history_(cpp11::as_cpp<cpp11::decay_t<cpp11::doubles>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_state), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_order), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(reorder)));
+    return cpp11::as_sexp(test_history_(cpp11::as_cpp<cpp11::decay_t<cpp11::doubles>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_state), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_order), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_select_particle), cpp11::as_cpp<cpp11::decay_t<bool>>(reorder)));
   END_CPP11
 }
 // test_interpolate.cpp
@@ -492,7 +492,7 @@ extern "C" SEXP _dust2_dust2_system_walk_simulate(SEXP ptr, SEXP r_times, SEXP r
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_filter_sir_alloc",                  (DL_FUNC) &_dust2_dust2_filter_sir_alloc,                  10},
-    {"_dust2_dust2_filter_sir_last_history",           (DL_FUNC) &_dust2_dust2_filter_sir_last_history,            3},
+    {"_dust2_dust2_filter_sir_last_history",           (DL_FUNC) &_dust2_dust2_filter_sir_last_history,            4},
     {"_dust2_dust2_filter_sir_rng_state",              (DL_FUNC) &_dust2_dust2_filter_sir_rng_state,               1},
     {"_dust2_dust2_filter_sir_run",                    (DL_FUNC) &_dust2_dust2_filter_sir_run,                     5},
     {"_dust2_dust2_filter_sir_set_rng_state",          (DL_FUNC) &_dust2_dust2_filter_sir_set_rng_state,           2},
@@ -553,7 +553,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_unfilter_sir_last_history",         (DL_FUNC) &_dust2_dust2_unfilter_sir_last_history,          4},
     {"_dust2_dust2_unfilter_sir_run",                  (DL_FUNC) &_dust2_dust2_unfilter_sir_run,                   7},
     {"_dust2_dust2_unfilter_sir_update_pars",          (DL_FUNC) &_dust2_dust2_unfilter_sir_update_pars,           3},
-    {"_dust2_test_history_",                           (DL_FUNC) &_dust2_test_history_,                            5},
+    {"_dust2_test_history_",                           (DL_FUNC) &_dust2_test_history_,                            6},
     {"_dust2_test_interpolate_constant1",              (DL_FUNC) &_dust2_test_interpolate_constant1,               3},
     {"_dust2_test_interpolate_linear1",                (DL_FUNC) &_dust2_test_interpolate_linear1,                 3},
     {"_dust2_test_interpolate_search",                 (DL_FUNC) &_dust2_test_interpolate_search,                  2},

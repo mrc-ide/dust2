@@ -261,7 +261,7 @@ SEXP dust2_system_simulate(cpp11::sexp ptr,
   // make later.
   const auto len = n_state_save * n_particles * n_groups * n_times;
   cpp11::sexp ret = cpp11::writable::doubles(len);
-  h.export_state(REAL(ret), false, index_group);
+  h.export_state(REAL(ret), false, index_group, {});
   if (preserve_group_dimension && preserve_particle_dimension) {
     set_array_dims(ret, {n_state_save, n_particles, n_groups, n_times});
   } else if (preserve_group_dimension || preserve_particle_dimension) {

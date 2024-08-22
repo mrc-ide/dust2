@@ -4,7 +4,11 @@
 \alias{dust_filter_last_history}
 \title{Fetch last filter history}
 \usage{
-dust_filter_last_history(filter, index_group = NULL)
+dust_filter_last_history(
+  filter,
+  index_group = NULL,
+  select_random_particle = FALSE
+)
 }
 \arguments{
 \item{filter}{A \code{dust_filter} object, created by
@@ -14,9 +18,20 @@ dust_filter_last_history(filter, index_group = NULL)
 filter for.  You can use this to run a subset of possible
 groups, once the filter is initialised (this argument must be
 \code{NULL} on the \strong{first} call).}
+
+\item{select_random_particle}{Logical, indicating if we should
+return a history for one randomly selected particle (rather than
+the entire history).  If this is \code{TRUE}, the particle will be
+selected independently for each group, if the filter is grouped.
+This option is intended to help select a representative
+trajectory during an MCMC.  When \code{TRUE}, we drop the \code{particle}
+dimension of the return value.}
 }
 \value{
-An array
+An array.  If ungrouped this will have dimensions \code{state}
+x \code{particle} x \code{time}, and if grouped then \code{state} x \code{particle}
+x \code{group} x \code{time}.  If \code{select_random_particle = TRUE}, the
+second (particle) dimension will be dropped.
 }
 \description{
 Fetch the last history created by running a filter.  This
