@@ -34,9 +34,9 @@ inline double to_double(cpp11::sexp x, bool allow_na, const char * name) {
     int ret = INTEGER(x)[0];
     if (ISNA(ret)) {
       if (allow_na) {
-	return NA_REAL;
+        return NA_REAL;
       } else {
-	cpp11::stop("'%s' must not be a missing value (NA)", name);
+        cpp11::stop("'%s' must not be a missing value (NA)", name);
       }
     }
     return static_cast<double>(ret);
@@ -219,10 +219,10 @@ cpp11::sexp export_array_n(Iter iter, std::initializer_list<size_t> dims) {
 
 template <typename T>
 std::vector<typename T::shared_state> build_shared(cpp11::list r_pars,
-						   size_t n_groups) {
+                                                   size_t n_groups) {
   if (r_pars.size() != static_cast<int>(n_groups)) {
     cpp11::stop("Expected 'pars' to have length %d to match 'n_groups'",
-		static_cast<int>(n_groups));
+                static_cast<int>(n_groups));
   }
 
   std::vector<typename T::shared_state> shared;

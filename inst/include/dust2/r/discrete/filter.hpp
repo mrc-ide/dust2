@@ -17,7 +17,7 @@ cpp11::sexp dust2_discrete_filter_alloc(cpp11::list r_pars,
                                         cpp11::list r_data,
                                         cpp11::sexp r_n_particles,
                                         cpp11::sexp r_n_groups,
-					cpp11::sexp r_n_threads,
+                                        cpp11::sexp r_n_threads,
                                         cpp11::sexp r_index_state,
                                         cpp11::sexp r_seed) {
   using rng_state_type = typename T::rng_state_type;
