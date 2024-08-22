@@ -450,3 +450,40 @@ test_that("can print a filter", {
                fixed = TRUE, all = FALSE)
   expect_match(res$messages, "5 particles", all = FALSE)
 })
+
+
+test_that("can extract random trajectory", {
+  pars <- list(
+    list(beta = 0.21, gamma = 0.1, N = 1000, I0 = 10, exp_noise = 1e6),
+    list(beta = 0.22, gamma = 0.1, N = 1000, I0 = 10, exp_noise = 1e6))
+  time_start <- 0
+  data <- data.frame(time = rep(seq(4, by = 4, length.out = 10), 2),
+                     group = rep(1:2, each = 10),
+                     incidence = c(1:10, 2:11))
+  n_particles <- 100
+  seed <- 42
+
+  obj1 <- dust_filter_create(sir(), time_start, data, n_particles = n_particles,
+                             seed = seed)
+  obj2 <- dust_filter_create(sir(), time_start, data, n_particles = n_particles,
+                             seed = seed)
+
+  ll1 <- dust_filter_run(obj1, pars, save_history = TRUE)
+  ll2 <- dust_filter_run(obj2, pars, save_history = TRUE)
+  expect_identical(ll1, ll2)
+
+  h1 <- dust_filter_last_history(obj1)
+  h2 <- lapply(1:5, function(i) {
+    dust_filter_last_history(obj1, select_random_particle = TRUE)
+  })
+  expect_equal(dim(h1), c(5, 100, 2, 10))
+  expect_equal(dim(h2[[1]]), c(5, 2, 10))
+
+  hash1 <- apply(h1, 2:3, rlang::hash)
+  hash2 <- vapply(h2, function(x) apply(x, 2, rlang::hash), character(2))
+  ## So we're consistently hitting the first one but not the second,
+  ## looks like we need a test of this in the details.
+  i <- cbind(match(hash2[1, ], hash1[, 1]),
+             match(hash2[2, ], hash1[, 2]))
+  expect_false(any(is.na(i)))
+})
