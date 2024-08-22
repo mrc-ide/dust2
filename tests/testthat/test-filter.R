@@ -481,9 +481,10 @@ test_that("can extract random trajectory", {
 
   hash1 <- apply(h1, 2:3, rlang::hash)
   hash2 <- vapply(h2, function(x) apply(x, 2, rlang::hash), character(2))
-  ## So we're consistently hitting the first one but not the second,
-  ## looks like we need a test of this in the details.
   i <- cbind(match(hash2[1, ], hash1[, 1]),
              match(hash2[2, ], hash1[, 2]))
   expect_false(any(is.na(i)))
+  expect_false(all(i[, 1] == i[, 2]))
+  expect_true(length(unique(i[, 1])) > 1)
+  expect_true(length(unique(i[, 2])) > 1)
 })

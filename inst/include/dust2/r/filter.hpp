@@ -47,8 +47,8 @@ cpp11::sexp dust2_filter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
 template <typename T>
 cpp11::sexp dust2_filter_last_history(cpp11::sexp ptr,
                                       cpp11::sexp r_index_group,
-				      bool select_random_particle,
-				      bool preserve_group_dimension) {
+                                      bool select_random_particle,
+                                      bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
   const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :

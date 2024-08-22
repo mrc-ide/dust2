@@ -208,8 +208,8 @@ test_scale_log_weights <- function(w) {
   .Call(`_dust2_test_scale_log_weights`, w)
 }
 
-test_history_ <- function(r_time, r_state, r_order, r_index_group, r_index_particle, reorder) {
-  .Call(`_dust2_test_history_`, r_time, r_state, r_order, r_index_group, r_index_particle, reorder)
+test_history_ <- function(r_time, r_state, r_order, r_index_group, r_select_particle, reorder) {
+  .Call(`_dust2_test_history_`, r_time, r_state, r_order, r_index_group, r_select_particle, reorder)
 }
 
 test_interpolate_search <- function(target, x) {

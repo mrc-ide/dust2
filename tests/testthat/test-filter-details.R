@@ -43,7 +43,7 @@ test_that("can use history", {
                             reorder = TRUE),
                list(time, s_arr))
 
-  res <- test_history(time, s, index_particle = c(6, 4, 2))[[2]]
+  res <- test_history(time, s, select_particle = c(6, 4, 2))[[2]]
   expect_equal(dim(res), c(n_state, n_groups, n_time))
   expect_equal(res[, 1, ], s_arr[, 6, 1, ])
   expect_equal(res[, 2, ], s_arr[, 4, 2, ])
@@ -110,11 +110,11 @@ test_that("can reorder history with no groups", {
 
   expect_equal(
     test_history(time, state, order = order, reorder = FALSE,
-                 index_particle = 3)[[2]],
+                 select_particle = 3)[[2]],
     array(state_arr[, 3, , ], c(n_state, n_groups, n_time)))
   expect_equal(
     test_history(time, state, order = order, reorder = TRUE,
-                 index_particle = 3)[[2]],
+                 select_particle = 3)[[2]],
     array(true[, 3, , ], c(n_state, n_groups, n_time)))
 })
 
@@ -176,18 +176,17 @@ test_that("can extract history with group index, no reordering", {
   expect_equal(test_history(time, s, index_group = c(3, 1)),
                list(time, s_arr[, , c(3, 1), , drop = FALSE]))
 
-  m <- test_history(time, s, index_particle = c(6, 4, 2))[[2]]
+  m <- test_history(time, s, select_particle = c(6, 4, 2))[[2]]
   expect_equal(dim(m), c(n_state, n_groups, n_time))
   expect_equal(m[, 1, ], s_arr[, 6, 1, ])
   expect_equal(m[, 2, ], s_arr[, 4, 2, ])
   expect_equal(m[, 3, ], s_arr[, 2, 3, ])
 
-  ## This needs work:
-  ## expect_equal(
-  ##   test_history(time, s,
-  ##                index_group = c(3, 1),
-  ##                index_particle = c(2, 6))[[2]],
-  ##   m[, c(3, 1), ])
+  expect_equal(
+    test_history(time, s,
+                 index_group = c(3, 1),
+                 select_particle = c(6, 4, 2))[[2]],
+    m[, c(3, 1), ])
 })
 
 
@@ -239,8 +238,15 @@ test_that("can reorder history on the way out", {
     list(time, true[, , 3:1, ]))
 
   m <- test_history(time, state, order = order, reorder = TRUE,
-                    index_particle = c(6, 4, 2))[[2]]
+                    select_particle = c(6, 4, 2))[[2]]
   expect_equal(m[, 1, ], true[, 6, 1, ])
   expect_equal(m[, 2, ], true[, 4, 2, ])
   expect_equal(m[, 3, ], true[, 2, 3, ])
+
+  ## Last error case
+  ## expect_equal(
+  ##   test_history(time, state, order = order, reorder = TRUE,
+  ##                index_group = c(3, 1),
+  ##                select_particle = c(6, 4, 2))[[2]],
+  ##   m[, c(3, 1), ])
 })
