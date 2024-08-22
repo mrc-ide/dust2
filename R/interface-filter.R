@@ -193,13 +193,13 @@ dust_filter_run <- function(filter, pars, initial = NULL,
 ##'
 ##' @inheritParams dust_filter_run
 ##'
-##' @inheritParams select_random_particle Logical, indicating if we
-##'   should return a history for one randomly selected particle
-##'   (rather than the entire history).  If this is `TRUE`, the
-##'   particle will be selected independently for each group, if the
-##'   filter is grouped.  This option is intended to help select a
-##'   representative trajectory during an MCMC.  When `TRUE`, we drop
-##'   the `particle` dimension of the return value.
+##' @param select_random_particle Logical, indicating if we should
+##'   return a history for one randomly selected particle (rather than
+##'   the entire history).  If this is `TRUE`, the particle will be
+##'   selected independently for each group, if the filter is grouped.
+##'   This option is intended to help select a representative
+##'   trajectory during an MCMC.  When `TRUE`, we drop the `particle`
+##'   dimension of the return value.
 ##'
 ##' @return An array.  If ungrouped this will have dimensions `state`
 ##'   x `particle` x `time`, and if grouped then `state` x `particle`
