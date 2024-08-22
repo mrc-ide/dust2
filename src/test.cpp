@@ -44,16 +44,17 @@ cpp11::sexp test_history_(cpp11::doubles r_time, cpp11::list r_state,
 
   const auto index_group = r_index_group == R_NilValue ? all_groups :
     dust2::r::check_index(r_index_group, all_groups.size(), "index_group");
+  const size_t n_groups = index_group.size();
+
   std::vector<size_t> index_particle;
   const bool use_index_particle = r_index_particle != R_NilValue;
   if (use_index_particle) {
-    dust2::r::check_length(r_index_particle, all_groups.size(),
-			   "index_particle");
+    dust2::r::check_length(r_index_particle, n_groups, "index_particle");
     index_particle = dust2::r::check_index(r_index_particle, n_particles,
 					   "index_particle");
   }
 
-  const size_t n_groups = index_group.size();
+
   const size_t n_particles_out = index_particle.empty() ? n_particles : 1;
 
   dust2::history<double> h(n_state, n_particles, n_groups_all, n_times);

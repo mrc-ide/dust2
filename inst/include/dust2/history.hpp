@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <vector>
+#include <dust2/tools.hpp>
 
 namespace dust2 {
 
@@ -112,8 +113,7 @@ public:
                     const std::vector<size_t>& index_group,
 		    const std::vector<size_t>& select_particle) const {
     reorder = reorder && n_particles_ > 1 && position_ > 0 &&
-      // tools::any(reorder_);
-      std::any_of(reorder_.begin(), reorder_.end(), [](auto v) { return v; });
+      tools::any(reorder_);
 
     auto use_select_particle = !select_particle.empty();
     auto use_index_group = index_group.size() < n_groups_;
@@ -126,18 +126,21 @@ public:
       }
     }
 
+    if (use_select_particle && use_index_group) {
+      throw std::runtime_error("not yet supported");
+    }
+
     if (!reorder && !use_index_group && !use_select_particle) {
+      // Optimised for simplest case of just dumping out everything
       std::copy_n(state_.begin(), position_ * len_state_, iter);
     } else if (reorder) {
       const size_t n_particles_out = use_select_particle ? 1 : n_particles_;
-      // Default index - we can improve this by fixing k to be an
-      // offset, and also by saving this within this history object.
       std::vector<size_t> index_particle(n_particles_out * n_groups_);
-      for (size_t i = 0, k = 0; i < n_groups_; ++i) {
+      for (size_t i = 0; i < n_groups_; ++i) {
 	if (use_select_particle) {
 	  index_particle[i] = select_particle[i];
 	} else {
-	  for (size_t j = 0; j < n_particles_; ++j, ++k) {
+	  for (size_t j = 0, k = i * n_particles_; j < n_particles_; ++j, ++k) {
 	    index_particle[k] = j;
 	  }
 	}
@@ -152,7 +155,7 @@ public:
         for (size_t j = 0; j < index_group.size(); ++j) {
           const auto k = index_group[j];
           const auto offset_state = k * n_state_ * n_particles_;
-          const auto offset_index = k * n_particles_out;
+          const auto offset_index = k * n_particles_;
           const auto offset_output =
             i * len_state_output + j * n_state_ * n_particles_out;
 	  if (use_select_particle) {
@@ -171,7 +174,7 @@ public:
         }
       }
     } else {
-      // use_index_group || use_select_particle (or both!)
+      // when use_index_group || use_select_particle (or both!)
       for (size_t i = 0; i < position_; ++i) {
 	const auto iter_state = state_.begin() + i * len_state_;
 	for (auto j : index_group) {
