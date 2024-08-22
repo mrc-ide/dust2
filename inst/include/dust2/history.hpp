@@ -156,10 +156,11 @@ public:
           const auto offset_output =
             i * len_state_output + j * n_state_ * n_particles_out;
 	  if (use_select_particle) {
-	    std::copy_n(iter_state + offset_state + index_particle[j] * n_state_, n_state_, iter + offset_output);
-	    if (reorder) {
-	      index_particle[j] = *(iter_order + index_particle[j]);
-	    }
+	    reorder_single_(iter_state + offset_state,
+			    iter_order + offset_index,
+			    reorder_[i],
+			    iter + offset_output,
+			    index_particle[j]);
 	  } else {
 	    reorder_group_(iter_state + offset_state,
 			   iter_order + offset_index,
@@ -224,6 +225,20 @@ private:
         const auto index_particle_i = index_particle + i;
         *index_particle_i = *(iter_order + *index_particle_i);
       }
+    }
+  }
+
+  template <typename Iter>
+  void reorder_single_(typename std::vector<real_type>::const_iterator iter_state,
+		       typename std::vector<size_t>::const_iterator iter_order,
+		       bool reorder,
+		       Iter iter_dest,
+		       size_t& index_particle) const {
+    std::copy_n(iter_state + index_particle * n_state_,
+		n_state_,
+		iter_dest);
+    if (reorder) {
+      index_particle = *(iter_order + index_particle);
     }
   }
 
