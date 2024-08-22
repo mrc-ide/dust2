@@ -27,7 +27,7 @@ cpp11::list test_scale_log_weights(std::vector<double> w) {
 cpp11::sexp test_history_(cpp11::doubles r_time, cpp11::list r_state,
                           cpp11::sexp r_order,
                           cpp11::sexp r_index_group,
-			  cpp11::sexp r_select_particle,
+                          cpp11::sexp r_select_particle,
                           bool reorder) {
   const size_t n_times = r_time.size();
   cpp11::sexp el0 = r_state[0];

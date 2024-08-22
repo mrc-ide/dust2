@@ -17,7 +17,7 @@ SEXP dust2_discrete_alloc(cpp11::list r_pars,
                           cpp11::sexp r_n_groups,
                           cpp11::sexp r_seed,
                           cpp11::sexp r_deterministic,
-			  cpp11::sexp r_n_threads) {
+                          cpp11::sexp r_n_threads) {
   using rng_state_type = typename T::rng_state_type;
 
   // These duplicate checks that happen on the R side and can be

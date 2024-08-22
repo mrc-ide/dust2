@@ -31,10 +31,10 @@ SEXP dust2_system_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {
 
 template <typename T>
 SEXP dust2_system_state(cpp11::sexp ptr, cpp11::sexp r_index_state,
-			cpp11::sexp r_index_particle,
-			cpp11::sexp r_index_group,
+                        cpp11::sexp r_index_particle,
+                        cpp11::sexp r_index_group,
                         bool preserve_particle_dimension,
-			bool preserve_group_dimension) {
+                        bool preserve_group_dimension) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
   check_errors(obj, "get state from");
   const auto n_state = obj->n_state();
@@ -86,16 +86,16 @@ SEXP dust2_system_state(cpp11::sexp ptr, cpp11::sexp r_index_state,
       const auto ii = index_group.empty() ? i : index_group[i];
       auto it_i = iter_src + ii * n_state * n_particles;
       for (size_t j = 0; j < n_particle_save; ++j) {
-	const auto jj = index_particle.empty() ? j : index_particle[j];
-	const auto it_j = it_i + jj * n_state;
-	if (index_state.empty()) {
-	  it_dst = std::copy_n(it_j, n_state, it_dst);
-	} else {
-	  for (size_t k = 0; k < n_state_save; ++k, ++it_dst) {
-	    const auto kk = index_state[k];
-	    *it_dst = *(it_j + kk);
-	  }
-	}
+        const auto jj = index_particle.empty() ? j : index_particle[j];
+        const auto it_j = it_i + jj * n_state;
+        if (index_state.empty()) {
+          it_dst = std::copy_n(it_j, n_state, it_dst);
+        } else {
+          for (size_t k = 0; k < n_state_save; ++k, ++it_dst) {
+            const auto kk = index_state[k];
+            *it_dst = *(it_j + kk);
+          }
+        }
       }
     }
     ret = d;

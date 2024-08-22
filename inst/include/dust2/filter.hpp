@@ -62,22 +62,22 @@ public:
       for (auto i : index_group) {
         const auto offset = i * n_particles_;
         const auto w = ll_step_.begin() + offset;
-	const auto idx = index.begin() + offset;
+        const auto idx = index.begin() + offset;
 
-	// Only reorder a group if any value has done a comparison (in
-	// the case where all ll values are exactly zero we take this
-	// as the case where data was all empty).
-	const bool reorder_this_group =
-	  std::any_of(w, w + n_particles_, [](auto v) { return v != 0; });
-	if (reorder_this_group) {
-	  ll_[i] += details::scale_log_weights<real_type>(n_particles_, w);
-	  const auto u = monty::random::random_real<real_type>(rng_.state(i));
-	  details::resample_weight(n_particles_, w, u, idx);
-	} else {
-	  for (size_t j = 0; j < n_particles_; ++j) {
-	    *(idx + j) = j;
-	  }
-	}
+        // Only reorder a group if any value has done a comparison (in
+        // the case where all ll values are exactly zero we take this
+        // as the case where data was all empty).
+        const bool reorder_this_group =
+          std::any_of(w, w + n_particles_, [](auto v) { return v != 0; });
+        if (reorder_this_group) {
+          ll_[i] += details::scale_log_weights<real_type>(n_particles_, w);
+          const auto u = monty::random::random_real<real_type>(rng_.state(i));
+          details::resample_weight(n_particles_, w, u, idx);
+        } else {
+          for (size_t j = 0; j < n_particles_; ++j) {
+            *(idx + j) = j;
+          }
+        }
       }
 
       sys.reorder(index.begin(), index_group);

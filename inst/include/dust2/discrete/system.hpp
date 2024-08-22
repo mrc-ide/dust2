@@ -33,7 +33,7 @@ public:
                 size_t n_particles, // per group
                 const std::vector<rng_int_type>& seed,
                 bool deterministic,
-		size_t n_threads) :
+                size_t n_threads) :
     packing_state_(T::packing_state(shared[0])),
     packing_gradient_(T::packing_gradient(shared[0])),
     n_state_(packing_state_.size()),
@@ -261,14 +261,14 @@ public:
 #endif
     for (auto i : index_group) {
       for (size_t j = 0; j < n_particles_; ++j) {
-	auto data_i = data + i;
+        auto data_i = data + i;
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
         auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
         auto output_ij = output + k;
         try {
           *output_ij = T::compare_data(time_, dt_, state + offset, *data_i,
-				       shared_[i], internal_i, rng_.state(k));
+                                       shared_[i], internal_i, rng_.state(k));
         } catch (std::exception const& e) {
           errors_.capture(e, k);
         }

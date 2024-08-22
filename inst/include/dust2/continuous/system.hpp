@@ -142,12 +142,12 @@ public:
         auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
         real_type* y = state_data + offset_write;
         std::copy_n(iter + offset_read, n_state_, y);
-	try {
-	  solver_.initialise(time_, y, ode_internals_[k],
-			     rhs_(shared_[i], internal_i));
-	} catch (std::exception const& e) {
-	  errors_.capture(e, k);
-	}
+        try {
+          solver_.initialise(time_, y, ode_internals_[k],
+                             rhs_(shared_[i], internal_i));
+        } catch (std::exception const& e) {
+          errors_.capture(e, k);
+        }
       }
     }
     errors_.report();
@@ -249,14 +249,14 @@ public:
 #endif
     for (auto i : index_group) {
       for (size_t j = 0; j < n_particles_; ++j) {
-	auto data_i = data + i;
+        auto data_i = data + i;
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
         auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
-	auto output_ij = output + k;
+        auto output_ij = output + k;
         try {
           *output_ij = T::compare_data(time_, state_data + offset, *data_i,
-				       shared_[i], internal_i, rng_.state(k));
+                                       shared_[i], internal_i, rng_.state(k));
         } catch (std::exception const& e) {
           errors_.capture(e, k);
         }
