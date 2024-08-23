@@ -36,7 +36,8 @@ public:
     history_index_state_(history_index_state),
     history_(history_index_state_.size() > 0 ? history_index_state_.size() : n_state_,
              n_particles_, n_groups_, time_.size()),
-    history_is_current_(n_groups_, false) {
+    history_is_current_(n_groups_, false),
+    random_particle_(n_groups_, n_particles_) {
   }
 
   void run(bool set_initial, bool save_history,
@@ -123,9 +124,14 @@ public:
     return rng_.import_state(rng_state);
   }
 
-  auto select_random_particle(size_t group) {
-    const auto u = monty::random::random_real<real_type>(rng_.state(group));
-    return static_cast<size_t>(std::floor(u * n_particles_));
+  const auto& select_random_particle(std::vector<size_t> index_group) {
+    for (auto i : index_group) {
+      if (random_particle_[i] == n_particles_) {
+        const auto u = monty::random::random_real<real_type>(rng_.state(i));
+        random_particle_[i] = static_cast<size_t>(std::floor(u * n_particles_));
+      }
+    }
+    return random_particle_;
   }
 
 private:
@@ -141,6 +147,7 @@ private:
   std::vector<size_t> history_index_state_;
   history<real_type> history_;
   std::vector<bool> history_is_current_;
+  std::vector<size_t> random_particle_;
 
   void reset(bool set_initial, bool save_history) {
     std::fill(history_is_current_.begin(), history_is_current_.end(), false);
@@ -152,6 +159,7 @@ private:
     if (set_initial) {
       sys.set_state_initial(sys.all_groups());
     }
+    std::fill(random_particle_.begin(), random_particle_.end(), n_particles_);
   }
 };
 

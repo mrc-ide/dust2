@@ -455,11 +455,12 @@ test_that("can print a filter", {
 test_that("can extract random trajectory", {
   pars <- list(
     list(beta = 0.21, gamma = 0.1, N = 1000, I0 = 10, exp_noise = 1e6),
-    list(beta = 0.22, gamma = 0.1, N = 1000, I0 = 10, exp_noise = 1e6))
+    list(beta = 0.22, gamma = 0.1, N = 1000, I0 = 10, exp_noise = 1e6),
+    list(beta = 0.23, gamma = 0.1, N = 1000, I0 = 10, exp_noise = 1e6))
   time_start <- 0
-  data <- data.frame(time = rep(seq(4, by = 4, length.out = 10), 2),
-                     group = rep(1:2, each = 10),
-                     incidence = c(1:10, 2:11))
+  data <- data.frame(time = rep(seq(4, by = 4, length.out = 10), 3),
+                     group = rep(1:3, each = 10),
+                     incidence = c(1:10, 2:11, 3:12))
   n_particles <- 100
   seed <- 42
 
@@ -473,18 +474,127 @@ test_that("can extract random trajectory", {
   expect_identical(ll1, ll2)
 
   h1 <- dust_filter_last_history(obj1)
-  h2 <- lapply(1:5, function(i) {
-    dust_filter_last_history(obj1, select_random_particle = TRUE)
-  })
-  expect_equal(dim(h1), c(5, 100, 2, 10))
-  expect_equal(dim(h2[[1]]), c(5, 2, 10))
+  h2 <- dust_filter_last_history(obj2, select_random_particle = TRUE)
+  expect_equal(dim(h1), c(5, 100, 3, 10))
+  expect_equal(dim(h2), c(5, 3, 10))
 
   hash1 <- apply(h1, 2:3, rlang::hash)
-  hash2 <- vapply(h2, function(x) apply(x, 2, rlang::hash), character(2))
-  i <- cbind(match(hash2[1, ], hash1[, 1]),
-             match(hash2[2, ], hash1[, 2]))
+  hash2 <- apply(h2, 2, rlang::hash)
+
+  i <- match(hash2, hash1)
   expect_false(any(is.na(i)))
-  expect_false(all(i[, 1] == i[, 2]))
-  expect_true(length(unique(i[, 1])) > 1)
-  expect_true(length(unique(i[, 2])) > 1)
+  expect_gt(length(unique(row(hash1)[i])), 1)
+
+  expect_identical(
+    dust_filter_last_history(obj2, select_random_particle = TRUE),
+    h2)
+})
+
+
+test_that("can extract final state from an filter", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  obj <- dust_filter_create(sir(), time_start, data, n_particles = 10)
+
+  dust_filter_run(obj, pars, save_history = TRUE)
+  h <- dust_filter_last_history(obj)
+  s <- dust_filter_last_state(obj)
+  expect_equal(dim(s), c(5, 10))
+  expect_equal(s, h[, , 4])
+
+  dust_filter_run(obj, pars, save_history = FALSE)
+  expect_error(dust_filter_last_history(obj), "History is not current")
+  expect_no_error(dust_filter_last_state(obj))
+})
+
+
+test_that("can extract final state from an filter, ignoring state index", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  obj <- dust_filter_create(sir(), time_start, data, n_particles = 10,
+                            index_state = 1:3)
+
+  dust_filter_run(obj, pars, save_history = TRUE)
+  h <- dust_filter_last_history(obj)
+  s <- dust_filter_last_state(obj)
+  expect_equal(s[1:3, ], h[, , 4])
+  expect_equal(dim(s), c(5, 10))
+})
+
+
+test_that("can extract final state from grouped filter", {
+  pars <- list(
+    list(beta = 0.1, gamma = 0.2, I0 = 10, exp_noise = 1e6),
+    list(beta = 0.2, gamma = 0.2, I0 = 10, exp_noise = 1e6),
+    list(beta = 0.3, gamma = 0.2, I0 = 10, exp_noise = 1e6))
+
+  time_start <- 0
+  data <- data.frame(time = rep(c(4, 8, 12, 16), 3),
+                     group = rep(1:3, each = 4),
+                     incidence = 1:12)
+
+  obj <- dust_filter_create(sir(), time_start, data, n_particles = 10)
+  dust_filter_run(obj, pars, save_history = TRUE)
+  h <- dust_filter_last_history(obj)
+  s <- dust_filter_last_state(obj)
+  expect_equal(s, h[, , , 4])
+
+  dust_filter_run(obj, pars, save_history = FALSE)
+  expect_error(dust_filter_last_history(obj), "History is not current")
+  expect_no_error(dust_filter_last_state(obj))
+})
+
+
+test_that("can extract a random particle from the history", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  obj1 <- dust_filter_create(sir(), time_start, data, n_particles = 100,
+                             seed = 42)
+  obj2 <- dust_filter_create(sir(), time_start, data, n_particles = 100,
+                             seed = 42)
+
+  dust_filter_run(obj1, pars)
+  dust_filter_run(obj2, pars)
+
+  s1 <- dust_filter_last_state(obj1)
+  s2 <- dust_filter_last_state(obj1, select_random_particle = TRUE)
+  expect_equal(dim(s1), c(5, 100))
+
+  i <- match(rlang::hash(s2), apply(s1, 2, rlang::hash))
+  expect_false(is.na(i))
+  expect_equal(
+    dust_filter_last_state(obj1, select_random_particle = TRUE),
+    s2)
+})
+
+
+test_that("can extract a random particle from a nested filter", {
+  pars <- list(
+    list(beta = 0.1, gamma = 0.2, I0 = 10, exp_noise = 1e6),
+    list(beta = 0.2, gamma = 0.2, I0 = 10, exp_noise = 1e6),
+    list(beta = 0.3, gamma = 0.2, I0 = 10, exp_noise = 1e6))
+
+  time_start <- 0
+  data <- data.frame(time = rep(c(4, 8, 12, 16), 3),
+                     group = rep(1:3, each = 4),
+                     incidence = 1:12)
+
+  obj1 <- dust_filter_create(sir(), time_start, data, n_particles = 100,
+                             seed = 42)
+  obj2 <- dust_filter_create(sir(), time_start, data, n_particles = 100,
+                             seed = 42)
+  dust_filter_run(obj1, pars, save_history = TRUE)
+  dust_filter_run(obj2, pars, save_history = TRUE)
+  s1 <- dust_filter_last_state(obj1)
+  s2 <- dust_filter_last_state(obj2, select_random_particle = TRUE)
+
+  hash1 <- apply(s1, 2:3, rlang::hash)
+  hash2 <- apply(s2, 2, rlang::hash)
+
+  i <- match(hash2, hash1)
+  expect_false(any(is.na(i)))
+  expect_gt(length(unique(row(hash1)[i])), 1)
 })

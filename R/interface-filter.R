@@ -224,6 +224,38 @@ dust_filter_last_history <- function(filter, index_group = NULL,
 }
 
 
+##' Get the last state from a filter.
+##'
+##' @title Get filter state
+##'
+##' @inheritParams dust_filter_last_history
+##'
+##' @return An array.  If ungrouped this will have dimensions `state`
+##'   x `particle`, and if grouped then `state` x `particle` x
+##'   `group`.  If `select_random_particle = TRUE`, the second
+##'   (particle) dimension will be dropped.  This is the same as the
+##'   state returned by [dust_filter_last_history] without the time
+##'   dimension but also without any state index applied (i.e., we
+##'   always return all state).
+##'
+##' @export
+dust_filter_last_state <- function(filter, index_group = NULL,
+                                   select_random_particle = FALSE) {
+  check_is_dust_filter(filter)
+  if (is.null(filter$ptr)) {
+    cli::cli_abort(c(
+      "History is not current",
+      i = "Filter has not yet been run"))
+  }
+  index_group <- check_index(index_group, max = filter$n_groups,
+                             unique = TRUE)
+  assert_scalar_logical(select_random_particle)
+  filter$methods$last_state(filter$ptr, index_group,
+                            select_random_particle,
+                            filter$preserve_group_dimension)
+}
+
+
 ##' Get random number generator (RNG) state from the particle filter.
 ##'
 ##' @title Get filter RNG state
