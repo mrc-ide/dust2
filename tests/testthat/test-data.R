@@ -94,3 +94,13 @@ test_that("if an object has class 'dust_filter_data' we just pass it back", {
   x <- structure(list(), class = "dust_filter_data")
   expect_identical(dust_filter_data(x), x)
 })
+
+
+test_that("can convert a data.frame with list columns", {
+  y <- lapply(1:5, function(i) runif(2))
+  d <- data.frame(time = 1:5, x = 1:5, y = I(y),
+                  stringsAsFactors = FALSE)
+  d2 <- prepare_data(d, 1)
+  expect_equal(d2$data[[1]], list(list(x = 1, y = y[[1]])))
+  expect_equal(d2$data[[3]], list(list(x = 3, y = y[[3]])))
+})

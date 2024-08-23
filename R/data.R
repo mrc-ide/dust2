@@ -127,15 +127,25 @@ prepare_data <- function(data, n_groups, call = NULL) {
     time <- time[data[[name_group]] == 1]
   }
 
-  data_by_time <- unname(
-    split(data[names(data) != name_time], data[[name_time]]))
+  cols <- names(data) != name_time
+  data_by_time <- unname(split(data[cols], data[[name_time]]))
+  is_list_column <- vlapply(data[cols], is.list)
+  row_as_list <- function(x) {
+    ret <- as.list(x)
+    if (any(is_list_column)) {
+      stopifnot(all(lengths(x[is_list_column]) == 1))
+      ret[is_list_column] <- lapply(ret[is_list_column], "[[", 1)
+    }
+    ret
+  }
+
   if (is.null(name_group)) {
-    data_by_time <- lapply(data_by_time, function(x) list(as.list(x)))
+    data_by_time <- lapply(data_by_time, function(x) list(row_as_list(x)))
   } else {
     data_by_time <- lapply(data_by_time, function(el) {
       lapply(unname(
         split(el[names(el) != name_group], el[[name_group]])),
-        as.list)
+        row_as_list)
     })
   }
 
