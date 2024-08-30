@@ -390,8 +390,9 @@ dust_system_run_to_time <- function(sys, time) {
 ##' @inheritParams dust_system_state
 ##'
 ##' @param times A vector of times.  They must be increasing, and the
-##'   first time must be no less than the current system time
-##'   (as reported by [dust_system_time])
+##'   first time must be no less than the current system time (as
+##'   reported by [dust_system_time]).  If your system is discrete,
+##'   then times must align to the `dt` used when creating the system.
 ##'
 ##' @param index_state An optional index of states to extract.  If
 ##'   given, then we subset the system state on return.  You can use
@@ -406,7 +407,7 @@ dust_system_run_to_time <- function(sys, time) {
 ##' @export
 dust_system_simulate <- function(sys, times, index_state = NULL) {
   check_is_dust_system(sys)
-  ## TODO: check time sequence, except for the first?
+  check_times(times, sys$dt)
   ret <- sys$methods$simulate(sys$ptr,
                               times,
                               index_state,
@@ -600,6 +601,31 @@ check_is_dust_system <- function(sys, call = parent.frame()) {
   if (!inherits(sys, "dust_system")) {
     cli::cli_abort("Expected 'sys' to be a 'dust_system' object",
                    arg = "sys", call = call)
+  }
+}
+
+
+check_times <- function(times, dt, name = "times", call = parent.frame()) {
+  assert_numeric(times, name = name)
+  if (any(diff(times) < 0)) {
+    cli::cli_abort(
+      "Values in '{name}' must be increasing (with ties allowed)",
+      arg = name, call = call)
+  }
+  if (!is.null(dt)) {
+    rem <- times %% dt
+    err <- abs(rem) > sqrt(.Machine$double.eps)
+    if (any(err)) {
+      if (dt == 1) {
+        cli::cli_abort(
+          "Values in '{name}' must be integer-like, because 'dt' is 1",
+          arg = name, call = call)
+      } else {
+        cli::cli_abort(
+          "Values in '{name}' must multiples of 'dt' ({dt})",
+          arg = name, call = call)
+      }
+    }
   }
 }
 

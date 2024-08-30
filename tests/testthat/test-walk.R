@@ -425,22 +425,36 @@ test_that("can simulate walk system with index", {
 })
 
 
-## This will likely move to use the R version soon, but save that move
-## till later and test this here.
 test_that("can validate times", {
   pars <- list(sd = 1)
   obj <- dust_system_create(walk(), pars, n_particles = 10, seed = 42)
   expect_error(
     dust_system_simulate(obj, c(1, 2, 3.5)),
-    "Expected 'time[3]' to be integer-like",
+    "Values in 'times' must be integer-like, because 'dt' is 1",
     fixed = TRUE)
   expect_error(
     dust_system_simulate(obj, c(1, 2, 1)),
-    "Expected 'time[3]' (2) to be larger than the previous value (1)",
+    "Values in 'times' must be increasing (with ties allowed)",
     fixed = TRUE)
   expect_error(
     dust_system_simulate(obj, NULL),
-    "'time' must be a numeric vector")
+    "Expected 'times' to be numeric")
+})
+
+
+test_that("allow non-integer times but validate times align", {
+  pars <- list(sd = 1)
+  obj1 <- dust_system_create(walk(), pars, n_particles = 10, seed = 42,
+                             dt = 0.25)
+  obj2 <- dust_system_create(walk(), pars, n_particles = 10, seed = 42)
+  expect_error(
+    dust_system_simulate(obj1, c(1, 2, 3.1)),
+    "Values in 'times' must multiples of 'dt'")
+
+  t <- seq(0, 1, by = 0.25)
+  y1 <- dust_system_simulate(obj1, t)
+  y2 <- dust_system_simulate(obj2, t * 4) / 4
+  expect_equal(y1, y2)
 })
 
 
