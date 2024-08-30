@@ -5,3 +5,4 @@ src/logistic.cpp linguist-generated=true
 src/sir.cpp linguist-generated=true
 src/sirode.cpp linguist-generated=true
 src/walk.cpp linguist-generated=true
+R/import-*.R linguist-generated=true
