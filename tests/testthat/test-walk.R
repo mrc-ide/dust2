@@ -130,7 +130,7 @@ test_that("validate inputs", {
     5.0)
   expect_error(
     dust_system_create(walk(), pars, time = "5", n_particles = 10),
-    "'time' must be scalar numeric")
+    "Expected 'time' to be numeric")
 
   expect_identical(
     dust_system_state(
@@ -458,11 +458,14 @@ test_that("can validate times", {
     fixed = TRUE)
   expect_error(
     dust_system_simulate(obj, c(1, 2, 1)),
-    "Values in 'times' must be increasing (with ties allowed)",
+    "Values in 'times' must be increasing",
     fixed = TRUE)
   expect_error(
     dust_system_simulate(obj, NULL),
     "Expected 'times' to be numeric")
+  expect_error(
+    dust_system_simulate(obj, numeric()),
+    "Expected at least one value in 'times'")
 })
 
 
@@ -473,7 +476,7 @@ test_that("allow non-integer times but validate times align", {
   obj2 <- dust_system_create(walk(), pars, n_particles = 10, seed = 42)
   expect_error(
     dust_system_simulate(obj1, c(1, 2, 3.1)),
-    "Values in 'times' must multiples of 'dt'")
+    "Values in 'times' must be multiples of 'dt'")
 
   t <- seq(0, 1, by = 0.25)
   y1 <- dust_system_simulate(obj1, t)

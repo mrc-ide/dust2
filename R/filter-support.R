@@ -26,33 +26,6 @@ check_dt <- function(dt, call = NULL) {
 }
 
 
-check_time_sequence <- function(time_start, time, call = NULL) {
-  assert_scalar_integer(time_start, call = call)
-  assert_integer(time, call = call)
-  if (length(time) == 0) {
-    cli::cli_abort("Expected at least one value in 'time'",
-                   arg = "time", call = call)
-  }
-  err <- diff(c(time_start, time)) <= 0
-  if (any(err)) {
-    i <- which(err)
-    nm_other <- ifelse(i == 1, "time_start", sprintf("time[%d]", i - 1))
-    detail <- sprintf("'time[%d]' (%d) must be greater than '%s' (%d)",
-                      i, time[i], nm_other, c(time_start, time)[i])
-    if (length(detail) > 5) {
-      detail <- c(
-        detail[1:4],
-        sprintf("...and %d other errors", sum(err) - 4))
-    }
-    cli::cli_abort(
-      c("Time sequence is not strictly increasing",
-        set_names(detail, "x")),
-      arg = "time", call = call)
-  }
-  as.numeric(time)
-}
-
-
 check_index <- function(index, max = NULL, unique = FALSE,
                         name = deparse(substitute(index)), call = NULL) {
   if (!is.null(index)) {

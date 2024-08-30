@@ -629,33 +629,48 @@ check_time <- function(time, dt, name = "time", call = parent.frame()) {
 }
 
 
-## TODO: harmonise with filter...
-check_time_sequence <- function(times, dt, name = "times",
+check_time_sequence <- function(time, dt, name = deparse(substitute(time)),
                                 call = parent.frame()) {
-  assert_numeric(times, name = name)
-  if (any(diff(times) < 0)) {
+  assert_numeric(time, name = name, call = call)
+  if (length(time) == 0) {
+    cli::cli_abort("Expected at least one value in '{name}'",
+                   arg = name, call = call)
+  }
+
+  err <- diff(time) <= 0
+  if (any(err)) {
+    i <- which(err)
+    detail <- tail_errors(sprintf(
+      "'{name}[%d]' (%s) must be greater than '{name}[%d]' (%s)",
+      i + 1, time[i + 1], i, time[i]))
     cli::cli_abort(
-      "Values in '{name}' must be increasing (with ties allowed)",
+      c("Values in '{name}' must be increasing",
+        detail),
       arg = name, call = call)
   }
+
   if (!is.null(dt)) {
-    rem <- times %% dt
+    rem <- time %% dt
     err <- abs(rem) > sqrt(.Machine$double.eps)
     if (any(err)) {
+      i <- which(err)
+      detail <- tail_errors(sprintf("'{name}[%d]' (%s) is invalid", i, time[i]))
       if (dt == 1) {
         cli::cli_abort(
-          "Values in '{name}' must be integer-like, because 'dt' is 1",
+          c("Values in '{name}' must be integer-like, because 'dt' is 1",
+            detail),
           arg = name, call = call)
       } else {
         cli::cli_abort(
-          "Values in '{name}' must be multiples of 'dt' ({dt})",
+          c("Values in '{name}' must be multiples of 'dt' ({dt})",
+            detail),
           arg = name, call = call)
       }
     }
   }
+
+  as.numeric(time)
 }
-
-
 
 
 is_uncalled_generator <- function(sys) {

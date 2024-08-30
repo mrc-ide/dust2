@@ -10,36 +10,6 @@ test_that("can validate that 'dt' is reasonable", {
 })
 
 
-test_that("can validate time sequence", {
-  expect_no_error(check_time_sequence(0, 1:5))
-
-  err <- expect_error(
-    check_time_sequence(3, 1:5),
-    "Time sequence is not strictly increasing")
-  expect_equal(
-    err$body,
-    c(x = "'time[1]' (1) must be greater than 'time_start' (3)"))
-
-  err <- expect_error(
-    check_time_sequence(0, 10:1),
-    "Time sequence is not strictly increasing")
-  expect_equal(
-    err$body,
-    c(x = "'time[2]' (9) must be greater than 'time[1]' (10)",
-      x = "'time[3]' (8) must be greater than 'time[2]' (9)",
-      x = "'time[4]' (7) must be greater than 'time[3]' (8)",
-      x = "'time[5]' (6) must be greater than 'time[4]' (7)",
-      x = "...and 5 other errors"))
-
-  expect_error(
-    check_time_sequence(0, integer()),
-    "Expected at least one value in 'time'")
-  expect_error(
-    check_time_sequence(0, NULL),
-    "Expected 'time' to be integer")
-})
-
-
 test_that("check index", {
   expect_no_error(check_index(NULL))
   expect_no_error(check_index(1:4))
