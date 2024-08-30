@@ -209,12 +209,13 @@ SEXP dust2_system_compare_data(cpp11::sexp ptr,
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
   check_errors(obj, "compare data for");
   const auto n_groups = obj->n_groups();
+  const auto& shared = obj->shared();
 
   std::vector<data_type> data;
   check_length(r_data, n_groups, "data");
   for (size_t i = 0; i < n_groups; ++i) {
     auto r_data_i = cpp11::as_cpp<cpp11::list>(r_data[i]);
-    data.push_back(system_type::build_data(r_data_i));
+    data.push_back(system_type::build_data(r_data_i, shared[i]));
   }
 
   cpp11::writable::doubles ret(obj->n_particles() * obj->n_groups());

@@ -103,7 +103,7 @@ public:
     return dust2::zero_every_type<real_type>{{1, {4}}}; // zero[1] = {4};
   }
 
-  static data_type build_data(cpp11::list r_data) {
+  static data_type build_data(cpp11::list r_data, const shared_state& shared) {
     auto data = static_cast<cpp11::list>(r_data);
     auto incidence = dust2::r::read_real(data, "incidence", NA_REAL);
     return data_type{incidence};

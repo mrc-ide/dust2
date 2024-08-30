@@ -220,6 +220,10 @@ public:
     return packing_gradient_;
   }
 
+  auto& shared() const {
+    return shared_;
+  }
+
   void set_time(real_type time) {
     time_ = time;
   }
