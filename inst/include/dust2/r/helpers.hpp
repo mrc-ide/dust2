@@ -116,13 +116,7 @@ inline cpp11::integers as_integers(cpp11::doubles x, const char * name) {
 
 inline double check_time(cpp11::sexp r_time, const char * name) {
   const auto allow_na = false;
-  const auto time = to_double(r_time, allow_na, name);
-  const auto eps = 1e-8;
-  // We can relax this later and carefully align time onto a grid
-  if (!is_integer_like(time, eps)) {
-    cpp11::stop("Expected '%s' to be integer-like", name);
-  }
-  return time;
+  return to_double(r_time, allow_na, name);
 }
 
 inline double check_dt(cpp11::sexp r_dt) {

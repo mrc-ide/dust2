@@ -146,7 +146,25 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
                                preserve_group_dimension = FALSE) {
   call <- environment()
   check_is_dust_system_generator(generator, substitute(generator))
-  ## check_time(time, call = call)
+
+  is_discrete <- generator$properties$time_type == "discrete"
+  if (is_discrete) {
+    dt <- check_dt(dt %||% 1, call = call)
+    if (!is.null(ode_control)) {
+      cli::cli_abort("Can't use 'ode_control' with discrete-time systems")
+    }
+  } else {
+    if (!is.null(dt)) {
+      cli::cli_abort("Can't use 'dt' with continuous-time systems")
+    }
+    if (is.null(ode_control)) {
+      ode_control <- dust_ode_control()
+    } else {
+      assert_is(ode_control, "dust_ode_control", call = environment())
+    }
+  }
+  check_time(time, dt, call = call)
+
   assert_scalar_size(n_particles, allow_zero = FALSE, call = call)
   assert_scalar_size(n_groups, allow_zero = FALSE, call = call)
   assert_scalar_size(n_threads, allow_zero = FALSE, call = call)
@@ -157,23 +175,11 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
   preserve_group_dimension <- preserve_group_dimension || n_groups > 1
 
   pars <- check_pars(pars, n_groups, NULL, preserve_group_dimension)
-  if (generator$properties$time_type == "discrete") {
-    if (!is.null(ode_control)) {
-      cli::cli_abort("Can't use 'ode_control' with discrete-time systems")
-    }
-    dt <- check_dt(dt %||% 1, call = call)
+  if (is_discrete) {
     res <- generator$methods$alloc(pars, time, dt, n_particles,
                                    n_groups, seed, deterministic,
                                    n_threads)
   } else {
-    if (!is.null(dt)) {
-      cli::cli_abort("Can't use 'dt' with continuous-time systems")
-    }
-    if (is.null(ode_control)) {
-      ode_control <- dust_ode_control()
-    } else {
-      assert_is(ode_control, "dust_ode_control", call = environment())
-    }
     res <- generator$methods$alloc(pars, time, ode_control, n_particles,
                                    n_groups, seed, deterministic, n_threads)
   }
@@ -304,7 +310,7 @@ dust_system_time <- function(sys) {
 ##' @export
 dust_system_set_time <- function(sys, time) {
   check_is_dust_system(sys)
-  ## check_time(time) # TODO
+  check_time(time, sys$dt)
   sys$methods$set_time(sys$ptr, time)
   invisible()
 }
@@ -407,7 +413,7 @@ dust_system_run_to_time <- function(sys, time) {
 ##' @export
 dust_system_simulate <- function(sys, times, index_state = NULL) {
   check_is_dust_system(sys)
-  check_times(times, sys$dt)
+  check_time_sequence(times, sys$dt)
   ret <- sys$methods$simulate(sys$ptr,
                               times,
                               index_state,
@@ -605,7 +611,27 @@ check_is_dust_system <- function(sys, call = parent.frame()) {
 }
 
 
-check_times <- function(times, dt, name = "times", call = parent.frame()) {
+check_time <- function(time, dt, name = "time", call = parent.frame()) {
+  assert_scalar_numeric(time, name = name, call = call)
+  if (!is.null(dt)) {
+    if (abs(time %% dt) > sqrt(.Machine$double.eps)) {
+      if (dt == 1) {
+        cli::cli_abort(
+          "'{name}' must be integer-like, because 'dt' is 1",
+          arg = name, call = call)
+      } else {
+        cli::cli_abort(
+          "'{name}' must be a multiple of 'dt' ({dt})",
+          arg = name, call = call)
+      }
+    }
+  }
+}
+
+
+## TODO: harmonise with filter...
+check_time_sequence <- function(times, dt, name = "times",
+                                call = parent.frame()) {
   assert_numeric(times, name = name)
   if (any(diff(times) < 0)) {
     cli::cli_abort(
@@ -622,12 +648,14 @@ check_times <- function(times, dt, name = "times", call = parent.frame()) {
           arg = name, call = call)
       } else {
         cli::cli_abort(
-          "Values in '{name}' must multiples of 'dt' ({dt})",
+          "Values in '{name}' must be multiples of 'dt' ({dt})",
           arg = name, call = call)
       }
     }
   }
 }
+
+
 
 
 is_uncalled_generator <- function(sys) {

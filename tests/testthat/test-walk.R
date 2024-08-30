@@ -92,11 +92,23 @@ test_that("provided dt is reasonable", {
 })
 
 
-test_that("time starts as an integer", {
+test_that("time starts as an integer when dt is 1", {
   pars <- list(sd = 1, random_initial = TRUE)
   expect_error(
     dust_system_create(walk(), pars, n_particles = 10, time = 1.5),
-    "Expected 'time' to be integer-like")
+    "'time' must be integer-like, because 'dt' is 1")
+})
+
+
+test_that("time aligns to grid when dt is less than 1", {
+  pars <- list(sd = 1, random_initial = TRUE)
+  obj <- dust_system_create(walk(), pars, n_particles = 10, dt = 0.25,
+                            time = 1.5)
+  expect_equal(dust_system_time(obj), 1.5)
+  expect_error(
+    dust_system_create(walk(), pars, n_particles = 10, dt = 0.25, time = 1.1),
+    "'time' must be a multiple of 'dt' (0.25)",
+    fixed = TRUE)
 })
 
 
@@ -215,7 +227,19 @@ test_that("can set time", {
   expect_null(dust_system_set_time(obj, 0))
   expect_equal(dust_system_time(obj), 0)
   expect_error(dust_system_set_time(obj, 0.5),
-               "Expected 'time' to be integer-like")
+               "'time' must be integer-like, because 'dt' is 1")
+})
+
+
+test_that("can set fractional time", {
+  pars <- list(sd = 1, random_initial = TRUE)
+  obj <- dust_system_create(walk(), pars, n_particles = 10, dt = 0.25)
+  expect_error(
+    dust_system_set_time(obj, 0.1),
+    "'time' must be a multiple of 'dt' (0.25)",
+    fixed = TRUE)
+  dust_system_set_time(obj, 1.25)
+  expect_equal(dust_system_time(obj), 1.25)
 })
 
 

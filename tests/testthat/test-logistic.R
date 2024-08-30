@@ -87,8 +87,8 @@ test_that("can set time", {
   expect_equal(dust_system_time(obj), 4)
   expect_null(dust_system_set_time(obj, 0))
   expect_equal(dust_system_time(obj), 0)
-  expect_error(dust_system_set_time(obj, 0.5),
-               "Expected 'time' to be integer-like")
+  expect_null(dust_system_set_time(obj, 0.5))
+  expect_equal(dust_system_time(obj), 0.5)
 })
 
 
