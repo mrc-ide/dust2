@@ -236,7 +236,7 @@ SEXP dust2_system_simulate(cpp11::sexp ptr,
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
   check_errors(obj, "simulate");
   const auto n_state = obj->n_state();
-  const auto times = check_time_sequence2(obj->time(), r_times, false, "time");
+  const auto times = check_time_sequence(obj->time(), r_times, false, "time");
   const auto index_state =
     check_index(r_index_state, obj->n_state(), "index_state");
   const auto index_group = obj->all_groups();

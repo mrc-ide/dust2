@@ -142,34 +142,12 @@ inline double check_dt(cpp11::sexp r_dt) {
   return dt;
 }
 
+
 template <typename real_type>
 std::vector<real_type> check_time_sequence(real_type time_start,
                                            cpp11::sexp r_time,
                                            bool require_later,
                                            const char * name) {
-  auto time = to_vector_real<real_type>(r_time, name);
-  auto prev = time_start;
-  const auto eps = 1e-8;
-  for (size_t i = 0; i < time.size(); ++i) {
-    const auto t = time[i];
-    if (!is_integer_like(t, eps)) {
-      cpp11::stop("Expected 'time[%d]' to be integer-like", i + 1);
-    }
-    if (t < prev || (require_later && t == prev)) {
-      cpp11::stop("Expected 'time[%d]' (%d) to be larger than the previous value (%d)",
-                  i + 1, static_cast<int>(prev), static_cast<int>(t));
-    }
-    prev = t;
-  }
-  return time;
-}
-
-
-template <typename real_type>
-std::vector<real_type> check_time_sequence2(real_type time_start,
-                                            cpp11::sexp r_time,
-                                            bool require_later,
-                                            const char * name) {
   auto time = to_vector_real<real_type>(r_time, name);
   if (time[0] < time_start || (require_later && time[0] == time_start)) {
     cpp11::stop("Expected 'time[1]' (%d) to be larger than the previous value (%d)",
