@@ -185,6 +185,43 @@ dust_filter_run <- function(filter, pars, initial = NULL,
 }
 
 
+##' Extract the final state after running a particle filter.
+##'
+##' @title Extract final state from particle filter
+##'
+##' @param filter A `dust_filter` object, created by
+##'   [dust_filter_create]
+##'
+##' @param index_group An optional vector of group indices to extract
+##'   from the filter.
+##'
+##' @inheritParams dust_filter_last_history
+##'
+##' @return An array.  If ungrouped this will have dimensions `state`
+##'   x `particle` and if grouped then `state` x `particle` x `group`.
+##'   If `select_random_particle` is `TRUE`, we drop the particle
+##'   dimension of the return value.
+##' 
+##' @export
+dust_filter_last_state <- function(filter, index_group = NULL,
+                                   select_random_particle = FALSE) {
+  check_is_dust_filter(filter)
+  if (is.null(filter$ptr)) {
+    cli::cli_abort(c(
+      "History is not current",
+      i = "Filter has not yet been run"))
+  }
+  index_group <- check_index(index_group, max = filter$n_groups,
+                             unique = TRUE)
+  ## TODO: we should store the index_group against the filter and
+  ## error if it's not the same as the previous run - I feel like we
+  ## do that somewhere?
+  filter$methods$last_state(filter$ptr, index_group,
+                            select_random_particle,
+                            filter$preserve_group_dimension)
+}
+
+
 ##' Fetch the last history created by running a filter.  This
 ##' errors if the last call to [dust_filter_run] did not use
 ##' `save_history = TRUE`.

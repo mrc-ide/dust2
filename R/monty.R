@@ -181,6 +181,43 @@ dust_filter_monty <- function(filter, packer, initial = NULL,
 }
 
 
+dust_filter_observer <- function(state = "none", trajectories = "single") {
+  trajectories <- match_value(trajectories, c("none", "single", "all"))
+  state <- match_value(state, c("none", "single", "all"))
+  if (trajectories == "single" && state == "single") {
+    cli::cli_warn(
+      paste("You have selected 'trajectories = \"single\"' and",
+            "'state = \"single\"'; please be aware these are not generally",
+            "from the same particle yet, but will be in a future",
+            "version"),
+      .frequency = "regularly",
+      .frequency_id = "dust_filter_observer_single")
+  }
+
+  ## TODO: this should accept index_group, but that's something that
+  ## monty needs to do better atm.
+  observe <- function(model, rng) {
+    filter <- model$filter
+    ## We will need something nice here so that if both state and
+    ## trajectory give 'single' then we return the _same_ index.  I
+    ## think that might end up being
+    t <- switch(
+      trajectories,
+      none = NULL,
+      single = dust_filter_last_history(filter, select_random_particle = TRUE),
+      all = dust_filter_last_history(filter))
+    s <- switch(
+      state,
+      none = NULL,
+      single = dust_filter_state(model$filter, select_random_particle = TRUE),
+      all = dust_filter_state(model$filter))
+    list(trajectories = t, state = s)
+  }
+
+  monty::monty_observer(observe)
+}
+
+
 packer_unpack <- function(packer, x) {
   if (is.matrix(x)) {
     lapply(seq_len(ncol(x)), function(i) packer$unpack(x[, i]))

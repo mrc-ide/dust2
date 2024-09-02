@@ -115,6 +115,10 @@ public:
     return history_is_current_;
   }
 
+  auto& last_state() const {
+    return sys_.state();
+  }
+
   auto rng_state() const {
     return rng_.export_state();
   }
