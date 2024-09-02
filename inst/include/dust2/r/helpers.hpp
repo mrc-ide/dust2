@@ -116,13 +116,7 @@ inline cpp11::integers as_integers(cpp11::doubles x, const char * name) {
 
 inline double check_time(cpp11::sexp r_time, const char * name) {
   const auto allow_na = false;
-  const auto time = to_double(r_time, allow_na, name);
-  const auto eps = 1e-8;
-  // We can relax this later and carefully align time onto a grid
-  if (!is_integer_like(time, eps)) {
-    cpp11::stop("Expected '%s' to be integer-like", name);
-  }
-  return time;
+  return to_double(r_time, allow_na, name);
 }
 
 inline double check_dt(cpp11::sexp r_dt) {
@@ -142,27 +136,20 @@ inline double check_dt(cpp11::sexp r_dt) {
   return dt;
 }
 
+
 template <typename real_type>
 std::vector<real_type> check_time_sequence(real_type time_start,
                                            cpp11::sexp r_time,
                                            bool require_later,
                                            const char * name) {
   auto time = to_vector_real<real_type>(r_time, name);
-  auto prev = time_start;
-  const auto eps = 1e-8;
-  for (size_t i = 0; i < time.size(); ++i) {
-    const auto t = time[i];
-    if (!is_integer_like(t, eps)) {
-      cpp11::stop("Expected 'time[%d]' to be integer-like", i + 1);
-    }
-    if (t < prev || (require_later && t == prev)) {
-      cpp11::stop("Expected 'time[%d]' (%d) to be larger than the previous value (%d)",
-                  i + 1, static_cast<int>(prev), static_cast<int>(t));
-    }
-    prev = t;
+  if (time[0] < time_start || (require_later && time[0] == time_start)) {
+    cpp11::stop("Expected 'time[1]' (%d) to be larger than the previous value (%d)",
+                static_cast<int>(time[0]), static_cast<int>(time_start));
   }
   return time;
 }
+
 
 inline std::vector<size_t> check_index(cpp11::sexp r_index, size_t max,
                                        const char * name) {

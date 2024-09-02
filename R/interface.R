@@ -146,7 +146,25 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
                                preserve_group_dimension = FALSE) {
   call <- environment()
   check_is_dust_system_generator(generator, substitute(generator))
-  ## check_time(time, call = call)
+
+  is_discrete <- generator$properties$time_type == "discrete"
+  if (is_discrete) {
+    dt <- check_dt(dt %||% 1, call = call)
+    if (!is.null(ode_control)) {
+      cli::cli_abort("Can't use 'ode_control' with discrete-time systems")
+    }
+  } else {
+    if (!is.null(dt)) {
+      cli::cli_abort("Can't use 'dt' with continuous-time systems")
+    }
+    if (is.null(ode_control)) {
+      ode_control <- dust_ode_control()
+    } else {
+      assert_is(ode_control, "dust_ode_control", call = environment())
+    }
+  }
+  check_time(time, dt, call = call)
+
   assert_scalar_size(n_particles, allow_zero = FALSE, call = call)
   assert_scalar_size(n_groups, allow_zero = FALSE, call = call)
   assert_scalar_size(n_threads, allow_zero = FALSE, call = call)
@@ -157,23 +175,11 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
   preserve_group_dimension <- preserve_group_dimension || n_groups > 1
 
   pars <- check_pars(pars, n_groups, NULL, preserve_group_dimension)
-  if (generator$properties$time_type == "discrete") {
-    if (!is.null(ode_control)) {
-      cli::cli_abort("Can't use 'ode_control' with discrete-time systems")
-    }
-    dt <- check_dt(dt %||% 1, call = call)
+  if (is_discrete) {
     res <- generator$methods$alloc(pars, time, dt, n_particles,
                                    n_groups, seed, deterministic,
                                    n_threads)
   } else {
-    if (!is.null(dt)) {
-      cli::cli_abort("Can't use 'dt' with continuous-time systems")
-    }
-    if (is.null(ode_control)) {
-      ode_control <- dust_ode_control()
-    } else {
-      assert_is(ode_control, "dust_ode_control", call = environment())
-    }
     res <- generator$methods$alloc(pars, time, ode_control, n_particles,
                                    n_groups, seed, deterministic, n_threads)
   }
@@ -304,7 +310,7 @@ dust_system_time <- function(sys) {
 ##' @export
 dust_system_set_time <- function(sys, time) {
   check_is_dust_system(sys)
-  ## check_time(time) # TODO
+  check_time(time, sys$dt)
   sys$methods$set_time(sys$ptr, time)
   invisible()
 }
@@ -390,8 +396,9 @@ dust_system_run_to_time <- function(sys, time) {
 ##' @inheritParams dust_system_state
 ##'
 ##' @param times A vector of times.  They must be increasing, and the
-##'   first time must be no less than the current system time
-##'   (as reported by [dust_system_time])
+##'   first time must be no less than the current system time (as
+##'   reported by [dust_system_time]).  If your system is discrete,
+##'   then times must align to the `dt` used when creating the system.
 ##'
 ##' @param index_state An optional index of states to extract.  If
 ##'   given, then we subset the system state on return.  You can use
@@ -406,7 +413,7 @@ dust_system_run_to_time <- function(sys, time) {
 ##' @export
 dust_system_simulate <- function(sys, times, index_state = NULL) {
   check_is_dust_system(sys)
-  ## TODO: check time sequence, except for the first?
+  check_time_sequence(times, sys$dt)
   ret <- sys$methods$simulate(sys$ptr,
                               times,
                               index_state,
@@ -601,6 +608,68 @@ check_is_dust_system <- function(sys, call = parent.frame()) {
     cli::cli_abort("Expected 'sys' to be a 'dust_system' object",
                    arg = "sys", call = call)
   }
+}
+
+
+check_time <- function(time, dt, name = "time", call = parent.frame()) {
+  assert_scalar_numeric(time, name = name, call = call)
+  if (!is.null(dt)) {
+    if (abs(time %% dt) > sqrt(.Machine$double.eps)) {
+      if (dt == 1) {
+        cli::cli_abort(
+          "'{name}' must be integer-like, because 'dt' is 1",
+          arg = name, call = call)
+      } else {
+        cli::cli_abort(
+          "'{name}' must be a multiple of 'dt' ({dt})",
+          arg = name, call = call)
+      }
+    }
+  }
+}
+
+
+check_time_sequence <- function(time, dt, name = deparse(substitute(time)),
+                                call = parent.frame()) {
+  assert_numeric(time, name = name, call = call)
+  if (length(time) == 0) {
+    cli::cli_abort("Expected at least one value in '{name}'",
+                   arg = name, call = call)
+  }
+
+  err <- diff(time) <= 0
+  if (any(err)) {
+    i <- which(err)
+    detail <- tail_errors(sprintf(
+      "'{name}[%d]' (%s) must be greater than '{name}[%d]' (%s)",
+      i + 1, time[i + 1], i, time[i]))
+    cli::cli_abort(
+      c("Values in '{name}' must be increasing",
+        detail),
+      arg = name, call = call)
+  }
+
+  if (!is.null(dt)) {
+    rem <- time %% dt
+    err <- abs(rem) > sqrt(.Machine$double.eps)
+    if (any(err)) {
+      i <- which(err)
+      detail <- tail_errors(sprintf("'{name}[%d]' (%s) is invalid", i, time[i]))
+      if (dt == 1) {
+        cli::cli_abort(
+          c("Values in '{name}' must be integer-like, because 'dt' is 1",
+            detail),
+          arg = name, call = call)
+      } else {
+        cli::cli_abort(
+          c("Values in '{name}' must be multiples of 'dt' ({dt})",
+            detail),
+          arg = name, call = call)
+      }
+    }
+  }
+
+  as.numeric(time)
 }
 
 

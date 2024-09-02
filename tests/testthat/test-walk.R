@@ -92,11 +92,23 @@ test_that("provided dt is reasonable", {
 })
 
 
-test_that("time starts as an integer", {
+test_that("time starts as an integer when dt is 1", {
   pars <- list(sd = 1, random_initial = TRUE)
   expect_error(
     dust_system_create(walk(), pars, n_particles = 10, time = 1.5),
-    "Expected 'time' to be integer-like")
+    "'time' must be integer-like, because 'dt' is 1")
+})
+
+
+test_that("time aligns to grid when dt is less than 1", {
+  pars <- list(sd = 1, random_initial = TRUE)
+  obj <- dust_system_create(walk(), pars, n_particles = 10, dt = 0.25,
+                            time = 1.5)
+  expect_equal(dust_system_time(obj), 1.5)
+  expect_error(
+    dust_system_create(walk(), pars, n_particles = 10, dt = 0.25, time = 1.1),
+    "'time' must be a multiple of 'dt' (0.25)",
+    fixed = TRUE)
 })
 
 
@@ -118,7 +130,7 @@ test_that("validate inputs", {
     5.0)
   expect_error(
     dust_system_create(walk(), pars, time = "5", n_particles = 10),
-    "'time' must be scalar numeric")
+    "Expected 'time' to be numeric")
 
   expect_identical(
     dust_system_state(
@@ -215,7 +227,19 @@ test_that("can set time", {
   expect_null(dust_system_set_time(obj, 0))
   expect_equal(dust_system_time(obj), 0)
   expect_error(dust_system_set_time(obj, 0.5),
-               "Expected 'time' to be integer-like")
+               "'time' must be integer-like, because 'dt' is 1")
+})
+
+
+test_that("can set fractional time", {
+  pars <- list(sd = 1, random_initial = TRUE)
+  obj <- dust_system_create(walk(), pars, n_particles = 10, dt = 0.25)
+  expect_error(
+    dust_system_set_time(obj, 0.1),
+    "'time' must be a multiple of 'dt' (0.25)",
+    fixed = TRUE)
+  dust_system_set_time(obj, 1.25)
+  expect_equal(dust_system_time(obj), 1.25)
 })
 
 
@@ -425,22 +449,39 @@ test_that("can simulate walk system with index", {
 })
 
 
-## This will likely move to use the R version soon, but save that move
-## till later and test this here.
 test_that("can validate times", {
   pars <- list(sd = 1)
   obj <- dust_system_create(walk(), pars, n_particles = 10, seed = 42)
   expect_error(
     dust_system_simulate(obj, c(1, 2, 3.5)),
-    "Expected 'time[3]' to be integer-like",
+    "Values in 'times' must be integer-like, because 'dt' is 1",
     fixed = TRUE)
   expect_error(
     dust_system_simulate(obj, c(1, 2, 1)),
-    "Expected 'time[3]' (2) to be larger than the previous value (1)",
+    "Values in 'times' must be increasing",
     fixed = TRUE)
   expect_error(
     dust_system_simulate(obj, NULL),
-    "'time' must be a numeric vector")
+    "Expected 'times' to be numeric")
+  expect_error(
+    dust_system_simulate(obj, numeric()),
+    "Expected at least one value in 'times'")
+})
+
+
+test_that("allow non-integer times but validate times align", {
+  pars <- list(sd = 1)
+  obj1 <- dust_system_create(walk(), pars, n_particles = 10, seed = 42,
+                             dt = 0.25)
+  obj2 <- dust_system_create(walk(), pars, n_particles = 10, seed = 42)
+  expect_error(
+    dust_system_simulate(obj1, c(1, 2, 3.1)),
+    "Values in 'times' must be multiples of 'dt'")
+
+  t <- seq(0, 1, by = 0.25)
+  y1 <- dust_system_simulate(obj1, t)
+  y2 <- dust_system_simulate(obj2, t * 4) / 4
+  expect_equal(y1, y2)
 })
 
 

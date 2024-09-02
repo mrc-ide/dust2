@@ -38,6 +38,8 @@ dust_filter_data <- function(data, time = NULL, group = NULL) {
     cli::cli_abort(
       "Did not find column '{time}' in 'data'")
   }
+  ## TODO: we should support noninteger time here but that will take a
+  ## bit of a fiddle still...
   assert_integer(data[[time]], name = sprintf('data[["%s"]]', time),
                  arg = "data")
 

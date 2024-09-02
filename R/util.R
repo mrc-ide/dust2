@@ -112,3 +112,13 @@ protect <- function(fn, on_error) {
     tryCatch(fn(...), error = function(e) on_error)
   }
 }
+
+
+tail_errors <- function(x, n = 5) {
+  if (length(x) > n) {
+    x <- c(
+      x[seq_len(n - 1)],
+      sprintf("...and %d other errors", length(x) - (n - 1)))
+  }
+  set_names(x, "x")
+}
