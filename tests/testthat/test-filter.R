@@ -551,23 +551,36 @@ test_that("can extract a random particle from the history", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
   time_start <- 0
   data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
-  obj1 <- dust_filter_create(sir(), time_start, data, n_particles = 100,
-                             seed = 42)
-  obj2 <- dust_filter_create(sir(), time_start, data, n_particles = 100,
-                             seed = 42)
+  obj <- dust_filter_create(sir(), time_start, data, n_particles = 100,
+                            seed = 42)
 
-  dust_filter_run(obj1, pars)
-  dust_filter_run(obj2, pars)
+  dust_filter_run(obj, pars)
 
-  s1 <- dust_filter_last_state(obj1)
-  s2 <- dust_filter_last_state(obj1, select_random_particle = TRUE)
+  s1 <- dust_filter_last_state(obj)
+  s2 <- dust_filter_last_state(obj, select_random_particle = TRUE)
   expect_equal(dim(s1), c(5, 100))
 
   i <- match(rlang::hash(s2), apply(s1, 2, rlang::hash))
   expect_false(is.na(i))
   expect_equal(
-    dust_filter_last_state(obj1, select_random_particle = TRUE),
+    dust_filter_last_state(obj, select_random_particle = TRUE),
     s2)
+
+  j <- replicate(3, {
+    s3 <- dust_filter_last_state(obj)
+    s4 <- dust_filter_last_state(obj, select_random_particle = TRUE)
+    match(rlang::hash(s4), apply(s3, 2, rlang::hash))
+  })
+  expect_equal(j, rep(i, 3))
+
+  k <- replicate(3, {
+    dust_filter_run(obj, pars)
+    s3 <- dust_filter_last_state(obj)
+    s4 <- dust_filter_last_state(obj, select_random_particle = TRUE)
+    match(rlang::hash(s4), apply(s3, 2, rlang::hash))
+  })
+
+  expect_true(any(k != i))
 })
 
 
@@ -582,14 +595,11 @@ test_that("can extract a random particle from a nested filter", {
                      group = rep(1:3, each = 4),
                      incidence = 1:12)
 
-  obj1 <- dust_filter_create(sir(), time_start, data, n_particles = 100,
-                             seed = 42)
-  obj2 <- dust_filter_create(sir(), time_start, data, n_particles = 100,
-                             seed = 42)
-  dust_filter_run(obj1, pars, save_history = TRUE)
-  dust_filter_run(obj2, pars, save_history = TRUE)
-  s1 <- dust_filter_last_state(obj1)
-  s2 <- dust_filter_last_state(obj2, select_random_particle = TRUE)
+  obj <- dust_filter_create(sir(), time_start, data, n_particles = 100,
+                            seed = 42)
+  dust_filter_run(obj, pars, save_history = TRUE)
+  s1 <- dust_filter_last_state(obj)
+  s2 <- dust_filter_last_state(obj, select_random_particle = TRUE)
 
   hash1 <- apply(s1, 2:3, rlang::hash)
   hash2 <- apply(s2, 2, rlang::hash)
