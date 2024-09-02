@@ -257,7 +257,7 @@ std::vector<typename T::shared_state> build_shared(cpp11::list r_pars,
 }
 
 template <typename T>
-std::vector<typename T::internal_state> build_internal(std::vector<typename T::shared_state> shared, size_t n_threads) {
+std::vector<typename T::internal_state> build_internal(const std::vector<typename T::shared_state>& shared, size_t n_threads) {
   std::vector<typename T::internal_state> internal;
   const size_t n_groups = shared.size();
   internal.reserve(n_groups * n_threads);
@@ -290,23 +290,24 @@ void update_pars(T& obj, cpp11::list r_pars, const std::vector<size_t>& index_gr
 
 template <typename T>
 std::vector<typename T::data_type> check_data(cpp11::list r_data,
+                                              const std::vector<typename T::shared_state>& shared,
                                               size_t n_time,
-                                              size_t n_groups,
                                               const char * name) {
+  const size_t n_groups = shared.size();
   std::vector<typename T::data_type> data;
   data.reserve(n_time * n_groups);
 
-  // Errors here are no longer likely to be thrown, as check_data()
-  // should do the work for us.  The exception is that T::build_data()
-  // might fail and we should probably report back the time and group
-  // index that is failing here.
+  // Errors here are no longer likely to be thrown, as the R-side
+  // check_data() should do the work for us.  The exception is that
+  // T::build_data() might fail and we should probably report back the
+  // time and group index that is failing here.
   check_length(r_data, n_time, name);
   for (size_t i = 0; i < n_time; ++i) {
     auto r_data_i = cpp11::as_cpp<cpp11::list>(r_data[i]);
     check_length(r_data_i, n_groups, "data[i]");
     for (size_t j = 0; j < n_groups; ++j) {
       auto r_data_ij = cpp11::as_cpp<cpp11::list>(r_data_i[j]);
-      data.push_back(T::build_data(r_data_ij));
+      data.push_back(T::build_data(r_data_ij, shared[j]));
     }
   }
 
