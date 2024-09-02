@@ -251,7 +251,7 @@ dust_filter_rng_state <- function(filter) {
 dust_filter_set_rng_state <- function(filter, rng_state) {
   check_is_dust_filter(filter)
   if (is.null(filter$ptr)) {
-    assert_raw_vector(rng_state, length(filter$initial_rng_state))
+    assert_raw(rng_state, length(filter$initial_rng_state))
     filter$initial_rng_state <- rng_state
   } else {
     filter$methods$set_rng_state(filter$ptr, rng_state)
