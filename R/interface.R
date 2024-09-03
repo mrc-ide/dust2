@@ -650,7 +650,8 @@ check_time_sequence <- function(time, dt, name = deparse(substitute(time)),
   }
 
   if (!is.null(dt)) {
-    rem <- time %% dt
+    #rem <- time %% dt # The problem is 10 %% 0.25 = 0, but 10 %% 0.1 = 0.1
+    rem <- (floor(time / dt) * dt) - time
     err <- abs(rem) > sqrt(.Machine$double.eps)
     if (any(err)) {
       i <- which(err)
