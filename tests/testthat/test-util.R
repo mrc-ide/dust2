@@ -84,3 +84,10 @@ test_that("can use protect to avoid errors", {
   expect_equal(g(4), 2)
   expect_equal(g(-1), -Inf)
 })
+
+test_that("fmod works", {
+  expect_equal(abs(fmod(5L, 2L)), 1)
+  expect_equal(fmod(10, 0.25), 0)
+  expect_equal(fmod(10, 0.1), 0)
+  expect_equal(fmod(10, 0.01), 0)
+})

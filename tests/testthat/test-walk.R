@@ -102,7 +102,7 @@ test_that("time starts as an integer when dt is 1", {
 
 test_that("time aligns to grid when dt is less than 1", {
   pars <- list(sd = 1, random_initial = TRUE)
-  obj <- dust_system_create(walk(), pars, n_particles = 10, dt = 0.25,
+  obj <- dust_system_create(walk(), pars, n_particles = 10, dt = 0.1,
                             time = 1.5)
   expect_equal(dust_system_time(obj), 1.5)
   expect_error(
