@@ -122,3 +122,7 @@ tail_errors <- function(x, n = 5) {
   }
   set_names(x, "x")
 }
+
+fmod <- function(n, m) {
+  (floor(n / m) * m) - n
+}

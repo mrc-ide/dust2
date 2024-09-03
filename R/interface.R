@@ -614,7 +614,7 @@ check_is_dust_system <- function(sys, call = parent.frame()) {
 check_time <- function(time, dt, name = "time", call = parent.frame()) {
   assert_scalar_numeric(time, name = name, call = call)
   if (!is.null(dt)) {
-    if (abs(time %% dt) > sqrt(.Machine$double.eps)) {
+    if (abs(fmod(time, dt)) > sqrt(.Machine$double.eps)) {
       if (dt == 1) {
         cli::cli_abort(
           "'{name}' must be integer-like, because 'dt' is 1",
@@ -651,7 +651,7 @@ check_time_sequence <- function(time, dt, name = deparse(substitute(time)),
 
   if (!is.null(dt)) {
     #rem <- time %% dt # The problem is 10 %% 0.25 = 0, but 10 %% 0.1 = 0.1
-    rem <- (floor(time / dt) * dt) - time
+    rem <- fmod(time, dt)
     err <- abs(rem) > sqrt(.Machine$double.eps)
     if (any(err)) {
       i <- which(err)
