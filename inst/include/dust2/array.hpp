@@ -10,26 +10,32 @@
 namespace dust2 {
 namespace array {
 
-struct array_dimensions {
-  std::vector<size_t> dim;
+template <size_t rank_>
+struct dimensions {
   size_t rank;
+  std::array<size_t, rank_> dim;
   size_t size;
-  std::vector<size_t> mult;
+  std::array<size_t, rank_> mult;
   // One disadvantage here is we can't optimise away the case where
   // arrays have literal size, we might want to add that in as an
   // optimisation later?
-  array_dimensions(std::initializer_list<size_t> dim_) :
+  dimensions(std::initializer_list<size_t> dim_) :
+    rank(rank_),
     dim(dim_),
-    rank(dim.size()),
     size(std::accumulate(dim.begin(), dim.end(), 1, std::multiplies<size_t>())) {
-    mult.reserve(dim.size());
+    // TODO: I think we can fail to compile here if rank does not
+    // match dim_.size()?
+    //
+    // TODO: I think we can drop 2 of these, so only bother doing
+    // this in the case where we have 3 dimensions or more and store 2
+    // fewer values (with slightly more complex calculations).
     for (size_t i = 0; i < rank; ++i) {
-      mult.push_back(i == 0 ? 1 : dim[i - 1] * mult[i - 1]);
+      mult[i] = i == 0 ? 1 : dim[i - 1] * mult[i - 1];
     }
   }
 };
 
-inline size_t position1(size_t at, size_t size, const char *name,
+inline size_t index1(size_t at, size_t size, const char *name,
                      const char *context) {
   if (at >= size) {
     std::stringstream msg;
@@ -43,8 +49,8 @@ inline size_t position1(size_t at, size_t size, const char *name,
   return at;
 }
 
-inline size_t position2(size_t at_r, size_t at_c, size_t size_r, size_t size_c,
-                        const char *name, const char *context) {
+inline size_t index2(size_t at_r, size_t at_c, size_t size_r, size_t size_c,
+                     const char *name, const char *context) {
   if (at_r >= size_r || at_c >= size_c) {
     std::stringstream msg;
     msg << "Tried to access element (" << at_r + 1 << ", " << at_c + 1 <<
@@ -59,12 +65,11 @@ inline size_t position2(size_t at_r, size_t at_c, size_t size_r, size_t size_c,
   return at_r + at_c * size_r;
 }
 
-
-size_t position(std::initializer_list<size_t> at,
-                const std::vector<size_t>& dim,
-                const std::vector<size_t>& mult,
-                const char *name,
-                const char *context) {
+size_t index(std::initializer_list<size_t> at,
+             const std::vector<size_t>& dim,
+             const std::vector<size_t>& mult,
+             const char *name,
+             const char *context) {
   const auto rank = dim.size();
   size_t ret = 0;
   auto it = at.begin();
