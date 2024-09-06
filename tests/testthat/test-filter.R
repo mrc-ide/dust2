@@ -509,7 +509,7 @@ test_that("can extract final state from an filter", {
 })
 
 
-test_that("can extract final state from an filter, ignoring state index", {
+test_that("can extract final state from a filter, ignoring state index", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
   time_start <- 0
   data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
