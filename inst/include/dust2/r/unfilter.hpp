@@ -97,6 +97,40 @@ cpp11::sexp dust2_unfilter_last_history(cpp11::sexp ptr,
 }
 
 template <typename T>
+cpp11::sexp dust2_unfilter_last_state(cpp11::sexp ptr,
+                                      cpp11::sexp r_index_group,
+                                      bool preserve_particle_dimension,
+                                      bool preserve_group_dimension) {
+  auto *obj =
+    cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
+  const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
+    check_index(r_index_group, obj->sys.n_groups(), "index_group");
+
+  const auto& state = obj->sys.state();
+  const auto n_state = obj->sys.n_state();
+  const auto n_particles = obj->sys.n_particles();
+  const auto n_groups = index_group.size();
+
+  const auto len = n_state * n_particles * n_groups;
+  cpp11::sexp ret = cpp11::writable::doubles(len);
+  if (r_index_group == R_NilValue) {
+    std::copy_n(state.begin(), len, REAL(ret));
+  } else {
+    auto iter_dst = REAL(ret);
+    const auto n_copy = n_state * n_particles;
+    for (auto i : index_group) {
+      iter_dst = std::copy_n(state.begin() + i * n_copy, n_copy, iter_dst);
+    }
+  }
+  if (preserve_group_dimension && preserve_particle_dimension) {
+    set_array_dims(ret, {n_state, n_particles, n_groups});
+  } else if (preserve_group_dimension || preserve_particle_dimension) {
+    set_array_dims(ret, {n_state, n_particles * n_groups});
+  }
+  return ret;
+}
+
+template <typename T>
 cpp11::sexp dust2_discrete_unfilter_last_gradient(cpp11::sexp ptr,
                                                   cpp11::sexp r_index_group,
                                                   bool preserve_particle_dimension,

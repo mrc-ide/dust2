@@ -169,6 +169,31 @@ dust_unfilter_last_history <- function(unfilter, index_group = NULL) {
 }
 
 
+##' Fetch the last state created by running an unfilter.
+##'
+##' @title Fetch last unfilter state
+##'
+##' @inheritParams dust_unfilter_last_history
+##'
+##' @return An array
+##'
+##' @export
+dust_unfilter_last_state <- function(unfilter, index_group = NULL) {
+  check_is_dust_unfilter(unfilter)
+  if (is.null(unfilter$ptr)) {
+    cli::cli_abort(c(
+      "History is not current",
+      i = "Unfilter has not yet been run"))
+  }
+  index_group <- check_index(index_group, max = unfilter$n_groups,
+                             unique = TRUE)
+  unfilter$methods$last_state(unfilter$ptr,
+                              index_group,
+                              unfilter$preserve_particle_dimension,
+                              unfilter$preserve_group_dimension)
+}
+
+
 ##' Fetch the last gradient created by running an unfilter.  This
 ##' errors if the last call to [dust_unfilter_run] did not use
 ##' `adjoint = TRUE`.  The first time you call this (after a

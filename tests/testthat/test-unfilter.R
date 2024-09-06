@@ -337,3 +337,58 @@ test_that("can print an unfilter", {
                fixed = TRUE, all = FALSE)
   expect_match(res$messages, "5 particles", all = FALSE)
 })
+
+
+test_that("can extract final state from an unfilter", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  obj <- dust_unfilter_create(sir(), time_start, data)
+
+  ## Looks like I have broken the _old_ history saving somehow?
+  dust_unfilter_run(obj, pars, save_history = TRUE)
+  h <- dust_unfilter_last_history(obj)
+  s <- dust_unfilter_last_state(obj)
+  expect_equal(s, h[, 4])
+
+  dust_unfilter_run(obj, pars, save_history = FALSE)
+  expect_error(dust_unfilter_last_history(obj), "History is not current")
+  expect_equal(dust_unfilter_last_state(obj), s)
+})
+
+
+test_that("can extract final state from an unfilter, ignoring state index", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  obj <- dust_unfilter_create(sir(), time_start, data, index_state = 1:3)
+
+  dust_unfilter_run(obj, pars, save_history = TRUE)
+  h <- dust_unfilter_last_history(obj)
+  s <- dust_unfilter_last_state(obj)
+  expect_equal(s[1:3], h[, 4])
+  expect_length(s, 5)
+})
+
+
+test_that("can extract final state from grouped unfilter", {
+  pars <- list(
+    list(beta = 0.1, gamma = 0.2, I0 = 10, exp_noise = 1e6),
+    list(beta = 0.2, gamma = 0.2, I0 = 10, exp_noise = 1e6),
+    list(beta = 0.3, gamma = 0.2, I0 = 10, exp_noise = 1e6))
+
+  time_start <- 0
+  data <- data.frame(time = rep(c(4, 8, 12, 16), 3),
+                     group = rep(1:3, each = 4),
+                     incidence = 1:12)
+
+  obj <- dust_unfilter_create(sir(), time_start, data)
+  dust_unfilter_run(obj, pars, save_history = TRUE)
+  h <- dust_unfilter_last_history(obj)
+  s <- dust_unfilter_last_state(obj)
+  expect_equal(s, h[, , 4])
+
+  dust_unfilter_run(obj, pars, save_history = FALSE)
+  expect_error(dust_unfilter_last_history(obj), "History is not current")
+  expect_equal(dust_unfilter_last_state(obj), s)
+})

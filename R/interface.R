@@ -54,10 +54,10 @@ dust_system_generator <- function(name, time_type,
 
   if (has_compare) {
     methods_unfilter <- c("alloc", "run", "update_pars", "last_history",
-                          "last_gradient")
+                          "last_state", "last_gradient")
     methods$unfilter <- get_methods(methods_unfilter, "unfilter", name)
     methods_filter <- c("alloc", "run", "update_pars", "last_history",
-                        "rng_state", "set_rng_state")
+                        "last_state", "rng_state", "set_rng_state")
     methods$filter <- get_methods(methods_filter, "filter", name)
   }
 
