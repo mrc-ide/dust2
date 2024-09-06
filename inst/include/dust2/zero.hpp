@@ -1,13 +1,13 @@
 #pragma once
 
 #include <cstddef>
-#include <map>
+#include <utility>
 #include <vector>
 
 namespace dust2 {
 
 template <typename real_type>
-using zero_every_type = std::map<real_type, std::vector<size_t>>;
+using zero_every_type = std::vector<std::pair<real_type, std::vector<size_t>>>;
 
 template <typename T>
 auto zero_every_vec(const std::vector<typename T::shared_state>& shared) {
