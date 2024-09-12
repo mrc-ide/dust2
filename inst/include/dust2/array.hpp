@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cstddef>
+#include <numeric>
 #include <stdexcept>
 #include <sstream>
 #include <vector>
@@ -84,6 +85,53 @@ size_t index(std::initializer_list<size_t> at,
   }
   return ret;
 }
+
+namespace {
+using idx = std::pair<size_t, size_t>;
+}
+
+// One dimension:
+template <typename T, typename Iterator>
+T sum(const Iterator& x, const idx& i) {
+  return std::accumulate(x + i.first, x + i.second, static_cast<T>(0));
+}
+
+// Complete sum, a special case of 1d but applicable to any rank:
+template <typename T, typename Container, size_t rank>
+T sum(const Container& x, const dimensions<rank>& dim) {
+  return sum<T>(x, {static_cast<size_t>(0), dim.size});
+}
+
+// These are written out by hand for now, and then we an explore less
+// tedious ways, and for more dimensions.  I think we can do this
+// really quite generally with iterators?
+// two dimensions:
+template <typename T, typename Container>
+T sum(Container x, const idx& i, const idx& j, const dimensions<2>& dim) {
+  T tot = 0;
+  for (int jj = j.first; jj < j.second; ++jj) {
+    for (int ii = i.first; ii < i.second; ++ii) {
+      tot += x[ii + jj * dim.mult[1]];
+    }
+  }
+  return tot;
+}
+
+/*
+// three dimensions:
+template <typename T, typename Container>
+T sum(const Container& x, const idx& i, const idx& j, const idx& k, const dimensions<3>& dim) {
+  T tot = 0;
+  for (int kk = k.first; kk < k.second; ++kk) {
+    for (int jj = j.first; jj < j.second; ++jj) {
+      for (int ii = i.first; ii < i.second; ++ii) {
+        tot += x[ii + jj * dim.mult[1] + kk * dim.mult[2]];
+      }
+    }
+  }
+  return tot;
+ }
+*/
 
 }
 }

@@ -236,6 +236,10 @@ test_interpolate_spline1 <- function(t, y, z) {
   .Call(`_dust2_test_interpolate_spline1`, t, y, z)
 }
 
+test_sum <- function(r_x, r_m) {
+  .Call(`_dust2_test_sum`, r_x, r_m)
+}
+
 dust2_system_walk_alloc <- function(r_pars, r_time, r_dt, r_n_particles, r_n_groups, r_seed, r_deterministic, r_n_threads) {
   .Call(`_dust2_dust2_system_walk_alloc`, r_pars, r_time, r_dt, r_n_particles, r_n_groups, r_seed, r_deterministic, r_n_threads)
 }
