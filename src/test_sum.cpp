@@ -14,7 +14,7 @@ double test_sum(cpp11::sexp r_x, cpp11::sexp r_m) {
   if (r_m != R_NilValue) {
     auto tmp = cpp11::as_cpp<cpp11::integers>(r_m);
     for (int i = 0; i < tmp.size(); ++i) {
-      m.push_back(i);
+      m.push_back(tmp[i] - 1);
     }
   }
 
@@ -26,11 +26,21 @@ double test_sum(cpp11::sexp r_x, cpp11::sexp r_m) {
       ret = dust2::array::sum<double>(x, {m[0], m[1]}, dim);
     }
   } else if (rank == 2) {
-    dust2::array::dimensions<2> dim{static_cast<size_t>(r_dim[0], r_dim[1])};
+    dust2::array::dimensions<2> dim{static_cast<size_t>(r_dim[0]),
+                                    static_cast<size_t>(r_dim[1])};
     if (r_m == R_NilValue) {
       ret = dust2::array::sum<double>(x, dim);
     } else {
       ret = dust2::array::sum<double>(x, {m[0], m[1]}, {m[2], m[3]}, dim);
+    }
+  } else if (rank == 3) {
+    dust2::array::dimensions<3> dim{static_cast<size_t>(r_dim[0]),
+                                    static_cast<size_t>(r_dim[1]),
+                                    static_cast<size_t>(r_dim[2])};
+    if (r_m == R_NilValue) {
+      ret = dust2::array::sum<double>(x, dim);
+    } else {
+      ret = dust2::array::sum<double>(x, {m[0], m[1]}, {m[2], m[3]}, {m[4], m[5]}, dim);
     }
   }
 
