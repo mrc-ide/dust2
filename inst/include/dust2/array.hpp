@@ -90,53 +90,95 @@ namespace {
 using idx = std::pair<size_t, size_t>;
 }
 
-// Special case, sum over everything:
-template <typename T, typename Container, size_t rank>
-T sum(Container x, const dimensions<rank>& dim) {
-  return std::accumulate(x, x + dim.size, static_cast<T>(0));
-}
-
 // Sum over vector (1d)
-template <typename T, typename Container>
-T sum(Container x, const dimensions<1>& dim, const idx& i) {
-  if (i.first >= i.second) {
-    return static_cast<T>(0);
+template <typename T, typename Container, typename BinaryOp>
+T reduce(Container x, const dimensions<1>& dim, T init, BinaryOp op,
+         const idx& i) {
+  if (i.first > i.second) {
+    return init;
   }
-  return std::accumulate(x + i.first, x + i.second + 1, static_cast<T>(0));
+  return std::accumulate(x + i.first, x + i.second + 1, init, op);
 }
 
 // These are written out by hand for now, and then we an explore less
-// tedious ways, and for more dimensions.  I think we can do this
-// really quite generally with iterators?  At the moment it's a bit
-// ambiguous if these take iterators or if they take containers.
-// Certainly they will give the right answer is given a pointer it
-// seems, but I am not totally clear if they will survive with a
-// vector.
+// tedious ways, and for more dimensions.  Previously we've generated
+// code for this rather than trying to do anything to clever with C++
+// template metaprogramming.
 
 // 2 dimensions:
-template <typename T, typename Container>
-T sum(Container x, const dimensions<2>& dim, const idx& i, const idx& j) {
-  T tot = 0;
+template <typename T, typename Container, typename BinaryOp>
+T reduce(Container x, const dimensions<2>& dim, T init, BinaryOp op,
+         const idx& i, const idx& j) {
+  T tot = init;
   for (size_t jj = j.first; jj <= j.second; ++jj) {
     for (size_t ii = i.first; ii <= i.second; ++ii) {
-      tot += x[ii + jj * dim.mult[1]];
+      tot = op(tot, x[ii + jj * dim.mult[1]]);
     }
   }
   return tot;
 }
 
 // 3 dimensions:
-template <typename T, typename Container>
-T sum(Container x, const dimensions<3>& dim, const idx& i, const idx& j, const idx& k) {
-  T tot = 0;
+template <typename T, typename Container, typename BinaryOp>
+T reduce(Container x, const dimensions<3>& dim, T init, BinaryOp op,
+         const idx& i, const idx& j, const idx& k) {
+  T tot = init;
   for (size_t kk = k.first; kk <= k.second; ++kk) {
     for (size_t jj = j.first; jj <= j.second; ++jj) {
       for (size_t ii = i.first; ii <= i.second; ++ii) {
-        tot += x[ii + jj * dim.mult[1] + kk * dim.mult[2]];
+        tot = op(tot, x[ii + jj * dim.mult[1] + kk * dim.mult[2]]);
       }
     }
   }
   return tot;
+}
+
+// Special case, sum over everything:
+template <typename T, typename Container, typename BinaryOp, size_t rank>
+T reduce(Container x, const dimensions<rank>& dim, T init, BinaryOp op) {
+  return reduce(x, x + dim.size, init, op);
+}
+
+// Then implement sums:
+template <typename T, typename Container, size_t rank>
+T sum(Container x, const dimensions<rank>& dim) {
+  return reduce(x, dim, static_cast<T>(0), std::plus<T>());
+}
+
+template <typename T, typename Container>
+T sum(Container x, const dimensions<1>& dim, const idx& i) {
+  return reduce(x, dim, static_cast<T>(0), std::plus<T>(), i);
+}
+
+template <typename T, typename Container>
+T sum(Container x, const dimensions<2>& dim, const idx& i, const idx& j) {
+  return reduce(x, dim, static_cast<T>(0), std::plus<T>(), i, j);
+}
+
+template <typename T, typename Container>
+T sum(Container x, const dimensions<3>& dim, const idx& i, const idx& j, const idx& k) {
+  return reduce(x, dim, static_cast<T>(0), std::plus<T>(), i, j, k);
+}
+
+// And products:
+template <typename T, typename Container, size_t rank>
+T prod(Container x, const dimensions<rank>& dim) {
+  return reduce(x, dim, static_cast<T>(1), std::multiplies<T>());
+}
+
+template <typename T, typename Container>
+T prod(Container x, const dimensions<1>& dim, const idx& i) {
+  return reduce(x, dim, static_cast<T>(1), std::multiplies<T>(), i);
+}
+
+template <typename T, typename Container>
+T prod(Container x, const dimensions<2>& dim, const idx& i, const idx& j) {
+  return reduce(x, dim, static_cast<T>(1), std::multiplies<T>(), i, j);
+}
+
+template <typename T, typename Container>
+T prod(Container x, const dimensions<3>& dim, const idx& i, const idx& j, const idx& k) {
+  return reduce(x, dim, static_cast<T>(1), std::multiplies<T>(), i, j, k);
 }
 
 }
