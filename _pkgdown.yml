@@ -41,8 +41,8 @@ reference:
   - subtitle: Helpers
     contents:
       - dust_filter_data
-  - subtitle:
-    contents: Advanced use
+  - subtitle: Advanced use
+    contents:
       - dust_likelihood_copy
       - dust_likelihood_rng_state
       - dust_likelihood_set_rng_state
