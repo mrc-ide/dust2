@@ -56,6 +56,7 @@ cpp11::sexp dust2_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
 template <typename T>
 cpp11::sexp dust2_unfilter_last_history(cpp11::sexp ptr,
                                         cpp11::sexp r_index_group,
+                                        bool select_random_particle,
                                         bool preserve_particle_dimension,
                                         bool preserve_group_dimension) {
   auto *obj =
@@ -99,6 +100,7 @@ cpp11::sexp dust2_unfilter_last_history(cpp11::sexp ptr,
 template <typename T>
 cpp11::sexp dust2_unfilter_last_state(cpp11::sexp ptr,
                                       cpp11::sexp r_index_group,
+                                      bool select_random_particle,
                                       bool preserve_particle_dimension,
                                       bool preserve_group_dimension) {
   auto *obj =

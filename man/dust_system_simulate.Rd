@@ -10,8 +10,9 @@ dust_system_simulate(sys, times, index_state = NULL)
 \item{sys}{A \code{dust_system} object}
 
 \item{times}{A vector of times.  They must be increasing, and the
-first time must be no less than the current system time
-(as reported by \link{dust_system_time})}
+first time must be no less than the current system time (as
+reported by \link{dust_system_time}).  If your system is discrete,
+then times must align to the \code{dt} used when creating the system.}
 
 \item{index_state}{An optional index of states to extract.  If
 given, then we subset the system state on return.  You can use

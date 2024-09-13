@@ -63,8 +63,8 @@ dimension is always preserved.}
 initialisation.}
 }
 \value{
-A \code{dust_unfilter} object, which can be used with
-\link{dust_unfilter_run}
+A \code{dust_likelihood} object, which can be used with
+\link{dust_likelihood_run}
 }
 \description{
 Create a particle filter object

@@ -5,8 +5,8 @@ test_that("can run an unfilter via the adjoint method", {
   data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
 
   obj <- dust_unfilter_create(sir(), time_start, data)
-  ll1 <- dust_unfilter_run(obj, pars, adjoint = FALSE)
-  ll2 <- dust_unfilter_run(obj, pars, adjoint = TRUE)
+  ll1 <- dust_likelihood_run(obj, pars, adjoint = FALSE)
+  ll2 <- dust_likelihood_run(obj, pars, adjoint = TRUE)
   expect_identical(ll2, ll1)
 })
 
@@ -17,11 +17,11 @@ test_that("can run the adjoint model", {
 
   obj <- dust_unfilter_create(sir(), time_start, data)
   x <- c(beta = 0.1, gamma = 0.2, I0 = 10)
-  ll <- dust_unfilter_run(obj, as.list(x), adjoint = TRUE)
-  gr <- dust_unfilter_last_gradient(obj)
+  ll <- dust_likelihood_run(obj, as.list(x), adjoint = TRUE)
+  gr <- dust_likelihood_last_gradient(obj)
 
-  ll <- dust_unfilter_run(obj, as.list(x))
-  gr_num <- numDeriv::grad(function(x) dust_unfilter_run(obj, as.list(x)), x,
+  ll <- dust_likelihood_run(obj, as.list(x))
+  gr_num <- numDeriv::grad(function(x) dust_likelihood_run(obj, as.list(x)), x,
                            method = "Richardson", method.args = list(r = 6))
   expect_equal(gr_num, gr, tolerance = 1e-4)
 })
@@ -36,10 +36,10 @@ test_that("can't compute adjoint where it was not enabled in the unfilter", {
   ## TODO: these errors end up quite different, but that's
   ## unavoidable?
   obj <- dust_unfilter_create(sir(), time_start, data)
-  expect_error(dust_unfilter_last_gradient(obj),
+  expect_error(dust_likelihood_last_gradient(obj),
                "Gradient is not current")
-  ll1 <- dust_unfilter_run(obj, pars, adjoint = FALSE)
-  expect_error(dust_unfilter_last_gradient(obj),
+  ll1 <- dust_likelihood_run(obj, pars, adjoint = FALSE)
+  expect_error(dust_likelihood_last_gradient(obj),
                "System was not run with 'adjoint = TRUE'")
 })
 
@@ -53,10 +53,10 @@ test_that("adjoint is enabled in unfilter by default", {
   ## TODO: these errors end up quite different, but that's
   ## unavoidable?
   obj <- dust_unfilter_create(sir(), time_start, data)
-  expect_error(dust_unfilter_last_gradient(obj),
+  expect_error(dust_likelihood_last_gradient(obj),
                "Gradient is not current")
-  ll <- dust_unfilter_run(obj, pars)
-  expect_length(dust_unfilter_last_gradient(obj), 3)
+  ll <- dust_likelihood_run(obj, pars)
+  expect_length(dust_likelihood_last_gradient(obj), 3)
 })
 
 
@@ -77,23 +77,23 @@ test_that("can compute multiple gradients at once", {
     dust_unfilter_create(sir(), time_start, data[data$group == i, -2])
   })
 
-  ll1 <- dust_unfilter_run(obj1, pars, adjoint = FALSE)
-  ll2 <- dust_unfilter_run(obj1, pars, adjoint = TRUE)
+  ll1 <- dust_likelihood_run(obj1, pars, adjoint = FALSE)
+  ll2 <- dust_likelihood_run(obj1, pars, adjoint = TRUE)
   expect_equal(ll1, ll2)
 
   cmp <- vapply(1:4, function(i) {
-    dust_unfilter_run(obj2[[i]], pars[[i]], adjoint = TRUE)
-    dust_unfilter_last_gradient(obj2[[i]])
+    dust_likelihood_run(obj2[[i]], pars[[i]], adjoint = TRUE)
+    dust_likelihood_last_gradient(obj2[[i]])
   }, numeric(3))
 
-  expect_equal(dust_unfilter_last_gradient(obj1), cmp)
+  expect_equal(dust_likelihood_last_gradient(obj1), cmp)
 
   obj3 <- dust_unfilter_create(sir(), time_start, data, n_groups = 4,
                                preserve_particle_dimension = TRUE)
-  ll3 <- dust_unfilter_run(obj3, pars, adjoint = TRUE)
+  ll3 <- dust_likelihood_run(obj3, pars, adjoint = TRUE)
   expect_equal(dim(ll3), c(1, 4))
   expect_equal(ll3, matrix(ll1, 1, 4))
-  expect_equal(dust_unfilter_last_gradient(obj3),
+  expect_equal(dust_likelihood_last_gradient(obj3),
                array(cmp, c(3, 1, 4)))
 })
 
@@ -105,11 +105,11 @@ test_that("can save history while running unfilter with adjoint", {
   data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
 
   obj <- dust_unfilter_create(sir(), time_start, data)
-  ll1 <- dust_unfilter_run(obj, pars, adjoint = FALSE, save_history = TRUE)
-  h1 <- dust_unfilter_last_history(obj)
+  ll1 <- dust_likelihood_run(obj, pars, adjoint = FALSE, save_history = TRUE)
+  h1 <- dust_likelihood_last_history(obj)
 
-  ll2 <- dust_unfilter_run(obj, pars, adjoint = TRUE, save_history = TRUE)
-  h2 <- dust_unfilter_last_history(obj)
+  ll2 <- dust_likelihood_run(obj, pars, adjoint = TRUE, save_history = TRUE)
+  h2 <- dust_likelihood_last_history(obj)
   expect_identical(ll2, ll1)
   expect_identical(h2, h1)
 })
@@ -121,11 +121,11 @@ test_that("can run the adjoint model with an odd number of steps", {
 
   obj <- dust_unfilter_create(sir(), time_start, data)
   x <- c(beta = 0.1, gamma = 0.2, I0 = 10)
-  ll <- dust_unfilter_run(obj, as.list(x), adjoint = TRUE)
-  gr <- dust_unfilter_last_gradient(obj)
+  ll <- dust_likelihood_run(obj, as.list(x), adjoint = TRUE)
+  gr <- dust_likelihood_last_gradient(obj)
 
-  ll <- dust_unfilter_run(obj, as.list(x))
-  gr_num <- numDeriv::grad(function(x) dust_unfilter_run(obj, as.list(x)), x,
+  ll <- dust_likelihood_run(obj, as.list(x))
+  gr_num <- numDeriv::grad(function(x) dust_likelihood_run(obj, as.list(x)), x,
                            method = "Richardson", method.args = list(r = 6))
   expect_equal(gr_num, gr, tolerance = 1e-4)
 })

@@ -216,17 +216,17 @@ extern "C" SEXP _dust2_dust2_unfilter_sir_run(SEXP ptr, SEXP r_initial, SEXP sav
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_unfilter_sir_last_history(cpp11::sexp ptr, cpp11::sexp r_index_group, bool preserve_particle_dimension, bool preserve_group_dimension);
-extern "C" SEXP _dust2_dust2_unfilter_sir_last_history(SEXP ptr, SEXP r_index_group, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
+SEXP dust2_unfilter_sir_last_history(cpp11::sexp ptr, cpp11::sexp r_index_group, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_unfilter_sir_last_history(SEXP ptr, SEXP r_index_group, SEXP select_random_particle, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_unfilter_sir_last_history(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
+    return cpp11::as_sexp(dust2_unfilter_sir_last_history(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(select_random_particle), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_unfilter_sir_last_state(cpp11::sexp ptr, cpp11::sexp r_index_group, bool preserve_particle_dimension, bool preserve_group_dimension);
-extern "C" SEXP _dust2_dust2_unfilter_sir_last_state(SEXP ptr, SEXP r_index_group, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
+SEXP dust2_unfilter_sir_last_state(cpp11::sexp ptr, cpp11::sexp r_index_group, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_unfilter_sir_last_state(SEXP ptr, SEXP r_index_group, SEXP select_random_particle, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_unfilter_sir_last_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
+    return cpp11::as_sexp(dust2_unfilter_sir_last_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(select_random_particle), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // sir.cpp
@@ -237,24 +237,24 @@ extern "C" SEXP _dust2_dust2_filter_sir_update_pars(SEXP ptr, SEXP r_pars, SEXP 
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_filter_sir_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, cpp11::sexp index_group, bool preserve_group_dimension);
-extern "C" SEXP _dust2_dust2_filter_sir_run(SEXP ptr, SEXP r_initial, SEXP save_history, SEXP index_group, SEXP preserve_group_dimension) {
+SEXP dust2_filter_sir_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, cpp11::sexp index_group, bool preserve_particle_dimension, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_filter_sir_run(SEXP ptr, SEXP r_initial, SEXP save_history, SEXP adjoint, SEXP index_group, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_filter_sir_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(save_history), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
+    return cpp11::as_sexp(dust2_filter_sir_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(save_history), cpp11::as_cpp<cpp11::decay_t<bool>>(adjoint), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_filter_sir_last_history(cpp11::sexp ptr, cpp11::sexp r_index_group, bool select_random_particle, bool preserve_group_dimension);
-extern "C" SEXP _dust2_dust2_filter_sir_last_history(SEXP ptr, SEXP r_index_group, SEXP select_random_particle, SEXP preserve_group_dimension) {
+SEXP dust2_filter_sir_last_history(cpp11::sexp ptr, cpp11::sexp r_index_group, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_filter_sir_last_history(SEXP ptr, SEXP r_index_group, SEXP select_random_particle, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_filter_sir_last_history(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(select_random_particle), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
+    return cpp11::as_sexp(dust2_filter_sir_last_history(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(select_random_particle), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_filter_sir_last_state(cpp11::sexp ptr, cpp11::sexp r_index_group, bool select_random_particle, bool preserve_group_dimension);
-extern "C" SEXP _dust2_dust2_filter_sir_last_state(SEXP ptr, SEXP r_index_group, SEXP select_random_particle, SEXP preserve_group_dimension) {
+SEXP dust2_filter_sir_last_state(cpp11::sexp ptr, cpp11::sexp r_index_group, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_filter_sir_last_state(SEXP ptr, SEXP r_index_group, SEXP select_random_particle, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_filter_sir_last_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(select_random_particle), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
+    return cpp11::as_sexp(dust2_filter_sir_last_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(select_random_particle), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // sir.cpp
@@ -513,10 +513,10 @@ extern "C" SEXP _dust2_dust2_system_walk_simulate(SEXP ptr, SEXP r_times, SEXP r
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_filter_sir_alloc",                  (DL_FUNC) &_dust2_dust2_filter_sir_alloc,                  10},
-    {"_dust2_dust2_filter_sir_last_history",           (DL_FUNC) &_dust2_dust2_filter_sir_last_history,            4},
-    {"_dust2_dust2_filter_sir_last_state",             (DL_FUNC) &_dust2_dust2_filter_sir_last_state,              4},
+    {"_dust2_dust2_filter_sir_last_history",           (DL_FUNC) &_dust2_dust2_filter_sir_last_history,            5},
+    {"_dust2_dust2_filter_sir_last_state",             (DL_FUNC) &_dust2_dust2_filter_sir_last_state,              5},
     {"_dust2_dust2_filter_sir_rng_state",              (DL_FUNC) &_dust2_dust2_filter_sir_rng_state,               1},
-    {"_dust2_dust2_filter_sir_run",                    (DL_FUNC) &_dust2_dust2_filter_sir_run,                     5},
+    {"_dust2_dust2_filter_sir_run",                    (DL_FUNC) &_dust2_dust2_filter_sir_run,                     7},
     {"_dust2_dust2_filter_sir_set_rng_state",          (DL_FUNC) &_dust2_dust2_filter_sir_set_rng_state,           2},
     {"_dust2_dust2_filter_sir_update_pars",            (DL_FUNC) &_dust2_dust2_filter_sir_update_pars,             3},
     {"_dust2_dust2_system_logistic_alloc",             (DL_FUNC) &_dust2_dust2_system_logistic_alloc,              8},
@@ -572,8 +572,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_system_walk_update_pars",           (DL_FUNC) &_dust2_dust2_system_walk_update_pars,            2},
     {"_dust2_dust2_unfilter_sir_alloc",                (DL_FUNC) &_dust2_dust2_unfilter_sir_alloc,                 9},
     {"_dust2_dust2_unfilter_sir_last_gradient",        (DL_FUNC) &_dust2_dust2_unfilter_sir_last_gradient,         4},
-    {"_dust2_dust2_unfilter_sir_last_history",         (DL_FUNC) &_dust2_dust2_unfilter_sir_last_history,          4},
-    {"_dust2_dust2_unfilter_sir_last_state",           (DL_FUNC) &_dust2_dust2_unfilter_sir_last_state,            4},
+    {"_dust2_dust2_unfilter_sir_last_history",         (DL_FUNC) &_dust2_dust2_unfilter_sir_last_history,          5},
+    {"_dust2_dust2_unfilter_sir_last_state",           (DL_FUNC) &_dust2_dust2_unfilter_sir_last_state,            5},
     {"_dust2_dust2_unfilter_sir_run",                  (DL_FUNC) &_dust2_dust2_unfilter_sir_run,                   7},
     {"_dust2_dust2_unfilter_sir_update_pars",          (DL_FUNC) &_dust2_dust2_unfilter_sir_update_pars,           3},
     {"_dust2_test_history_",                           (DL_FUNC) &_dust2_test_history_,                            6},

@@ -64,8 +64,8 @@ than one group is run, this argument has no effect as the
 dimension is always preserved.}
 }
 \value{
-A \code{dust_unfilter} object, which can be used with
-\link{dust_unfilter_run}
+A \code{dust_likelihood} object, which can be used with
+\link{dust_likelihood_run}
 }
 \description{
 Create an "unfilter" object, which can be used to compute a

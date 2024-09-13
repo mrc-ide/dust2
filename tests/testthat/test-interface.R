@@ -67,10 +67,9 @@ test_that("error if non-dust system given to dust function", {
 
 
 test_that("error if non-dust system given to dust function", {
-  expect_error(dust_unfilter_run(NULL),
-               "Expected 'unfilter' to be a 'dust_unfilter' object")
-  expect_error(dust_filter_run(NULL),
-               "Expected 'filter' to be a 'dust_filter' object")
+  thing <- NULL
+  expect_error(dust_likelihood_run(thing),
+               "Expected 'obj' to be a 'dust_likelihood' object")
 })
 
 
