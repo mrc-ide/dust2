@@ -4,6 +4,7 @@
 // choice of directory here.
 #include <monty/random/random.hpp>
 #include <monty/random/density.hpp>
+#include <dust2/array.hpp>
 #include <dust2/packing.hpp>
 #include <dust2/tools.hpp>
 #include <dust2/zero.hpp>

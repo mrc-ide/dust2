@@ -98,7 +98,7 @@ T sum(Container x, const dimensions<rank>& dim) {
 
 // Sum over vector (1d)
 template <typename T, typename Container>
-T sum(Container x, const idx& i, const dimensions<1>& dim) {
+T sum(Container x, const dimensions<1>& dim, const idx& i) {
   if (i.first >= i.second) {
     return static_cast<T>(0);
   }
@@ -107,10 +107,15 @@ T sum(Container x, const idx& i, const dimensions<1>& dim) {
 
 // These are written out by hand for now, and then we an explore less
 // tedious ways, and for more dimensions.  I think we can do this
-// really quite generally with iterators?
-// two dimensions:
+// really quite generally with iterators?  At the moment it's a bit
+// ambiguous if these take iterators or if they take containers.
+// Certainly they will give the right answer is given a pointer it
+// seems, but I am not totally clear if they will survive with a
+// vector.
+
+// 2 dimensions:
 template <typename T, typename Container>
-T sum(Container x, const idx& i, const idx& j, const dimensions<2>& dim) {
+T sum(Container x, const dimensions<2>& dim, const idx& i, const idx& j) {
   T tot = 0;
   for (size_t jj = j.first; jj <= j.second; ++jj) {
     for (size_t ii = i.first; ii <= i.second; ++ii) {
@@ -120,8 +125,9 @@ T sum(Container x, const idx& i, const idx& j, const dimensions<2>& dim) {
   return tot;
 }
 
+// 3 dimensions:
 template <typename T, typename Container>
-T sum(Container x, const idx& i, const idx& j, const idx& k, const dimensions<3>& dim) {
+T sum(Container x, const dimensions<3>& dim, const idx& i, const idx& j, const idx& k) {
   T tot = 0;
   for (size_t kk = k.first; kk <= k.second; ++kk) {
     for (size_t jj = j.first; jj <= j.second; ++jj) {
