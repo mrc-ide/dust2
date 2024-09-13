@@ -32,6 +32,13 @@ trajectories) will be saved at each time for which you have
 data.  If \code{obj} was constructed using a non-\code{NULL} \code{index_state}
 parameter, the history is restricted to these states.}
 
+\item{adjoint}{Optional logical, indicating if we should enable
+adjoint history saving. This is enabled by default if your model
+has an adjoint, but can be disabled or enabled even when your
+model does not support adjoints! But if you don't actually have
+an adjoint you will not be able to compute gradients.  This has
+no effect for stochastic models.}
+
 \item{index_group}{An optional vector of group indices to run the
 calculation for.  You can use this to run a subset of possible
 groups, once \code{obj} is initialised (this argument must be \code{NULL}
