@@ -100,9 +100,9 @@ T reduce(Container x, const dimensions<1>& dim, T init, BinaryOp op,
   return std::accumulate(x + i.first, x + i.second + 1, init, op);
 }
 
-// These are written out by hand for now, and then we an explore less
+// These are written out by hand for now, and then we can explore less
 // tedious ways, and for more dimensions.  Previously we've generated
-// code for this rather than trying to do anything to clever with C++
+// code for this rather than trying to do anything too clever with C++
 // template metaprogramming.
 
 // 2 dimensions:
