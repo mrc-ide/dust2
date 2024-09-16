@@ -418,6 +418,13 @@ extern "C" SEXP _dust2_test_interpolate_spline1(SEXP t, SEXP y, SEXP z) {
     return cpp11::as_sexp(test_interpolate_spline1(cpp11::as_cpp<cpp11::decay_t<std::vector<double>>>(t), cpp11::as_cpp<cpp11::decay_t<std::vector<double>>>(y), cpp11::as_cpp<cpp11::decay_t<double>>(z)));
   END_CPP11
 }
+// test_sum.cpp
+double test_sum(cpp11::sexp r_x, cpp11::sexp r_m);
+extern "C" SEXP _dust2_test_sum(SEXP r_x, SEXP r_m) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(test_sum(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_x), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_m)));
+  END_CPP11
+}
 // walk.cpp
 SEXP dust2_system_walk_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::sexp r_dt, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic, cpp11::sexp r_n_threads);
 extern "C" SEXP _dust2_dust2_system_walk_alloc(SEXP r_pars, SEXP r_time, SEXP r_dt, SEXP r_n_particles, SEXP r_n_groups, SEXP r_seed, SEXP r_deterministic, SEXP r_n_threads) {
@@ -576,6 +583,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_test_interpolate_spline1",                (DL_FUNC) &_dust2_test_interpolate_spline1,                 3},
     {"_dust2_test_resample_weight",                    (DL_FUNC) &_dust2_test_resample_weight,                     2},
     {"_dust2_test_scale_log_weights",                  (DL_FUNC) &_dust2_test_scale_log_weights,                   1},
+    {"_dust2_test_sum",                                (DL_FUNC) &_dust2_test_sum,                                 2},
     {NULL, NULL, 0}
 };
 }
