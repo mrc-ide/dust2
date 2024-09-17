@@ -10,6 +10,9 @@
 #include <dust2/zero.hpp>
 #include <cpp11/list.hpp>
 
+// In an odd place, we might update that later too
+#include <dust2/interpolate/interpolate.hpp>
+
 namespace dust2 {
 
 struct no_data {};
