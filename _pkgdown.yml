@@ -27,32 +27,29 @@ reference:
   - title: Likelihood
     contents:
       - dust_system_compare_data
-  - subtitle: Deterministic unfilter
-    contents:
-      - dust_unfilter_create
-      - dust_unfilter_run
-      - dust_unfilter_last_history
-      - dust_unfilter_last_state
-      - dust_unfilter_last_gradient
-  - subtitle: Particle filter
-    contents:
       - dust_filter_create
-      - dust_filter_run
-      - dust_filter_last_history
-      - dust_filter_last_state
-      - dust_filter_rng_state
-      - dust_filter_set_rng_state
-      - dust_filter_copy
+      - dust_unfilter_create
+      - dust_likelihood_run
+  - subtitle: Interact with system state after likelihood run
+    contents:
+      - dust_likelihood_last_history
+      - dust_likelihood_last_state
+      - dust_likelihood_last_gradient
+  - subtitle: Interface to monty
+    contents:
+      - dust_likelihood_monty
   - subtitle: Helpers
     contents:
       - dust_filter_data
+  - subtitle: Advanced use
+    contents:
+      - dust_likelihood_copy
+      - dust_likelihood_rng_state
+      - dust_likelihood_set_rng_state
   - title: Creation
     contents:
       - dust_compile
       - dust_package
-  - title: Interface to monty
-    contents:
-      - dust_filter_monty
 
 articles:
   - title: Details

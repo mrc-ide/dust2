@@ -27,8 +27,8 @@
 ##' @inheritParams dust_system_create
 ##' @inheritParams dust_system_simulate
 ##'
-##' @return A `dust_unfilter` object, which can be used with
-##'   [dust_unfilter_run]
+##' @return A `dust_likelihood` object, which can be used with
+##'   [dust_likelihood_run]
 ##'
 ##' @export
 dust_filter_create <- function(generator, time_start, data,
@@ -45,8 +45,6 @@ dust_filter_create <- function(generator, time_start, data,
   time_start <- check_time_start(time_start, data$time, call = call)
   dt <- check_dt(dt, call = call)
 
-  ## NOTE: there is no preserve_particle_dimension option here because
-  ## we will always preserve this dimension.
   n_groups <- data$n_groups
   preserve_group_dimension <- preserve_group_dimension || n_groups > 1
 
@@ -65,238 +63,38 @@ dust_filter_create <- function(generator, time_start, data,
 
   res <- list2env(
     list(inputs = inputs,
+         initialise = filter_create,
          initial_rng_state = filter_rng_state(n_particles, n_groups, seed),
          n_particles = n_particles,
          n_groups = n_groups,
          deterministic = FALSE,
+         has_adjoint = FALSE,
          generator = generator,
          methods = generator$methods$filter,
          index_state = index_state,
+         preserve_particle_dimension = TRUE,
          preserve_group_dimension = preserve_group_dimension),
     parent = emptyenv())
-  class(res) <- "dust_filter"
+  class(res) <- c("dust_filter", "dust_likelihood")
   res
 }
 
 
-##' Create an independent copy of a filter.  The new filter is
-##' decoupled from the random number streams of the parent filter.  It
-##' is also decoupled from the *state size* of the parent filter, so
-##' you can use this to create a new filter where the system is
-##' fundamentally different but everything else is the same.
-##'
-##' @title Create copy of filter
-##'
-##' @inheritParams dust_filter_run
-##'
-##' @param seed The seed for the filter (see [dust_filter_create])
-##'
-##' @return A new `dust_filter` object
-dust_filter_copy <- function(filter, seed = NULL) {
-  dst <- new.env(parent = emptyenv())
-  nms <- c("inputs", "n_particles", "n_groups", "deterministic", "methods",
-           "index_state", "preserve_group_dimension", "generator")
-  for (nm in nms) {
-    dst[[nm]] <- filter[[nm]]
-  }
-  dst$initial_rng_state <-
-    filter_rng_state(filter$n_particles, filter$n_groups, seed)
-  class(dst) <- "dust_filter"
-  dst
-}
-
-
-filter_create <- function(filter, pars) {
-  inputs <- filter$inputs
+filter_create <- function(obj, pars) {
+  inputs <- obj$inputs
   list2env(
-    filter$methods$alloc(pars,
-                         inputs$time_start,
-                         inputs$time,
-                         inputs$dt,
-                         inputs$data,
-                         inputs$n_particles,
-                         inputs$n_groups,
-                         inputs$n_threads,
-                         inputs$index_state,
-                         filter$initial_rng_state),
-    filter)
-  filter$initial_rng_state <- NULL
-}
-
-
-##' Run particle filter
-##'
-##' @title Run particle filter
-##'
-##' @param filter A `dust_filter` object, created by
-##'   [dust_filter_create]
-##'
-##' @param pars Optional parameters to run the filter with.  If not
-##'   provided, parameters are not updated
-##'
-##' @param initial Optional initial conditions, as a matrix (state x
-##'   particle) or 3d array (state x particle x group).  If not
-##'   provided, the system initial conditions are used.
-##'
-##' @param save_history Logical, indicating if the simulation history
-##'   should be saved while the simulation runs; this has a small
-##'   overhead in runtime and in memory.  History (particle
-##'   trajectories) will be saved at each time in the filter.  If the
-##'   filter was constructed using a non-`NULL` `index_state` parameter,
-##'   the history is restricted to these states.
-##'
-##' @param index_group An optional vector of group indices to run the
-##'   filter for.  You can use this to run a subset of possible
-##'   groups, once the filter is initialised (this argument must be
-##'   `NULL` on the **first** call).
-##'
-##' @return A vector of likelihood values, with as many elements as
-##'   there are groups.
-##'
-##' @export
-dust_filter_run <- function(filter, pars, initial = NULL,
-                            save_history = FALSE, index_group = NULL) {
-  check_is_dust_filter(filter)
-  index_group <- check_index(index_group, max = filter$n_groups,
-                             unique = TRUE)
-  if (!is.null(pars)) {
-    pars <- check_pars(pars, filter$n_groups, index_group,
-                       filter$preserve_group_dimension)
-  }
-  if (is.null(filter$ptr)) {
-    if (is.null(pars)) {
-      cli::cli_abort("'pars' cannot be NULL, as filter is not initialised",
-                     arg = "pars")
-    }
-    if (!is.null(index_group)) {
-      cli::cli_abort(
-        "'index_group' must be NULL, as filter is not initialised",
-        arg = "index_group")
-    }
-    filter_create(filter, pars)
-  } else if (!is.null(pars)) {
-    filter$methods$update_pars(filter$ptr, pars, index_group)
-  }
-  filter$methods$run(filter$ptr,
-                     initial,
-                     save_history,
-                     index_group,
-                     filter$preserve_group_dimension)
-}
-
-
-##' Fetch the last history created by running a filter.  This
-##' errors if the last call to [dust_filter_run] did not use
-##' `save_history = TRUE`.
-##'
-##' @title Fetch last filter history
-##'
-##' @inheritParams dust_filter_run
-##'
-##' @param select_random_particle Logical, indicating if we should
-##'   return a history for one randomly selected particle (rather than
-##'   the entire history).  If this is `TRUE`, the particle will be
-##'   selected independently for each group, if the filter is grouped.
-##'   This option is intended to help select a representative
-##'   trajectory during an MCMC.  When `TRUE`, we drop the `particle`
-##'   dimension of the return value.
-##'
-##' @return An array.  If ungrouped this will have dimensions `state`
-##'   x `particle` x `time`, and if grouped then `state` x `particle`
-##'   x `group` x `time`.  If `select_random_particle = TRUE`, the
-##'   second (particle) dimension will be dropped.
-##'
-##' @export
-dust_filter_last_history <- function(filter, index_group = NULL,
-                                     select_random_particle = FALSE) {
-  check_is_dust_filter(filter)
-  if (is.null(filter$ptr)) {
-    cli::cli_abort(c(
-      "History is not current",
-      i = "Filter has not yet been run"))
-  }
-  index_group <- check_index(index_group, max = filter$n_groups,
-                             unique = TRUE)
-  assert_scalar_logical(select_random_particle)
-  filter$methods$last_history(filter$ptr, index_group,
-                              select_random_particle,
-                              filter$preserve_group_dimension)
-}
-
-
-##' Get the last state from a filter.
-##'
-##' @title Get filter state
-##'
-##' @inheritParams dust_filter_last_history
-##'
-##' @return An array.  If ungrouped this will have dimensions `state`
-##'   x `particle`, and if grouped then `state` x `particle` x
-##'   `group`.  If `select_random_particle = TRUE`, the second
-##'   (particle) dimension will be dropped.  This is the same as the
-##'   state returned by [dust_filter_last_history] without the time
-##'   dimension but also without any state index applied (i.e., we
-##'   always return all state).
-##'
-##' @export
-dust_filter_last_state <- function(filter, index_group = NULL,
-                                   select_random_particle = FALSE) {
-  check_is_dust_filter(filter)
-  if (is.null(filter$ptr)) {
-    cli::cli_abort(c(
-      "History is not current",
-      i = "Filter has not yet been run"))
-  }
-  index_group <- check_index(index_group, max = filter$n_groups,
-                             unique = TRUE)
-  assert_scalar_logical(select_random_particle)
-  filter$methods$last_state(filter$ptr, index_group,
-                            select_random_particle,
-                            filter$preserve_group_dimension)
-}
-
-
-##' Get random number generator (RNG) state from the particle filter.
-##'
-##' @title Get filter RNG state
-##'
-##' @inheritParams dust_filter_run
-##'
-##' @return A raw vector, this could be quite long.  Later we will
-##'   describe how you might reseed a filter or system with this state.
-##'
-##' @export
-dust_filter_rng_state <- function(filter) {
-  check_is_dust_filter(filter)
-  if (is.null(filter$ptr)) {
-    filter$initial_rng_state
-  } else {
-    filter$methods$rng_state(filter$ptr)
-  }
-}
-
-
-##' @param rng_state A raw vector of random number generator state,
-##'   returned by `dust_filter_rng_state`
-##' @rdname dust_filter_rng_state
-##' @export
-dust_filter_set_rng_state <- function(filter, rng_state) {
-  check_is_dust_filter(filter)
-  if (is.null(filter$ptr)) {
-    assert_raw(rng_state, length(filter$initial_rng_state))
-    filter$initial_rng_state <- rng_state
-  } else {
-    filter$methods$set_rng_state(filter$ptr, rng_state)
-  }
-  invisible()
-}
-
-
-check_is_dust_filter <- function(filter, call = parent.frame()) {
-  if (!inherits(filter, "dust_filter")) {
-    cli::cli_abort("Expected 'filter' to be a 'dust_filter' object",
-                   arg = "filter", call = call)
-  }
+    obj$methods$alloc(pars,
+                      inputs$time_start,
+                      inputs$time,
+                      inputs$dt,
+                      inputs$data,
+                      inputs$n_particles,
+                      inputs$n_groups,
+                      inputs$n_threads,
+                      inputs$index_state,
+                      obj$initial_rng_state),
+    obj)
+  obj$initial_rng_state <- NULL
 }
 
 
@@ -305,14 +103,4 @@ check_is_dust_filter <- function(filter, call = parent.frame()) {
 filter_rng_state <- function(n_particles, n_groups, seed) {
   n_streams <- max(n_groups, 1) * (1 + n_particles)
   monty::monty_rng$new(n_streams = n_streams, seed = seed)$state()
-}
-
-
-##' @export
-print.dust_filter <- function(x, ...) {
-  cli::cli_h1("<dust_filter ({x$generator$name})>")
-  cli::cli_alert_info(format_dimensions(x))
-  cli::cli_bullets(c(
-    i = "This filter runs in {x$generator$properties$time_type} time"))
-  invisible(x)
 }

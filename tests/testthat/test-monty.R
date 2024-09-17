@@ -14,7 +14,7 @@ test_that("can create monty model from sir model", {
     gamma ~ Exponential(mean = 0.5)
   })
 
-  m <- dust_filter_monty(obj, packer)
+  m <- dust_likelihood_monty(obj, packer)
   expect_true(m$properties$is_stochastic)
 
   expect_s3_class(m, "monty_model")
@@ -40,7 +40,7 @@ test_that("can create deterministic model", {
     gamma ~ Exponential(mean = 0.5)
   })
 
-  m <- dust_filter_monty(obj, packer)
+  m <- dust_likelihood_monty(obj, packer)
   expect_false(m$properties$is_stochastic)
   expect_true(m$properties$has_gradient)
 
@@ -69,8 +69,8 @@ test_that("can avoid errors by converting to impossible density", {
     gamma ~ Exponential(mean = 0.5)
   })
 
-  m1 <- dust_filter_monty(obj, packer)
-  m2 <- dust_filter_monty(obj, packer, failure_is_impossible = TRUE)
+  m1 <- dust_likelihood_monty(obj, packer)
+  m2 <- dust_likelihood_monty(obj, packer, failure_is_impossible = TRUE)
 
   expect_error(m1$density(c(-1, -1)),
                "Invalid call to binomial")
@@ -94,11 +94,11 @@ test_that("can create wrapper around filter with multiple pars", {
     c("beta", "gamma"),
     fixed = list(N = 1000, I0 = 10, exp_noise = 1e6))
 
-  m <- dust_filter_monty(obj, packer)
+  m <- dust_likelihood_monty(obj, packer)
   expect_true(m$properties$allow_multiple_parameters)
   expect_true(m$properties$is_stochastic)
 
-  m1 <- dust_filter_monty(obj1, packer)
+  m1 <- dust_likelihood_monty(obj1, packer)
   expect_false(m1$properties$allow_multiple_parameters)
 
   p <- cbind(c(0.2, 0.1), c(0.25, 0.1))
