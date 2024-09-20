@@ -390,6 +390,13 @@ extern "C" SEXP _dust2_test_history_(SEXP r_time, SEXP r_state, SEXP r_order, SE
     return cpp11::as_sexp(test_history_(cpp11::as_cpp<cpp11::decay_t<cpp11::doubles>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_state), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_order), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_select_particle), cpp11::as_cpp<cpp11::decay_t<bool>>(reorder)));
   END_CPP11
 }
+// test_helpers.cpp
+bool test_check_dimensions(cpp11::sexp value, cpp11::integers r_dim, const char * name);
+extern "C" SEXP _dust2_test_check_dimensions(SEXP value, SEXP r_dim, SEXP name) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(test_check_dimensions(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(value), cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(r_dim), cpp11::as_cpp<cpp11::decay_t<const char *>>(name)));
+  END_CPP11
+}
 // test_interpolate.cpp
 int test_interpolate_search(double target, std::vector<double> x);
 extern "C" SEXP _dust2_test_interpolate_search(SEXP target, SEXP x) {
@@ -597,6 +604,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_unfilter_sir_last_state",           (DL_FUNC) &_dust2_dust2_unfilter_sir_last_state,            5},
     {"_dust2_dust2_unfilter_sir_run",                  (DL_FUNC) &_dust2_dust2_unfilter_sir_run,                   7},
     {"_dust2_dust2_unfilter_sir_update_pars",          (DL_FUNC) &_dust2_dust2_unfilter_sir_update_pars,           3},
+    {"_dust2_test_check_dimensions",                   (DL_FUNC) &_dust2_test_check_dimensions,                    3},
     {"_dust2_test_history_",                           (DL_FUNC) &_dust2_test_history_,                            6},
     {"_dust2_test_interpolate_constant1",              (DL_FUNC) &_dust2_test_interpolate_constant1,               3},
     {"_dust2_test_interpolate_constant2",              (DL_FUNC) &_dust2_test_interpolate_constant2,               3},

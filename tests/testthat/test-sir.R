@@ -91,7 +91,7 @@ test_that("validate data size on compare", {
   obj <- dust_system_create(sir(), pars, n_particles = 10, n_groups = 4)
   expect_error(
     dust_system_compare_data(obj, vector("list", 3)),
-    "'data' must have length 4")
+    "Expected 'data' to have length 4, but it had length 3")
 })
 
 

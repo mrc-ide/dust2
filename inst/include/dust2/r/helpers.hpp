@@ -17,7 +17,70 @@ inline void check_scalar(cpp11::sexp x, const char * name) {
 
 inline void check_length(cpp11::sexp x, int len, const char * name) {
   if (LENGTH(x) != len) {
-    cpp11::stop("'%s' must have length %d", name, len);
+    cpp11::stop("Expected '%s' to have length %d, but it had length %d",
+                name, len, LENGTH(x));
+  }
+}
+
+inline void check_rank(cpp11::sexp value, size_t rank, const char * name) {
+  auto r_dim = value.attr("dim");
+  size_t rank_given = r_dim == R_NilValue ? 1 : LENGTH(r_dim);
+
+  if (rank_given == rank) {
+    return;
+  }
+
+  if (rank == 1) {
+    if (rank_given == 2) {
+      cpp11::stop("Expected '%s' to be a vector, but was given a matrix", name);
+    } else {
+      cpp11::stop("Expected '%s' to be a vector, but was given a %d-dimensional array",
+                  name, static_cast<int>(rank_given));
+    }
+  } else if (rank == 2) {
+    if (rank_given == 1) {
+      cpp11::stop("Expected '%s' to be a matrix, but was given a vector", name);
+    } else {
+      cpp11::stop("Expected '%s' to be a matrix, but was given a %d-dimensional array",
+                  name, static_cast<int>(rank_given));
+    }
+  } else {
+    if (rank_given == 1) {
+      cpp11::stop("Expected '%s' to be a %d-dimensional array, but was given a vector",
+                  name, static_cast<int>(rank));
+    } else if (rank_given == 2) {
+      cpp11::stop("Expected '%s' to be a %d-dimensional array, but was given a matrix",
+                  name, static_cast<int>(rank));
+    } else {
+      cpp11::stop("Expected '%s' to be a %d-dimensional array, but was given a %d-dimensional array",
+                  name, static_cast<int>(rank), static_cast<int>(rank_given));
+    }
+  }
+}
+
+template <size_t rank>
+void check_dimensions(cpp11::sexp value,
+                      const dust2::array::dimensions<rank>& dim,
+                      const char * name) {
+  check_rank(value, rank, name);
+  if (rank == 1) {
+    check_length(value, dim.size, name);
+  } else {
+    auto r_dim = cpp11::as_cpp<cpp11::integers>(value.attr("dim"));
+    for (size_t i = 0; i < rank; ++i) {
+      if (static_cast<size_t>(r_dim[i]) != dim.dim[i]) {
+        if (rank > 2) {
+          cpp11::stop("Expected dimension %d of '%s' to have length %d, but it had length %d",
+                      static_cast<int>(i + 1), name, static_cast<int>(dim.dim[i]), r_dim[i]);
+        } else if (i == 0) {
+          cpp11::stop("Expected '%s' to have %d rows, but was given %d",
+                      name, static_cast<int>(dim.dim[i]), r_dim[i]);
+        } else {
+          cpp11::stop("Expected '%s' to have %d columns, but was given %d",
+                      name, static_cast<int>(dim.dim[i]), r_dim[i]);
+        }
+      }
+    }
   }
 }
 
@@ -444,6 +507,28 @@ void read_real_vector(cpp11::list args, size_t len, real_type * dest,
     }
   } else {
     check_length(value, len, name);
+    if (TYPEOF(value) == REALSXP) {
+      auto value_dbl = cpp11::as_cpp<cpp11::doubles>(value);
+      std::copy(value_dbl.begin(), value_dbl.end(), dest);
+    } else if (TYPEOF(value) == INTSXP) {
+      auto value_int = cpp11::as_cpp<cpp11::integers>(value);
+      std::copy(value_int.begin(), value_int.end(), dest);
+    } else {
+      cpp11::stop("'%s' must be numeric", name);
+    }
+  }
+}
+
+template <typename real_type, size_t rank>
+void read_real_array(cpp11::list args, dust2::array::dimensions<rank>& dim,
+                     real_type * dest, const char *name, bool required) {
+  cpp11::sexp value = args[name];
+  if (value == R_NilValue) {
+    if (required) {
+      cpp11::stop("A value is expected for '%s'", name);
+    }
+  } else {
+    check_dimensions<rank>(value, dim, name);
     if (TYPEOF(value) == REALSXP) {
       auto value_dbl = cpp11::as_cpp<cpp11::doubles>(value);
       std::copy(value_dbl.begin(), value_dbl.end(), dest);
