@@ -47,3 +47,37 @@ test_that("validate dimensions of an array", {
     test_check_dimensions(array(0, 1:4), 2:4, "x"),
     "Expected 'x' to be a 3-dimensional array, but was given a 4-dimensional")
 })
+
+
+test_that("can read dimensions from vector", {
+  expect_equal(test_read_dimensions(0:3, 1, "x"), 4)
+  expect_error(test_read_dimensions(cbind(0:3), 1, "x"),
+               "Expected 'x' to be a vector, but was given a matrix")
+  expect_error(
+    test_read_dimensions(array(0:3, c(1, 2, 2)), 1, "x"),
+    "Expected 'x' to be a vector, but was given a 3-dimensional array")
+})
+
+
+test_that("can read dimensions from vector", {
+  expect_equal(test_read_dimensions(matrix(0, 2, 3), 2, "x"), c(2, 3))
+  expect_error(test_read_dimensions(1:6, 2, "x"),
+               "Expected 'x' to be a matrix, but was given a vector")
+  expect_error(
+    test_read_dimensions(array(0, 1:3), 2, "x"),
+    "Expected 'x' to be a matrix, but was given a 3-dimensional array")
+})
+
+
+test_that("can read dimensions from array", {
+  expect_equal(test_read_dimensions(array(0, 2:4), 3, "x"), 2:4)
+  expect_error(
+    test_read_dimensions(1:6, 3, "x"),
+    "Expected 'x' to be a 3-dimensional array, but was given a vector")
+  expect_error(
+    test_read_dimensions(matrix(0, 2, 3), 3, "x"),
+    "Expected 'x' to be a 3-dimensional array, but was given a matrix")
+  expect_error(
+    test_read_dimensions(array(0, 1:4), 3, "x"),
+    "Expected 'x' to be a 3-dimensional array, but was given a 4-dimensional")
+})

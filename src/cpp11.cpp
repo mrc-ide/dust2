@@ -397,6 +397,13 @@ extern "C" SEXP _dust2_test_check_dimensions(SEXP value, SEXP r_dim, SEXP name) 
     return cpp11::as_sexp(test_check_dimensions(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(value), cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(r_dim), cpp11::as_cpp<cpp11::decay_t<const char *>>(name)));
   END_CPP11
 }
+// test_helpers.cpp
+std::vector<size_t> test_read_dimensions(cpp11::sexp value, int rank, const char * name);
+extern "C" SEXP _dust2_test_read_dimensions(SEXP value, SEXP rank, SEXP name) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(test_read_dimensions(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(value), cpp11::as_cpp<cpp11::decay_t<int>>(rank), cpp11::as_cpp<cpp11::decay_t<const char *>>(name)));
+  END_CPP11
+}
 // test_interpolate.cpp
 int test_interpolate_search(double target, std::vector<double> x);
 extern "C" SEXP _dust2_test_interpolate_search(SEXP target, SEXP x) {
@@ -613,6 +620,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_test_interpolate_search",                 (DL_FUNC) &_dust2_test_interpolate_search,                  2},
     {"_dust2_test_interpolate_spline1",                (DL_FUNC) &_dust2_test_interpolate_spline1,                 3},
     {"_dust2_test_interpolate_spline2",                (DL_FUNC) &_dust2_test_interpolate_spline2,                 3},
+    {"_dust2_test_read_dimensions",                    (DL_FUNC) &_dust2_test_read_dimensions,                     3},
     {"_dust2_test_resample_weight",                    (DL_FUNC) &_dust2_test_resample_weight,                     2},
     {"_dust2_test_scale_log_weights",                  (DL_FUNC) &_dust2_test_scale_log_weights,                   1},
     {"_dust2_test_sum",                                (DL_FUNC) &_dust2_test_sum,                                 2},

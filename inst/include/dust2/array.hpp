@@ -16,18 +16,17 @@ struct dimensions {
   size_t size;
   std::array<size_t, rank_> dim;
   std::array<size_t, rank_> mult;
-  // One disadvantage here is we can't optimise away the case where
-  // arrays have literal size, we might want to add that in as an
-  // optimisation later?
-  dimensions(std::initializer_list<size_t> dim_) :
-    rank(rank_),
-    size(1) {
-    auto iter = dim_.begin();
+
+  template <typename Iterator>
+  dimensions(Iterator iter) : rank(rank_), size(1) {
     for (size_t i = 0; i < rank; ++i, ++iter) {
       dim[i] = *iter;
       mult[i] = size;
       size *= dim[i];
     }
+  }
+
+  dimensions(std::initializer_list<size_t> dim_) : dimensions(dim_.begin()) {
   }
 };
 

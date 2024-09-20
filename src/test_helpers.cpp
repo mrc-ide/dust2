@@ -19,3 +19,18 @@ bool test_check_dimensions(cpp11::sexp value, cpp11::integers r_dim,
   }
   return true;
 }
+
+
+[[cpp11::register]]
+std::vector<size_t> test_read_dimensions(cpp11::sexp value, int rank, const char * name) {
+  if (rank == 1) {
+    const auto arr = dust2::r::read_dimensions<1>(value, name).dim;
+    return std::vector<size_t>(arr.begin(), arr.end());
+  } else if (rank == 2) {
+    const auto arr = dust2::r::read_dimensions<2>(value, name).dim;
+    return std::vector<size_t>(arr.begin(), arr.end());
+  } else {
+    const auto arr = dust2::r::read_dimensions<3>(value, name).dim;
+    return std::vector<size_t>(arr.begin(), arr.end());
+  }
+}
