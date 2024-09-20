@@ -107,3 +107,48 @@ test_that("Check that time values are sensible", {
     test_interpolate_spline1(t[-2], y, 1),
     "Time variable 't' and interpolation target 'y' must have the same length")
 })
+
+
+test_that("can interpolate an matrix, piecewise constant", {
+  t <- c(0, 1, 2, 3, 4)
+  nt <- length(t)
+  nr <- 7
+  nc <- 3
+  y <- array(runif(nt * nr * nc), c(nr, nc, nt))
+  expect_equal(test_interpolate_constant2(t, y, 0), c(y[, , 1]))
+  expect_equal(test_interpolate_constant2(t, y, 1 - 1e-6), c(y[, , 1]))
+  expect_equal(test_interpolate_constant2(t, y, 1), c(y[, , 2]))
+  expect_equal(test_interpolate_constant2(t, y, 10), c(y[, , 5]))
+})
+
+
+test_that("can interpolate an matrix, piecewise linear", {
+  t <- c(0, 1, 2, 3, 4)
+  nt <- length(t)
+  nr <- 7
+  nc <- 3
+  y <- array(runif(nt * nr * nc), c(nr, nc, nt))
+  expect_equal(test_interpolate_linear2(t, y, 0), c(y[, , 1]))
+  expect_equal(test_interpolate_linear2(t, y, 1), c(y[, , 2]))
+  expect_equal(test_interpolate_linear2(t, y, 4), c(y[, , 5]))
+  expect_equal(test_interpolate_linear2(t, y, 1.3),
+               c(y[, , 2] + (y[, , 3] - y[, , 2]) * 0.3))
+})
+
+
+test_that("can interpolate an matrix, spline", {
+  t <- c(0, 1, 2, 3, 4)
+  nt <- length(t)
+  nr <- 7
+  nc <- 3
+  y <- array(runif(nt * nr * nc), c(nr, nc, nt))
+
+  expect_equal(test_interpolate_spline2(t, y, 0), c(y[, , 1]))
+  expect_equal(test_interpolate_spline2(t, y, 1), c(y[, , 2]))
+  expect_equal(test_interpolate_spline2(t, y, 4), c(y[, , 5]))
+
+  yy <- apply(array(y, c(nr * nc, nt)), 1,
+              function(yi) test_interpolate_spline1(t, yi, 1.3))
+  expect_equal(test_interpolate_spline2(t, y, 1.3),
+               yy)
+})
