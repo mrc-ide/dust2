@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cstddef>
+#include <limits>
 #include <numeric>
 #include <stdexcept>
 #include <sstream>
