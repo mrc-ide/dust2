@@ -6,7 +6,6 @@
 #include <stdexcept>
 #include <sstream>
 #include <vector>
-#include <monty/random/math.hpp>
 
 namespace dust2 {
 namespace array {
