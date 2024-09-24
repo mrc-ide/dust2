@@ -20,7 +20,7 @@
 ##' @keywords internal
 ##' @examples
 ##' # This creates the "sir" generator
-##' dust_system_generator("sir", "discrete", asNamespace("dust2"))
+##' dust_system_generator("sir", "discrete", 1, asNamespace("dust2"))
 ##'
 ##' # This is the same code as in "dust2:::sir", except there we find
 ##' # the correct environment automatically
