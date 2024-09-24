@@ -215,7 +215,7 @@ T min(Container x, const dimensions<3>& dim, const idx& i, const idx& j, const i
 // And max
 template <typename T, typename Container, size_t rank>
 T max(Container x, const dimensions<rank>& dim) {
-  return std::accumulate(x, x + dim.size, std::numeric_limits<T>::infinity(), max2);
+  return std::accumulate(x, x + dim.size, -std::numeric_limits<T>::infinity(), max2);
 }
 
 template <typename T, typename Container>
