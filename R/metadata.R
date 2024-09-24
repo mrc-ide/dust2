@@ -22,9 +22,11 @@ parse_metadata <- function(filename, call = NULL) {
   data <- decor::cpp_decorations(files = filename)
 
   class <- parse_metadata_class(data, call)
+  time_type <- parse_metadata_time_type(data, call)
   list(class = class,
        name = parse_metadata_name(data, call) %||% class,
-       time_type = parse_metadata_time_type(data, call),
+       time_type = time_type,
+       default_dt = parse_metadata_default_dt(data, time_type, call),
        has_compare = parse_metadata_has_compare(data, call),
        has_adjoint = parse_metadata_has_adjoint(data, call),
        parameters = parse_metadata_parameters(data, call))
@@ -91,6 +93,33 @@ parse_metadata_time_type <- function(data, call = NULL) {
             "'discrete' or 'continuous'"),
       call = call)
   }
+  value
+}
+
+
+parse_metadata_default_dt <- function(data, time_type, call = NULL) {
+  data <- find_attribute_value_single(data, "dust2::default_dt",
+                                      required = FALSE, call = call)
+  if (is.null(data)) {
+    return(if (time_type == "discrete") 1 else NULL)
+  }
+  if (time_type == "continuous") {
+    cli::cli_abort(
+      "Can't use '[[dust::default_dt()]]' with continuous-time systems",
+      call = call)
+  }
+  if (length(data) != 1 || nzchar(names(data))) {
+    cli::cli_abort(
+      "Expected a single unnamed argument to '[[dust2::default_dt()]]'",
+      call = call)
+  }
+  if (!is.numeric(data[[1]])) {
+    cli::cli_abort(
+      "Expected a numerical argument to '[[dust2::default_dt()]]'",
+      call = call)
+  }
+  value <- data[[1]]
+  check_dt(value, "[[dust2::default_dt()]]", call = call)
   value
 }
 

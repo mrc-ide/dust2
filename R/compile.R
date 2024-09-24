@@ -116,7 +116,7 @@ dust_generate <- function(config, filename, linking_to, cpp_std,
                           optimisation_level, compiler_options, mangle) {
   system <- read_lines(filename)
   data <- dust_template_data(config$name, config$class, config$time_type,
-                             linking_to, cpp_std,
+                             config$default_dt, linking_to, cpp_std,
                              optimisation_level, compiler_options, mangle)
   data$system_requirements <- data$cpp_std %||% "R (>= 4.0.0)"
 
@@ -171,6 +171,7 @@ dust_generate_cpp <- function(system, config, data) {
 dust_template_data <- function(name,
                                class,
                                time_type,
+                               default_dt,
                                linking_to = NULL,
                                cpp_std = NULL,
                                optimisation_level = NULL,
@@ -188,6 +189,7 @@ dust_template_data <- function(name,
   list(name = name,
        class = class,
        time_type = time_type,
+       default_dt = deparse1(default_dt),
        package = paste0(name, mangle %||% ""),
        linking_to = linking_to,
        cpp_std = cpp_std,

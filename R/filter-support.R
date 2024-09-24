@@ -10,16 +10,46 @@ check_generator_for_filter <- function(generator, what, call = NULL) {
 }
 
 
-check_dt <- function(dt, call = NULL) {
+check_system_dt <- function(dt, generator, name = "dt", call = NULL) {
+  is_discrete <- generator$properties$time_type == "discrete"
+  if (is_discrete) {
+    check_dt(dt %||% generator$default_dt, name, call = call)
+  } else {
+    if (!is.null(dt)) {
+      cli::cli_abort("Can't use '{name}' with continuous-time systems",
+                     call = call)
+    }
+  }
+}
+
+
+check_system_ode_control <- function(ode_control, generator,
+                                     name = "ode_control", call = NULL) {
+  is_discrete <- generator$properties$time_type == "discrete"
+  if (is_discrete) {
+    if (!is.null(ode_control)) {
+      cli::cli_abort("Can't use 'ode_control' with discrete-time systems")
+    }
+  } else {
+    if (is.null(ode_control)) {
+      ode_control <- dust_ode_control()
+    } else {
+      assert_is(ode_control, "dust_ode_control", call = environment())
+    }
+  }
+}
+
+
+check_dt <- function(dt, name = deparse(substitute(dt)), call = NULL) {
   assert_scalar_numeric(dt, call = call)
   if (dt <= 0) {
-    cli::cli_abort("Expected 'dt' to be greater than 0")
+    cli::cli_abort("Expected '{name}' to be greater than 0")
   }
   if (dt > 1) {
-    cli::cli_abort("Expected 'dt' to be at most 1")
+    cli::cli_abort("Expected '{name}' to be at most 1")
   }
   if (!rlang::is_integerish(1 / dt)) {
-    cli::cli_abort("Expected 'dt' to be the inverse of an integer",
+    cli::cli_abort("Expected '{name}' to be the inverse of an integer",
                    arg = "dt", call = call)
   }
   dt

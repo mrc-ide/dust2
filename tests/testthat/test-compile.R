@@ -1,42 +1,53 @@
 test_that("can construct template data", {
   expect_equal(
-    dust_template_data("foo", "foo", "discrete"),
-    list(name = "foo", class = "foo", time_type = "discrete", package = "foo",
-         linking_to = "cpp11, dust2, monty", cpp_std = NULL,
+    dust_template_data("foo", "foo", "discrete", 1),
+    list(name = "foo", class = "foo", time_type = "discrete", default_dt = "1",
+         package = "foo", linking_to = "cpp11, dust2, monty", cpp_std = NULL,
          compiler_options = ""))
   expect_equal(
-    dust_template_data("foo", "bar", "discrete", mangle = "abc"),
-    list(name = "foo", class = "bar", time_type = "discrete",
+    dust_template_data("foo", "bar", "discrete", 1, mangle = "abc"),
+    list(name = "foo", class = "bar", time_type = "discrete", default_dt = "1",
          package = "fooabc",
          linking_to = "cpp11, dust2, monty", cpp_std = NULL,
          compiler_options = ""))
   expect_equal(
-    dust_template_data("foo", "foo", "discrete", linking_to = "baz"),
-    list(name = "foo", class = "foo", time_type = "discrete", package = "foo",
-         linking_to = "cpp11, dust2, monty, baz", cpp_std = NULL,
-         compiler_options = ""))
+    dust_template_data("foo", "foo", "discrete", 1, linking_to = "baz"),
+    list(name = "foo", class = "foo", time_type = "discrete", default_dt = "1",
+         package = "foo", linking_to = "cpp11, dust2, monty, baz",
+         cpp_std = NULL, compiler_options = ""))
   expect_equal(
-    dust_template_data("foo", "foo", "discrete",
+    dust_template_data("foo", "foo", "discrete", 1,
                        linking_to = c("x", "dust2", "y")),
-    list(name = "foo", class = "foo", time_type = "discrete", package = "foo",
-         linking_to = "cpp11, dust2, monty, x, y", cpp_std = NULL,
-         compiler_options = ""))
+    list(name = "foo", class = "foo", time_type = "discrete", default_dt = "1",
+         package = "foo", linking_to = "cpp11, dust2, monty, x, y",
+         cpp_std = NULL, compiler_options = ""))
   expect_equal(
-    dust_template_data("foo", "foo", time_type = "discrete",
-                       compiler_options = "-Xf"),
-    list(name = "foo", class = "foo", time_type = "discrete", package = "foo",
-         linking_to = "cpp11, dust2, monty", cpp_std = NULL,
+    dust_template_data("foo", "foo", "discrete", 1, compiler_options = "-Xf"),
+    list(name = "foo", class = "foo", time_type = "discrete", default_dt = "1",
+         package = "foo", linking_to = "cpp11, dust2, monty", cpp_std = NULL,
          compiler_options = "-Xf"))
   expect_equal(
-    dust_template_data("foo", "foo", "discrete", optimisation_level = "none",
+    dust_template_data("foo", "foo", "discrete", 1, optimisation_level = "none",
                        compiler_options = "-Xf"),
-    list(name = "foo", class = "foo", time_type = "discrete", package = "foo",
-         linking_to = "cpp11, dust2, monty", cpp_std = NULL,
+    list(name = "foo", class = "foo", time_type = "discrete", default_dt = "1",
+         package = "foo", linking_to = "cpp11, dust2, monty", cpp_std = NULL,
          compiler_options = "-Xf -O0"))
   expect_equal(
-    dust_template_data("foo", "foo", "discrete", cpp_std = "c++14"),
-    list(name = "foo", class = "foo", time_type = "discrete", package = "foo",
-         linking_to = "cpp11, dust2, monty", cpp_std = "c++14",
+    dust_template_data("foo", "foo", "discrete", 1, cpp_std = "c++14"),
+    list(name = "foo", class = "foo", time_type = "discrete", default_dt = "1",
+         package = "foo", linking_to = "cpp11, dust2, monty", cpp_std = "c++14",
+         compiler_options = ""))
+  expect_equal(
+    dust_template_data("foo", "foo", "discrete", 0.25),
+    list(name = "foo", class = "foo", time_type = "discrete",
+         default_dt = "0.25",
+         package = "foo", linking_to = "cpp11, dust2, monty", cpp_std = NULL,
+         compiler_options = ""))
+  expect_equal(
+    dust_template_data("foo", "foo", "continuous", NULL),
+    list(name = "foo", class = "foo", time_type = "continuous",
+         default_dt = "NULL", package = "foo",
+         linking_to = "cpp11, dust2, monty", cpp_std = NULL,
          compiler_options = ""))
 })
 

@@ -10,7 +10,7 @@ dust_filter_create(
   data,
   n_particles,
   n_groups = NULL,
-  dt = 1,
+  dt = NULL,
   index_state = NULL,
   n_threads = 1,
   preserve_group_dimension = FALSE,

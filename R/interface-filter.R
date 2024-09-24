@@ -32,7 +32,7 @@
 ##'
 ##' @export
 dust_filter_create <- function(generator, time_start, data,
-                               n_particles, n_groups = NULL, dt = 1,
+                               n_particles, n_groups = NULL, dt = NULL,
                                index_state = NULL, n_threads = 1,
                                preserve_group_dimension = FALSE,
                                seed = NULL) {
@@ -43,7 +43,7 @@ dust_filter_create <- function(generator, time_start, data,
 
   data <- prepare_data(data, n_groups, call = call)
   time_start <- check_time_start(time_start, data$time, call = call)
-  dt <- check_dt(dt, call = call)
+  dt <- check_system_dt(dt, generator, call = call)
 
   n_groups <- data$n_groups
   preserve_group_dimension <- preserve_group_dimension || n_groups > 1

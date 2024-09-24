@@ -19,7 +19,7 @@
 ##' @export
 dust_unfilter_create <- function(generator, time_start, data,
                                  n_particles = 1, n_groups = NULL,
-                                 dt = 1, n_threads = 1, index_state = NULL,
+                                 dt = NULL, n_threads = 1, index_state = NULL,
                                  preserve_particle_dimension = FALSE,
                                  preserve_group_dimension = FALSE) {
   call <- environment()
@@ -29,7 +29,7 @@ dust_unfilter_create <- function(generator, time_start, data,
 
   data <- prepare_data(data, n_groups, call = call)
   time_start <- check_time_start(time_start, data$time, call = call)
-  dt <- check_dt(dt, call = call)
+  dt <- check_system_dt(dt, generator, call = call)
 
   n_groups <- data$n_groups
   preserve_group_dimension <- preserve_group_dimension || n_groups > 1
