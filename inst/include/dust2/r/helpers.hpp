@@ -538,7 +538,7 @@ void read_real_vector(cpp11::list args, size_t len, real_type * dest,
 }
 
 template <typename real_type, size_t rank>
-void read_real_array(cpp11::list args, dust2::array::dimensions<rank>& dim,
+void read_real_array(cpp11::list args, const dust2::array::dimensions<rank>& dim,
                      real_type * dest, const char *name, bool required) {
   cpp11::sexp value = args[name];
   if (value == R_NilValue) {
