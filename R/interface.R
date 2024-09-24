@@ -542,6 +542,30 @@ dust_system_compare_data <- function(sys, data) {
 }
 
 
+##' Unpack state!
+##'
+##' @title Unpack state
+##'
+##' @param obj A `dust_system` object (from [dust_system_create]) or
+##'   `dust_likelihood` object (from [dust_filter_create] or
+##'   [dust_unfilter_create]).
+##'
+##' @param state A state vector, matrix or array.  This might have
+##'   come from [dust_system_state], [dust_system_trajectories], or
+##'   [dust_likelihood_state].
+##'
+##' @return A named list
+##'
+##' @export
+dust_unpack_state <- function(obj, state) {
+  ## TODO: do we want to offer support for unpacking time in the other
+  ## locations?  I know we discuss this somewhere!
+  assert_is(obj, c("dust_system", "dust_likelihood"))
+  packer <- obj$packer_state
+  packer$unpack(state)
+}
+
+
 ##' @export
 print.dust_system <- function(x, ...) {
   cli::cli_h1("<dust_system: {x$name}>")

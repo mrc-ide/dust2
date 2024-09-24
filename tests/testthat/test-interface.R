@@ -193,3 +193,12 @@ test_that("format dimensions as a string", {
                            n_groups = 1)),
     "single particle")
 })
+
+
+test_that("Can unpack state", {
+  sys <- dust_system_create(sir(), list(), 10)
+  dust_system_set_state_initial(sys)
+  s <- dust_system_state(sys)
+  expect_equal(dust_unpack_state(sys, s),
+               sys$packer_state$unpack(s))
+})
