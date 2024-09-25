@@ -236,6 +236,18 @@ test_interpolate_spline1 <- function(t, y, z) {
   .Call(`_dust2_test_interpolate_spline1`, t, y, z)
 }
 
+test_interpolate_constant2 <- function(t, r_y, z) {
+  .Call(`_dust2_test_interpolate_constant2`, t, r_y, z)
+}
+
+test_interpolate_linear2 <- function(t, r_y, z) {
+  .Call(`_dust2_test_interpolate_linear2`, t, r_y, z)
+}
+
+test_interpolate_spline2 <- function(t, r_y, z) {
+  .Call(`_dust2_test_interpolate_spline2`, t, r_y, z)
+}
+
 test_sum <- function(r_x, r_m) {
   .Call(`_dust2_test_sum`, r_x, r_m)
 }

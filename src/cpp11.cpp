@@ -418,6 +418,27 @@ extern "C" SEXP _dust2_test_interpolate_spline1(SEXP t, SEXP y, SEXP z) {
     return cpp11::as_sexp(test_interpolate_spline1(cpp11::as_cpp<cpp11::decay_t<std::vector<double>>>(t), cpp11::as_cpp<cpp11::decay_t<std::vector<double>>>(y), cpp11::as_cpp<cpp11::decay_t<double>>(z)));
   END_CPP11
 }
+// test_interpolate.cpp
+std::vector<double> test_interpolate_constant2(std::vector<double> t, cpp11::doubles r_y, double z);
+extern "C" SEXP _dust2_test_interpolate_constant2(SEXP t, SEXP r_y, SEXP z) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(test_interpolate_constant2(cpp11::as_cpp<cpp11::decay_t<std::vector<double>>>(t), cpp11::as_cpp<cpp11::decay_t<cpp11::doubles>>(r_y), cpp11::as_cpp<cpp11::decay_t<double>>(z)));
+  END_CPP11
+}
+// test_interpolate.cpp
+std::vector<double> test_interpolate_linear2(std::vector<double> t, cpp11::doubles r_y, double z);
+extern "C" SEXP _dust2_test_interpolate_linear2(SEXP t, SEXP r_y, SEXP z) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(test_interpolate_linear2(cpp11::as_cpp<cpp11::decay_t<std::vector<double>>>(t), cpp11::as_cpp<cpp11::decay_t<cpp11::doubles>>(r_y), cpp11::as_cpp<cpp11::decay_t<double>>(z)));
+  END_CPP11
+}
+// test_interpolate.cpp
+std::vector<double> test_interpolate_spline2(std::vector<double> t, cpp11::doubles r_y, double z);
+extern "C" SEXP _dust2_test_interpolate_spline2(SEXP t, SEXP r_y, SEXP z) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(test_interpolate_spline2(cpp11::as_cpp<cpp11::decay_t<std::vector<double>>>(t), cpp11::as_cpp<cpp11::decay_t<cpp11::doubles>>(r_y), cpp11::as_cpp<cpp11::decay_t<double>>(z)));
+  END_CPP11
+}
 // test_sum.cpp
 double test_sum(cpp11::sexp r_x, cpp11::sexp r_m);
 extern "C" SEXP _dust2_test_sum(SEXP r_x, SEXP r_m) {
@@ -578,9 +599,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_unfilter_sir_update_pars",          (DL_FUNC) &_dust2_dust2_unfilter_sir_update_pars,           3},
     {"_dust2_test_history_",                           (DL_FUNC) &_dust2_test_history_,                            6},
     {"_dust2_test_interpolate_constant1",              (DL_FUNC) &_dust2_test_interpolate_constant1,               3},
+    {"_dust2_test_interpolate_constant2",              (DL_FUNC) &_dust2_test_interpolate_constant2,               3},
     {"_dust2_test_interpolate_linear1",                (DL_FUNC) &_dust2_test_interpolate_linear1,                 3},
+    {"_dust2_test_interpolate_linear2",                (DL_FUNC) &_dust2_test_interpolate_linear2,                 3},
     {"_dust2_test_interpolate_search",                 (DL_FUNC) &_dust2_test_interpolate_search,                  2},
     {"_dust2_test_interpolate_spline1",                (DL_FUNC) &_dust2_test_interpolate_spline1,                 3},
+    {"_dust2_test_interpolate_spline2",                (DL_FUNC) &_dust2_test_interpolate_spline2,                 3},
     {"_dust2_test_resample_weight",                    (DL_FUNC) &_dust2_test_resample_weight,                     2},
     {"_dust2_test_scale_log_weights",                  (DL_FUNC) &_dust2_test_scale_log_weights,                   1},
     {"_dust2_test_sum",                                (DL_FUNC) &_dust2_test_sum,                                 2},
