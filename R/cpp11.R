@@ -208,6 +208,58 @@ dust2_system_sirode_simulate <- function(ptr, r_times, r_index_state, preserve_p
   .Call(`_dust2_dust2_system_sirode_simulate`, ptr, r_times, r_index_state, preserve_particle_dimension, preserve_group_dimension)
 }
 
+dust2_unfilter_sirode_alloc <- function(r_pars, r_time_start, r_time, r_ode_control, r_data, r_n_particles, r_n_groups, r_n_threads, r_index_state) {
+  .Call(`_dust2_dust2_unfilter_sirode_alloc`, r_pars, r_time_start, r_time, r_ode_control, r_data, r_n_particles, r_n_groups, r_n_threads, r_index_state)
+}
+
+dust2_filter_sirode_alloc <- function(r_pars, r_time_start, r_time, r_ode_control, r_data, r_n_particles, r_n_groups, r_n_threads, r_index_state, r_seed) {
+  .Call(`_dust2_dust2_filter_sirode_alloc`, r_pars, r_time_start, r_time, r_ode_control, r_data, r_n_particles, r_n_groups, r_n_threads, r_index_state, r_seed)
+}
+
+dust2_system_sirode_compare_data <- function(ptr, r_data, preserve_particle_dimension, preserve_group_dimension) {
+  .Call(`_dust2_dust2_system_sirode_compare_data`, ptr, r_data, preserve_particle_dimension, preserve_group_dimension)
+}
+
+dust2_unfilter_sirode_update_pars <- function(ptr, r_pars, r_index_group) {
+  .Call(`_dust2_dust2_unfilter_sirode_update_pars`, ptr, r_pars, r_index_group)
+}
+
+dust2_unfilter_sirode_run <- function(ptr, r_initial, save_history, adjoint, r_index_group, preserve_particle_dimension, preserve_group_dimension) {
+  .Call(`_dust2_dust2_unfilter_sirode_run`, ptr, r_initial, save_history, adjoint, r_index_group, preserve_particle_dimension, preserve_group_dimension)
+}
+
+dust2_unfilter_sirode_last_history <- function(ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension) {
+  .Call(`_dust2_dust2_unfilter_sirode_last_history`, ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension)
+}
+
+dust2_unfilter_sirode_last_state <- function(ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension) {
+  .Call(`_dust2_dust2_unfilter_sirode_last_state`, ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension)
+}
+
+dust2_filter_sirode_update_pars <- function(ptr, r_pars, r_index_group) {
+  .Call(`_dust2_dust2_filter_sirode_update_pars`, ptr, r_pars, r_index_group)
+}
+
+dust2_filter_sirode_run <- function(ptr, r_initial, save_history, adjoint, index_group, preserve_particle_dimension, preserve_group_dimension) {
+  .Call(`_dust2_dust2_filter_sirode_run`, ptr, r_initial, save_history, adjoint, index_group, preserve_particle_dimension, preserve_group_dimension)
+}
+
+dust2_filter_sirode_last_history <- function(ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension) {
+  .Call(`_dust2_dust2_filter_sirode_last_history`, ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension)
+}
+
+dust2_filter_sirode_last_state <- function(ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension) {
+  .Call(`_dust2_dust2_filter_sirode_last_state`, ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension)
+}
+
+dust2_filter_sirode_rng_state <- function(ptr) {
+  .Call(`_dust2_dust2_filter_sirode_rng_state`, ptr)
+}
+
+dust2_filter_sirode_set_rng_state <- function(ptr, r_rng_state) {
+  .Call(`_dust2_dust2_filter_sirode_set_rng_state`, ptr, r_rng_state)
+}
+
 test_resample_weight <- function(w, u) {
   .Call(`_dust2_test_resample_weight`, w, u)
 }

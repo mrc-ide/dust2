@@ -4,6 +4,7 @@
 
 // [[dust2::class(sirode)]]
 // [[dust2::time_type(continuous)]]
+// [[dust2::has_compare()]]
 // [[dust2::parameter(I0)]]
 // [[dust2::parameter(N)]]
 // [[dust2::parameter(beta)]]
@@ -97,10 +98,32 @@ public:
   static auto zero_every(const shared_state& shared) {
     return dust2::zero_every_type<real_type>{{1, {4}}}; // zero[1] = {4};
   }
+
+  static data_type build_data(cpp11::list r_data, const shared_state& shared) {
+    auto data = static_cast<cpp11::list>(r_data);
+    auto incidence = dust2::r::read_real(data, "incidence", NA_REAL);
+    return data_type{incidence};
+  }
+
+  static real_type compare_data(const real_type time,
+                                const real_type * state,
+                                const data_type& data,
+                                const shared_state& shared,
+                                internal_state& internal,
+                                rng_state_type& rng_state) {
+    const auto incidence_observed = data.incidence;
+    if (std::isnan(data.incidence)) {
+      return 0;
+    }
+    const auto incidence_modelled = state[4];
+    return monty::density::poisson(incidence_observed, incidence_modelled, true);
+  }
 };
 
 #include <cpp11.hpp>
 #include <dust2/r/continuous/system.hpp>
+#include <dust2/r/continuous/filter.hpp>
+#include <dust2/r/continuous/unfilter.hpp>
 
 [[cpp11::register]]
 SEXP dust2_system_sirode_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::list r_ode_control, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic, cpp11::sexp r_n_threads) {
@@ -164,4 +187,68 @@ SEXP dust2_system_sirode_update_pars(cpp11::sexp ptr, cpp11::list pars) {
 [[cpp11::register]]
 SEXP dust2_system_sirode_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::sexp r_index_state, bool preserve_particle_dimension, bool preserve_group_dimension) {
   return dust2::r::dust2_system_simulate<dust2::dust_continuous<sirode>>(ptr, r_times, r_index_state, preserve_particle_dimension, preserve_group_dimension);
+}
+
+[[cpp11::register]]
+SEXP dust2_unfilter_sirode_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::list r_ode_control, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_n_threads, cpp11::sexp r_index_state) {
+  return dust2::r::dust2_continuous_unfilter_alloc<sirode>(r_pars, r_time_start, r_time, r_ode_control, r_data, r_n_particles, r_n_groups, r_n_threads, r_index_state);
+}
+
+[[cpp11::register]]
+SEXP dust2_filter_sirode_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::list r_ode_control, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_n_threads, cpp11::sexp r_index_state, cpp11::sexp r_seed) {
+  return dust2::r::dust2_continuous_filter_alloc<sirode>(r_pars, r_time_start, r_time, r_ode_control, r_data, r_n_particles, r_n_groups, r_n_threads, r_index_state, r_seed);
+}
+[[cpp11::register]]
+SEXP dust2_system_sirode_compare_data(cpp11::sexp ptr, cpp11::list r_data, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_system_compare_data<dust2::dust_continuous<sirode>>(ptr, r_data, preserve_particle_dimension, preserve_group_dimension);
+}
+
+[[cpp11::register]]
+SEXP dust2_unfilter_sirode_update_pars(cpp11::sexp ptr, cpp11::list r_pars, cpp11::sexp r_index_group) {
+  return dust2::r::dust2_unfilter_update_pars<dust2::dust_continuous<sirode>>(ptr, r_pars, r_index_group);
+}
+
+[[cpp11::register]]
+SEXP dust2_unfilter_sirode_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, cpp11::sexp r_index_group, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_unfilter_run<dust2::dust_continuous<sirode>>(ptr, r_initial, save_history, adjoint, r_index_group, preserve_particle_dimension, preserve_group_dimension);
+}
+
+[[cpp11::register]]
+SEXP dust2_unfilter_sirode_last_history(cpp11::sexp ptr, cpp11::sexp r_index_group, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_unfilter_last_history<dust2::dust_continuous<sirode>>(ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension);
+}
+
+[[cpp11::register]]
+SEXP dust2_unfilter_sirode_last_state(cpp11::sexp ptr, cpp11::sexp r_index_group, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_unfilter_last_state<dust2::dust_continuous<sirode>>(ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension);
+}
+
+[[cpp11::register]]
+SEXP dust2_filter_sirode_update_pars(cpp11::sexp ptr, cpp11::list r_pars, cpp11::sexp r_index_group) {
+  return dust2::r::dust2_filter_update_pars<dust2::dust_continuous<sirode>>(ptr, r_pars, r_index_group);
+}
+
+[[cpp11::register]]
+SEXP dust2_filter_sirode_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, cpp11::sexp index_group, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_filter_run<dust2::dust_continuous<sirode>>(ptr, r_initial, save_history, adjoint, index_group, preserve_particle_dimension, preserve_group_dimension);
+}
+
+[[cpp11::register]]
+SEXP dust2_filter_sirode_last_history(cpp11::sexp ptr, cpp11::sexp r_index_group, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_filter_last_history<dust2::dust_continuous<sirode>>(ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension);
+}
+
+[[cpp11::register]]
+SEXP dust2_filter_sirode_last_state(cpp11::sexp ptr, cpp11::sexp r_index_group, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_filter_last_state<dust2::dust_continuous<sirode>>(ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension);
+}
+
+[[cpp11::register]]
+SEXP dust2_filter_sirode_rng_state(cpp11::sexp ptr) {
+  return dust2::r::dust2_filter_rng_state<dust2::dust_continuous<sirode>>(ptr);
+}
+
+[[cpp11::register]]
+SEXP dust2_filter_sirode_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
+  return dust2::r::dust2_filter_set_rng_state<dust2::dust_continuous<sirode>>(ptr, r_rng_state);
 }

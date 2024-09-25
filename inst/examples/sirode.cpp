@@ -2,6 +2,7 @@
 
 // [[dust2::class(sirode)]]
 // [[dust2::time_type(continuous)]]
+// [[dust2::has_compare()]]
 // [[dust2::parameter(I0)]]
 // [[dust2::parameter(N)]]
 // [[dust2::parameter(beta)]]
@@ -94,5 +95,25 @@ public:
 
   static auto zero_every(const shared_state& shared) {
     return dust2::zero_every_type<real_type>{{1, {4}}}; // zero[1] = {4};
+  }
+
+  static data_type build_data(cpp11::list r_data, const shared_state& shared) {
+    auto data = static_cast<cpp11::list>(r_data);
+    auto incidence = dust2::r::read_real(data, "incidence", NA_REAL);
+    return data_type{incidence};
+  }
+
+  static real_type compare_data(const real_type time,
+                                const real_type * state,
+                                const data_type& data,
+                                const shared_state& shared,
+                                internal_state& internal,
+                                rng_state_type& rng_state) {
+    const auto incidence_observed = data.incidence;
+    if (std::isnan(data.incidence)) {
+      return 0;
+    }
+    const auto incidence_modelled = state[4];
+    return monty::density::poisson(incidence_observed, incidence_modelled, true);
   }
 };
