@@ -109,7 +109,7 @@ test_that("Check that time values are sensible", {
 })
 
 
-test_that("can interpolate an matrix, piecewise constant", {
+test_that("can interpolate a matrix, piecewise constant", {
   t <- c(0, 1, 2, 3, 4)
   nt <- length(t)
   nr <- 7
@@ -122,7 +122,7 @@ test_that("can interpolate an matrix, piecewise constant", {
 })
 
 
-test_that("can interpolate an matrix, piecewise linear", {
+test_that("can interpolate a matrix, piecewise linear", {
   t <- c(0, 1, 2, 3, 4)
   nt <- length(t)
   nr <- 7
@@ -136,7 +136,7 @@ test_that("can interpolate an matrix, piecewise linear", {
 })
 
 
-test_that("can interpolate an matrix, spline", {
+test_that("can interpolate a matrix, spline", {
   t <- c(0, 1, 2, 3, 4)
   nt <- length(t)
   nr <- 7
