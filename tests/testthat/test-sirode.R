@@ -100,3 +100,17 @@ test_that("throw nice error on run failure, then prevent access", {
   dust_system_set_state_initial(obj)
   expect_equal(dust_system_time(obj), 0)
 })
+
+
+test_that("can compare to data", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 0.5)
+  obj <- dust_system_create(sirode(), pars, 10, deterministic = TRUE)
+
+  s <- rbind(0, 0, 0, 0, rpois(10, 30) + rnorm(10))
+  dust_system_set_state(obj, s)
+  d <- list(incidence = 30)
+
+  expect_equal(
+    dust_system_compare_data(obj, d),
+    dpois(30, s[5, ], log = TRUE))
+})
