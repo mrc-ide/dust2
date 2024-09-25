@@ -137,6 +137,7 @@ test_that("can interpolate a matrix, piecewise linear", {
 
 
 test_that("can interpolate a matrix, spline", {
+  set.seed(1)
   t <- c(0, 1, 2, 3, 4)
   nt <- length(t)
   nr <- 7
