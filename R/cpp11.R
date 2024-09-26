@@ -220,6 +220,14 @@ test_history_ <- function(r_time, r_state, r_order, r_index_group, r_select_part
   .Call(`_dust2_test_history_`, r_time, r_state, r_order, r_index_group, r_select_particle, reorder)
 }
 
+test_check_dimensions <- function(value, r_dim, name) {
+  .Call(`_dust2_test_check_dimensions`, value, r_dim, name)
+}
+
+test_read_dimensions <- function(value, rank, name) {
+  .Call(`_dust2_test_read_dimensions`, value, rank, name)
+}
+
 test_interpolate_search <- function(target, x) {
   .Call(`_dust2_test_interpolate_search`, target, x)
 }

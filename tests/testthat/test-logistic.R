@@ -135,7 +135,7 @@ test_that("can accept a vector of parameters", {
   expect_error(
     dust_system_create(logistic(), list(n = 1, r = 1, K = c(1, 2)),
                        n_particles = 1),
-    "'K' must have length 1")
+    "Expected 'K' to have length 1, but it had length 2")
   expect_error(
     dust_system_create(logistic(), list(n = 1, r = 1, K = "a"),
                        n_particles = 1),
