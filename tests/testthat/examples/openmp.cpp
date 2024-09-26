@@ -37,9 +37,6 @@ public:
   static void update_shared(cpp11::list pars, shared_state& shared) {
   }
 
-  static void update_internal(const shared_state& shared, internal_state& internal) {
-  }
-
   static void initial(real_type time,
                       real_type dt,
                       const shared_state& shared,

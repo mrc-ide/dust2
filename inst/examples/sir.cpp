@@ -93,12 +93,6 @@ public:
     shared.gamma = dust2::r::read_real(pars, "gamma", shared.gamma);
   }
 
-  // This is a reasonable default implementation in the no-internal
-  // case
-  static void update_internal(const shared_state& shared,
-                              internal_state& internal) {
-  }
-
   static auto zero_every(const shared_state& shared) {
     return dust2::zero_every_type<real_type>{{1, {4}}}; // zero[1] = {4};
   }
