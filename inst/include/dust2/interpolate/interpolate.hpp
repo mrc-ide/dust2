@@ -104,6 +104,10 @@ public:
 
   InterpolateConstantArray() {}
 
+  void eval(T z, std::vector<T>& dest) const {
+    return eval(z, dest.begin());
+  }
+
   template <typename Iterator>
   void eval(T z, Iterator dest) const {
     const auto i = internal::interpolate_search(z, t_, true);
@@ -151,6 +155,10 @@ public:
   }
 
   InterpolateLinearArray() {}
+
+  void eval(T z, std::vector<T>& dest) const {
+    return eval(z, dest.begin());
+  }
 
   template <typename Iterator>
   void eval(T z, Iterator dest) const {
@@ -231,6 +239,10 @@ public:
   }
 
   InterpolateSplineArray() {}
+
+  void eval(T z, std::vector<T>& dest) const {
+    return eval(z, dest.begin());
+  }
 
   template <typename Iterator>
   void eval(T z, Iterator dest) const {
