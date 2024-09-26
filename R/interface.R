@@ -711,7 +711,7 @@ format_dimensions <- function(x) {
       cli::format_inline(
         "{x$n_state} state x {x$n_particles} particle{?s}")
     } else {
-      cli::format_inline("single particle with {x$n_state} state")
+      cli::format_inline("single particle with {x$n_state} state{?s}")
     }
   }
 }
