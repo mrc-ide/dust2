@@ -35,7 +35,7 @@ test_that("can print information about dust systems", {
   }
 
   expect_match(msgs(list(), n_particles = 1),
-               "single particle with 5 state\\b",
+               "single particle with 5 states\\b",
                all = FALSE)
   expect_match(msgs(list(), n_particles = 1,
                     preserve_particle_dimension = TRUE),
@@ -185,7 +185,7 @@ test_that("format dimensions as a string", {
                            n_particles = 1,
                            n_groups = 1,
                            n_state = 10)),
-    "single particle with 10 state")
+    "single particle with 10 states")
   expect_equal(
     format_dimensions(list(preserve_particle_dimension = FALSE,
                            preserve_group_dimension = FALSE,
