@@ -19,7 +19,7 @@ test_that("can run simple logistic system", {
     tolerance = 1e-6)
 
   expect_identical(dim(obj), c(3L, 1L))
-  expect_equal(obj$ode_control, dust_ode_control())
+  expect_equal(obj$time_control$ode_control, dust_ode_control())
 })
 
 
@@ -282,8 +282,8 @@ test_that("can set ode control", {
   expect_equal(s2, cmp, tolerance = 1e-3)
   expect_true(all(abs(s1 - cmp) < abs(s2 - cmp)))
 
-  expect_equal(obj1$ode_control, ctl1)
-  expect_equal(obj2$ode_control, ctl2)
+  expect_equal(obj1$time_control$ode_control, ctl1)
+  expect_equal(obj2$time_control$ode_control, ctl2)
 })
 
 

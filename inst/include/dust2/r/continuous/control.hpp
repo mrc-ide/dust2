@@ -7,7 +7,8 @@ namespace dust2 {
 namespace r {
 
 template <typename real_type>
-dust2::ode::control<real_type> validate_ode_control(cpp11::list ode_control) {
+dust2::ode::control<real_type> validate_ode_control(cpp11::list r_time_control) {
+  cpp11::list ode_control = r_time_control["ode_control"];
   const auto max_steps = dust2::r::read_int(ode_control, "max_steps");
   const auto atol = dust2::r::read_real(ode_control, "atol");
   const auto rtol = dust2::r::read_real(ode_control, "rtol");

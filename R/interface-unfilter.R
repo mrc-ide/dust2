@@ -19,7 +19,8 @@
 ##' @export
 dust_unfilter_create <- function(generator, time_start, data,
                                  n_particles = 1, n_groups = NULL,
-                                 dt = NULL, n_threads = 1, index_state = NULL,
+                                 dt = NULL, ode_control = NULL,
+                                 n_threads = 1, index_state = NULL,
                                  preserve_particle_dimension = FALSE,
                                  preserve_group_dimension = FALSE) {
   call <- environment()
@@ -29,7 +30,7 @@ dust_unfilter_create <- function(generator, time_start, data,
 
   data <- prepare_data(data, n_groups, call = call)
   time_start <- check_time_start(time_start, data$time, call = call)
-  dt <- check_system_dt(dt, generator, call = call)
+  time_control <- check_time_control(generator, dt, ode_control, call = call)
 
   n_groups <- data$n_groups
   preserve_group_dimension <- preserve_group_dimension || n_groups > 1
@@ -37,20 +38,6 @@ dust_unfilter_create <- function(generator, time_start, data,
 
   index_state <- check_index(index_state, call = call)
   n_threads <- check_n_threads(n_threads, n_particles, n_groups)
-
-  if (generator$properties$time_type == "discrete") {
-    time_control <- dt
-  } else {
-    ## until we merge mrc-5799 as we'll just conflict annoyingly, then
-    ## move into args.
-    ode_control <- NULL
-    if (is.null(ode_control)) {
-      ode_control <- dust_ode_control()
-    } else {
-      assert_is(ode_control, "dust_ode_control", call = environment())
-    }
-    time_control <- ode_control
-  }
 
   inputs <- list(time_start = time_start,
                  time = data$time,
@@ -72,6 +59,7 @@ dust_unfilter_create <- function(generator, time_start, data,
          has_adjoint = generator$properties$has_adjoint,
          generator = generator,
          methods = generator$methods$unfilter,
+         time_control = time_control,
          index_state = index_state,
          preserve_particle_dimension = preserve_particle_dimension,
          preserve_group_dimension = preserve_group_dimension),

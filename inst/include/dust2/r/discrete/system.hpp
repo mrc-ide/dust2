@@ -12,7 +12,7 @@ namespace r {
 template <typename T>
 SEXP dust2_discrete_alloc(cpp11::list r_pars,
                           cpp11::sexp r_time,
-                          cpp11::sexp r_dt,
+                          cpp11::list r_time_control,
                           cpp11::sexp r_n_particles,
                           cpp11::sexp r_n_groups,
                           cpp11::sexp r_seed,
@@ -32,7 +32,7 @@ SEXP dust2_discrete_alloc(cpp11::list r_pars,
   // system with an unexpected size.  These will result in a fairly
   // ugly error compared with most.
   const auto time = check_time(r_time, "time");
-  const auto dt = check_dt(r_dt);
+  const auto dt = check_dt(r_time_control);
   const auto n_particles = to_size(r_n_particles, "n_particles");
   const auto n_groups = to_size(r_n_groups, "n_groups");
   const auto n_threads = to_size(r_n_threads, "n_threads");

@@ -33,8 +33,8 @@
 ##' @export
 dust_filter_create <- function(generator, time_start, data,
                                n_particles, n_groups = NULL, dt = NULL,
-                               index_state = NULL, n_threads = 1,
-                               preserve_group_dimension = FALSE,
+                               ode_control = NULL, index_state = NULL,
+                               n_threads = 1, preserve_group_dimension = FALSE,
                                seed = NULL) {
   call <- environment()
   check_generator_for_filter(generator, "filter", call = call)
@@ -43,7 +43,7 @@ dust_filter_create <- function(generator, time_start, data,
 
   data <- prepare_data(data, n_groups, call = call)
   time_start <- check_time_start(time_start, data$time, call = call)
-  dt <- check_system_dt(dt, generator, call = call)
+  time_control <- check_time_control(generator, dt, ode_control, call = call)
 
   n_groups <- data$n_groups
   preserve_group_dimension <- preserve_group_dimension || n_groups > 1
@@ -51,18 +51,7 @@ dust_filter_create <- function(generator, time_start, data,
   index_state <- check_index(index_state, call = call)
   n_threads <- check_n_threads(n_threads, n_particles, n_groups)
 
-  if (generator$properties$time_type == "discrete") {
-    time_control <- dt
-  } else {
-    ## until we merge mrc-5799 as we'll just conflict annoyingly, then
-    ## move into args.
-    ode_control <- NULL
-    if (is.null(ode_control)) {
-      ode_control <- dust_ode_control()
-    } else {
-      assert_is(ode_control, "dust_ode_control", call = environment())
-    }
-    time_control <- ode_control
+  if (generator$properties$time_type == "continuous") {
     cli::cli_abort(
       c("Can't use 'dust_filter_create()' with continous-time models",
         i = paste("We'll support this in future, but you need a place where",
@@ -90,6 +79,7 @@ dust_filter_create <- function(generator, time_start, data,
          has_adjoint = FALSE,
          generator = generator,
          methods = generator$methods$filter,
+         time_control = time_control,
          index_state = index_state,
          preserve_particle_dimension = TRUE,
          preserve_group_dimension = preserve_group_dimension),

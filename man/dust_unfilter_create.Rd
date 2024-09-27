@@ -11,6 +11,7 @@ dust_unfilter_create(
   n_particles = 1,
   n_groups = NULL,
   dt = NULL,
+  ode_control = NULL,
   n_threads = 1,
   index_state = NULL,
   preserve_particle_dimension = FALSE,
@@ -41,6 +42,10 @@ initial conditions then you would see different likelihoods.}
 \item{dt}{The time step for discrete time systems, defaults to 1
 if not given.  It is an error to provide a non-NULL argument
 with continuous-time systems.}
+
+\item{ode_control}{The ODE integration control for continuous time
+systems.  Defaults to the default return of \link{dust_ode_control}.
+It is an error to provide this with discrete-time systems.}
 
 \item{n_threads}{Integer, the number of threads to use in
 parallelisable calculations.  See Details.}

@@ -13,7 +13,7 @@ template <typename T>
 cpp11::sexp dust2_discrete_filter_alloc(cpp11::list r_pars,
                                         cpp11::sexp r_time_start,
                                         cpp11::sexp r_time,
-                                        cpp11::sexp r_dt,
+                                        cpp11::list r_time_control,
                                         cpp11::list r_data,
                                         cpp11::sexp r_n_particles,
                                         cpp11::sexp r_n_groups,
@@ -28,7 +28,7 @@ cpp11::sexp dust2_discrete_filter_alloc(cpp11::list r_pars,
   const auto n_threads = to_size(r_n_threads, "n_threads");
   const auto time_start = check_time(r_time_start, "time_start");
   const auto time = check_time_sequence(time_start, r_time, true, "time");
-  const auto dt = check_dt(r_dt);
+  const auto dt = check_dt(r_time_control);
   const auto shared = build_shared<T>(r_pars, n_groups);
   const auto internal = build_internal<T>(shared, n_threads);
   const auto data = check_data<T>(r_data, shared, time.size(), "data");

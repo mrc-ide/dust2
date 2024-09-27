@@ -200,7 +200,9 @@ inline double check_time(cpp11::sexp r_time, const char * name) {
   return to_double(r_time, allow_na, name);
 }
 
-inline double check_dt(cpp11::sexp r_dt) {
+
+inline double check_dt(cpp11::list r_time_control) {
+  cpp11::sexp r_dt = r_time_control["dt"];
   const auto allow_na = false;
   const auto dt = to_double(r_dt, allow_na, "dt");
   const auto eps = 1e-8;
