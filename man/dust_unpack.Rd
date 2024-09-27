@@ -15,7 +15,7 @@ dust_unpack_index(obj)
 \link{dust_unfilter_create}).}
 
 \item{state}{A state vector, matrix or array.  This might have
-come from \link{dust_system_state}, \link{dust_system_last_history}, or
+come from \link{dust_system_state}, \link{dust_likelihood_last_history}, or
 \link{dust_likelihood_last_state}.}
 }
 \value{
