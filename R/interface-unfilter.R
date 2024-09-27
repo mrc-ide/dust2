@@ -38,9 +38,23 @@ dust_unfilter_create <- function(generator, time_start, data,
   index_state <- check_index(index_state, call = call)
   n_threads <- check_n_threads(n_threads, n_particles, n_groups)
 
+  if (generator$properties$time_type == "discrete") {
+    time_control <- dt
+  } else {
+    ## until we merge mrc-5799 as we'll just conflict annoyingly, then
+    ## move into args.
+    ode_control <- NULL
+    if (is.null(ode_control)) {
+      ode_control <- dust_ode_control()
+    } else {
+      assert_is(ode_control, "dust_ode_control", call = environment())
+    }
+    time_control <- ode_control
+  }
+
   inputs <- list(time_start = time_start,
                  time = data$time,
-                 dt = dt,
+                 time_control = time_control,
                  data = data$data,
                  n_particles = n_particles,
                  n_groups = n_groups,
@@ -73,7 +87,7 @@ unfilter_create <- function(unfilter, pars) {
     unfilter$methods$alloc(pars,
                            inputs$time_start,
                            inputs$time,
-                           inputs$dt,
+                           inputs$time_control,
                            inputs$data,
                            inputs$n_particles,
                            inputs$n_groups,

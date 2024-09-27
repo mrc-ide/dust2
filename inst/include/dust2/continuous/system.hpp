@@ -96,6 +96,35 @@ public:
     time_ = time;
   }
 
+  void run_to_time(real_type time,
+                   const std::vector<size_t>& index_group,
+                   real_type *state_history) {
+    /*
+    const auto stride = n_state_ * n_particles_ * n_groups_;
+    std::copy_n(state_.begin(), stride, state_history);
+    for (auto i : index_group) {
+      for (size_t j = 0; j < n_particles_; ++j) {
+        const auto k = n_particles_ * i + j;
+        const auto offset = k * n_state_;
+        auto state_model_ij = state_.data() + offset;
+        auto state_history_ij = state_history + offset;
+        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
+        try {
+          run_particle(time_, dt_, n_steps, n_state_, stride,
+                       shared_[i], internal_i, zero_every_[i],
+                       state_model_ij, state_history_ij,
+                       rng_.state(k));
+        } catch (std::exception const &e) {
+          errors_.capture(e, k);
+        }
+      }
+    }
+    errors_.report();
+    time_ = time_ + n_steps * dt_;
+    */
+    throw std::runtime_error("Write run_to_time() with saved history");
+  }
+
   void set_state_initial(const std::vector<size_t>& index_group) {
     errors_.reset();
     real_type * state_data = state_.data();
@@ -196,6 +225,10 @@ public:
     return time_;
   }
 
+  auto dt() const {
+    return 0;
+  }
+
   auto n_state() const {
     return n_state_;
   }
@@ -244,10 +277,16 @@ public:
   }
 
   template <typename IterData, typename IterOutput>
+  void compare_data(IterData data,
+                    const std::vector<size_t>& index_group,
+                    IterOutput output) {
+    compare_data(data, state_.data(), index_group, output);
+  }
+
+  template <typename IterData, typename IterOutput>
   void compare_data(IterData data, const real_type * state,
                     const std::vector<size_t>& index_group,
                     IterOutput output) {
-    const real_type * state_data = state_.data();
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
 #endif
@@ -259,7 +298,7 @@ public:
         auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
         auto output_ij = output + k;
         try {
-          *output_ij = T::compare_data(time_, state_data + offset, *data_i,
+          *output_ij = T::compare_data(time_, state + offset, *data_i,
                                        shared_[i], internal_i, rng_.state(k));
         } catch (std::exception const& e) {
           errors_.capture(e, k);

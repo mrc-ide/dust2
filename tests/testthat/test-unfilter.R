@@ -393,3 +393,33 @@ test_that("can extract final state from grouped unfilter", {
   expect_error(dust_likelihood_last_history(obj), "History is not current")
   expect_equal(dust_likelihood_last_state(obj), s)
 })
+
+
+test_that("can run continuous-time unfilter", {
+  base <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  pars1 <- list(beta = 0.1, gamma = 0.2, I0 = 10)
+  pars2 <- list(beta = 0.2, gamma = 0.2, I0 = 10)
+
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+
+  ## Manually compute likelihood:
+  f <- function(pars) {
+    base[names(pars)] <- pars
+    obj <- dust_system_create(sirode(), base, time = time_start,
+                              n_particles = 1, deterministic = TRUE)
+    dust_system_set_state_initial(obj)
+    incidence <- numeric(nrow(data))
+    time0 <- c(time_start, data$time)
+    for (i in seq_len(nrow(data))) {
+      dust_system_run_to_time(obj, data$time[i])
+      incidence[i] <- dust_system_state(obj)[5]
+    }
+    sum(dpois(data$incidence, incidence, log = TRUE))
+  }
+
+  obj <- dust_unfilter_create(sirode(), time_start, data)
+  expect_equal(dust_likelihood_run(obj, base), f(pars1))
+  expect_equal(dust_likelihood_run(obj, pars = pars1), f(pars1))
+  expect_equal(dust_likelihood_run(obj, pars = pars2), f(pars2))
+})
