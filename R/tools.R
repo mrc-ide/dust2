@@ -58,15 +58,20 @@
 ##' # names to positions within the state dimension of this array
 ##' dust_unpack_index(sys)
 dust_unpack_state <- function(obj, state) {
-  assert_is(obj, c("dust_system", "dust_likelihood"))
-  packer <- obj$packer_state
-  packer$unpack(state)
+  get_unpacker(obj)$unpack(state)
 }
 
 
 ##' @rdname dust_unpack
 ##' @export
 dust_unpack_index <- function(obj) {
-  assert_is(obj, c("dust_system", "dust_likelihood"))
-  obj$packer_state$index()
+  get_unpacker(obj)$index()
+}
+
+
+get_unpacker <- function(obj, call = parent.frame()) {
+  ## Once mrc-5806 is merged, we can add this into the filter/unfilter
+  ## too and do the same basic idea.
+  assert_is(obj, "dust_system", call = call)
+  obj$packer_state
 }
