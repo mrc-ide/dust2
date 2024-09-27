@@ -615,7 +615,7 @@ test_that("can extract a random particle from a nested filter", {
 })
 
 
-test_that("can run continuous-time unfilter", {
+test_that("can run continuous-time filter", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
   time_start <- 0
   data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
