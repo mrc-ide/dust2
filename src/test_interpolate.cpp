@@ -38,7 +38,7 @@ std::vector<double> test_interpolate_constant2(std::vector<double> t,
   std::vector<double> ret(dim.size);
   auto obj =
     dust2::interpolate::InterpolateConstantArray<double, 2>(t, y, dim, "t", "y");
-  obj.eval(z, ret.begin());
+  obj.eval(z, ret);
   return ret;
 }
 
@@ -53,7 +53,7 @@ std::vector<double> test_interpolate_linear2(std::vector<double> t,
   std::vector<double> ret(dim.size);
   auto obj =
     dust2::interpolate::InterpolateLinearArray<double, 2>(t, y, dim, "t", "y");
-  obj.eval(z, ret.begin());
+  obj.eval(z, ret);
   return ret;
 }
 
@@ -68,6 +68,6 @@ std::vector<double> test_interpolate_spline2(std::vector<double> t,
   std::vector<double> ret(dim.size);
   auto obj =
     dust2::interpolate::InterpolateSplineArray<double, 2>(t, y, dim, "t", "y");
-  obj.eval(z, ret.begin());
+  obj.eval(z, ret);
   return ret;
 }

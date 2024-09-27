@@ -68,8 +68,9 @@ public:
     const auto n = dust2::r::read_size(pars, "n");
     std::vector<real_type> r(n);
     std::vector<real_type> K(n);
-    dust2::r::read_real_vector(pars, n, r.data(), "r", true);
-    dust2::r::read_real_vector(pars, n, K.data(), "K", true);
+    const auto dim = dust2::array::dimensions<1>{n};
+    dust2::r::read_real_array(pars, dim, r.data(), "r", true);
+    dust2::r::read_real_array(pars, dim, K.data(), "K", true);
     return shared_state{n, r, K};
   }
 
@@ -78,8 +79,9 @@ public:
   }
 
   static void update_shared(cpp11::list pars, shared_state& shared) {
-    dust2::r::read_real_vector(pars, shared.n, shared.r.data(), "r", false);
-    dust2::r::read_real_vector(pars, shared.n, shared.K.data(), "K", false);
+    const auto dim = dust2::array::dimensions<1>{shared.n};
+    dust2::r::read_real_array(pars, dim, shared.r.data(), "r", false);
+    dust2::r::read_real_array(pars, dim, shared.K.data(), "K", false);
   }
 
   static void update_internal(const shared_state& shared,

@@ -43,6 +43,9 @@ inline bool read_bool(cpp11::list pars, const char * name,
 template <typename real_type>
 void read_real_vector(cpp11::list pars, size_t len, real_type * dest,
                              const char *name, bool required);
+template <typename real_type, size_t rank>
+void read_real_array(cpp11::list args, const dust2::array::dimensions<rank>& dim,
+                     real_type * dest, const char *name, bool required);
 
 }
 
