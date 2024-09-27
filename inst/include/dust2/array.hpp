@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cstddef>
+#include <limits>
 #include <numeric>
 #include <stdexcept>
 #include <sstream>
@@ -9,6 +10,13 @@
 
 namespace dust2 {
 namespace array {
+
+namespace {
+
+constexpr auto min2 = [](auto a, auto b) { return a < b ? a : b; };
+constexpr auto max2 = [](auto a, auto b) { return a > b ? a : b; };
+
+}
 
 template <size_t rank_>
 struct dimensions {
@@ -178,6 +186,51 @@ T prod(Container x, const dimensions<2>& dim, const idx& i, const idx& j) {
 template <typename T, typename Container>
 T prod(Container x, const dimensions<3>& dim, const idx& i, const idx& j, const idx& k) {
   return reduce(x, dim, static_cast<T>(1), std::multiplies<T>(), i, j, k);
+}
+
+// And min:
+template <typename T, typename Container, size_t rank>
+T min(Container x, const dimensions<rank>& dim) {
+  // TODO: I don't see why I can't use
+  // > return reduce(x, dim, std::numeric_limits<T>::infinity(), min2);
+  // but I get a template substitution error on compilation if I do so.
+  return std::accumulate(x, x + dim.size, std::numeric_limits<T>::infinity(), min2);
+}
+
+template <typename T, typename Container>
+T min(Container x, const dimensions<1>& dim, const idx& i) {
+  return reduce(x, dim, std::numeric_limits<T>::infinity(), min2, i);
+}
+
+template <typename T, typename Container>
+T min(Container x, const dimensions<2>& dim, const idx& i, const idx& j) {
+  return reduce(x, dim, std::numeric_limits<T>::infinity(), min2, i, j);
+}
+
+template <typename T, typename Container>
+T min(Container x, const dimensions<3>& dim, const idx& i, const idx& j, const idx& k) {
+  return reduce(x, dim, std::numeric_limits<T>::infinity(), min2, i, j, k);
+}
+
+// And max
+template <typename T, typename Container, size_t rank>
+T max(Container x, const dimensions<rank>& dim) {
+  return std::accumulate(x, x + dim.size, -std::numeric_limits<T>::infinity(), max2);
+}
+
+template <typename T, typename Container>
+T max(Container x, const dimensions<1>& dim, const idx& i) {
+  return reduce(x, dim, -std::numeric_limits<T>::infinity(), max2, i);
+}
+
+template <typename T, typename Container>
+T max(Container x, const dimensions<2>& dim, const idx& i, const idx& j) {
+  return reduce(x, dim, -std::numeric_limits<T>::infinity(), max2, i, j);
+}
+
+template <typename T, typename Container>
+T max(Container x, const dimensions<3>& dim, const idx& i, const idx& j, const idx& k) {
+  return reduce(x, dim, -std::numeric_limits<T>::infinity(), max2, i, j, k);
 }
 
 }
