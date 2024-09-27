@@ -28,7 +28,7 @@
 ##' @export
 ##' @examples
 ##'
-##' sys <- dust_system_create(dust:::sir(), list(), n_particles = 10, dt = 0.25)
+##' sys <- dust_system_create(dust2:::sir(), list(), n_particles = 10, dt = 0.25)
 ##' dust_system_set_state_initial(sys)
 ##' t <- seq(0, 100, by = 5)
 ##' y <- dust_system_simulate(sys, t)
