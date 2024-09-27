@@ -48,8 +48,8 @@ reference:
       - dust_likelihood_set_rng_state
   - title: Tools
     contents:
-      - dust_state_unpack
-      - dust_state_index
+      - dust_unpack_state
+      - dust_unpack_index
   - title: Creation
     contents:
       - dust_compile

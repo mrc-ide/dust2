@@ -15,8 +15,8 @@
 ##'   [dust_unfilter_create]).
 ##'
 ##' @param state A state vector, matrix or array.  This might have
-##'   come from [dust_system_state], [dust_system_trajectories], or
-##'   [dust_likelihood_state].
+##'   come from [dust_system_state], [dust_system_last_history], or
+##'   [dust_likelihood_last_state].
 ##'
 ##' @return A named list, where each element corresponds to a logical
 ##'   compartment.
