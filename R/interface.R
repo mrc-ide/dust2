@@ -542,7 +542,15 @@ dust_system_compare_data <- function(sys, data) {
 }
 
 
-##' Unpack state!
+##' Unpack state.  You will see state come out of dust2 systems in
+##' several places, for example [dust_system_state], but it will
+##' typically be an unstructed vector with no names; this is not very
+##' useful!  However, your model knows what each element, or group of
+##' elements "means".  You can unpack your state from this
+##' unstructured array into a named list using this function.  The
+##' same idea applies to the higher-dimensional arrays that you might
+##' get if your system has multiple particles, multiple parameter
+##' groups or has been run for multiple time steps.
 ##'
 ##' @title Unpack state
 ##'
@@ -554,15 +562,57 @@ dust_system_compare_data <- function(sys, data) {
 ##'   come from [dust_system_state], [dust_system_trajectories], or
 ##'   [dust_likelihood_state].
 ##'
-##' @return A named list
+##' @return A named list, where each element corresponds to a logical
+##'   compartment.
 ##'
+##' @seealso [monty::monty_packer], and within that especially
+##'   documentation for `$unpack()`, which powers this function.
+##'
+##' @rdname dust_unpack
 ##' @export
+##' @examples
+##'
+##' sys <- dust_system_create(sir(), list(), n_particles = 10, dt = 0.25)
+##' dust_system_set_state_initial(sys)
+##' t <- seq(0, 100, by = 5)
+##' y <- dust_system_simulate(sys, t)
+##' # The result here is a 5 x 10 x 21 matrix: 5 states by 10 particles by
+##' # 21 times.
+##' dim(y)
+##'
+##' # The 10 particles and 21 times (following t) are simple enough, but
+##' # what are our 5 compartments?
+##'
+##' # You can use dust_unpack_state() to reshape your output as a
+##' # list:
+##' dust_unpack_state(sys, y)
+##'
+##' # Here, the list is named following the compartments (S, I, R,
+##' # etc) and is a 10 x 21 matrix (i.e., the remaining dimensions
+##' # from y)
+##'
+##' # We could apply this to the final state, which converts a 5 x 10
+##' # matrix of state into a 5 element list of vectors, each with
+##' # length 10:
+##' s <- dust_system_state(sys)
+##' dim(s)
+##' dust_unpack_state(sys, s)
+##'
+##' # If you need more control, you can use 'dust_unpack_index' to map
+##' # names to positions within the state dimension of this array
+##' dust_unpack_index(sys)
 dust_unpack_state <- function(obj, state) {
-  ## TODO: do we want to offer support for unpacking time in the other
-  ## locations?  I know we discuss this somewhere!
   assert_is(obj, c("dust_system", "dust_likelihood"))
   packer <- obj$packer_state
   packer$unpack(state)
+}
+
+
+##' @rdname dust_unpack
+##' @export
+dust_unpack_index <- function(obj) {
+  assert_is(obj, c("dust_system", "dust_likelihood"))
+  obj$packer_state$index()
 }
 
 
