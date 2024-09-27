@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <vector>
 
@@ -21,14 +22,25 @@ public:
     n_adjoint_(0),
     n_particles_(n_particles),
     n_groups_(n_groups),
-    n_particles_total_(n_particles_ * n_groups_),
-    n_steps_(0) {
+    n_particles_total_(n_particles_ * n_groups_) {
   }
 
-  void init_history(size_t n_steps) {
-    if (n_steps_ != n_steps) {
-      state_.resize(n_state_ * n_particles_total_ * (n_steps + 1));
-      n_steps_ = n_steps;
+  void init_history(size_t start_time, const std::vector<real_type> times,
+                    real_type dt) {
+    if (offset_.empty()) {
+      offset_.reserve(times.size() + 1);
+      offset_.push_back(0);
+      if (dt == 0) {
+        for (auto i : times) {
+          offset_.push_back(i * n_particles_total_ * n_state_);
+        }
+      } else {
+        for (auto i : times) {
+          const auto j = std::round(std::max(0.0, i - start_time) / dt);
+          offset_.push_back(j * n_particles_total_ * n_state_);
+        }
+      }
+      state_.resize(offset_.back() + n_particles_total_ * n_state_);
     }
     reset();
   }
@@ -41,8 +53,8 @@ public:
     }
   }
 
-  auto state() {
-    return state_.data();
+  auto state(size_t i) {
+    return state_.data() + offset_[i];
   }
 
   auto curr() {
@@ -76,7 +88,7 @@ private:
   size_t n_particles_;
   size_t n_groups_;
   size_t n_particles_total_;
-  size_t n_steps_;
+  std::vector<size_t> offset_;
   std::vector<real_type> state_;
   std::vector<real_type> adjoint_curr_;
   std::vector<real_type> adjoint_next_;

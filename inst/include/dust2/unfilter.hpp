@@ -82,20 +82,15 @@ public:
     reset(set_initial, save_history, /* adjoint = */ true);
 
     // Run the entire forward time simulation
-    auto state = adjoint_.state();
-    sys.run_to_time(time_.back(), index_group, state);
+    sys.run_to_time(time_.back(), index_group, adjoint_.state(0));
 
     // Then all the data comparison in one pass.  This bit can
     // theoretically be parallelised but it's unlikely to be
     // important in most models.
     const bool use_index = history_index_state_.size() > 0;
-    const auto dt = sys.dt();
     const auto n_times = time_.size();
-    const auto stride_state = n_particles_ * n_groups_ * n_state_;
     for (size_t i = 0; i < n_times; ++i) {
-      const size_t n_steps =
-        std::round(std::max(0.0, time_[i] - time_start_) / dt);
-      const auto state_i = state + n_steps * stride_state;
+      const auto state_i = adjoint_.state(i + 1);
       const auto data_i = data_.begin() + n_groups_ * i;
       sys.compare_data(data_i, state_i, index_group, ll_step_.begin());
       for (size_t j = 0; j < ll_.size(); ++j) {
@@ -166,10 +161,7 @@ private:
       history_.reset();
     }
     if (adjoint) {
-      const auto dt = sys.dt();
-      const size_t n_steps =
-        std::round(std::max(0.0, time_.back() - time_start_) / dt);
-      adjoint_.init_history(n_steps);
+      adjoint_.init_history(time_start_, time_, sys.dt());
     }
     std::fill(ll_.begin(), ll_.end(), 0);
     sys.set_time(time_start_);
@@ -185,16 +177,12 @@ private:
     auto adjoint_curr = adjoint_.curr();
     auto adjoint_next = adjoint_.next();
 
-    const auto stride_state = n_particles_ * n_groups_ * n_state_;
-    const auto state = adjoint_.state();
-    const auto dt = sys.dt();
     auto time = sys.time();
-    size_t position = std::round(std::max(0.0, time - time_start_) / dt);
 
     for (size_t irev = 0; irev < n_times; ++irev) {
       const auto i = n_times - irev - 1;
       const auto time_i = i == 0 ? time_start_ : time_[i - 1];
-      const auto state_i = state + position * stride_state;
+      const auto state_i = adjoint_.state(i + 1);
       const auto data_i = data_.begin() + i * n_groups_;
       // Compare data
       sys.adjoint_compare_data(time, data_i, state_i,
@@ -202,20 +190,19 @@ private:
                                adjoint_curr, adjoint_next);
       std::swap(adjoint_curr, adjoint_next);
       // Then run the system backwards from time => time_i
-      const auto n_steps = sys.adjoint_run_to_time(time, time_i, state_i,
-                                                   n_adjoint, index_group,
-                                                   adjoint_curr, adjoint_next);
+      const auto swap_adjoint = sys.adjoint_run_to_time(time, time_i, state_i,
+                                                        n_adjoint, index_group,
+                                                        adjoint_curr, adjoint_next);
       // Bookkeeping chore
-      if (n_steps % 2 == 1) {
+      if (swap_adjoint) {
         std::swap(adjoint_curr, adjoint_next);
       }
-      position -= n_steps;
       time = time_i;
     }
 
     // Initial conditions go right at the end, and are surprisingly
     // hard to work out.
-    sys.adjoint_initial(time, state, n_adjoint, index_group,
+    sys.adjoint_initial(time, adjoint_.state(0), n_adjoint, index_group,
                         adjoint_curr, adjoint_next);
 
     // At the end of the calculation, copy the final states so that

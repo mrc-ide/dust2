@@ -314,7 +314,7 @@ public:
   // Note that this does not affect anything (except internal_) within
   // the model; not time and not state, as we want those to reflect
   // the state of the forwards model.
-  size_t adjoint_run_to_time(const real_type time0,
+  bool adjoint_run_to_time(const real_type time0,
                              const real_type time1,
                              const real_type* state,
                              const size_t n_adjoint,
@@ -343,7 +343,7 @@ public:
       }
     }
     errors_.report();
-    return n_steps;
+    return n_steps % 2 == 1;
   }
 
   void adjoint_initial(const real_type time,
