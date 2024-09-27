@@ -218,7 +218,8 @@ package_validate_makevars_openmp <- function(text, call) {
 package_generate <- function(filename, call) {
   config <- parse_metadata(filename, call = call)
   system <- read_lines(filename)
-  data <- dust_template_data(config$name, config$class, config$time_type)
+  data <- dust_template_data(config$name, config$class, config$time_type,
+                             config$default_dt)
   list(r = substitute_dust_template(data, "dust.R"),
        cpp = dust_generate_cpp(system, config, data))
 }

@@ -10,6 +10,8 @@
 ##'   the wrong time here will lead to crashes or failure to create
 ##'   the generator.
 ##'
+##' @param default_dt The default value for `dt` on initialisation
+##'
 ##' @param env The environment where the generator is defined.
 ##'
 ##' @return A `dust_system_generator` object
@@ -18,12 +20,12 @@
 ##' @keywords internal
 ##' @examples
 ##' # This creates the "sir" generator
-##' dust_system_generator("sir", "discrete", asNamespace("dust2"))
+##' dust_system_generator("sir", "discrete", 1, asNamespace("dust2"))
 ##'
 ##' # This is the same code as in "dust2:::sir", except there we find
 ##' # the correct environment automatically
 ##' dust2:::sir
-dust_system_generator <- function(name, time_type,
+dust_system_generator <- function(name, time_type, default_dt,
                                   env = parent.env(parent.frame())) {
   ## I don't love that this requires running through sprintf() each
   ## time we create a generator, but using a function for the generator (see
@@ -68,6 +70,7 @@ dust_system_generator <- function(name, time_type,
 
   ret <- list(name = name,
               methods = methods,
+              default_dt = default_dt,
               properties = properties)
 
   class(ret) <- "dust_system_generator"
@@ -147,22 +150,9 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
   call <- environment()
   check_is_dust_system_generator(generator, substitute(generator))
 
-  is_discrete <- generator$properties$time_type == "discrete"
-  if (is_discrete) {
-    dt <- check_dt(dt %||% 1, call = call)
-    if (!is.null(ode_control)) {
-      cli::cli_abort("Can't use 'ode_control' with discrete-time systems")
-    }
-  } else {
-    if (!is.null(dt)) {
-      cli::cli_abort("Can't use 'dt' with continuous-time systems")
-    }
-    if (is.null(ode_control)) {
-      ode_control <- dust_ode_control()
-    } else {
-      assert_is(ode_control, "dust_ode_control", call = environment())
-    }
-  }
+  dt <- check_system_dt(dt, generator, call = call)
+  ode_control <- check_system_ode_control(ode_control, generator, call = call)
+
   check_time(time, dt, call = call)
 
   assert_scalar_size(n_particles, allow_zero = FALSE, call = call)
@@ -175,6 +165,7 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
   preserve_group_dimension <- preserve_group_dimension || n_groups > 1
 
   pars <- check_pars(pars, n_groups, NULL, preserve_group_dimension)
+  is_discrete <- generator$properties$time_type == "discrete"
   if (is_discrete) {
     res <- generator$methods$alloc(pars, time, dt, n_particles,
                                    n_groups, seed, deterministic,
@@ -558,8 +549,13 @@ print.dust_system <- function(x, ...) {
     cli::cli_bullets(c(
       i = "This system has 'adjoint' support, and can compute gradients"))
   }
-  cli::cli_bullets(c(
-    i = "This system runs in {x$properties$time_type} time"))
+  if (x$properties$time_type == "discrete") {
+    cli::cli_bullets(c(
+      i = "This system runs in discrete time with dt = {x$dt}"))
+  } else {
+    cli::cli_bullets(c(
+      i = "This system runs in continuous time"))
+  }
   invisible(x)
 }
 
@@ -573,8 +569,14 @@ print.dust_system_generator <- function(x, ...) {
     cli::cli_bullets(c(
       i = "This system has 'compare_data' support"))
   }
-  cli::cli_bullets(c(
-    i = "This system runs in {x$properties$time_type} time"))
+  if (x$properties$time_type == "discrete") {
+    cli::cli_bullets(c(
+      i = paste("This system runs in discrete time",
+                "with a default dt of {x$default_dt}")))
+  } else {
+    cli::cli_bullets(c(
+      i = "This system runs in continuous time"))
+  }
   invisible(x)
 }
 

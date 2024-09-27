@@ -4,7 +4,12 @@
 \alias{dust_system_generator}
 \title{Create a system generator}
 \usage{
-dust_system_generator(name, time_type, env = parent.env(parent.frame()))
+dust_system_generator(
+  name,
+  time_type,
+  default_dt,
+  env = parent.env(parent.frame())
+)
 }
 \arguments{
 \item{name}{The name of the generator}
@@ -12,6 +17,8 @@ dust_system_generator(name, time_type, env = parent.env(parent.frame()))
 \item{time_type}{The time type (discrete or continuous).  Using
 the wrong time here will lead to crashes or failure to create
 the generator.}
+
+\item{default_dt}{The default value for \code{dt} on initialisation}
 
 \item{env}{The environment where the generator is defined.}
 }
@@ -25,7 +32,7 @@ using \link{dust_package}
 }
 \examples{
 # This creates the "sir" generator
-dust_system_generator("sir", "discrete", asNamespace("dust2"))
+dust_system_generator("sir", "discrete", 1, asNamespace("dust2"))
 
 # This is the same code as in "dust2:::sir", except there we find
 # the correct environment automatically

@@ -3,6 +3,7 @@ test_that("can read sir metadata", {
   expect_equal(meta$class, "sir")
   expect_equal(meta$name, "sir")
   expect_true(meta$has_compare)
+  expect_equal(meta$default_dt, 1)
   expect_equal(meta$parameters,
                data.frame(name = c("I0", "N", "beta", "gamma", "exp_noise")))
 })
@@ -128,4 +129,29 @@ test_that("require that file exists", {
   expect_error(
     parse_metadata(tempfile()),
     "File '.+' does not exist")
+})
+
+
+test_that("can specify default dt in discrete time models", {
+  tmp <- withr::local_tempfile()
+  writeLines(c(
+    "// [[dust2::class(a)]]",
+    "// [[dust2::time_type(discrete)]]",
+    "// [[dust2::default_dt(0.25)]]"),
+    tmp)
+  expect_equal(parse_metadata(tmp)$default_dt, 0.25)
+})
+
+
+test_that("can validate default dt in discrete time models", {
+  tmp <- withr::local_tempfile()
+  writeLines(c(
+    "// [[dust2::class(a)]]",
+    "// [[dust2::time_type(discrete)]]",
+    "// [[dust2::default_dt(0.32)]]"),
+    tmp)
+  expect_error(
+    parse_metadata(tmp),
+    "Expected '[[dust2::default_dt()]]' to be the inverse of an integer",
+    fixed = TRUE)
 })
