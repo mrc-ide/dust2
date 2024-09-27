@@ -55,12 +55,6 @@ public:
     shared.sd = dust2::r::read_real(pars, "sd", shared.sd);
   }
 
-  // This is a reasonable default implementation in the no-internal
-  // case
-  static void update_internal(const shared_state& shared,
-                              internal_state& internal) {
-  }
-
   // Compute initial state.  It's not completely clear that we would
   // want dt here, but I am including it for now at least.
   static void initial(real_type time,
