@@ -46,6 +46,10 @@ reference:
       - dust_likelihood_copy
       - dust_likelihood_rng_state
       - dust_likelihood_set_rng_state
+  - title: Tools
+    contents:
+      - dust_unpack_state
+      - dust_unpack_index
   - title: Creation
     contents:
       - dust_compile
