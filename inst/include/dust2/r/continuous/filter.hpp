@@ -35,10 +35,6 @@ cpp11::sexp dust2_continuous_filter_alloc(cpp11::list r_pars,
   const auto internal = build_internal<T>(shared, n_threads);
   const auto data = check_data<T>(r_data, shared, time.size(), "data");
 
-  // It's possible that we don't want to always really be
-  // deterministic here?  Though nooone can think of a case where
-  // that's actually the behaviour wanted.  For now let's go fully
-  // deterministic.
   auto seed = monty::random::r::as_rng_seed<rng_state_type>(r_seed);
   const auto deterministic = false;
 
