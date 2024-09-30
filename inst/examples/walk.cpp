@@ -56,7 +56,6 @@ public:
   // Compute initial state.  It's not completely clear that we would
   // want dt here, but I am including it for now at least.
   static void initial(real_type time,
-                      real_type dt,
                       const shared_state& shared,
                       internal_state& internal,
                       rng_state_type& rng_state,

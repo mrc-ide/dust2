@@ -28,7 +28,6 @@ public:
   }
 
   static void initial(real_type time,
-                      real_type dt,
                       const shared_state& shared,
                       internal_state& internal,
                       rng_state_type& rng_state,
