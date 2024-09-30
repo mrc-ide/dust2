@@ -53,9 +53,11 @@ cpp11::sexp dust2_discrete_unfilter_alloc(cpp11::list r_pars,
   cpp11::external_pointer<unfilter<dust_discrete<T>>> ptr(obj, true, false);
 
   cpp11::sexp r_n_state = cpp11::as_sexp(obj->sys.n_state());
+  cpp11::sexp r_packing_state = packing_to_r(obj->sys.packing_state());
+  cpp11::sexp r_packing_gradient = packing_to_r(obj->sys.packing_gradient());
 
   using namespace cpp11::literals;
-  return cpp11::writable::list{"ptr"_nm = ptr, "n_state"_nm = r_n_state};
+  return cpp11::writable::list{"ptr"_nm = ptr, "n_state"_nm = r_n_state, "packing_state"_nm = r_packing_state, "packing_gradient"_nm = r_packing_gradient};
 }
 
 }

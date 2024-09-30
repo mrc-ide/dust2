@@ -508,6 +508,9 @@ test_that("can extract final state from a filter", {
   expect_equal(dim(s), c(5, 10))
   expect_equal(s, h[, , 4])
 
+  expect_equal(names(dust_unpack_state(obj, s)),
+               c("S", "I", "R", "cases_cumul", "cases_inc"))
+
   dust_likelihood_run(obj, pars, save_history = FALSE)
   expect_error(dust_likelihood_last_history(obj), "History is not current")
   expect_no_error(dust_likelihood_last_state(obj))

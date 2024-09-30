@@ -104,6 +104,7 @@ filter_create <- function(obj, pars) {
                       obj$initial_rng_state),
     obj)
   obj$initial_rng_state <- NULL
+  obj$packer_state <- monty::monty_packer(array = obj$packing_state)
 }
 
 
