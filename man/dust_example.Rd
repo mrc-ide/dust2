@@ -33,7 +33,7 @@ This model has parameters:
 \itemize{
 \item \code{N}: total population size
 \item \code{I0}: initial infected population size (when using
-\link{dust_system_set_state_intiial})
+\link{dust_system_set_state_initial})
 \item \code{beta}: per-contact rate of infection
 \item \code{gamma}: rate of recovery
 \item \code{exp_noise}: noise parameter used in the comparison to data

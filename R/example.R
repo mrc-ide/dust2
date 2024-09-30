@@ -17,7 +17,7 @@
 ##'
 ##' * `N`: total population size
 ##' * `I0`: initial infected population size (when using
-##'   [dust_system_set_state_intiial])
+##'   [dust_system_set_state_initial])
 ##' * `beta`: per-contact rate of infection
 ##' * `gamma`: rate of recovery
 ##' * `exp_noise`: noise parameter used in the comparison to data
