@@ -21,6 +21,7 @@ reference:
       - dust_system_simulate
   - subtitle: Other
     contents:
+      - dust_example
       - dust_system_reorder
       - dust_system_internals
       - dust_ode_control
