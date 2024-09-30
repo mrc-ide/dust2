@@ -131,7 +131,7 @@ public:
         const auto offset = k * n_state_;
         auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
         try {
-          T::initial(time_, dt_,
+          T::initial(time_,
                      shared_[i], internal_i,
                      rng_.state(k),
                      state_data + offset);
@@ -271,7 +271,7 @@ public:
         auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
         auto output_ij = output + k;
         try {
-          *output_ij = T::compare_data(time_, dt_, state + offset, *data_i,
+          *output_ij = T::compare_data(time_, state + offset, *data_i,
                                        shared_[i], internal_i, rng_.state(k));
         } catch (std::exception const& e) {
           errors_.capture(e, k);
@@ -297,7 +297,7 @@ public:
         const auto offset_adjoint = k * n_adjoint;
         auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
         try {
-          T::adjoint_compare_data(time, dt_,
+          T::adjoint_compare_data(time,
                                   state + offset_state,
                                   adjoint_curr + offset_adjoint,
                                   *data_i,
@@ -360,7 +360,6 @@ public:
         auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
         try {
           T::adjoint_initial(time,
-                             dt_,
                              state + offset_state,
                              adjoint_curr + offset_adjoint,
                              shared_[i],

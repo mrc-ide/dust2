@@ -36,7 +36,6 @@ public:
   }
 
   static void initial(real_type time,
-                      real_type dt,
                       const shared_state& shared,
                       internal_state& internal,
                       rng_state_type& rng_state,
@@ -104,7 +103,6 @@ public:
   }
 
   static real_type compare_data(const real_type time,
-                                const real_type dt,
                                 const real_type * state,
                                 const data_type& data,
                                 const shared_state& shared,
@@ -126,7 +124,6 @@ public:
   }
 
   static void adjoint_initial(real_type time,
-                              real_type dt,
                               const real_type * state,
                               const real_type * adjoint,
                               const shared_state& shared,
@@ -182,7 +179,6 @@ public:
   }
 
   static void adjoint_compare_data(real_type time,
-                                   real_type dt,
                                    const real_type * state,
                                    const real_type * adjoint,
                                    const data_type& data,
