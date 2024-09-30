@@ -150,10 +150,8 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
   call <- environment()
   check_is_dust_system_generator(generator, substitute(generator))
 
-  dt <- check_system_dt(dt, generator, call = call)
-  ode_control <- check_system_ode_control(ode_control, generator, call = call)
-
-  check_time(time, dt, call = call)
+  time_control <- check_time_control(generator, dt, ode_control, call = call)
+  check_time(time, time_control, call = call)
 
   assert_scalar_size(n_particles, allow_zero = FALSE, call = call)
   assert_scalar_size(n_groups, allow_zero = FALSE, call = call)
@@ -165,15 +163,9 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
   preserve_group_dimension <- preserve_group_dimension || n_groups > 1
 
   pars <- check_pars(pars, n_groups, NULL, preserve_group_dimension)
-  is_discrete <- generator$properties$time_type == "discrete"
-  if (is_discrete) {
-    res <- generator$methods$alloc(pars, time, dt, n_particles,
-                                   n_groups, seed, deterministic,
-                                   n_threads)
-  } else {
-    res <- generator$methods$alloc(pars, time, ode_control, n_particles,
-                                   n_groups, seed, deterministic, n_threads)
-  }
+  res <- generator$methods$alloc(pars, time, time_control, n_particles,
+                                 n_groups, seed, deterministic, n_threads)
+
   ## Here, we augment things slightly
   res$name <- generator$name
   res$packer_state <- monty::monty_packer(array = res$packing_state)
@@ -189,8 +181,7 @@ dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
   res$properties <- generator$properties
   res$preserve_particle_dimension <- preserve_particle_dimension
   res$preserve_group_dimension <- preserve_group_dimension
-  res$ode_control <- ode_control
-  res$dt <- dt
+  res$time_control <- time_control
   class(res) <- "dust_system"
   res
 }
@@ -301,7 +292,7 @@ dust_system_time <- function(sys) {
 ##' @export
 dust_system_set_time <- function(sys, time) {
   check_is_dust_system(sys)
-  check_time(time, sys$dt)
+  check_time(time, sys$time_control)
   sys$methods$set_time(sys$ptr, time)
   invisible()
 }
@@ -404,7 +395,7 @@ dust_system_run_to_time <- function(sys, time) {
 ##' @export
 dust_system_simulate <- function(sys, times, index_state = NULL) {
   check_is_dust_system(sys)
-  check_time_sequence(times, sys$dt)
+  check_time_sequence(times, sys$time_control)
   ret <- sys$methods$simulate(sys$ptr,
                               times,
                               index_state,
@@ -551,7 +542,7 @@ print.dust_system <- function(x, ...) {
   }
   if (x$properties$time_type == "discrete") {
     cli::cli_bullets(c(
-      i = "This system runs in discrete time with dt = {x$dt}"))
+      i = "This system runs in discrete time with dt = {x$time_control$dt}"))
   } else {
     cli::cli_bullets(c(
       i = "This system runs in continuous time"))
@@ -613,8 +604,10 @@ check_is_dust_system <- function(sys, call = parent.frame()) {
 }
 
 
-check_time <- function(time, dt, name = "time", call = parent.frame()) {
+check_time <- function(time, time_control, name = "time",
+                       call = parent.frame()) {
   assert_scalar_numeric(time, name = name, call = call)
+  dt <- time_control$dt
   if (!is.null(dt)) {
     if (abs(fmod(time, dt)) > sqrt(.Machine$double.eps)) {
       if (dt == 1) {
@@ -631,7 +624,8 @@ check_time <- function(time, dt, name = "time", call = parent.frame()) {
 }
 
 
-check_time_sequence <- function(time, dt, name = deparse(substitute(time)),
+check_time_sequence <- function(time, time_control,
+                                name = deparse(substitute(time)),
                                 call = parent.frame()) {
   assert_numeric(time, name = name, call = call)
   if (length(time) == 0) {
@@ -651,6 +645,7 @@ check_time_sequence <- function(time, dt, name = deparse(substitute(time)),
       arg = name, call = call)
   }
 
+  dt <- time_control$dt
   if (!is.null(dt)) {
     #rem <- time %% dt # The problem is 10 %% 0.25 = 0, but 10 %% 0.1 = 0.1
     rem <- fmod(time, dt)
@@ -716,4 +711,12 @@ format_dimensions <- function(x) {
       cli::format_inline("single particle with {x$n_state} state{?s}")
     }
   }
+}
+
+
+check_time_control <- function(generator, dt, ode_control,
+                               call = parent.frame()) {
+  dt <- check_system_dt(dt, generator, call = call)
+  ode_control <- check_system_ode_control(ode_control, generator, call = call)
+  list(dt = dt, ode_control = ode_control)
 }

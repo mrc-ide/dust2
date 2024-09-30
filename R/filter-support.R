@@ -78,6 +78,7 @@ check_index <- function(index, max = NULL, unique = FALSE,
 
 
 check_time_start <- function(time_start, time, call = NULL) {
+  ## TODO: port over bits from check_time() here...
   assert_scalar_integer(time_start, call = call)
   if (time_start > time[[1]]) {
     cli::cli_abort(

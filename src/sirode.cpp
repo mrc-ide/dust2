@@ -120,8 +120,8 @@ public:
 #include <dust2/r/continuous/unfilter.hpp>
 
 [[cpp11::register]]
-SEXP dust2_system_sirode_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::list r_ode_control, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic, cpp11::sexp r_n_threads) {
-  return dust2::r::dust2_continuous_alloc<sirode>(r_pars, r_time, r_ode_control, r_n_particles, r_n_groups, r_seed, r_deterministic, r_n_threads);
+SEXP dust2_system_sirode_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::list r_time_control, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic, cpp11::sexp r_n_threads) {
+  return dust2::r::dust2_continuous_alloc<sirode>(r_pars, r_time, r_time_control, r_n_particles, r_n_groups, r_seed, r_deterministic, r_n_threads);
 }
 
 [[cpp11::register]]
@@ -184,13 +184,13 @@ SEXP dust2_system_sirode_simulate(cpp11::sexp ptr, cpp11::sexp r_times, cpp11::s
 }
 
 [[cpp11::register]]
-SEXP dust2_unfilter_sirode_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::list r_ode_control, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_n_threads, cpp11::sexp r_index_state) {
-  return dust2::r::dust2_continuous_unfilter_alloc<sirode>(r_pars, r_time_start, r_time, r_ode_control, r_data, r_n_particles, r_n_groups, r_n_threads, r_index_state);
+SEXP dust2_unfilter_sirode_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::list r_time_control, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_n_threads, cpp11::sexp r_index_state) {
+  return dust2::r::dust2_continuous_unfilter_alloc<sirode>(r_pars, r_time_start, r_time, r_time_control, r_data, r_n_particles, r_n_groups, r_n_threads, r_index_state);
 }
 
 [[cpp11::register]]
-SEXP dust2_filter_sirode_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::list r_ode_control, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_n_threads, cpp11::sexp r_index_state, cpp11::sexp r_seed) {
-  return dust2::r::dust2_continuous_filter_alloc<sirode>(r_pars, r_time_start, r_time, r_ode_control, r_data, r_n_particles, r_n_groups, r_n_threads, r_index_state, r_seed);
+SEXP dust2_filter_sirode_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::list r_time_control, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_n_threads, cpp11::sexp r_index_state, cpp11::sexp r_seed) {
+  return dust2::r::dust2_continuous_filter_alloc<sirode>(r_pars, r_time_start, r_time, r_time_control, r_data, r_n_particles, r_n_groups, r_n_threads, r_index_state, r_seed);
 }
 [[cpp11::register]]
 SEXP dust2_system_sirode_compare_data(cpp11::sexp ptr, cpp11::list r_data, bool preserve_particle_dimension, bool preserve_group_dimension) {

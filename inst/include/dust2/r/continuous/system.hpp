@@ -13,7 +13,7 @@ namespace r {
 template <typename T>
 SEXP dust2_continuous_alloc(cpp11::list r_pars,
                             cpp11::sexp r_time,
-                            cpp11::list r_ode_control,
+                            cpp11::list r_time_control,
                             cpp11::sexp r_n_particles,
                             cpp11::sexp r_n_groups,
                             cpp11::sexp r_seed,
@@ -33,8 +33,8 @@ SEXP dust2_continuous_alloc(cpp11::list r_pars,
 
   auto seed = monty::random::r::as_rng_seed<rng_state_type>(r_seed);
   auto deterministic = to_bool(r_deterministic, "deterministic");
-  auto ode_control = validate_ode_control<real_type>(r_ode_control);
 
+  auto ode_control = validate_ode_control<real_type>(r_time_control);
 
   auto obj = new dust_continuous<T>(shared, internal, time, ode_control,
                                     n_particles, seed, deterministic,

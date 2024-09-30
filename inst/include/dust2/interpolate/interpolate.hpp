@@ -165,6 +165,7 @@ public:
     const auto i = internal::interpolate_search(z, t_, false);
     if (i == t_.size() - 1) {
       std::copy_n(y_.begin() + i * n_, n_, dest);
+      return;
     }
     const T r = (z - t_[i]) / (t_[i + 1] - t_[i]);
     auto y0 = y_.begin() + i * n_;
@@ -249,6 +250,7 @@ public:
     const auto i = internal::interpolate_search(z, t_, false);
     if (i == t_.size() - 1) {
       std::copy_n(y_.begin() + i * n_, n_, dest);
+      return;
     }
     const auto t0 = t_[i];
     const auto t1 = t_[i + 1];
