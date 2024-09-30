@@ -82,4 +82,9 @@ unfilter_create <- function(unfilter, pars) {
                            inputs$n_threads,
                            inputs$index_state),
     unfilter)
+  unfilter$packer_state <- monty::monty_packer(array = unfilter$packing_state)
+  if (!is.null(unfilter$packing_gradient)) {
+    unfilter$packer_gradient <-
+      monty::monty_packer(array = unfilter$packing_gradient)
+  }
 }

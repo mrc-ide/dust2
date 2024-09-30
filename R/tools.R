@@ -70,8 +70,16 @@ dust_unpack_index <- function(obj) {
 
 
 get_unpacker <- function(obj, call = parent.frame()) {
-  ## Once mrc-5806 is merged, we can add this into the filter/unfilter
-  ## too and do the same basic idea.
-  assert_is(obj, "dust_system", call = call)
+  if (inherits(obj, "dust_likelihood")) {
+    if (is.null(obj$packer_state)) {
+      cli::cli_abort(
+        c("Packer is not yet ready",
+          i = "Likelihood has not yet been run"))
+    }
+  } else if (!inherits(obj, "dust_system")) {
+    cli::cli_abort(
+      "Expected 'obj' to be a 'dust_system' or a 'dust_likelihood'",
+      arg = "obj", call = call)
+  }
   obj$packer_state
 }

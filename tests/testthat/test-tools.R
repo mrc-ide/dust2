@@ -16,3 +16,21 @@ test_that("can unpack state from systems with several particles", {
   expect_equal(s2, sys$packer_state$unpack(s))
   expect_equal(lengths(s2, FALSE), rep(10, 5))
 })
+
+
+test_that("can't get unpacker from filter before running", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  obj <- dust_filter_create(sir(), time_start, data, n_particles = 10)
+  expect_error(
+    dust_unpack_state(obj, numeric()),
+    "Packer is not yet ready")
+})
+
+
+test_that("can't get unpacker from unknown object", {
+  expect_error(
+    dust_unpack_state(NULL, numeric()),
+    "Expected 'obj' to be a 'dust_system' or a 'dust_likelihood'")
+})
