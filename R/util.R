@@ -72,18 +72,6 @@ squote <- function(x) {
 }
 
 
-stop_unless_installed <- function(pkgs, call = NULL) {
-  err <- !vlapply(pkgs, requireNamespace, quietly = TRUE)
-  if (any(err)) {
-    msg <- pkgs[err]
-    cli::cli_abort(
-      c("Package{?s} missing for this functionality: {squote(msg)}",
-        i = "You can install these packages using 'install.packages()'"),
-      call = call)
-  }
-}
-
-
 writelines_if_changed <- function(text, workdir, path, quiet) {
   path_full <- file.path(workdir, path)
   skip <- file.exists(path_full) && same_content(path_full, text)
