@@ -30,7 +30,8 @@ public:
   dust_continuous(std::vector<shared_state> shared,
                   std::vector<internal_state> internal,
                   real_type time,
-                  const ode::control<real_type> control, // in place of dt
+                  real_type dt,
+                  const ode::control<real_type> control,
                   size_t n_particles, // per group
                   const std::vector<rng_int_type>& seed,
                   bool deterministic, size_t n_threads) :
@@ -41,6 +42,7 @@ public:
     n_groups_(shared.size()),
     n_particles_total_(n_particles_ * n_groups_),
 
+    dt_(dt),
     control_(control),
 
     state_(n_state_ * n_particles_total_),
@@ -101,7 +103,6 @@ public:
   template <typename mixed_time = typename T::mixed_time>
   typename std::enable_if<mixed_time::value, void>::type
   run_to_time(real_type time, const std::vector<size_t>& index_group) {
-    const real_type dt_ = 0; // TODO
     real_type * state_data = state_.data();
     real_type * state_other_data = state_other_.data();
     const size_t n_steps = (time - time_) / dt_;
@@ -248,7 +249,7 @@ public:
   }
 
   auto dt() const {
-    return 0;
+    return dt_;
   }
 
   auto n_state() const {
@@ -346,6 +347,7 @@ private:
   size_t n_particles_;
   size_t n_groups_;
   size_t n_particles_total_;
+  real_type dt_;
   ode::control<real_type> control_;
   // Some more will be needed here to get history to work.  With
   // that, we'll need to hold something that will let us accumulate

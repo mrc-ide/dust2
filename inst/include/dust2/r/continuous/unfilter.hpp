@@ -29,6 +29,7 @@ cpp11::sexp dust2_continuous_unfilter_alloc(cpp11::list r_pars,
   const auto n_threads = to_size(r_n_threads, "n_threads");
   const auto time_start = check_time(r_time_start, "time_start");
   const auto time = check_time_sequence(time_start, r_time, true, "time");
+  const auto dt = check_dt(r_time_control, T::mixed_time::value);
   const auto ode_control = validate_ode_control<real_type>(r_time_control);
   const auto shared = build_shared<T>(r_pars, n_groups);
   const auto internal = build_internal<T>(shared, n_threads);
@@ -45,7 +46,7 @@ cpp11::sexp dust2_continuous_unfilter_alloc(cpp11::list r_pars,
   // we need.  At this point we could have constructed the system out
   // of one that exists already on the R side, but I think that's
   // going to feel weirder overall.
-  const auto system = dust2::dust_continuous<T>(shared, internal, time_start, ode_control, n_particles,
+  const auto system = dust2::dust_continuous<T>(shared, internal, time_start, dt, ode_control, n_particles,
                                                 seed, deterministic, n_threads);
   const auto index_state = check_index(r_index_state, system.n_state(),
                                        "index_state");
