@@ -80,7 +80,7 @@ dust_package <- function(path, quiet = NULL) {
   }
 
   code_r <- c(dust_header("##"), vcapply(data, "[[", "r"))
-  writelines_if_changed(code_r, path, "R/package.R", quiet)
+  writelines_if_changed(code_r, path, "R/dust.R", quiet)
 
   if (file.exists(file.path(path, "src/Makevars"))) {
     makevars <- read_lines(file.path(path, "src/Makevars"))
