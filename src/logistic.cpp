@@ -12,6 +12,7 @@ class logistic {
 public:
   logistic() = delete;
 
+  using mixed_time = std::false_type;
   using real_type = double;
 
   struct shared_state {
