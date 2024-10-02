@@ -10,7 +10,7 @@
 ##' [cpp11::cpp_register()] on them once the generated code
 ##' has been created.
 ##'
-##' Your package needs a `src/Makevars` file to enable openmp (if your
+##' Your package needs a `src/Makevars` file to enable OpenMP (if your
 ##' system supports it). If it is not present then a suitable Makevars
 ##' will be written, containing
 ##'
