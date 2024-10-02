@@ -24,6 +24,7 @@ LinkingTo:
     cpp11,
     monty
 Suggests:
+    callr,
     cpp11,
     decor,
     glue,

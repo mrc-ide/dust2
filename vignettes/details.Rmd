@@ -1,0 +1,24 @@
+---
+title: "Details"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Details}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Influential environment variables and options
+
+`DUST_WORKDIR_ROOT`: an environment variable which sets the **root** working directory for compilation if your code.  Normally, we use the session-specific directory, which is a good choice.  You might want to change this in a few cases:
+
+* You want to generate models from a process and you want these to outlive the lifetime of that process (e.g., for running models on an HPC)
+* You want to cache the compilation across sessions
+
+If you set this environment variable, then we'll create models here, each with a name in the pattern `dust_<hash>` where `<hash>` is the hash of the generated code.  This means that if your model changes we'll still recompile it.

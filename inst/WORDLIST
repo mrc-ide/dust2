@@ -1,5 +1,6 @@
 CMD
 Dormand
+HPC
 Makevars
 ODEs
 OpenMP

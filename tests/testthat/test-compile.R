@@ -76,27 +76,43 @@ test_that("can validate C++ standard", {
 
 
 test_that("validate that working directory is suitable", {
+  hash <- "abc1234"
   path <- withr::local_tempfile()
-  expect_equal(dust_workdir(path), path)
+  expect_equal(dust_workdir(path, hash), path)
 
   dir_create(file.path(path, c("src", "R")))
-  expect_equal(dust_workdir(path), path)
+  expect_equal(dust_workdir(path, hash), path)
   file.create(file.path(path, c("DESCRIPTION", "NAMESPACE",
                                 "src/Makevars", "src/cpp11.cpp", "src/dust.cpp",
                                 "R/cpp11.R", "R/dust.R")))
-  expect_equal(dust_workdir(path), path)
+  expect_equal(dust_workdir(path, hash), path)
   file.create(file.path(path, c("src/dust.o", "src/other.o", "src/dust.so")))
-  expect_equal(dust_workdir(path), path)
+  expect_equal(dust_workdir(path, hash), path)
 
   file.create(file.path(path, "other"))
-  expect_error(dust_workdir(path),
+  expect_error(dust_workdir(path, hash),
                "Path '.+' does not look like a dust directory")
 })
 
 
 test_that("validate that working directory is suitable", {
   path <- withr::local_tempfile()
+  hash <- "abc1234"
   file.create(path)
-  expect_error(dust_workdir(path),
+  expect_error(dust_workdir(path, hash),
                "already exists but is not a directory")
+})
+
+
+test_that("can work in a stable temporary directory", {
+  hash <- "abc123456789"
+  withr::with_envvar(
+    c(DUST_WORKDIR_ROOT = NA_character_),
+    path <- dust_workdir(NULL, hash))
+  expect_equal(dirname(path), tempdir())
+  expect_match(basename(path), "^dust_")
+
+  withr::with_envvar(
+    c(DUST_WORKDIR_ROOT = "my/path"),
+    expect_equal(dust_workdir(NULL, hash), "my/path/dust_abc1234"))
 })
