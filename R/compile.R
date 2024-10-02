@@ -98,7 +98,8 @@ dust_compile <- function(filename, quiet = NULL, workdir = NULL,
 
   ## Second round of substitution in here, in order to sub in the work
   ## directory now that we have it:
-  res$r <- glue_whisker(res$r, list(path_pkg = workdir))
+  data <- list(path_pkg = gsub("\\", "/", workdir, fixed = TRUE))
+  res$r <- glue_whisker(res$r, data)
 
   dir_create(c(workdir, file.path(workdir, c("R", "src"))))
   writelines_if_changed(res$description, workdir, "DESCRIPTION", quiet)
