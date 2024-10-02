@@ -52,6 +52,110 @@ dust2_system_logistic_simulate <- function(ptr, r_times, r_index_state, preserve
   .Call(`_dust2_dust2_system_logistic_simulate`, ptr, r_times, r_index_state, preserve_particle_dimension, preserve_group_dimension)
 }
 
+dust2_system_malaria_alloc <- function(r_pars, r_time, r_time_control, r_n_particles, r_n_groups, r_seed, r_deterministic, r_n_threads) {
+  .Call(`_dust2_dust2_system_malaria_alloc`, r_pars, r_time, r_time_control, r_n_particles, r_n_groups, r_seed, r_deterministic, r_n_threads)
+}
+
+dust2_system_malaria_internals <- function(ptr, include_coefficients) {
+  .Call(`_dust2_dust2_system_malaria_internals`, ptr, include_coefficients)
+}
+
+dust2_system_malaria_run_to_time <- function(ptr, r_time) {
+  .Call(`_dust2_dust2_system_malaria_run_to_time`, ptr, r_time)
+}
+
+dust2_system_malaria_state <- function(ptr, r_index_state, r_index_particle, r_index_group, preserve_particle_dimension, preserve_group_dimension) {
+  .Call(`_dust2_dust2_system_malaria_state`, ptr, r_index_state, r_index_particle, r_index_group, preserve_particle_dimension, preserve_group_dimension)
+}
+
+dust2_system_malaria_time <- function(ptr) {
+  .Call(`_dust2_dust2_system_malaria_time`, ptr)
+}
+
+dust2_system_malaria_set_state_initial <- function(ptr) {
+  .Call(`_dust2_dust2_system_malaria_set_state_initial`, ptr)
+}
+
+dust2_system_malaria_set_state <- function(ptr, r_state, preserve_group_dimension) {
+  .Call(`_dust2_dust2_system_malaria_set_state`, ptr, r_state, preserve_group_dimension)
+}
+
+dust2_system_malaria_reorder <- function(ptr, r_index) {
+  .Call(`_dust2_dust2_system_malaria_reorder`, ptr, r_index)
+}
+
+dust2_system_malaria_rng_state <- function(ptr) {
+  .Call(`_dust2_dust2_system_malaria_rng_state`, ptr)
+}
+
+dust2_system_malaria_set_rng_state <- function(ptr, r_rng_state) {
+  .Call(`_dust2_dust2_system_malaria_set_rng_state`, ptr, r_rng_state)
+}
+
+dust2_system_malaria_set_time <- function(ptr, r_time) {
+  .Call(`_dust2_dust2_system_malaria_set_time`, ptr, r_time)
+}
+
+dust2_system_malaria_update_pars <- function(ptr, pars) {
+  .Call(`_dust2_dust2_system_malaria_update_pars`, ptr, pars)
+}
+
+dust2_system_malaria_simulate <- function(ptr, r_times, r_index_state, preserve_particle_dimension, preserve_group_dimension) {
+  .Call(`_dust2_dust2_system_malaria_simulate`, ptr, r_times, r_index_state, preserve_particle_dimension, preserve_group_dimension)
+}
+
+dust2_unfilter_malaria_alloc <- function(r_pars, r_time_start, r_time, r_time_control, r_data, r_n_particles, r_n_groups, r_n_threads, r_index_state) {
+  .Call(`_dust2_dust2_unfilter_malaria_alloc`, r_pars, r_time_start, r_time, r_time_control, r_data, r_n_particles, r_n_groups, r_n_threads, r_index_state)
+}
+
+dust2_filter_malaria_alloc <- function(r_pars, r_time_start, r_time, r_time_control, r_data, r_n_particles, r_n_groups, r_n_threads, r_index_state, r_seed) {
+  .Call(`_dust2_dust2_filter_malaria_alloc`, r_pars, r_time_start, r_time, r_time_control, r_data, r_n_particles, r_n_groups, r_n_threads, r_index_state, r_seed)
+}
+
+dust2_system_malaria_compare_data <- function(ptr, r_data, preserve_particle_dimension, preserve_group_dimension) {
+  .Call(`_dust2_dust2_system_malaria_compare_data`, ptr, r_data, preserve_particle_dimension, preserve_group_dimension)
+}
+
+dust2_unfilter_malaria_update_pars <- function(ptr, r_pars, r_index_group) {
+  .Call(`_dust2_dust2_unfilter_malaria_update_pars`, ptr, r_pars, r_index_group)
+}
+
+dust2_unfilter_malaria_run <- function(ptr, r_initial, save_history, adjoint, r_index_group, preserve_particle_dimension, preserve_group_dimension) {
+  .Call(`_dust2_dust2_unfilter_malaria_run`, ptr, r_initial, save_history, adjoint, r_index_group, preserve_particle_dimension, preserve_group_dimension)
+}
+
+dust2_unfilter_malaria_last_history <- function(ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension) {
+  .Call(`_dust2_dust2_unfilter_malaria_last_history`, ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension)
+}
+
+dust2_unfilter_malaria_last_state <- function(ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension) {
+  .Call(`_dust2_dust2_unfilter_malaria_last_state`, ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension)
+}
+
+dust2_filter_malaria_update_pars <- function(ptr, r_pars, r_index_group) {
+  .Call(`_dust2_dust2_filter_malaria_update_pars`, ptr, r_pars, r_index_group)
+}
+
+dust2_filter_malaria_run <- function(ptr, r_initial, save_history, adjoint, index_group, preserve_particle_dimension, preserve_group_dimension) {
+  .Call(`_dust2_dust2_filter_malaria_run`, ptr, r_initial, save_history, adjoint, index_group, preserve_particle_dimension, preserve_group_dimension)
+}
+
+dust2_filter_malaria_last_history <- function(ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension) {
+  .Call(`_dust2_dust2_filter_malaria_last_history`, ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension)
+}
+
+dust2_filter_malaria_last_state <- function(ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension) {
+  .Call(`_dust2_dust2_filter_malaria_last_state`, ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension)
+}
+
+dust2_filter_malaria_rng_state <- function(ptr) {
+  .Call(`_dust2_dust2_filter_malaria_rng_state`, ptr)
+}
+
+dust2_filter_malaria_set_rng_state <- function(ptr, r_rng_state) {
+  .Call(`_dust2_dust2_filter_malaria_set_rng_state`, ptr, r_rng_state)
+}
+
 dust2_system_sir_alloc <- function(r_pars, r_time, r_time_control, r_n_particles, r_n_groups, r_seed, r_deterministic, r_n_threads) {
   .Call(`_dust2_dust2_system_sir_alloc`, r_pars, r_time, r_time_control, r_n_particles, r_n_groups, r_seed, r_deterministic, r_n_threads)
 }
