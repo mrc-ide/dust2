@@ -11,6 +11,8 @@
 ##' @param quiet Logical, indicating if compilation messages from
 ##'   `pkgbuild` should be displayed.  Error messages will be
 ##'   displayed on compilation failure regardless of the value used.
+##'   If `NULL` is given, then we take the value from `DUST_QUIET`, or
+##'   `FALSE` otherwise.
 ##'
 ##' @param workdir Optional working directory to use.  If `NULL`, the
 ##'   behaviour depends on the existence of the environment variable
@@ -72,7 +74,7 @@
 ##'   a `dust_system_generator` function.
 ##'
 ##' @export
-dust_compile <- function(filename, quiet = FALSE, workdir = NULL,
+dust_compile <- function(filename, quiet = NULL, workdir = NULL,
                          linking_to = NULL, cpp_std = NULL,
                          compiler_options = NULL, optimisation_level = NULL,
                          debug = FALSE, skip_cache = FALSE) {
@@ -92,6 +94,7 @@ dust_compile <- function(filename, quiet = FALSE, workdir = NULL,
   }
 
   workdir <- dust_workdir(workdir, hash)
+  quiet <- dust_quiet(quiet)
   dir_create(c(workdir, file.path(workdir, c("R", "src"))))
   writelines_if_changed(res$description, workdir, "DESCRIPTION", quiet)
   writelines_if_changed(res$namespace, workdir, "NAMESPACE", quiet)
@@ -285,4 +288,13 @@ dust_workdir <- function(path, hash, call = parent.frame()) {
     }
   }
   path
+}
+
+
+dust_quiet <- function(quiet, call = parent.frame()) {
+  if (is.null(quiet)) {
+    envvar_is_truthy("DUST_QUIET")
+  } else {
+    assert_scalar_logical(quiet, call = call)
+  }
 }

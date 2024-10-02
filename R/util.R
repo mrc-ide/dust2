@@ -126,3 +126,8 @@ tail_errors <- function(x, n = 5) {
 fmod <- function(n, m) {
   (floor(n / m) * m) - n
 }
+
+
+envvar_is_truthy <- function(name) {
+  tolower(Sys.getenv(name, "false")) %in% c("t", "true", "1")
+}
