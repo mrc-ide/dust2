@@ -18,14 +18,11 @@ test_that("error if given invalid inputs to dust_system_create", {
     dust_system_create("sir"),
     "Expected 'generator' to be a 'dust_system_generator' object")
 
-  foo <- function() {
-    dust_system("foo")
-  }
   err <- expect_error(
-    dust_system_create(foo),
+    dust_system_create(sir),
     "Expected 'generator' to be a 'dust_system_generator' object")
   expect_equal(err$body,
-               c(i = "Did you mean 'foo()' (i.e., with parentheses)"))
+               c(i = "Did you mean 'sir()' (i.e., with parentheses)"))
 })
 
 
