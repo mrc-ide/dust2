@@ -18,6 +18,17 @@ test_that("error if given invalid inputs to dust_system_create", {
     dust_system_create("sir"),
     "Expected 'generator' to be a 'dust_system_generator' object")
 
+  foo <- function() {
+    dust2::dust_system_generator(...)
+  }
+  expect_true(is_uncalled_generator(foo))
+  err <- expect_error(
+    dust_system_create(foo),
+    "Expected 'generator' to be a 'dust_system_generator' object")
+  expect_equal(err$body,
+               c(i = "Did you mean 'foo()' (i.e., with parentheses)"))
+
+  skip_on_covr()
   err <- expect_error(
     dust_system_create(sir),
     "Expected 'generator' to be a 'dust_system_generator' object")
