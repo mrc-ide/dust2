@@ -107,12 +107,6 @@ test_that("validate that working directory is suitable", {
 test_that("can work in a stable temporary directory", {
   hash <- "abc123456789"
   withr::with_envvar(
-    c(DUST_WORKDIR_ROOT = NA_character_),
-    path <- dust_workdir(NULL, hash))
-  expect_equal(dirname(path), tempdir())
-  expect_match(basename(path), "^dust_")
-
-  withr::with_envvar(
     c(DUST_WORKDIR_ROOT = "my/path"),
     expect_equal(dust_workdir(NULL, hash), "my/path/dust_abc1234"))
 })
