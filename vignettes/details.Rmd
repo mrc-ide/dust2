@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 
 # Influential environment variables and options
 
-`DUST_WORKDIR_ROOT`: an environment variable which sets the **root** working directory for compilation if your code.  Normally, we use the session-specific directory, which is a good choice.  You might want to change this in a few cases:
+`DUST_WORKDIR_ROOT`: an environment variable which sets the **root** working directory for compilation of your code.  Normally, we use the session-specific directory, which is a good choice.  You might want to change this in a few cases:
 
 * You want to generate models from a process and you want these to outlive the lifetime of that process (e.g., for running models on an HPC)
 * You want to cache the compilation across sessions
