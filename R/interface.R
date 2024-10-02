@@ -544,6 +544,15 @@ print.dust_system <- function(x, ...) {
   if (x$properties$time_type == "discrete") {
     cli::cli_bullets(c(
       i = "This system runs in discrete time with dt = {x$time_control$dt}"))
+  } else if (x$properties$time_type == "mixed") {
+    if (is.null(x$time_control$dt)) {
+      cli::cli_bullets(c(
+        i = "This system runs in continuous time (discrete time disabled)"))
+    } else {
+      cli::cli_bullets(c(
+        i = paste("This system runs in both continuous time and",
+                  "discrete time with dt = {x$time_control$dt}")))
+    }
   } else {
     cli::cli_bullets(c(
       i = "This system runs in continuous time"))
@@ -565,6 +574,16 @@ print.dust_system_generator <- function(x, ...) {
     cli::cli_bullets(c(
       i = paste("This system runs in discrete time",
                 "with a default dt of {x$default_dt}")))
+  } else if (x$properties$time_type == "mixed") {
+    if (is.null(x$default_dt)) {
+      cli::cli_bullets(c(
+        i = paste("This system runs in both continuous time",
+                  "and discrete time with discrete time disabled by default")))
+    } else {
+      cli::cli_bullets(c(
+        i = paste("This system runs in both continuous time",
+                  "and discrete time with a default dt of {x$default_dt}")))
+    }
   } else {
     cli::cli_bullets(c(
       i = "This system runs in continuous time"))
@@ -609,7 +628,7 @@ check_time <- function(time, time_control, name = "time",
                        call = parent.frame()) {
   assert_scalar_numeric(time, name = name, call = call)
   dt <- time_control$dt
-  if (!is.null(dt)) {
+  if (!is.null(dt) && dt > 0) {
     if (abs(fmod(time, dt)) > sqrt(.Machine$double.eps)) {
       if (dt == 1) {
         cli::cli_abort(

@@ -103,6 +103,10 @@ public:
   template <typename mixed_time = typename T::mixed_time>
   typename std::enable_if<mixed_time::value, void>::type
   run_to_time(real_type time, const std::vector<size_t>& index_group) {
+    if (dt_ == 0) {
+      run_to_time<std::false_type>(time, index_group);
+      return;
+    }
     real_type * state_data = state_.data();
     real_type * state_other_data = state_other_.data();
     const size_t n_steps = (time - time_) / dt_;
@@ -114,7 +118,7 @@ public:
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
         auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
-        const auto& rng_state = rng_.state(k);
+        auto& rng_state = rng_.state(k);
         real_type * y = state_data + offset;
         real_type * y_other = state_other_data + offset;
         try {
@@ -125,6 +129,7 @@ public:
             solver_.run(t0, t1, y, zero_every_[i],
                         ode_internals_[k],
                         rhs_(shared_[i], internal_i));
+            std::copy_n(y, n_state_, y_other);
             T::update(t1, dt_, y, shared_[i], internal_i, rng_state, y_other);
             std::swap(y, y_other);
             solver_.initialise(time_, y, ode_internals_[k],

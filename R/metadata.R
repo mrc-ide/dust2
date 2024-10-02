@@ -87,10 +87,11 @@ parse_metadata_time_type <- function(data, call = NULL) {
       call = call)
   }
   value <- deparse(data[[1]])
-  if (!(value %in% c("discrete", "continuous"))) {
+  valid <- c("discrete", "continuous", "mixed")
+  if (!(value %in% valid)) {
     cli::cli_abort(
       paste("Expected argument to '[[dust2::time_type()]]' to be one of",
-            "'discrete' or 'continuous'"),
+            "{squote(valid)}"),
       call = call)
   }
   value
