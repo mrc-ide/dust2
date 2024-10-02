@@ -14,7 +14,7 @@ dust_ode_control(
 )
 }
 \arguments{
-\item{max_steps}{Maxmimum number of steps to take. If the
+\item{max_steps}{Maximum number of steps to take. If the
 integration attempts to take more steps that this, it will
 throw an error, stopping the integration.}
 

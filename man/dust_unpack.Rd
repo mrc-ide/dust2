@@ -25,7 +25,7 @@ compartment.
 \description{
 Unpack state.  You will see state come out of dust2 systems in
 several places, for example \link{dust_system_state}, but it will
-typically be an unstructed vector with no names; this is not very
+typically be an unstructured vector with no names; this is not very
 useful!  However, your model knows what each element, or group of
 elements "means".  You can unpack your state from this
 unstructured array into a named list using this function.  The

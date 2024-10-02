@@ -40,7 +40,7 @@ computing the likelihood should be treated as a log-density of
 hammer to use, and you would be better off using the domain
 (with reflecting boundaries) or the priors to control this if
 possible.  However, sometimes you can have integration failures
-with very high parameter values, or just other pathalogical
+with very high parameter values, or just other pathological
 parameter sets where, once you understand the model, giving up
 on that parameter set and continuing is the best option.}
 }
@@ -67,7 +67,7 @@ one per particle).  If you run the filter directly (e.g., with
 However, if you use the filter with monty (which is why you're
 using \code{dust_likelihood_monty}) we will ignore this seeding.
 
-When running mcmc with \code{n_chains} chains, we need \code{n_chains * n_groups * (n_particles + 1)} random number streams - that is
+When running MCMC with \code{n_chains} chains, we need \code{n_chains * n_groups * (n_particles + 1)} random number streams - that is
 enough streams for every chain to have a filter with its own set
 of chains.  monty will look after this for us, but the upshot
 is that the random number state that you may have previously set

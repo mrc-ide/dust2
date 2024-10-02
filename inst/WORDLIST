@@ -1,5 +1,6 @@
 CMD
 Dormand
+HPC
 Makevars
 ODEs
 OpenMP
@@ -9,6 +10,8 @@ cpp
 etc
 io
 lfloor
+monty
+parallelisable
 pkgload
 resettings
 rfloor

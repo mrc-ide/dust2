@@ -59,4 +59,5 @@ articles:
   - title: Details
     navbar: Details
     contents:
+      - details
       - periodic
