@@ -116,7 +116,7 @@ test_that("quiet responds to envvar", {
   withr::with_envvar(c(DUST_QUIET = NA_character_), {
     expect_false(dust_quiet(NULL))
     expect_false(dust_quiet(FALSE))
-    expect_false(dust_quiet(TRUE))
+    expect_true(dust_quiet(TRUE))
     expect_error(dust_quiet(1), "Expected 'quiet' to be logical")
   })
 
