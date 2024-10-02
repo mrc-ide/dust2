@@ -700,7 +700,7 @@ is_uncalled_generator <- function(sys) {
   code <- body(sys)
   rlang::is_call(code, "{") &&
     length(code) == 2 &&
-    rlang::is_call(code[[2]], "dust_system")
+    rlang::is_call(code[[2]], "dust_system_generator")
 }
 
 
