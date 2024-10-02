@@ -7,7 +7,7 @@
 dust_system_create(
   generator,
   pars,
-  n_particles,
+  n_particles = 1,
   n_groups = 1,
   time = 0,
   dt = NULL,
@@ -27,7 +27,8 @@ dust_system_create(
 system.  If \code{n_groups} is 1 or more, then this must be a list of length
 \code{n_groups} where each element is a list of parameters for your system.}
 
-\item{n_particles}{The number of particles to create.}
+\item{n_particles}{The number of particles to create, defaulting
+to a single particle}
 
 \item{n_groups}{Optionally, the number of parameter groups}
 

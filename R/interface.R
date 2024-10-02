@@ -103,7 +103,8 @@ dust_system_generator <- function(name, time_type, default_dt,
 ##'   system.  If `n_groups` is 1 or more, then this must be a list of length
 ##'   `n_groups` where each element is a list of parameters for your system.
 ##'
-##' @param n_particles The number of particles to create.
+##' @param n_particles The number of particles to create, defaulting
+##'   to a single particle
 ##'
 ##' @param n_groups Optionally, the number of parameter groups
 ##'
@@ -141,7 +142,7 @@ dust_system_generator <- function(name, time_type, default_dt,
 ##' @return A `dust_system` object, with opaque format.
 ##'
 ##' @export
-dust_system_create <- function(generator, pars, n_particles, n_groups = 1,
+dust_system_create <- function(generator, pars, n_particles = 1, n_groups = 1,
                                time = 0, dt = NULL, ode_control = NULL,
                                seed = NULL, deterministic = FALSE,
                                n_threads = 1,
