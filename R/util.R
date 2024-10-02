@@ -131,3 +131,8 @@ fmod <- function(n, m) {
 envvar_is_truthy <- function(name) {
   tolower(Sys.getenv(name, "false")) %in% c("t", "true", "1")
 }
+
+
+last <- function(x) {
+  x[[length(x)]]
+}

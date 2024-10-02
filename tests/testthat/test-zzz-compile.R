@@ -9,6 +9,7 @@ test_that("can compile simple system", {
   expect_s3_class(res, "dust_system_generator")
   expect_equal(res$name, "mysir")
   expect_true(res$properties$has_compare)
+  expect_true(is_uncalled_generator(gen))
 
   obj1 <- dust_system_create(gen(), list(), n_particles = 10, seed = 1)
   dust_system_set_state_initial(obj1)
