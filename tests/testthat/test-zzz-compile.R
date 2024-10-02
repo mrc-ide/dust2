@@ -9,7 +9,6 @@ test_that("can compile simple system", {
   expect_s3_class(res, "dust_system_generator")
   expect_equal(res$name, "mysir")
   expect_true(res$properties$has_compare)
-  expect_true(is_uncalled_generator(gen))
 
   obj1 <- dust_system_create(gen(), list(), n_particles = 10, seed = 1)
   dust_system_set_state_initial(obj1)
@@ -22,6 +21,9 @@ test_that("can compile simple system", {
   res <- evaluate_promise(dust_compile(filename, quiet = FALSE, debug = TRUE))
   expect_identical(res$result, gen)
   expect_match(res$messages, "Using cached generator")
+
+  skip_on_covr()
+  expect_true(is_uncalled_generator(gen))
 })
 
 
