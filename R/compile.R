@@ -11,7 +11,7 @@
 ##' @param quiet Logical, indicating if compilation messages from
 ##'   `pkgbuild` should be displayed.  Error messages will be
 ##'   displayed on compilation failure regardless of the value used.
-##'   If `NULL` is given, then we take the value from `DUST_QUIET`, or
+##'   If `NULL` is given, then we take the value from `DUST_QUIET` if set, or
 ##'   `FALSE` otherwise.
 ##'
 ##' @param workdir Optional working directory to use.  If `NULL`, the

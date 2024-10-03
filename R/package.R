@@ -41,7 +41,7 @@
 ##' @param quiet Passed to `cpp11::cpp_register`, if `TRUE` suppresses
 ##'   informational notices about updates to the cpp11 files.  If
 ##'   `NULL`, uses the value of the environment variable `DUST_QUIET`
-##'   of set or `FALSE` otherwise.
+##'   if set or `FALSE` otherwise.
 ##'
 ##' @title Create dust system in package
 ##'
