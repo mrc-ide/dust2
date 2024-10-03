@@ -22,7 +22,7 @@ dust_compile(
 \item{quiet}{Logical, indicating if compilation messages from
 \code{pkgbuild} should be displayed.  Error messages will be
 displayed on compilation failure regardless of the value used.
-If \code{NULL} is given, then we take the value from \code{DUST_QUIET}, or
+If \code{NULL} is given, then we take the value from \code{DUST_QUIET} if set, or
 \code{FALSE} otherwise.}
 
 \item{workdir}{Optional working directory to use.  If \code{NULL}, the
