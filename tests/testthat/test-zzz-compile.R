@@ -45,8 +45,12 @@ test_that("can compile into a stable directory", {
   }, list(filename = filename), env = env, stdout = log, stderr = "2>&1")
 
   log_txt <- readLines(log)
-  expect_match(log_txt, "'src/dust.cpp' is up to date", all = FALSE)
-  expect_match(log_txt, "Loading(.+)mysir2", all = FALSE)
+  expect_match(cli::ansi_strip(log_txt),
+               "'src/dust.cpp' is up to date",
+               all = FALSE)
+  expect_match(cli::ansi_strip(log_txt),
+               "Loading(.+)mysir2",
+               all = FALSE)
   expect_false(any(grepl("compiling", log_txt, ignore.case = TRUE)))
 })
 
