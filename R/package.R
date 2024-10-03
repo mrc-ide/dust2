@@ -223,7 +223,7 @@ package_generate <- function(filename, call) {
   system <- read_lines(filename)
   data <- dust_template_data(config$name, config$class, config$time_type,
                              config$default_dt)
-  list(r = substitute_dust_template(data, "dust.R"),
+  list(r = substitute_dust_template(data, "package.R"),
        cpp = dust_generate_cpp(system, config, data))
 }
 

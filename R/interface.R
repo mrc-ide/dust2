@@ -39,6 +39,8 @@ dust_system_generator <- function(name, time_type, default_dt,
       nms)
   }
 
+  env <- dust_package_env(env)
+
   methods_core <- c("alloc",
                     "state", "set_state", "set_state_initial",
                     "time", "set_time",
@@ -697,8 +699,8 @@ is_uncalled_generator <- function(sys) {
   }
   code <- body(sys)
   rlang::is_call(code, "{") &&
-    length(code) == 2 &&
-    rlang::is_call(code[[2]], "dust_system")
+    length(code) %in% 2:3 &&
+    rlang::is_call(last(code), "dust_system_generator")
 }
 
 
@@ -739,4 +741,15 @@ check_time_control <- function(generator, dt, ode_control,
   dt <- check_system_dt(dt, generator, call = call)
   ode_control <- check_system_ode_control(ode_control, generator, call = call)
   list(dt = dt, ode_control = ode_control)
+}
+
+
+dust_package_env <- function(env, quiet = FALSE) {
+  if (is.environment(env)) {
+    env
+  } else if (isNamespaceLoaded(env$name)) {
+    asNamespace(env$name)
+  } else {
+    env <- load_temporary_package(env$path, env$name, quiet)
+  }
 }
