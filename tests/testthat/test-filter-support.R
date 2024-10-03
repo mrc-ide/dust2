@@ -1,12 +1,15 @@
 test_that("can validate that 'dt' is reasonable", {
   expect_no_error(check_dt(1))
   expect_no_error(check_dt(1 / 5))
-  expect_error(check_dt(-1, "dt"),
+  expect_no_error(check_dt(NULL, allow_null = TRUE))
+  expect_error(check_dt(-1, name = "dt"),
                "Expected 'dt' to be greater than 0")
-  expect_error(check_dt(2, "dt"),
+  expect_error(check_dt(2, name = "dt"),
                "Expected 'dt' to be at most 1")
-  expect_error(check_dt(1 / 3.5, "dt"),
+  expect_error(check_dt(1 / 3.5, name = "dt"),
                "Expected 'dt' to be the inverse of an integer")
+  expect_error(check_dt(NULL, name = "dt"),
+               "'dt' must be a scalar")
 })
 
 

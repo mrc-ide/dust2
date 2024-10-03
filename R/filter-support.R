@@ -12,7 +12,7 @@ check_generator_for_filter <- function(generator, what, call = NULL) {
 
 check_system_dt <- function(dt, generator, name = "dt", call = NULL) {
   time_type <- generator$properties$time_type
-  if (time_type == "continous") {
+  if (time_type == "continuous") {
     if (!is.null(dt)) {
       cli::cli_abort("Can't use '{name}' with continuous-time systems",
                      call = call)

@@ -120,7 +120,7 @@ parse_metadata_default_dt <- function(data, time_type, call = NULL) {
       call = call)
   }
   value <- data[[1]]
-  check_dt(value, "[[dust2::default_dt()]]", call = call)
+  check_dt(value, name = "[[dust2::default_dt()]]", call = call)
   value
 }
 
