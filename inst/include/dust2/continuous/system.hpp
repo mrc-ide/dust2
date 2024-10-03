@@ -30,7 +30,8 @@ public:
   dust_continuous(std::vector<shared_state> shared,
                   std::vector<internal_state> internal,
                   real_type time,
-                  const ode::control<real_type> control, // in place of dt
+                  real_type dt,
+                  const ode::control<real_type> control,
                   size_t n_particles, // per group
                   const std::vector<rng_int_type>& seed,
                   bool deterministic, size_t n_threads) :
@@ -41,6 +42,7 @@ public:
     n_groups_(shared.size()),
     n_particles_total_(n_particles_ * n_groups_),
 
+    dt_(dt),
     control_(control),
 
     state_(n_state_ * n_particles_total_),
@@ -72,7 +74,9 @@ public:
     }
   }
 
-  auto run_to_time(real_type time, const std::vector<size_t>& index_group) {
+  template <typename mixed_time = typename T::mixed_time>
+  typename std::enable_if<!mixed_time::value, void>::type
+  run_to_time(real_type time, const std::vector<size_t>& index_group) {
     real_type * state_data = state_.data();
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
@@ -96,32 +100,56 @@ public:
     time_ = time;
   }
 
-  void run_to_time(real_type time,
-                   const std::vector<size_t>& index_group,
-                   real_type *state_history) {
-    /*
-    const auto stride = n_state_ * n_particles_ * n_groups_;
-    std::copy_n(state_.begin(), stride, state_history);
+  template <typename mixed_time = typename T::mixed_time>
+  typename std::enable_if<mixed_time::value, void>::type
+  run_to_time(real_type time, const std::vector<size_t>& index_group) {
+    if (dt_ == 0) {
+      run_to_time<std::false_type>(time, index_group);
+      return;
+    }
+    real_type * state_data = state_.data();
+    real_type * state_other_data = state_other_.data();
+    const size_t n_steps = (time - time_) / dt_;
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
+#endif
     for (auto i : index_group) {
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
-        auto state_model_ij = state_.data() + offset;
-        auto state_history_ij = state_history + offset;
         auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
+        auto& rng_state = rng_.state(k);
+        real_type * y = state_data + offset;
+        real_type * y_other = state_other_data + offset;
         try {
-          run_particle(time_, dt_, n_steps, n_state_, stride,
-                       shared_[i], internal_i, zero_every_[i],
-                       state_model_ij, state_history_ij,
-                       rng_.state(k));
-        } catch (std::exception const &e) {
+          real_type t1 = time_;
+          for (size_t step = 0; step < n_steps; ++step) {
+            const real_type t0 = t1;
+            t1 = (step == n_steps - 1) ? time : time_ + step * dt_;
+            solver_.run(t0, t1, y, zero_every_[i],
+                        ode_internals_[k],
+                        rhs_(shared_[i], internal_i));
+            std::copy_n(y, n_state_, y_other);
+            T::update(t1, dt_, y, shared_[i], internal_i, rng_state, y_other);
+            std::swap(y, y_other);
+            solver_.initialise(time_, y, ode_internals_[k],
+                               rhs_(shared_[i], internal_i));
+          }
+          } catch (std::exception const& e) {
           errors_.capture(e, k);
         }
       }
     }
     errors_.report();
-    time_ = time_ + n_steps * dt_;
-    */
+    if (n_steps % 2 == 1) {
+      std::swap(state_, state_other_);
+    }
+    time_ = time;
+  }
+
+  void run_to_time(real_type time,
+                   const std::vector<size_t>& index_group,
+                   real_type *state_history) {
     throw std::runtime_error("Write run_to_time() with saved history");
   }
 
@@ -226,7 +254,7 @@ public:
   }
 
   auto dt() const {
-    return 0;
+    return dt_;
   }
 
   auto n_state() const {
@@ -324,6 +352,7 @@ private:
   size_t n_particles_;
   size_t n_groups_;
   size_t n_particles_total_;
+  real_type dt_;
   ode::control<real_type> control_;
   // Some more will be needed here to get history to work.  With
   // that, we'll need to hold something that will let us accumulate

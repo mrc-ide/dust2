@@ -2,6 +2,9 @@
 logistic <- function() {
   dust_system_generator("logistic", "continuous", NULL)
 }
+malaria <- function() {
+  dust_system_generator("malaria", "mixed", NULL)
+}
 sir <- function() {
   dust_system_generator("sir", "discrete", 1)
 }

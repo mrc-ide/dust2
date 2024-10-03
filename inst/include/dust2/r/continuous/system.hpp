@@ -34,9 +34,10 @@ SEXP dust2_continuous_alloc(cpp11::list r_pars,
   auto seed = monty::random::r::as_rng_seed<rng_state_type>(r_seed);
   auto deterministic = to_bool(r_deterministic, "deterministic");
 
+  auto dt = check_dt(r_time_control, T::mixed_time::value, false);
   auto ode_control = validate_ode_control<real_type>(r_time_control);
 
-  auto obj = new dust_continuous<T>(shared, internal, time, ode_control,
+  auto obj = new dust_continuous<T>(shared, internal, time, dt, ode_control,
                                     n_particles, seed, deterministic,
                                     n_threads);
   cpp11::external_pointer<dust_continuous<T>> ptr(obj, true, false);

@@ -625,6 +625,6 @@ test_that("can run continuous-time filter", {
   n_particles <- 100
   expect_error(
     dust_filter_create(sirode(), time_start, data, n_particles = n_particles),
-    "Can't use 'dust_filter_create()' with continous-time models",
+    "Can't use 'dust_filter_create()' with continuous-time models",
     fixed = TRUE)
 })

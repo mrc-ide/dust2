@@ -141,7 +141,7 @@ dust_generate <- function(config, filename, linking_to, cpp_std,
 
 
 dust_generate_cpp <- function(system, config, data) {
-  time_type <- config$time_type
+  time_type <- data$time_type
   includes <- c("cpp11.hpp", sprintf("dust2/r/%s/system.hpp", time_type))
   code <- c(
     substitute_dust_template(data, file.path(time_type, "system.cpp")),
@@ -195,9 +195,11 @@ dust_template_data <- function(name,
   cpp_std <- validate_cpp_std(cpp_std)
   compiler_options <- validate_compiler_options(compiler_options,
                                                 optimisation_level)
+
   list(name = name,
        class = class,
-       time_type = time_type,
+       time_type_property = time_type,
+       time_type = if (time_type == "mixed") "continuous" else time_type,
        default_dt = deparse1(default_dt),
        package = paste0(name, mangle %||% ""),
        linking_to = linking_to,

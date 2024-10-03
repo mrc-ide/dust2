@@ -53,7 +53,7 @@ dust_filter_create <- function(generator, time_start, data,
 
   if (generator$properties$time_type == "continuous") {
     cli::cli_abort(
-      c("Can't use 'dust_filter_create()' with continous-time models",
+      c("Can't use 'dust_filter_create()' with continuous-time models",
         i = paste("We'll support this in future, but you need a place where",
                   "stochasticity enters into the model, and we don't really",
                   "allow for this yet")))

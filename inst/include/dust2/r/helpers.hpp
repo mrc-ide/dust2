@@ -201,8 +201,18 @@ inline double check_time(cpp11::sexp r_time, const char * name) {
 }
 
 
-inline double check_dt(cpp11::list r_time_control) {
+inline double check_dt(cpp11::list r_time_control, bool enabled = true,
+                       bool required = true) {
   cpp11::sexp r_dt = r_time_control["dt"];
+  const bool is_null = r_dt == R_NilValue;
+
+  if (is_null && !required) {
+    return 0;
+  }
+  if (!is_null && !enabled) {
+    cpp11::stop("Unexpected value for 'dt' in time control");
+  }
+
   const auto allow_na = false;
   const auto dt = to_double(r_dt, allow_na, "dt");
   const auto eps = 1e-8;

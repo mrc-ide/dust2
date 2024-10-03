@@ -11,22 +11,25 @@ check_generator_for_filter <- function(generator, what, call = NULL) {
 
 
 check_system_dt <- function(dt, generator, name = "dt", call = NULL) {
-  is_discrete <- generator$properties$time_type == "discrete"
-  if (is_discrete) {
-    check_dt(dt %||% generator$default_dt, name, call = call)
-  } else {
+  time_type <- generator$properties$time_type
+  if (time_type == "continuous") {
     if (!is.null(dt)) {
       cli::cli_abort("Can't use '{name}' with continuous-time systems",
                      call = call)
     }
+  } else {
+    check_dt(dt %||% generator$default_dt,
+             allow_null = time_type == "mixed",
+             name = name,
+             call = call)
   }
 }
 
 
 check_system_ode_control <- function(ode_control, generator,
                                      name = "ode_control", call = NULL) {
-  is_discrete <- generator$properties$time_type == "discrete"
-  if (is_discrete) {
+  time_type <- generator$properties$time_type
+  if (time_type == "discrete") {
     if (!is.null(ode_control)) {
       cli::cli_abort("Can't use 'ode_control' with discrete-time systems")
     }
@@ -40,7 +43,11 @@ check_system_ode_control <- function(ode_control, generator,
 }
 
 
-check_dt <- function(dt, name = deparse(substitute(dt)), call = NULL) {
+check_dt <- function(dt, allow_null = FALSE, name = deparse(substitute(dt)),
+                     call = NULL) {
+  if (allow_null && is.null(dt)) {
+    return(dt)
+  }
   assert_scalar_numeric(dt, call = call)
   if (dt <= 0) {
     cli::cli_abort("Expected '{name}' to be greater than 0")
