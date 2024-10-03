@@ -110,3 +110,18 @@ test_that("can work in a stable temporary directory", {
     c(DUST_WORKDIR_ROOT = "my/path"),
     expect_equal(dust_workdir(NULL, hash), "my/path/dust_abc1234"))
 })
+
+
+test_that("quiet responds to envvar", {
+  withr::with_envvar(c(DUST_QUIET = NA_character_), {
+    expect_false(dust_quiet(NULL))
+    expect_false(dust_quiet(FALSE))
+    expect_true(dust_quiet(TRUE))
+    expect_error(dust_quiet(1), "Expected 'quiet' to be logical")
+  })
+
+  withr::with_envvar(c(DUST_QUIET = "true"), {
+    expect_true(dust_quiet(NULL))
+    expect_false(dust_quiet(FALSE))
+  })
+})

@@ -4,13 +4,15 @@
 \alias{dust_package}
 \title{Create dust system in package}
 \usage{
-dust_package(path, quiet = FALSE)
+dust_package(path, quiet = NULL)
 }
 \arguments{
 \item{path}{Path to the package}
 
 \item{quiet}{Passed to \code{cpp11::cpp_register}, if \code{TRUE} suppresses
-informational notices about updates to the cpp11 files}
+informational notices about updates to the cpp11 files.  If
+\code{NULL}, uses the value of the environment variable \code{DUST_QUIET}
+if set or \code{FALSE} otherwise.}
 }
 \value{
 Nothing, this function is called for its side effects

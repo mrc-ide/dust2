@@ -39,18 +39,21 @@
 ##' @param path Path to the package
 ##'
 ##' @param quiet Passed to `cpp11::cpp_register`, if `TRUE` suppresses
-##'   informational notices about updates to the cpp11 files
+##'   informational notices about updates to the cpp11 files.  If
+##'   `NULL`, uses the value of the environment variable `DUST_QUIET`
+##'   if set or `FALSE` otherwise.
 ##'
 ##' @title Create dust system in package
 ##'
 ##' @return Nothing, this function is called for its side effects
 ##'
 ##' @export
-dust_package <- function(path, quiet = FALSE) {
+dust_package <- function(path, quiet = NULL) {
   call <- environment()
   pkg <- package_validate_root(path, call)
   path_dust <- file.path(path, "inst/dust")
 
+  quiet <- dust_quiet(quiet)
   if (!quiet) {
     cli::cli_alert_info("Working in package '{pkg}' at '{path}'")
   }
