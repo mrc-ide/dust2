@@ -49,7 +49,7 @@ test_that("can compile into a stable directory", {
                "'src/dust.cpp' is up to date",
                all = FALSE)
   expect_match(cli::ansi_strip(log_txt),
-               "Loading(.+)mysir2",
+               "Loading mysir2",
                all = FALSE)
   expect_false(any(grepl("compiling", log_txt, ignore.case = TRUE)))
 })
@@ -73,5 +73,5 @@ test_that("generators can be serialised and used from other processes", {
       dust2::dust_system_state(dust2::dust_system_create(sys(), list(), 1))
     }, list(tmp), stdout = log, stderr = "2>&1"),
     numeric(5))
-  expect_match(readLines(log), "Loading mysir", all = FALSE)
+  expect_match(cli::ansi_string(readLines(log)), "Loading mysir", all = FALSE)
 })
