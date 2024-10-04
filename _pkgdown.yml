@@ -51,6 +51,10 @@ reference:
     contents:
       - dust_unpack_state
       - dust_unpack_index
+  - title: Debugging
+    contents:
+      - dust_debug_enabled
+      - dust_debug_verbosity
   - title: Creation
     contents:
       - dust_compile

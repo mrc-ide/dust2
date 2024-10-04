@@ -49,6 +49,7 @@ dust_debug_enabled <- function(value = TRUE) {
 
 
 ##' @rdname dust_debug
+##' @export
 ##'
 ##' @param level The verbosity level, as a string.  This must be one
 ##'   of the values `quiet` (prevents informational messages),
