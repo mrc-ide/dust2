@@ -63,7 +63,8 @@
 ##'   anything in your personal `Makevars`
 ##'
 ##' @param debug Passed to [pkgbuild::compile_dll], this will build a
-##'   debug library.
+##'   debug library. If `NULL` is given, then we take the value from
+##'   `DUST_DEBUG` if set, or `FALSE` otherwise.
 ##'
 ##' @param skip_cache Logical, indicating if the cache of previously
 ##'   compiled systems should be skipped. If `TRUE` then your system will
@@ -77,7 +78,10 @@
 dust_compile <- function(filename, quiet = NULL, workdir = NULL,
                          linking_to = NULL, cpp_std = NULL,
                          compiler_options = NULL, optimisation_level = NULL,
-                         debug = FALSE, skip_cache = FALSE) {
+                         debug = NULL, skip_cache = FALSE) {
+  quiet <- dust_quiet(quiet)
+  debug <- dust_debug(debug)
+
   stop_unless_installed(dust_compile_needs())
   config <- parse_metadata(filename, call = environment())
   mangle <- substr(rlang::hash_file(filename), 1, 8)
@@ -94,7 +98,6 @@ dust_compile <- function(filename, quiet = NULL, workdir = NULL,
   }
 
   workdir <- dust_workdir(workdir, hash)
-  quiet <- dust_quiet(quiet)
 
   ## Second round of substitution in here, in order to sub in the work
   ## directory now that we have it:
@@ -304,5 +307,14 @@ dust_quiet <- function(quiet, call = parent.frame()) {
     envvar_is_truthy("DUST_QUIET")
   } else {
     assert_scalar_logical(quiet, call = call)
+  }
+}
+
+
+dust_debug <- function(debug, call = parent.frame()) {
+  if (is.null(debug)) {
+    envvar_is_truthy("DUST_DEBUG")
+  } else {
+    assert_scalar_logical(debug, call = call)
   }
 }
