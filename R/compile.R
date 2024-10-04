@@ -81,7 +81,6 @@ dust_compile <- function(filename, quiet = NULL, workdir = NULL,
                          debug = NULL, skip_cache = FALSE) {
   quiet <- dust_quiet(quiet)
   debug <- dust_quiet(debug)
-  workdir <- dust_workdir(workdir, hash)
 
   stop_unless_installed(dust_compile_needs())
   config <- parse_metadata(filename, call = environment())
@@ -97,6 +96,8 @@ dust_compile <- function(filename, quiet = NULL, workdir = NULL,
     }
     return(cache$generators[[hash]]$gen)
   }
+
+  workdir <- dust_workdir(workdir, hash)
 
   ## Second round of substitution in here, in order to sub in the work
   ## directory now that we have it:
