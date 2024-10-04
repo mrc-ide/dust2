@@ -80,7 +80,7 @@ dust_compile <- function(filename, quiet = NULL, workdir = NULL,
                          compiler_options = NULL, optimisation_level = NULL,
                          debug = NULL, skip_cache = FALSE) {
   quiet <- dust_quiet(quiet)
-  debug <- dust_quiet(debug)
+  debug <- dust_debug(debug)
 
   stop_unless_installed(dust_compile_needs())
   config <- parse_metadata(filename, call = environment())
