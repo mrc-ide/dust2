@@ -12,7 +12,7 @@ dust_compile(
   cpp_std = NULL,
   compiler_options = NULL,
   optimisation_level = NULL,
-  debug = FALSE,
+  debug = NULL,
   skip_cache = FALSE
 )
 }
@@ -73,7 +73,8 @@ Note that as for \code{compiler_options}, R will apply these \emph{before}
 anything in your personal \code{Makevars}}
 
 \item{debug}{Passed to \link[pkgbuild:compile_dll]{pkgbuild::compile_dll}, this will build a
-debug library.}
+debug library. If \code{NULL} is given, then we take the value from
+\code{DUST_DEBUG} if set, or \code{FALSE} otherwise.}
 
 \item{skip_cache}{Logical, indicating if the cache of previously
 compiled systems should be skipped. If \code{TRUE} then your system will

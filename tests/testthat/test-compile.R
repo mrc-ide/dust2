@@ -148,3 +148,18 @@ test_that("quiet responds to envvar", {
     expect_false(dust_quiet(FALSE))
   })
 })
+
+
+test_that("debug responds to envvar", {
+  withr::with_envvar(c(DUST_DEBUG = NA_character_), {
+    expect_false(dust_debug(NULL))
+    expect_false(dust_debug(FALSE))
+    expect_true(dust_debug(TRUE))
+    expect_error(dust_debug(1), "Expected 'debug' to be logical")
+  })
+
+  withr::with_envvar(c(DUST_DEBUG = "true"), {
+    expect_true(dust_debug(NULL))
+    expect_false(dust_debug(FALSE))
+  })
+})
