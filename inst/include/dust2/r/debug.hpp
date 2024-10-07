@@ -21,11 +21,11 @@ void save(T x, const char * name, cpp11::environment env) {
 template <typename T, size_t rank>
 void save(T *x, array::dimensions<rank> dim, const char * name,
           cpp11::environment env) {
-  const size_t size = dim.size();
+  const R_xlen_t size = dim.size();
   cpp11::writable::doubles r_x(size);
   std::copy_n(x, size, REAL(r_x));
   if (rank > 1) {
-    cpp11::writable::integers r_dim(rank);
+    cpp11::writable::integers r_dim(static_cast<R_xlen_t>(rank));
     std::copy_n(dim.dim.begin(), rank, INTEGER(r_dim));
     r_x.attr("dim") = r_dim;
   }
