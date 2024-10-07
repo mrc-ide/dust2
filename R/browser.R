@@ -1,9 +1,8 @@
-##' Control debugging of dust models.  This help page documents two
-##' funtions that can be used to control if and how the debugger is
-##' enabled (`dust_debug_enabled` and `dust_debug_verbosity`).  You
-##' can't enter the debugger from any of these functions; it is only
-##' enabled if present in your C++ code (or if using `odin2` if you
-##' have enabled it).
+##' Control browser-based of dust models.  This help page documents
+##' three funtions that can be used to control if and how the browser
+##' is enabled.  You can't enter the debugger from any of these
+##' functions; it is only enabled if present in your C++ code (or if
+##' using `odin2` if you have enabled it).
 ##'
 ##' dust2 includes an extremely simple debugging system, and if you
 ##' are reading this message, there's a good chance you are inside it.
@@ -39,82 +38,82 @@
 ##'
 ##' @title The dust debugger
 ##'
-##' @return Both `dust_debug_enabled` and `dust_debug_verbosity`
+##' @return Both `dust_browser_enabled` and `dust_browser_verbosity`
 ##'   return the previous value of the option they are setting.
 ##'
 ##' @param value Logical, `TRUE` for where the debugger should be
 ##'   enabled, `FALSE` otherwise.
 ##'
 ##' @export
-##' @rdname dust_debug
-##' @name dust_debug
-dust_debug_enabled <- function(value = TRUE) {
+##' @rdname dust_browser
+##' @name dust_browser
+dust_browser_enabled <- function(value = TRUE) {
   if (!is.null(value)) {
     assert_scalar_logical(value)
   }
-  options(dust.debug_enabled = value)
+  options(dust.browser_enabled = value)
 }
 
 
-##' @rdname dust_debug
+##' @rdname dust_browser
 ##' @export
 ##'
 ##' @param level The verbosity level, as a string.  This must be one
 ##'   of the values `quiet` (prevents informational messages),
 ##'   `normal` (prints a single line on entry) and `verbose` (prints
 ##'   several informational messages on entry).  The default is `normal`.
-dust_debug_verbosity <- function(level) {
+dust_browser_verbosity <- function(level) {
   if (!is.null(level)) {
     level <- match_value(level, c("quiet", "normal", "verbose"))
   }
-  options(dust.debug_verbosity = level)
+  options(dust.browser_verbosity = level)
 }
 
 
-##' @rdname dust_debug
+##' @rdname dust_browser
 ##' @export
-dust_debug_continue <- function() {
-  parent <- debug_find_parent_env(sys.frames())
+dust_browser_continue <- function() {
+  parent <- browser_find_parent_env(sys.frames())
   if (is.null(parent) || environmentIsLocked(parent)) {
     cli::cli_abort(
-      "Called 'dust_debug_continue()' from outside of a dust debug context")
+      "Called 'dust_browser_continue()' from outside of a dust browser context")
   }
-  parent$.dust_debug_continue <- TRUE
+  parent$.dust_browser_continue <- TRUE
 }
 
 
-debug_welcome_message <- function(env, phase, time) {
-  verbosity <- getOption("dust.debug_verbosity", "normal")
+browser_welcome_message <- function(env, phase, time) {
+  verbosity <- getOption("dust.browser_verbosity", "normal")
   if (verbosity == "normal") {
     cli::cli_alert_info(
-      "dust debug ('{phase}'; time = {time}): see {.help dust_debug} for help")
+      "dust debug ('{phase}'; time = {time}): see {.help dust_browser} for help")
   } else if (verbosity == "verbose") {
     cli::cli_alert_info("dust debug ('{phase}'; time = {time})")
     nms <- ls(env)
     cli::cli_alert_info("{length(nms)} variable{?s} available: {nms}")
     cli::cli_alert_info("'c' to continue, 'Q' to exit")
     cli::cli_alert_info(
-      "Run {.run dust2::dust_debug_continue()} to stop debugging")
-    cli::cli_alert_info("See {.help dust_debug} for help")
+      "Run {.run dust2::dust_browser_continue()} to stop debugging")
+    cli::cli_alert_info("See {.help dust_browser} for help")
   }
 }
 
 
-debug_env <- function(env, phase, time) {
-  enabled <- getOption("dust.debug_enabled", TRUE)
+browser_env <- function(env, phase, time) {
+  enabled <- getOption("dust.browser_enabled", TRUE)
   if (enabled) {
-    parent <- debug_find_parent_env(sys.frames())
-    if (is.null(parent) || !isTRUE(parent$.dust_debug_continue)) {
-      debug_welcome_message(env, phase, time)
+    parent <- browser_find_parent_env(sys.frames())
+    if (is.null(parent) || !isTRUE(parent$.dust_browser_continue)) {
+      browser_welcome_message(env, phase, time)
       with(env, browser())
     }
   }
 }
 
 
-debug_find_parent_env <- function(frames, drop = 1) {
-  ## Finds the outermost debug call to dust2, dropping the last
-  ## frame(s), which we expect to be dust calls.
+browser_find_parent_env <- function(frames, drop = 1) {
+  ## Finds the outermost call to dust2, dropping the last frame(s),
+  ## which we expect to be dust calls.
   frames <- drop_last(frames, drop)
   i <- vcapply(frames, function(x) environmentName(parent.env(x))) == "dust2"
   if (any(i)) {

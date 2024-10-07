@@ -1,5 +1,5 @@
 #include <dust2/common.hpp>
-#include <dust2/r/debug.hpp>
+#include <dust2/r/browser.hpp>
 
 // [[dust2::class(sirdebug)]]
 // [[dust2::time_type(discrete)]]
@@ -74,14 +74,14 @@ public:
     state_next[4] = cases_inc + n_SI;
 
     if (time > 2 && time < 5) {
-      auto env = dust2::r::debug::create_env();
-      dust2::r::debug::save(time, "time", env);
-      dust2::r::debug::save(S, "S", env);
-      dust2::r::debug::save(I, "I", env);
-      dust2::r::debug::save(R, "R", env);
-      dust2::r::debug::save(n_SI, "n_SI", env);
-      dust2::r::debug::save(n_IR, "n_IR", env);
-      dust2::r::debug::browser(env, "update", time);
+      auto env = dust2::r::browser::create();
+      dust2::r::browser::save(time, "time", env);
+      dust2::r::browser::save(S, "S", env);
+      dust2::r::browser::save(I, "I", env);
+      dust2::r::browser::save(R, "R", env);
+      dust2::r::browser::save(n_SI, "n_SI", env);
+      dust2::r::browser::save(n_IR, "n_IR", env);
+      dust2::r::browser::enter(env, "update", time);
     }
   }
 

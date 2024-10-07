@@ -7,8 +7,8 @@
 namespace dust2 {
 namespace r {
 
-namespace debug {
-inline cpp11::environment create_env() {
+namespace browser {
+inline cpp11::environment create() {
   cpp11::function new_env(cpp11::package("base")["new.env"]);
   return new_env();
 }
@@ -32,11 +32,11 @@ void save(T *x, array::dimensions<rank> dim, const char * name,
   env[name] = r_x;
 }
 
-inline void browser(cpp11::environment env, const char *phase, double time) {
-  cpp11::function debug_env(cpp11::package("dust2")["debug_env"]);
+inline void enter(cpp11::environment env, const char *phase, double time) {
+  cpp11::function browser_env(cpp11::package("dust2")["browser_env"]);
   cpp11::sexp r_phase = cpp11::as_sexp(phase);
   cpp11::sexp r_time = cpp11::as_sexp(time);
-  debug_env(env, r_phase, r_time);
+  browser_env(env, r_phase, r_time);
 }
 
 }
