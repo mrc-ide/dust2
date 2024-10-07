@@ -55,6 +55,7 @@ reference:
     contents:
       - dust_debug_enabled
       - dust_debug_verbosity
+      - dust_debug_continue
   - title: Creation
     contents:
       - dust_compile

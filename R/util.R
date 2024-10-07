@@ -124,3 +124,9 @@ envvar_is_truthy <- function(name) {
 last <- function(x) {
   x[[length(x)]]
 }
+
+
+drop_last <- function(x, n = 1) {
+  len <- length(x)
+  x[if (len < n) integer(0) else seq_len(len - n)]
+}

@@ -30,8 +30,12 @@
 ##'
 ##' If you enable the debugger, you may have very many iterations to
 ##' get through before control is returned back to the console.  You
-##' can run `dust_debug_enabled(FALSE)` to prevent entry into the
-##' debugger.  We might change this interface in future.
+##' can run `dust_debug_continue()` to prevent entry into the debugger
+##' until control is passed back to the you; this means the time
+##' series will run to completion and then the next time you run the
+##' system the debugger will be triggered again.  Alternatively, you
+##' can run `dust_debug_enabled(FALSE)` to disable all calls to the
+##' debugger.
 ##'
 ##' @title The dust debugger
 ##'
@@ -67,29 +71,55 @@ dust_debug_verbosity <- function(level) {
 }
 
 
-debug_welcome_message <- function(env) {
+##' @rdname dust_debug
+##' @export
+dust_debug_continue <- function() {
+  parent <- debug_find_parent_env(sys.frames())
+  if (is.null(parent) || environmentIsLocked(parent)) {
+    cli::cli_abort(
+      "Called 'dust_debug_continue()' from outside of a dust debug context")
+  }
+  parent$.dust_debug_continue <- TRUE
+}
+
+
+debug_welcome_message <- function(env, phase, time) {
   verbosity <- getOption("dust.debug_verbosity", "normal")
   if (verbosity == "normal") {
-    cli::cli_alert_info("dust debug: see {.help dust_debug} for help")
+    cli::cli_alert_info(
+      "dust debug ('{phase}'; time = {time}): see {.help dust_debug} for help")
   } else if (verbosity == "verbose") {
-    cli::cli_alert_info("dust debug")
-    nms <- ls(env, all = TRUE)
+    cli::cli_alert_info("dust debug ('{phase}'; time = {time})")
+    nms <- ls(env)
     cli::cli_alert_info("{length(nms)} variable{?s} available: {nms}")
     cli::cli_alert_info("'c' to continue, 'Q' to exit")
+    cli::cli_alert_info(
+      "Run {.run dust2::dust_debug_continue()} to stop debugging")
     cli::cli_alert_info("See {.help dust_debug} for help")
   }
 }
 
 
-debug_env <- function(env) {
+debug_env <- function(env, phase, time) {
   enabled <- getOption("dust.debug_enabled", TRUE)
-  ## It looks like we can use sys.frames() here to find out the
-  ## environment where we started the calls from; we could use that at
-  ## some point to implement something where we can prevent debugging
-  ## for the rest of the calls in the current run by adding a deferred
-  ## handler to that environment.  An extension for later I think.
   if (enabled) {
-    debug_welcome_message(env)
-    with(env, browser(skipCalls = 1L))
+    parent <- debug_find_parent_env(sys.frames())
+    if (is.null(parent) || !isTRUE(parent$.dust_debug_continue)) {
+      debug_welcome_message(env, phase, time)
+      with(env, browser())
+    }
+  }
+}
+
+
+debug_find_parent_env <- function(frames, drop = 1) {
+  ## Finds the outermost debug call to dust2, dropping the last
+  ## frame(s), which we expect to be dust calls.
+  frames <- drop_last(frames, drop)
+  i <- vcapply(frames, function(x) environmentName(parent.env(x))) == "dust2"
+  if (any(i)) {
+    frames[[which(i)[[1]]]]
+  } else {
+    NULL
   }
 }

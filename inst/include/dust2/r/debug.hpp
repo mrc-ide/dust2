@@ -32,9 +32,11 @@ void save(T *x, array::dimensions<rank> dim, const char * name,
   env[name] = r_x;
 }
 
-inline void browser(cpp11::environment env) {
+inline void browser(cpp11::environment env, const char *phase, double time) {
   cpp11::function debug_env(cpp11::package("dust2")["debug_env"]);
-  debug_env(env);
+  cpp11::sexp r_phase = cpp11::as_sexp(phase);
+  cpp11::sexp r_time = cpp11::as_sexp(time);
+  debug_env(env, r_phase, r_time);
 }
 
 }

@@ -81,7 +81,7 @@ public:
       dust2::r::debug::save(R, "R", env);
       dust2::r::debug::save(n_SI, "n_SI", env);
       dust2::r::debug::save(n_IR, "n_IR", env);
-      dust2::r::debug::browser(env);
+      dust2::r::debug::browser(env, "update", time);
     }
   }
 

@@ -4,11 +4,14 @@
 \alias{dust_debug}
 \alias{dust_debug_enabled}
 \alias{dust_debug_verbosity}
+\alias{dust_debug_continue}
 \title{The dust debugger}
 \usage{
 dust_debug_enabled(value = TRUE)
 
 dust_debug_verbosity(level)
+
+dust_debug_continue()
 }
 \arguments{
 \item{value}{Logical, \code{TRUE} for where the debugger should be
@@ -58,6 +61,10 @@ propagated back into the running system.
 
 If you enable the debugger, you may have very many iterations to
 get through before control is returned back to the console.  You
-can run \code{dust_debug_enabled(FALSE)} to prevent entry into the
-debugger.  We might change this interface in future.
+can run \code{dust_debug_continue()} to prevent entry into the debugger
+until control is passed back to the you; this means the time
+series will run to completion and then the next time you run the
+system the debugger will be triggered again.  Alternatively, you
+can run \code{dust_debug_enabled(FALSE)} to disable all calls to the
+debugger.
 }

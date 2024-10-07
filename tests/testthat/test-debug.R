@@ -36,20 +36,28 @@ test_that("can debug print welcome message", {
 
   res <- withr::with_options(
     list(dust.debug_verbosity = "normal"),
-    evaluate_promise(debug_welcome_message(env)))
+    evaluate_promise(debug_welcome_message(env, "update", 2)))
   expect_length(res$messages, 1)
   expect_match(
     res$messages,
-    "dust debug: see.+dust_debug.+for help")
+    "dust debug \\('update'; time = 2\\): see.+dust_debug.+for help")
 
   res <- withr::with_options(
     list(dust.debug_verbosity = "verbose"),
-    evaluate_promise(debug_welcome_message(env)))
-  expect_length(res$messages, 4)
+    evaluate_promise(debug_welcome_message(env, "update", 2)))
+  expect_length(res$messages, 5)
   expect_match(
     res$messages[[1]],
-    "dust debug\n")
+    "dust debug \\('update'; time = 2\\)\n")
   expect_match(
     res$messages[[2]],
     "3 variables available")
+})
+
+
+test_that("can't call dust_debug_continue normally", {
+  expect_error(
+    dust_debug_continue(),
+    "Called 'dust_debug_continue()' from outside of a dust debug context",
+    fixed = TRUE)
 })
