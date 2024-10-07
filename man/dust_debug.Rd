@@ -10,6 +10,9 @@ dust_debug_enabled(value = TRUE)
 dust_debug_verbosity(level)
 }
 \arguments{
+\item{value}{Logical, \code{TRUE} for where the debugger should be
+enabled, \code{FALSE} otherwise.}
+
 \item{level}{The verbosity level, as a string.  This must be one
 of the values \code{quiet} (prevents informational messages),
 \code{normal} (prints a single line on entry) and \code{verbose} (prints

@@ -38,6 +38,9 @@
 ##' @return Both `dust_debug_enabled` and `dust_debug_verbosity`
 ##'   return the previous value of the option they are setting.
 ##'
+##' @param value Logical, `TRUE` for where the debugger should be
+##'   enabled, `FALSE` otherwise.
+##'
 ##' @export
 ##' @rdname dust_debug
 dust_debug_enabled <- function(value = TRUE) {
