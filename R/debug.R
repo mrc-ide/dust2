@@ -43,6 +43,7 @@
 ##'
 ##' @export
 ##' @rdname dust_debug
+##' @name dust_debug
 dust_debug_enabled <- function(value = TRUE) {
   if (!is.null(value)) {
     assert_scalar_logical(value)
