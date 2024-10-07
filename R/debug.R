@@ -89,6 +89,6 @@ debug_env <- function(env) {
   ## handler to that environment.  An extension for later I think.
   if (enabled) {
     debug_welcome_message(env)
-    with(env, browser())
+    with(env, browser(skip_calls = 1L))
   }
 }
