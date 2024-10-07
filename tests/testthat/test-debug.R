@@ -61,3 +61,14 @@ test_that("can't call dust_debug_continue normally", {
     "Called 'dust_debug_continue()' from outside of a dust debug context",
     fixed = TRUE)
 })
+
+
+test_that("set debug sentinal if requested", {
+  skip_if_not_installed("mockery")
+  e <- new.env()
+  mock_find_env <- mockery::mock(e)
+  mockery::stub(dust_debug_continue, "debug_find_parent_env", mock_find_env)
+  dust_debug_continue()
+  mockery::expect_called(mock_find_env, 1)
+  expect_true(e$.dust_debug_continue)
+})
