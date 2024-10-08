@@ -46,6 +46,10 @@ void read_real_vector(cpp11::list pars, size_t len, real_type * dest,
 template <typename real_type, size_t rank>
 void read_real_array(cpp11::list args, const dust2::array::dimensions<rank>& dim,
                      real_type * dest, const char *name, bool required);
+template <size_t rank>
+dust2::array::dimensions<rank> read_dimensions(cpp11::list args, const char * name);
+template <>
+dust2::array::dimensions<1> read_dimensions(cpp11::list args, const char * name);
 
 }
 

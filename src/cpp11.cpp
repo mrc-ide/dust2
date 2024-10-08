@@ -671,10 +671,10 @@ extern "C" SEXP _dust2_test_check_dimensions(SEXP value, SEXP r_dim, SEXP name) 
   END_CPP11
 }
 // test_helpers.cpp
-std::vector<size_t> test_read_dimensions(cpp11::sexp value, int rank, const char * name);
+std::vector<size_t> test_read_dimensions(cpp11::list value, int rank, const char * name);
 extern "C" SEXP _dust2_test_read_dimensions(SEXP value, SEXP rank, SEXP name) {
   BEGIN_CPP11
-    return cpp11::as_sexp(test_read_dimensions(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(value), cpp11::as_cpp<cpp11::decay_t<int>>(rank), cpp11::as_cpp<cpp11::decay_t<const char *>>(name)));
+    return cpp11::as_sexp(test_read_dimensions(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(value), cpp11::as_cpp<cpp11::decay_t<int>>(rank), cpp11::as_cpp<cpp11::decay_t<const char *>>(name)));
   END_CPP11
 }
 // test_interpolate.cpp

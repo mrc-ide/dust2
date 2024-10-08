@@ -22,7 +22,7 @@ bool test_check_dimensions(cpp11::sexp value, cpp11::integers r_dim,
 
 
 [[cpp11::register]]
-std::vector<size_t> test_read_dimensions(cpp11::sexp value, int rank, const char * name) {
+std::vector<size_t> test_read_dimensions(cpp11::list value, int rank, const char * name) {
   if (rank == 1) {
     const auto arr = dust2::r::read_dimensions<1>(value, name).dim;
     return std::vector<size_t>(arr.begin(), arr.end());

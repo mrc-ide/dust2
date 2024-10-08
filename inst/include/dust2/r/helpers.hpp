@@ -86,20 +86,21 @@ void check_dimensions(cpp11::sexp value,
 
 
 template <size_t rank>
-dust2::array::dimensions<rank> read_dimensions(cpp11::sexp value,
+dust2::array::dimensions<rank> read_dimensions(cpp11::list args,
                                                const char * name) {
+  cpp11::sexp value = args[name];
   check_rank(value, rank, name);
   auto r_dim = cpp11::as_cpp<cpp11::integers>(value.attr("dim"));
   return dust2::array::dimensions<rank>(r_dim.begin());
 }
 
 template <>
-inline dust2::array::dimensions<1> read_dimensions(cpp11::sexp value,
+inline dust2::array::dimensions<1> read_dimensions(cpp11::list args,
                                                    const char * name) {
+  SEXP value = args[name];
   check_rank(value, 1, name);
-  size_t len = LENGTH(value);
-  const auto ret = dust2::array::dimensions<1>{len};
-  return ret; // dust2::array::dimensions<1>{len};
+  const size_t len = LENGTH(value);
+  return dust2::array::dimensions<1>{len};
 }
 
 inline double to_double(cpp11::sexp x, bool allow_na, const char * name) {
