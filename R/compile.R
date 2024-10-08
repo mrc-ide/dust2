@@ -82,7 +82,7 @@ dust_compile <- function(filename, quiet = NULL, workdir = NULL,
   quiet <- dust_quiet(quiet)
   debug <- dust_debug(debug)
 
-  stop_unless_installed(dust_compile_needs())
+  install_needed("dust2", "compile")
   config <- parse_metadata(filename, call = environment())
   mangle <- substr(rlang::hash_file(filename), 1, 8)
   res <- dust_generate(config, filename, linking_to, cpp_std,
@@ -244,12 +244,6 @@ validate_cpp_std <- function(cpp_std, call = NULL) {
       arg = "cpp_std", call = call)
   }
   cpp_std
-}
-
-
-dust_compile_needs <- function() {
-  strsplit(utils::packageDescription("dust2")[["Config/Needs/compile"]],
-           ",\\s+")[[1]]
 }
 
 
