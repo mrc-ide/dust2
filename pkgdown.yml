@@ -1,0 +1,10 @@
+pandoc: 3.1.11
+pkgdown: 2.1.1
+pkgdown_sha: ~
+articles:
+  details: details.html
+  periodic: periodic.html
+last_built: 2024-10-09T15:03Z
+urls:
+  reference: https://mrc-ide.github.io/dust2/reference
+  article: https://mrc-ide.github.io/dust2/articles
