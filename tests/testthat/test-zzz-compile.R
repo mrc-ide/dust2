@@ -75,3 +75,9 @@ test_that("generators can be serialised and used from other processes", {
     numeric(5))
   expect_match(cli::ansi_string(readLines(log)), "Loading mysir", all = FALSE)
 })
+
+
+test_that("can compile a model with browser-based debugging", {
+  expect_no_error(
+    dust_compile("examples/debug.cpp", quiet = TRUE, debug = TRUE))
+})

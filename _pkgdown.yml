@@ -51,6 +51,11 @@ reference:
     contents:
       - dust_unpack_state
       - dust_unpack_index
+  - title: Browser-based debugging
+    contents:
+      - dust_browser_enabled
+      - dust_browser_verbosity
+      - dust_browser_continue
   - title: Creation
     contents:
       - dust_compile
