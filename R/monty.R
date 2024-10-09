@@ -71,6 +71,14 @@
 ##'   parameter sets where, once you understand the model, giving up
 ##'   on that parameter set and continuing is the best option.
 ##'
+##' @param save_state Logical, indicating if the state should be saved
+##'   at the time series.
+##'
+##' @param save_history Logical, indicating if particle trajectories
+##'   should be saved.  This can also be a character vector indicating
+##'   the logical compartments, or an integer vector being an index
+##'   into the state.
+##'
 ##' @return A [monty::monty_model] object
 ##'
 ##' @export
