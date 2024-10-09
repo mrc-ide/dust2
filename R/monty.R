@@ -75,10 +75,34 @@
 ##'
 ##' @export
 dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
-                                  failure_is_impossible = FALSE) {
+                                  failure_is_impossible = FALSE,
+                                  save_state = FALSE,
+                                  save_history = FALSE) {
   call <- environment()
   assert_is(obj, "dust_likelihood", call = call)
   assert_is(packer, "monty_packer", call = call)
+
+  assert_scalar_logical(save_state)
+
+  save_history_subset <- NULL
+  save_history_index_state <- NULL
+  if (isFALSE(save_history)) {
+    save_history <- FALSE
+  } else {
+    if (isTRUE(save_history)) {
+    } else if (is.character(save_history) || is.integer(save_history)) {
+      if (anyDuplicated(save_history)) {
+        cli::cli_abort("All elements of 'save_history' must be unique")
+      }
+      save_history_subset <- save_history
+    } else {
+      cli::cli_abort(
+        "Invalid type for 'save_history'; expected logical or character")
+    }
+    save_history <- TRUE
+  }
+
+  assert_scalar_logical(save_history) # TODO: make flexible
 
   domain <- monty::monty_domain_expand(domain, packer)
 
@@ -95,6 +119,7 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
     has_direct_sample = FALSE,
     has_gradient = obj$deterministic && obj$has_adjoint,
     allow_multiple_parameters = obj$preserve_group_dimension,
+    has_observer = save_history || save_state,
     has_parameter_groups = FALSE)
 
   gradient <- NULL
@@ -120,7 +145,8 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
         ret <- dust_likelihood_run(
           obj,
           pars,
-          initial = if (is.null(initial)) NULL else initial(pars))
+          initial = if (is.null(initial)) NULL else initial(pars),
+          save_history = save_history)
         attr(obj$ptr, "last_density") <- ret
         attr(obj$ptr, "last_gradient") <- NULL
       }
@@ -143,12 +169,43 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
       dust_likelihood_run(
         obj,
         pars,
-        initial = if (is.null(initial)) NULL else initial(pars))
+        initial = if (is.null(initial)) NULL else initial(pars),
+        save_history = save_history)
     }
   }
 
   if (failure_is_impossible) {
     density <- protect(density, -Inf)
+  }
+
+  if (properties$has_observer) {
+    observe <- function() {
+      if (save_state) {
+        s <- NULL
+      } else {
+        s <- dust_likelihood_last_state(obj, select_random_particle = TRUE)
+      }
+      if (save_history) {
+        if (is.null(obj$packer_history)) {
+          if (is.null(save_history_subset)) {
+            obj$packer_history <- obj$packer_state
+          } else {
+            save_history_index_state <<-
+              validate_history_index(save_history_subset, obj$packer_state)
+            obj$packer_history <-
+              packer_subset(obj$packer_state, save_history_subset)
+          }
+        }
+        h <- dust_likelihood_last_history(obj, select_random_particle = TRUE)
+        if (!is.null(save_history_index_state)) {
+          h <- h[save_history_index_state, , drop = FALSE]
+        }
+      }
+      list(state = s, history = h)
+    }
+    observer <- monty::monty_observer(observe)
+  } else {
+    observer <- NULL
   }
 
   if (properties$is_stochastic) {
@@ -182,6 +239,7 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
          gradient = gradient,
          parameters = packer$parameters,
          domain = domain,
+         observer = observer,
          get_rng_state = get_rng_state,
          set_rng_state = set_rng_state),
     properties)
@@ -193,5 +251,44 @@ packer_unpack <- function(packer, x) {
     lapply(seq_len(ncol(x)), function(i) packer$unpack(x[, i]))
   } else {
     packer$unpack(x)
+  }
+}
+
+
+
+validate_history_index <- function(subset, packer, call = parent.frame()) {
+  index <- packer$index()
+  if (is.character(subset)) {
+    ret <- match(subset, names(index))
+    err <- is.na(ret)
+    if (any(err)) {
+      cli::cli_abort(
+        "Unknown state value{?s} referenced by observer: {squote(subset[err])}",
+        call = call)
+    }
+  } else {
+    max <- last(last(index))
+    err <- subset < 1 | subset > max
+    if (any(err)) {
+      cli::cli_abort(
+        "Invalid state value{?s} out of range: {as.character(err)}",
+        call = call)
+    }
+    ret <- index
+  }
+  ret
+}
+
+
+## Dirty hack for now, this should go into monty, but deserves its own
+## PR.
+packer_subset <- function(packer, index) {
+  e <- environment(packer$pack)
+  if (is.character(index)) {
+    scalar <- intersect(e$scalar, index)
+    array <- e$array[intersect(names(e$array), index)]
+    monty::monty_packer(scalar, array)
+  } else {
+    monty::monty_packer(packer$parameters[index])
   }
 }
