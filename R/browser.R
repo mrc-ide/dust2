@@ -1,4 +1,4 @@
-##' Control browser-based of dust models.  This help page documents
+##' Control browser-based debugging of dust models.  This help page documents
 ##' three funtions that can be used to control if and how the browser
 ##' is enabled.  You can't enter the debugger from any of these
 ##' functions; it is only enabled if present in your C++ code (or if
@@ -18,7 +18,7 @@
 ##' These commands are established by `browser`, and can't be
 ##' disabled.  This means that if you have an variable called `n` you
 ##' will need to work with it as `(n)` (i.e. in parentheses).  This
-##' applies to all of browser's command variables (`c`, `f`, `n`, `s`,
+##' applies to all of `browser`'s command variables (`c`, `f`, `n`, `s`,
 ##' `r` and `Q`); please see [browser] for more information.
 ##'
 ##' By the time the environment has been created, some variables from
@@ -30,7 +30,7 @@
 ##' If you enable the debugger, you may have very many iterations to
 ##' get through before control is returned back to the console.  You
 ##' can run `dust_debug_continue()` to prevent entry into the debugger
-##' until control is passed back to the you; this means the time
+##' until control is passed back to you; this means the time
 ##' series will run to completion and then the next time you run the
 ##' system the debugger will be triggered again.  Alternatively, you
 ##' can run `dust_debug_enabled(FALSE)` to disable all calls to the
