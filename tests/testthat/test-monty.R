@@ -110,28 +110,30 @@ test_that("can create wrapper around filter with multiple pars", {
 })
 
 
-pkgload::load_all("~/Documents/src/monty")
-pkgload::load_all()
+test_that("can get trajectories from model", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  obj <- dust_filter_create(sir(), time_start, data, n_particles = 100,
+                            seed = 42)
+  packer <- monty::monty_packer(
+    c("beta", "gamma"),
+    fixed = list(N = 1000, I0 = 10, exp_noise = 1e6))
+  m <- dust_likelihood_monty(obj, packer, save_history = TRUE)
+  expect_true(m$properties$has_observer)
 
-pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
-time_start <- 0
-data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
-obj <- dust_filter_create(sir(), time_start, data, n_particles = 100,
-                          seed = 42)
-packer <- monty::monty_packer(
-  c("beta", "gamma"),
-  fixed = list(N = 1000, I0 = 10, exp_noise = 1e6))
-m <- dust_likelihood_monty(obj, packer,
-                           save_history = c("I", "cases_inc"))
+  prior <- monty::monty_dsl({
+    beta ~ Exponential(mean = 0.5)
+    gamma ~ Exponential(mean = 0.5)
+  })
 
-prior <- monty::monty_dsl({
-  beta ~ Exponential(mean = 0.5)
-  gamma ~ Exponential(mean = 0.5)
+  posterior <- m + prior
+
+  sampler <- monty::monty_sampler_random_walk(diag(2) * c(0.02, 0.02))
+  res <- monty::monty_sample(posterior, sampler, 27, initial = c(.2, .1),
+                             n_chains = 3)
+
+  expect_equal(names(res$observations), "history")
+  expect_equal(dim(res$observations$history), c(5, 4, 27, 3))
+  expect_identical(obj$packer_history, obj$packer_state)
 })
-
-posterior <- m + prior
-
-sampler <- monty::monty_sampler_random_walk(diag(2) * c(0.02, 0.02))
-res <- monty::monty_sample(posterior, sampler, 100, initial = c(.2, .1))
-
-obj$packer_history$unpack(res$observations$history)
