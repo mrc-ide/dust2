@@ -135,5 +135,95 @@ test_that("can get trajectories from model", {
 
   expect_equal(names(res$observations), "history")
   expect_equal(dim(res$observations$history), c(5, 4, 27, 3))
-  expect_identical(obj$packer_history, obj$packer_state)
+})
+
+
+test_that("can subset trajectories from model", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  obj <- dust_filter_create(sir(), time_start, data, n_particles = 100,
+                            seed = 42)
+  packer <- monty::monty_packer(
+    c("beta", "gamma"),
+    fixed = list(N = 1000, I0 = 10, exp_noise = 1e6))
+
+  prior <- monty::monty_dsl({
+    beta ~ Exponential(mean = 0.5)
+    gamma ~ Exponential(mean = 0.5)
+  })
+
+  sampler <- monty::monty_sampler_random_walk(diag(2) * c(0.02, 0.02))
+
+  set.seed(1)
+  m1 <- dust_likelihood_monty(obj, packer, save_history = c("I", "cases_inc"))
+  p1 <- m1 + prior
+  res1 <- monty::monty_sample(p1, sampler, 13, initial = c(.2, .1),
+                              n_chains = 3)
+
+  set.seed(1)
+  m2 <- dust_likelihood_monty(obj, packer, save_history = TRUE)
+  p2 <- m2 + prior
+  res2 <- monty::monty_sample(p2, sampler, 13, initial = c(.2, .1),
+                              n_chains = 3)
+
+  expect_equal(dim(res1$observations$history), c(2, 4, 13, 3))
+  expect_equal(res1$observations$history,
+               res2$observations$history[c(2, 5), , , ])
+  expect_equal(names(res1$observations), "history")
+})
+
+
+test_that("can record final state", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  obj <- dust_filter_create(sir(), time_start, data, n_particles = 100,
+                            seed = 42)
+  packer <- monty::monty_packer(
+    c("beta", "gamma"),
+    fixed = list(N = 1000, I0 = 10, exp_noise = 1e6))
+
+  prior <- monty::monty_dsl({
+    beta ~ Exponential(mean = 0.5)
+    gamma ~ Exponential(mean = 0.5)
+  })
+
+  sampler <- monty::monty_sampler_random_walk(diag(2) * c(0.02, 0.02))
+
+  set.seed(1)
+  m <- dust_likelihood_monty(obj, packer, save_state = TRUE)
+  expect_true(m$properties$has_observer)
+  res <- monty::monty_sample(m + prior, sampler, 13, n_chains = 3)
+  expect_equal(names(res$observations), "state")
+  expect_equal(dim(res$observations$state), c(5, 13, 3))
+})
+
+
+test_that("can record both state and trajectories", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  obj <- dust_filter_create(sir(), time_start, data, n_particles = 100,
+                            seed = 42)
+  packer <- monty::monty_packer(
+    c("beta", "gamma"),
+    fixed = list(N = 1000, I0 = 10, exp_noise = 1e6))
+
+  prior <- monty::monty_dsl({
+    beta ~ Exponential(mean = 0.5)
+    gamma ~ Exponential(mean = 0.5)
+  })
+
+  sampler <- monty::monty_sampler_random_walk(diag(2) * c(0.02, 0.02))
+
+  set.seed(1)
+  m <- dust_likelihood_monty(obj, packer, save_state = TRUE,
+                             save_history = TRUE)
+  expect_true(m$properties$has_observer)
+  res <- monty::monty_sample(m + prior, sampler, 13, n_chains = 3)
+  expect_equal(names(res$observations), c("state", "history"))
+  expect_equal(dim(res$observations$state), c(5, 13, 3))
+  expect_equal(dim(res$observations$history), c(5, 4, 13, 3))
+  expect_equal(res$observations$state, res$observations$history[, 4, , ])
 })

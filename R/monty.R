@@ -242,24 +242,26 @@ dust_observer <- function(obj, save_state, save_history,
   }
 
   env <- environment()
+  env$uninitialised <- !is.null(save_history$subset)
 
   observe <- function() {
     ret <- list()
     if (save_state) {
-      ret$state <- dust_likelihood_last_state(obj,
-                                              select_random_particle = TRUE)
+      ret$state <-
+        dust_likelihood_last_state(obj, select_random_particle = TRUE)
     }
 
     if (save_history$enabled) {
-      if (is.null(obj$packer_history)) {
-        if (is.null(save_history$subset)) {
-          obj$packer_history <- obj$packer_state
-        } else {
-          tmp <- obj$packer_state$subset(save_history$subset)
-          env$save_history$index <- tmp$index
-          obj$packer_history <- tmp$packer
-        }
+      if (env$uninitialised) {
+        env$save_history$index <-
+          obj$packer_state$subset(save_history$subset)$index
+        env$uninitialised <- FALSE
       }
+
+      ## TODO: we'll create a index_state argument to
+      ## dust_likelihood_last_history which will simplify this, but
+      ## that requires slightly more surgery and I've moved it into
+      ## another ticket (mrc-5863)
       history <-
         dust_likelihood_last_history(obj, select_random_particle = TRUE)
       if (!is.null(save_history$index)) {
