@@ -247,8 +247,8 @@ dust_observer <- function(obj, save_state, save_history,
   observe <- function() {
     ret <- list()
     if (save_state) {
-      ret$state <-
-        dust_likelihood_last_state(obj, select_random_particle = TRUE)
+      ret$state <- dust_likelihood_last_state(
+        obj, select_random_particle = TRUE)
     }
 
     if (save_history$enabled) {
@@ -262,8 +262,8 @@ dust_observer <- function(obj, save_state, save_history,
       ## dust_likelihood_last_history which will simplify this, but
       ## that requires slightly more surgery and I've moved it into
       ## another ticket (mrc-5863)
-      history <-
-        dust_likelihood_last_history(obj, select_random_particle = TRUE)
+      history <- dust_likelihood_last_history(
+        obj, select_random_particle = TRUE)
       if (!is.null(save_history$index)) {
         history <- history[save_history$index, , drop = FALSE]
       }
