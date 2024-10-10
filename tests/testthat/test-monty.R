@@ -227,3 +227,16 @@ test_that("can record both state and trajectories", {
   expect_equal(dim(res$observations$history), c(5, 4, 13, 3))
   expect_equal(res$observations$state, res$observations$history[, 4, , ])
 })
+
+
+test_that("validate request to save history", {
+  expect_equal(validate_save_history(FALSE), list(enabled = FALSE))
+  expect_equal(validate_save_history(TRUE),
+               list(enabled = TRUE, index = NULL, subset = NULL))
+  expect_error(validate_save_history(NULL),
+               "Invalid value for 'save_history'")
+  expect_error(validate_save_history(1:3),
+               "Invalid value for 'save_history'")
+  expect_equal(validate_save_history(c("a", "b")),
+               list(enabled = TRUE, index = NULL, subset = c("a", "b")))
+})
