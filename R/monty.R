@@ -90,27 +90,9 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
   assert_is(obj, "dust_likelihood", call = call)
   assert_is(packer, "monty_packer", call = call)
 
-  assert_scalar_logical(save_state)
-
-  save_history_subset <- NULL
-  save_history_index_state <- NULL
-  if (isFALSE(save_history)) {
-    save_history <- FALSE
-  } else {
-    if (isTRUE(save_history)) {
-    } else if (is.character(save_history) || is.integer(save_history)) {
-      if (anyDuplicated(save_history)) {
-        cli::cli_abort("All elements of 'save_history' must be unique")
-      }
-      save_history_subset <- save_history
-    } else {
-      cli::cli_abort(
-        "Invalid type for 'save_history'; expected logical or character")
-    }
-    save_history <- TRUE
-  }
-
   domain <- monty::monty_domain_expand(domain, packer)
+  save_history <- validate_save_history(save_history, call = call)
+  observer <- dust_observer(obj, save_state, save_history)
 
   ## We configure saving trajectories on creation I think, which then
   ## affects density.  Start without trajectories?  Realistically
@@ -125,7 +107,7 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
     has_direct_sample = FALSE,
     has_gradient = obj$deterministic && obj$has_adjoint,
     allow_multiple_parameters = obj$preserve_group_dimension,
-    has_observer = save_history || save_state,
+    has_observer = !is.null(observer),
     has_parameter_groups = FALSE)
 
   gradient <- NULL
@@ -152,7 +134,7 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
           obj,
           pars,
           initial = if (is.null(initial)) NULL else initial(pars),
-          save_history = save_history)
+          save_history = save_history$enabled)
         attr(obj$ptr, "last_density") <- ret
         attr(obj$ptr, "last_gradient") <- NULL
       }
@@ -176,43 +158,12 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
         obj,
         pars,
         initial = if (is.null(initial)) NULL else initial(pars),
-        save_history = save_history)
+        save_history = save_history$enabled)
     }
   }
 
   if (failure_is_impossible) {
     density <- protect(density, -Inf)
-  }
-
-  if (properties$has_observer) {
-    observe <- function() {
-      if (save_state) {
-        s <- NULL
-      } else {
-        s <- dust_likelihood_last_state(obj, select_random_particle = TRUE)
-      }
-      if (save_history) {
-        if (is.null(obj$packer_history)) {
-          if (is.null(save_history_subset)) {
-            obj$packer_history <- obj$packer_state
-          } else {
-            browser()
-            save_history_index_state <<-
-              validate_history_index(save_history_subset, obj$packer_state)
-            obj$packer_history <-
-              packer_subset(obj$packer_state, save_history_subset)
-          }
-        }
-        h <- dust_likelihood_last_history(obj, select_random_particle = TRUE)
-        if (!is.null(save_history_index_state)) {
-          h <- h[save_history_index_state, , drop = FALSE]
-        }
-      }
-      list(state = s, history = h)
-    }
-    observer <- monty::monty_observer(observe)
-  } else {
-    observer <- NULL
   }
 
   if (properties$is_stochastic) {
@@ -259,4 +210,66 @@ packer_unpack <- function(packer, x) {
   } else {
     packer$unpack(x)
   }
+}
+
+
+validate_save_history <- function(save_history, call = parent.frame()) {
+  if (isFALSE(save_history)) {
+    return(list(enabled = FALSE))
+  }
+
+  if (isTRUE(save_history)) {
+    return(list(enabled = TRUE, index = NULL, subset = NULL))
+  }
+
+  if (!is.character(save_history)) {
+    cli::cli_abort(
+      paste("Invalid value for 'save_history', expected a scalar",
+            "logical or a character vector"),
+      arg = "save_history", call = call)
+  }
+
+  list(enabled = TRUE, index = NULL, subset = save_history)
+}
+
+
+dust_observer <- function(obj, save_state, save_history,
+                          call = parent.frame()) {
+  assert_scalar_logical(save_state, call = call)
+
+  if (!save_history$enabled && !save_state) {
+    return(NULL)
+  }
+
+  env <- environment()
+
+  observe <- function() {
+    ret <- list()
+    if (save_state) {
+      ret$state <- dust_likelihood_last_state(obj,
+                                              select_random_particle = TRUE)
+    }
+
+    if (save_history$enabled) {
+      if (is.null(obj$packer_history)) {
+        if (is.null(save_history$subset)) {
+          obj$packer_history <- obj$packer_state
+        } else {
+          tmp <- obj$packer_state$subset(save_history$subset)
+          env$save_history$index <- tmp$index
+          obj$packer_history <- tmp$packer
+        }
+      }
+      history <-
+        dust_likelihood_last_history(obj, select_random_particle = TRUE)
+      if (!is.null(save_history$index)) {
+        history <- history[save_history$index, , drop = FALSE]
+      }
+      ret$history <- history
+    }
+
+    ret
+  }
+
+  monty::monty_observer(observe)
 }
