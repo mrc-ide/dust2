@@ -108,3 +108,30 @@ test_that("can create wrapper around filter with multiple pars", {
   expect_length(ll, 2)
   expect_equal(ll[[1]], ll1)
 })
+
+
+pkgload::load_all("~/Documents/src/monty")
+pkgload::load_all()
+
+pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+time_start <- 0
+data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+obj <- dust_filter_create(sir(), time_start, data, n_particles = 100,
+                          seed = 42)
+packer <- monty::monty_packer(
+  c("beta", "gamma"),
+  fixed = list(N = 1000, I0 = 10, exp_noise = 1e6))
+m <- dust_likelihood_monty(obj, packer,
+                           save_history = c("I", "cases_inc"))
+
+prior <- monty::monty_dsl({
+  beta ~ Exponential(mean = 0.5)
+  gamma ~ Exponential(mean = 0.5)
+})
+
+posterior <- m + prior
+
+sampler <- monty::monty_sampler_random_walk(diag(2) * c(0.02, 0.02))
+res <- monty::monty_sample(posterior, sampler, 100, initial = c(.2, .1))
+
+obj$packer_history$unpack(res$observations$history)

@@ -110,8 +110,6 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
     save_history <- TRUE
   }
 
-  assert_scalar_logical(save_history) # TODO: make flexible
-
   domain <- monty::monty_domain_expand(domain, packer)
 
   ## We configure saving trajectories on creation I think, which then
@@ -198,6 +196,7 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
           if (is.null(save_history_subset)) {
             obj$packer_history <- obj$packer_state
           } else {
+            browser()
             save_history_index_state <<-
               validate_history_index(save_history_subset, obj$packer_state)
             obj$packer_history <-
@@ -259,44 +258,5 @@ packer_unpack <- function(packer, x) {
     lapply(seq_len(ncol(x)), function(i) packer$unpack(x[, i]))
   } else {
     packer$unpack(x)
-  }
-}
-
-
-
-validate_history_index <- function(subset, packer, call = parent.frame()) {
-  index <- packer$index()
-  if (is.character(subset)) {
-    ret <- match(subset, names(index))
-    err <- is.na(ret)
-    if (any(err)) {
-      cli::cli_abort(
-        "Unknown state value{?s} referenced by observer: {squote(subset[err])}",
-        call = call)
-    }
-  } else {
-    max <- last(last(index))
-    err <- subset < 1 | subset > max
-    if (any(err)) {
-      cli::cli_abort(
-        "Invalid state value{?s} out of range: {as.character(err)}",
-        call = call)
-    }
-    ret <- index
-  }
-  ret
-}
-
-
-## Dirty hack for now, this should go into monty, but deserves its own
-## PR.
-packer_subset <- function(packer, index) {
-  e <- environment(packer$pack)
-  if (is.character(index)) {
-    scalar <- intersect(e$scalar, index)
-    array <- e$array[intersect(names(e$array), index)]
-    monty::monty_packer(scalar, array)
-  } else {
-    monty::monty_packer(packer$parameters[index])
   }
 }
