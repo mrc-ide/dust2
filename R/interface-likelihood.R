@@ -116,11 +116,6 @@ dust_likelihood_copy <- function(obj, seed = NULL) {
 ##'
 ##' @inheritParams dust_likelihood_run
 ##'
-##' @param index_state Optional index vector to index state by.  This
-##'   is experimental and will play very poorly with providing
-##'   `index_state` when constructing the object (that will likely be
-##'   removed in a version soon)
-##'
 ##' @param select_random_particle Logical, indicating if we should
 ##'   return a history for one randomly selected particle (rather than
 ##'   the entire history).  If this is `TRUE`, the particle will be
