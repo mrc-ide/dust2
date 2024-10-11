@@ -24,8 +24,9 @@ files <- dir(path_dust, "\\.hpp$", recursive = TRUE)
 check <- function(f) {
   message(crayon::bold(sprintf("%s...", f)), appendLF = FALSE)
   include <- c(include_r, include_dust, include_monty, include_cpp)
+  dest <- tempfile()
   ans <- suppressWarnings(
-    system2(cc, c(cc_flags, "-O0", "-o/dev/null", "-c", include,
+    system2(cc, c(cc_flags, "-O0", paste0("-o", dest), "-c", include,
                   file.path(path_dust, f)),
             stderr = TRUE, stdout = TRUE))
   ok <- is.null(attr(ans, "status"))
