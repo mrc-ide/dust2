@@ -4,6 +4,7 @@
 #include <numeric>
 #include <vector>
 #include <dust2/common.hpp>
+#include <dust2/properties.hpp>
 #include <cpp11.hpp>
 
 namespace dust2 {
@@ -345,7 +346,7 @@ std::vector<typename T::internal_state> build_internal(const std::vector<typenam
   // We can parallelise this but it's probably not really wanted.
   for (size_t i = 0; i < n_threads; ++i) {
     for (auto& s : shared) {
-      internal.push_back(T::build_internal(s));
+      internal.push_back(do_build_internal<T>(s));
     }
   }
   return internal;

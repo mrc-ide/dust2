@@ -17,7 +17,6 @@ namespace dust2 {
 
 struct no_data {};
 struct no_internal_state {};
-struct no_shared_state {};
 
 namespace r {
 

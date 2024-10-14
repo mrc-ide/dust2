@@ -10,6 +10,7 @@
 #include <dust2/continuous/solver.hpp>
 #include <dust2/errors.hpp>
 #include <dust2/packing.hpp>
+#include <dust2/properties.hpp>
 #include <dust2/tools.hpp>
 #include <dust2/zero.hpp>
 #include <monty/random/random.hpp>
@@ -24,7 +25,6 @@ public:
   using rng_state_type = typename T::rng_state_type;
   using shared_state = typename T::shared_state;
   using internal_state = typename T::internal_state;
-  using data_type = typename T::data_type;
   using rng_int_type = typename rng_state_type::int_type;
 
   dust_continuous(std::vector<shared_state> shared,
@@ -36,7 +36,7 @@ public:
                   const std::vector<rng_int_type>& seed,
                   bool deterministic, size_t n_threads) :
     packing_state_(T::packing_state(shared[0])),
-    packing_gradient_(T::packing_gradient(shared[0])),
+    packing_gradient_(do_packing_gradient<T>(shared[0])),
     n_state_(packing_state_.size()),
     n_particles_(n_particles),
     n_groups_(shared.size()),
@@ -74,7 +74,7 @@ public:
     }
   }
 
-  template <typename mixed_time = typename T::mixed_time>
+  template <typename mixed_time = typename dust2::properties<T>::is_mixed_time>
   typename std::enable_if<!mixed_time::value, void>::type
   run_to_time(real_type time, const std::vector<size_t>& index_group) {
     real_type * state_data = state_.data();
@@ -100,7 +100,7 @@ public:
     time_ = time;
   }
 
-  template <typename mixed_time = typename T::mixed_time>
+  template <typename mixed_time = typename dust2::properties<T>::is_mixed_time>
   typename std::enable_if<mixed_time::value, void>::type
   run_to_time(real_type time, const std::vector<size_t>& index_group) {
     if (dt_ == 0) {

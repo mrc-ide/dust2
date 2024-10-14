@@ -12,16 +12,11 @@ public:
     real_type a;
     real_type b;
   };
-  using internal_state = dust2::no_internal_state;
-  using data_type = dust2::no_data;
+  struct internal_state {};
   using rng_state_type = monty::random::generator<real_type>;
 
   static dust2::packing packing_state(const shared_state& shared) {
     return dust2::packing{{"x", {}}, {"y", {}}};
-  }
-
-  static dust2::packing packing_gradient(const shared_state& shared) {
-    return dust2::packing{};
   }
 
   static void update_shared(cpp11::list pars, shared_state& shared) {
@@ -51,10 +46,6 @@ public:
     const auto a = dust2::r::read_real(pars, "a");
     const auto b = dust2::r::read_real(pars, "b");
     return shared_state{a, b};
-  }
-
-  static internal_state build_internal(const shared_state& shared) {
-    return internal_state{};
   }
 
   static auto zero_every(const shared_state& shared) {
