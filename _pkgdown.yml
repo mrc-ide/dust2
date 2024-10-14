@@ -72,6 +72,7 @@ articles:
   - title: Details
     navbar: Details
     contents:
+      - data
       - details
       - packaging
       - periodic
