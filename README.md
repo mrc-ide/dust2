@@ -6,7 +6,7 @@
 [![codecov.io](https://codecov.io/github/mrc-ide/dust2/coverage.svg?branch=main)](https://codecov.io/github/mrc-ide/dust2?branch=main)
 <!-- badges: end -->
 
-The `dust2` package provides an engine for running dynamical systemss in discrete or continuous time and where the processes are stochastic or deterministic.  We focus on Markov models where the problem reduces to describing how model state changes as a function of its current state (and possibly time) but without reference to where it has come from.  Superficially, the problem is not very hard (see `vignette("design")`), but `dust2` takes care of many practical and bookkeeping details such as:
+The `dust2` package provides an engine for running dynamical systems in discrete or continuous time and where the processes are stochastic or deterministic.  We focus on Markov models where the problem reduces to describing how model state changes as a function of its current state (and possibly time) but without reference to where it has come from.  Superficially, the problem is not very hard (see `vignette("design")`), but `dust2` takes care of many practical and bookkeeping details such as:
 
 * Running systems in parallel on multi-core machines, even those involving random numbers
 * Providing useful verbs for efficiently working with groups of simulations (different parameters, starting conditions or stochastic realisations)
@@ -19,7 +19,7 @@ The `dust2` package provides an engine for running dynamical systemss in discret
 * [`odin2`](https://mrc-ide.github.io/odin2) is the way most `dust2` system are written
 * The [odin & monty book](https://mrc-ide.github.io/odin-monty) book shows how the package works in context
 * `vignette("writing")` shows how to write a `dust2` system by hand in C++
-* `vignette("packaging")` describes how to package a system for easy resuse
+* `vignette("packaging")` describes how to package a system for easy reuse
 
 ## Roadmap
 
