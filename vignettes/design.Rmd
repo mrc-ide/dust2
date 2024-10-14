@@ -74,11 +74,7 @@ To initialise our system with a potentially very large number of particles we ta
 * First, we seed the first stream using the `splitmix64` RNG, following the xoshiro docs. This expands a single 64-bit integer into the 256-bits of RNG state, while ensuring that the resulting full random number seed does not contain all zeros.
 * Then, for each subsequent chain we take a "jump" in the sequence. This is a special move implemented by the RNG that is equivalent to a very large number of draws from the generator (e.g., about 2^128 for the default generator used for double-precision models) ensuring that each particles state occupies a non-overlapping section of the underling random number stream (see `vignette("rng")` for details).
 
-With this setup we are free to parallelise the system as each realisation is completely independent of each other; the problem has become "[embarrassingly parallel](https://en.wikipedia.org/wiki/Embarrassingly_parallel)". In practice we do this using [OpenMP](https://www.openmp.org/) where available as this is well supported from R and gracefully falls back on serial operation where not available.  See `dust::dust_openmp_support` for information on your system's OpenMP configuration as seen by R:
-
-```{r}
-dust::dust_openmp_support()
-```
+With this setup we are free to parallelise the system as each realisation is completely independent of each other; the problem has become "[embarrassingly parallel](https://en.wikipedia.org/wiki/Embarrassingly_parallel)". In practice we do this using [OpenMP](https://www.openmp.org/) where available as this is well supported from R and gracefully falls back on serial operation where not available.
 
 As the number of threads changes, the results will not change; the same calculations will be carried out and the same random numbers drawn.
 
