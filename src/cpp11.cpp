@@ -278,6 +278,13 @@ extern "C" SEXP _dust2_dust2_filter_malaria_set_rng_state(SEXP ptr, SEXP r_rng_s
     return cpp11::as_sexp(dust2_filter_malaria_set_rng_state(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_rng_state)));
   END_CPP11
 }
+// openmp.cpp
+cpp11::writable::list cpp_openmp_info();
+extern "C" SEXP _dust2_cpp_openmp_info() {
+  BEGIN_CPP11
+    return cpp11::as_sexp(cpp_openmp_info());
+  END_CPP11
+}
 // sir.cpp
 SEXP dust2_system_sir_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::list r_time_control, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic, cpp11::sexp r_n_threads);
 extern "C" SEXP _dust2_dust2_system_sir_alloc(SEXP r_pars, SEXP r_time, SEXP r_time_control, SEXP r_n_particles, SEXP r_n_groups, SEXP r_seed, SEXP r_deterministic, SEXP r_n_threads) {
@@ -827,6 +834,7 @@ extern "C" SEXP _dust2_dust2_system_walk_simulate(SEXP ptr, SEXP r_times, SEXP r
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
+    {"_dust2_cpp_openmp_info",                         (DL_FUNC) &_dust2_cpp_openmp_info,                          0},
     {"_dust2_dust2_filter_malaria_alloc",              (DL_FUNC) &_dust2_dust2_filter_malaria_alloc,              10},
     {"_dust2_dust2_filter_malaria_last_history",       (DL_FUNC) &_dust2_dust2_filter_malaria_last_history,        5},
     {"_dust2_dust2_filter_malaria_last_state",         (DL_FUNC) &_dust2_dust2_filter_malaria_last_state,          5},

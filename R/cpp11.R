@@ -156,6 +156,10 @@ dust2_filter_malaria_set_rng_state <- function(ptr, r_rng_state) {
   .Call(`_dust2_dust2_filter_malaria_set_rng_state`, ptr, r_rng_state)
 }
 
+cpp_openmp_info <- function() {
+  .Call(`_dust2_cpp_openmp_info`)
+}
+
 dust2_system_sir_alloc <- function(r_pars, r_time, r_time_control, r_n_particles, r_n_groups, r_seed, r_deterministic, r_n_threads) {
   .Call(`_dust2_dust2_system_sir_alloc`, r_pars, r_time, r_time_control, r_n_particles, r_n_groups, r_seed, r_deterministic, r_n_threads)
 }
