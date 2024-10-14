@@ -204,7 +204,7 @@ SEXP dust2_system_compare_data(cpp11::sexp ptr,
                                bool preserve_particle_dimension,
                                bool preserve_group_dimension) {
   using system_type = typename T::system_type;
-  using data_type = typename T::data_type;
+  using data_type = typename system_type::data_type;
 
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
   check_errors(obj, "compare data for");

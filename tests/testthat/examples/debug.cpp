@@ -22,7 +22,7 @@ public:
     real_type exp_noise;
   };
 
-  using internal_state = dust2::no_internal_state;
+  struct internal_state {};
 
   struct data_type {
     real_type incidence;
@@ -32,10 +32,6 @@ public:
 
   static dust2::packing packing_state(const shared_state& shared) {
     return dust2::packing{{"S", {}}, {"I", {}}, {"R", {}}, {"cases_cumul", {}}, {"cases_inc", {}}};
-  }
-
-  static dust2::packing packing_gradient(const shared_state& shared) {
-    return dust2::packing{};
   }
 
   static void initial(real_type time,
@@ -92,10 +88,6 @@ public:
     const real_type gamma = dust2::r::read_real(pars, "gamma", 0.1);
     const real_type exp_noise = dust2::r::read_real(pars, "exp_noise", 1e6);
     return shared_state{N, I0, beta, gamma, exp_noise};
-  }
-
-  static internal_state build_internal(const shared_state& shared) {
-    return internal_state{};
   }
 
   // This is the bit that we'll use to do fast parameter updating, and

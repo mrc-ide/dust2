@@ -7,9 +7,6 @@ class malaria {
 public:
   malaria() = delete;
 
-  // We will try and lift this elsewhere soon; the time_type bit needs
-  // to be the canonical source of this...
-  using mixed_time = std::true_type;
   using real_type = double;
 
   struct shared_state {
@@ -29,7 +26,7 @@ public:
     real_type beta_volatility; // Volatility of random walk
   };
 
-  using internal_state = dust2::no_internal_state;
+  struct internal_state {};
 
   struct data_type {
     real_type tested;
@@ -41,10 +38,6 @@ public:
   // State is modelled as [Sh, Ih, Sv, Iv, beta, Ev...]
   static dust2::packing packing_state(const shared_state& shared) {
     return dust2::packing{{"Sh", {}}, {"Ih", {}}, {"Sv", {}}, {"Iv", {}}, {"beta", {}}, {"Ev", {shared.n_rates}}};
-  }
-
-  static dust2::packing packing_gradient(const shared_state& shared) {
-    return dust2::packing{};
   }
 
   static void initial(real_type time,
@@ -115,18 +108,10 @@ public:
     return shared_state{a, bh, bv, n_rates, mu, r, tau, initial_Ih, initial_Iv, initial_Sv, beta_volatility};
   }
 
-  static internal_state build_internal(const shared_state& shared) {
-    return internal_state{};
-  }
-
   static void update_shared(cpp11::list pars, shared_state& shared) {
     shared.a = dust2::r::read_real(pars, "a", shared.a);
     shared.r = dust2::r::read_real(pars, "r", shared.r);
     shared.tau = dust2::r::read_real(pars, "tau", shared.tau);
-  }
-
-  static auto zero_every(const shared_state& shared) {
-    return dust2::zero_every_type<real_type>();
   }
 
   static data_type build_data(cpp11::list r_data, const shared_state& shared) {

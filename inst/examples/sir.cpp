@@ -23,7 +23,7 @@ public:
     real_type exp_noise;
   };
 
-  using internal_state = dust2::no_internal_state;
+  struct internal_state {};
 
   struct data_type {
     real_type incidence;

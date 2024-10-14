@@ -11,8 +11,8 @@ template <typename T>
 class unfilter {
 public:
   using real_type = typename T::real_type;
-  using data_type = typename T::data_type;
   using system_type = typename T::system_type;
+  using data_type = typename system_type::data_type;
 
   // We need to provide direct access to the system, because the user
   // will want to set parameters in, and pull out state, etc.

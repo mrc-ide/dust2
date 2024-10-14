@@ -34,7 +34,7 @@ SEXP dust2_continuous_alloc(cpp11::list r_pars,
   auto seed = monty::random::r::as_rng_seed<rng_state_type>(r_seed);
   auto deterministic = to_bool(r_deterministic, "deterministic");
 
-  auto dt = check_dt(r_time_control, T::mixed_time::value, false);
+  auto dt = check_dt(r_time_control, dust2::properties<T>::is_mixed_time::value, false);
   auto ode_control = validate_ode_control<real_type>(r_time_control);
 
   auto obj = new dust_continuous<T>(shared, internal, time, dt, ode_control,
