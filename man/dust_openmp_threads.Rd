@@ -39,8 +39,8 @@ smallest of the number of "processors" (reported by
 \code{omp_get_max_threads()} and "thread_limit" (reported by
 \code{omp_get_thread_limit()}.
 
-See \code{\link[dust:dust_openmp_support]{dust::dust_openmp_support()}} for the values of all the values
-that go into this calculation.
+See \code{\link[=dust_openmp_support]{dust_openmp_support()}} for the values of all the values that
+go into this calculation.
 }
 \examples{
 # Default number of threads; tries to pick something friendly,

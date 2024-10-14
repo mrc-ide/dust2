@@ -59,8 +59,8 @@ dust_openmp_support <- function(check_compile = FALSE) {
 ##' `omp_get_max_threads()` and "thread_limit" (reported by
 ##' `omp_get_thread_limit()`.
 ##'
-##' See [dust::dust_openmp_support()] for the values of all the values
-##' that go into this calculation.
+##' See [dust_openmp_support()] for the values of all the values that
+##' go into this calculation.
 ##'
 ##' @title Select number of threads
 ##'
