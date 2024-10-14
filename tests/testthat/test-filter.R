@@ -443,6 +443,27 @@ test_that("can skip over just some groups with missing data", {
 })
 
 
+test_that("can run particle filter with missing data from integers", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+
+  time_start <- 0
+  data1 <- data.frame(time = c(4, 8, 12, 16),
+                      incidence = c(NA, 2L, 3L, 4L))
+  data2 <- data1[complete.cases(data1), ]
+  dt <- 1
+  n_particles <- 100
+  seed <- 42
+
+  obj1 <- dust_filter_create(sir(), time_start, data1, dt = dt,
+                             n_particles = n_particles, seed = seed)
+  obj2 <- dust_filter_create(sir(), time_start, data2, dt = dt,
+                             n_particles = n_particles, seed = seed)
+  ll1 <- replicate(10, dust_likelihood_run(obj1, pars))
+  ll2 <- replicate(10, dust_likelihood_run(obj2, pars))
+  expect_identical(ll1, ll2)
+})
+
+
 test_that("can print a filter", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
   time_start <- 0

@@ -115,7 +115,7 @@ inline double to_double(cpp11::sexp x, bool allow_na, const char * name) {
   }
   if (TYPEOF(x) == INTSXP) {
     int ret = INTEGER(x)[0];
-    if (ISNA(ret)) {
+    if (ret == NA_INTEGER) {
       if (allow_na) {
         return NA_REAL;
       } else {
@@ -124,7 +124,7 @@ inline double to_double(cpp11::sexp x, bool allow_na, const char * name) {
     }
     return static_cast<double>(ret);
   }
-  if (allow_na && TYPEOF(x) == LGLSXP && ISNA(INTEGER(x)[0])) {
+  if (allow_na && TYPEOF(x) == LGLSXP && INTEGER(x)[0] == NA_LOGICAL) {
     return NA_REAL;
   }
   cpp11::stop("'%s' must be scalar numeric", name);
