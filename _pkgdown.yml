@@ -64,8 +64,15 @@ reference:
       - dust_package
 
 articles:
+  - title: Introduction
+    navbar: ~
+    contents:
+      - dust2
+      - design
   - title: Details
     navbar: Details
     contents:
       - details
+      - packaging
       - periodic
+      - writing

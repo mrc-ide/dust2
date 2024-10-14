@@ -1,0 +1,238 @@
+---
+title: "Introduction to dust"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to dust}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+source("support.R")
+set.seed(1)
+```
+
+Stochastic models can be used in statistical inference via methods such as [particle filtering](https://en.wikipedia.org/wiki/Particle_filter) but in practice doing so requires that the models can be run over and over again very quickly. While R has excellent support for sampling from distributions, it is not necessarily well suited for this sort of problem because R is single threaded, so we are forced to evaluate realisations of the stochastic process in series (one after another) rather than in parallel.
+
+The `dust2` package provides tools to help write stochastic models that can be evaluated in parallel. It does not directly provide statistical methods; see the [monty](https://mrc-ide.github.io/mcstate/) package for that. Instead, it focuses on providing:
+
+* a way of wrapping a user-provided model, itself written as a C++ class
+* a lightweight interface that drives this model from R
+* a set of useful primitives for developing sequential Monte Carlo methods.
+
+```{r}
+library(dust2)
+```
+
+## A simple example - random walk
+
+Consider a unbiased random walk; at each time step we move our position with a draw from a normal distribution with mean 0 and some standard deviation. We consider a single individual moving but will eventually simulate a family of these individuals, each independent. All simulations have a sense of time - a unitless measure of time "step" will be used but it's up to you how it is interpreted (time is a non-negative integer, implemented using `size_t`).
+
+In this example, we'll use the built-in example from the package:
+
+However, this is also bundled into the package and can be loaded with:
+
+```{r walk_load}
+walk <- dust_example("walk")
+```
+
+`walk` is a function which returns a `dust_system_generator` object:
+
+```{r walk_object}
+walk()
+```
+
+Create an instance of the system using `dust_system_create()`.
+
+```{r walk_create}
+sys <- dust_system_create(walk(), list(sd = 1), n_particles = 20)
+sys
+```
+
+This returns a `dust_system` object that can be used to simulate from or interact with the system.  For example, our initial model state is
+
+```{r walk_initial_state}
+dust_system_state(sys)
+```
+
+Here there is one row per model state variable (there is only one here) and one column per particle (there are 20).  All systems start with a zero state unless you set them via `dust_system_set_state()`, `dust_system_set_state_initial()` or by running the system.
+
+and we can run the system for 100 time steps, then return the state at the end of the walk (and not at any intermediate times):
+
+```{r walk_run_1}
+dust_system_run_to_time(sys, 100)
+dust_system_state(sys)
+```
+
+At this point our particles have been run for 100 time steps with standard deviation 1 at each step so they [will be distributed following Normal(0, 10)](https://en.wikipedia.org/wiki/Random_walk#Gaussian_random_walk).  This is easier to see if we simulate a lot of particles, here 20,000:
+
+```{r walk_simulate_many}
+sys <- dust_system_create(walk(), list(sd = 1), n_particles = 20000)
+dust_system_run_to_time(sys, 100)
+hist(dust_system_state(sys), freq = FALSE, las = 1, col = "steelblue2", main = "",
+     ylim = c(0., 0.04), xlab = "State")
+curve(dnorm(x, 0, 10), col = "orange", add = TRUE, lwd = 2)
+```
+
+### Running a model in parallel
+
+The approach above still runs everything in serial, one particle after another. We can configure this system to run in parallel by providing the extra argument `n_threads` to the constructor.
+
+Provided that your computer can compile with OpenMP the following code will execute in parallel using 2 threads
+
+```{r, walk_parallel}
+sys <- dust_system_create(walk(), list(sd = 1), n_particles = 20, n_threads = 2)
+dust_system_run_to_time(sys, 100)
+dust_system_state(sys)
+```
+
+We use as many random number generators as there are particles, so if you run fewer particles or more, increase the threads or decrease, the results will be the same (see `vignette("design")` for more on this).
+
+You should be careful when selecting the number of threads.  `dust` will never use more than one thread at a time without it being requested, but avoid using `parallel::detectCores()` to work out how many threads you have available as it will often return an overestimate. This is particularly the case in a shared-use system such as a cluster or CRAN's servers.
+
+## A more interesting example
+
+Consider now an SIR model (Susceptible - Infected - Recovered). This sort of model is common in epidemiology, and is often extended to add additional compartments (e.g., SEIR which adds an Exposed compartment) or by structuring each compartment based on properties such as age.  Here, we show a simple example with just 3 compartments, plus two tracking cumulative infections and daily infections.
+
+```{r sir_compile}
+sir <- dust_example("sir")
+```
+
+To get information about the parameters, use `coef()` on the generator
+
+The model is initialised the same way as before:
+
+```{r sir_create}
+sys <- dust_system_create(sir(), list(), n_particles = 2)
+```
+
+This system has a non-trivial initial state; we can set it with `dust_system_set_state_initial()`:
+
+```{r sir_initial_state}
+dust_system_state(sys)
+dust_system_set_state_initial(sys)
+dust_system_state(sys)
+```
+
+Because we have 5 states per particle, this is a 5 x 2 matrix.
+
+In order to run the simulation beginning-to-end, we use the `$simulate` method on a dust object, which runs over a set of time steps and records the state at each.  Let's do this with 200 particles:x
+
+```{r sir_run_collect}
+sys <- dust_system_create(sir(), list(), n_particles = 200)
+dust_system_set_state_initial(sys)
+times <- seq(0, 150)
+state <- dust_system_simulate(sys, times)
+```
+
+The output here is a 5 x 200 x 151 matrix (n state x n particles x n times)
+
+```{r sir_run_dim}
+dim(state)
+```
+
+We can use `dust_unpack_state` to convert this into a list-of-matrices:
+
+```{r}
+state <- dust_unpack_state(sys, state)
+names(state)
+dim(state$cases_inc)
+```
+
+so here `state$cases_inc` is a 200 (particle) by 151 (time step) matrix.  Note that this will need transposing before plotting.
+
+Plotting this over time, we see:
+
+```{r sir_average}
+matplot(times, t(state$I), type = "l", lty = 1, col = "#00000022",
+        xlab = "Time", ylab = "Number infected (I)")
+lines(times, colMeans(state$I), col = "red", lwd = 2)
+```
+
+## Other methods
+
+There are a few other methods on the dust objects that may be useful.
+
+### Reordering particles
+
+This method exists to support particle filtering, and allows resampling or reordering of particles.
+
+```{r reorder_setup}
+sys <- dust_system_create(walk(), list(sd = 1), n_particles = 20)
+dust_system_run_to_time(sys, 1)
+dust_system_state(sys)
+```
+
+Suppose that we wanted to reorder these particles so that they were in decreasing order:
+
+```{r reorder_index}
+index <- order(dust_system_state(sys))
+index
+```
+
+We then pass this `index` to the reorder method:
+
+```{r reorder_apply}
+dust_system_reorder(sys, index)
+dust_system_state(sys)
+```
+
+We can then continue our random walk. There is no need to sample every particle and particles can appear multiple times in the sample, but the total number must be conserved.  Suppose that we want to to sample particles based on how close they are to 0:
+
+```{r reorder_weighted_index}
+p <- dnorm(dust_system_state(sys))
+index <- sample(length(p), replace = TRUE , prob = p)
+index
+```
+
+We can then apply this sampling:
+
+```{r reorder_weighted_apply}
+dust_system_reorder(sys, index)
+dust_system_state(sys)
+```
+
+This is not terribly useful on its own but is a key part of a particle filter.
+
+When this reordering happens, only the model state is copied around; the `internal` data and random number state are left behind.
+
+### Set particle state
+
+A particle state is determined by three mutable things; `pars`, `state` and `time`; these can all be updated for a model after it has been created.  We have found setting one or more of these at a time important;
+
+* Resetting the model with a new set of parameters (`pars`), initial conditions (`state`) and times (`time`)
+* Changing `pars` at some point in the simulation to introduce some new aspect of the model
+* Changing `state` to manually move around some individuals within a model
+* Setting `time` along with `state` when initialising the model from a previously saved state
+
+The `update_state` method allows setting any or all of these components.
+
+By default every particle starts from the initial condition specified by your model classes `initial()` method. However, you can specify a state directly using the `$update_state()` method. Here, we initialise our SIR model with only 1 infected individual rather than 10:
+
+```{r update_state}
+sys <- dust_system_create(sir(), list(), n_particles = 20)
+dust_system_set_state(sys, matrix(c(1000, 1, 0, 0, 0), 5, 1))
+dust_system_state(sys)
+```
+
+Now, when we run the model, far more of the epidemics fail to take off as the infected individual goes disappears before infecting anyone.
+
+```{r}
+state <- dust_system_simulate(sys, times)
+state <- dust_unpack_state(sys, state)
+matplot(times, t(state$I), type = "l", lty = 1, col = "#00000022",
+        xlab = "Day", ylab = "Number infected (I)")
+```
+
+You can optionally set the initial time along with the state. This is useful if your model depends on time (e.g., you use the time step in a calculation by transforming it into some more meaningful measure of time).
+
+You can also set the initial state to a range of different values. Suppose we set the initial number of infections to be Poisson distributed with a mean of 10, we might write:
+
+```{r}
+I0 <- rpois(20, 10)
+state0 <- rbind(1010 - I0, I0, 0, 0, 0, deparse.level = 0)
+dust_system_set_state(sys, state0)
+dust_system_set_time(sys, 0)
+dust_system_time(sys)
+dust_system_state(sys)
+```

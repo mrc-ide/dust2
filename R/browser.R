@@ -1,5 +1,5 @@
 ##' Control browser-based debugging of dust models.  This help page documents
-##' three funtions that can be used to control if and how the browser
+##' three functions that can be used to control if and how the browser
 ##' is enabled.  You can't enter the debugger from any of these
 ##' functions; it is only enabled if present in your C++ code (or if
 ##' using `odin2` if you have enabled it).
@@ -9,7 +9,7 @@
 ##' It is built on top of R's [browser()] and so all the usual tips,
 ##' tricks and issues for working with this apply.  We recommend
 ##' setting the R option `browserNLdisabled = TRUE` to avoid surprises
-##' from presssing `<enter>`.
+##' from pressing `<enter>`.
 ##'
 ##' * You can press `n` or `c` to proceed to the next enabled iteration
 ##' * You can press `Q` to quit the browser (this will end up as an

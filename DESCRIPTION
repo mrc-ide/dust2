@@ -27,6 +27,7 @@ Suggests:
     callr,
     cpp11,
     decor,
+    fs,
     glue,
     knitr,
     mockery,
