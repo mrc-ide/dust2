@@ -1,8 +1,8 @@
 ---
-title: "Principles and design of dust"
+title: "Comparing dust systems to data"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Principles and design of dust}
+  %\VignetteIndexEntry{Comparing dust systems to data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
