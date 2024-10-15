@@ -111,7 +111,7 @@ stopifnot(length(j) >= 1)
 cc_output(walk_code[i_shared:j[[1]]])
 ```
 
-Values in `shared_state` are quantities, often parameters, that do not vary after a system is initialised (or after running `dust_system_update_pars()`) and which are shared across all particles in a group.  They are read-only while the system is running (indeed through all the non-parameter methods below).  You can include derived quantities here too.  In this model we have 1 element, `sd`, which will represent the standard deviation of the random walk over a time unit.
+Values in `shared_state` are quantities, often parameters, that do not vary after a system is initialised (or after running `dust_system_update_pars()`) and which are shared across all particles in a group.  They are read-only while the system is running (indeed through all the non-parameter methods below).  You can include derived quantities here too.  In this model we have one element, `sd`, which will represent the standard deviation of the random walk over a time unit.
 
 Third, we have an empty **internal state**:
 
@@ -183,12 +183,12 @@ cc_output(walk_code[methods_walk$initial])
 This function takes as argument:
 
 * `time`, which is the time at which the system is being initialised.  Our initial conditions don't depend on time so we will ignore this, but some systems will find it useful.
-"* `shared`, a **read only** (`const`) reference to our shared data (in this system a `struct` containing `sd`).  We will ignore this as well.
+* `shared`, a **read only** (`const`) reference to our shared data (in this system a `struct` containing `sd`).  We will ignore this as well.
 * `internal`, a mutable reference to our internal state, which is an empty `struct`.  We ignore this as well.
 * `rng_state`, the state of the random number generator for this particle; we would use this to generate random numbers if we did so, which we don't, so you will be unsurprised to read that we ignore this one too.
 * `state_next`, the system state that we are initialising.  This one we will write to, and it will contain on exit the initial conditions.
 
-Note that `state_next` raw pointer, which is a bit gross if you are used to modern C++, but here we are writing into the middle of a big state vector that includes all our particles.  It is your responsibility not to write past the end of this (here we can write exactly one number but in complex systems the state for each particle could be quite long).  If we used C++20 we might have used [ranges support](https://en.cppreference.com/w/cpp/ranges) to do this more nicely.
+Note that `state_next` is a raw pointer, which is a bit gross if you are used to modern C++, but here we are writing into the middle of a big state vector that includes all our particles.  It is your responsibility not to write past the end of this (here we can write exactly one number but in complex systems the state for each particle could be quite long).  If we used C++20 we might have used [ranges support](https://en.cppreference.com/w/cpp/ranges) to do this more nicely.
 
 The actual implementation is trivial; we zero the initial condition!
 
@@ -212,7 +212,7 @@ The general pattern is to read variables from `state`, do some calculations and 
 
 Slightly more interestingly, consider the SIR model used elsewhere in the docs (`dust_example("sir")` and elsewhere).  Here, we'll show a minimal implementation of this, which shows off a few more features:
 
-```{r FALSE, results = "asis"}
+```{r, echo = FALSE, results = "asis"}
 sir_code <- readLines("examples/sir.cpp")
 cc_output(sir_code)
 ```
@@ -277,7 +277,7 @@ You might think that this will simply compute **cumulative cases**, and you woul
 cc_output(sir_code[methods_sir$zero_every])
 ```
 
-This declares that every `1` time unit (the first element of the inner `{}`) we will zero the data at elements `{3}`.  This latter argument might be a vector, so saying `{7, {3, 4, 5}}` would read as "every 7 time unit, zero elements 3 to 5".  The outer `{}` allows us to have multiple different zeroed variables, so we could write `dust2::zero_every_type<real_type>{{1, {3}, {7, {4}}}` if we added another variable for weekly incidence.
+This declares that every `1` time unit (the first element of the inner `{}`) we will zero the data at element(s) `{3}`.  This latter argument might be a vector, so saying `{7, {3, 4, 5}}` would read as "every 7 time units, zero elements 3 to 5".  The outer `{}` allows us to have multiple different zeroed variables, so we could write `dust2::zero_every_type<real_type>{{1, {3}, {7, {4}}}` if we added another variable for weekly incidence.
 
 Finally, we have `compare_data`:
 

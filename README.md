@@ -16,14 +16,14 @@ The `dust2` package provides an engine for running dynamical systems in discrete
 
 * `vignette("design")` describes the problems `dust` tries to solve ([read on package website](https://mrc-ide.github.io/dust/articles/design.html))
 * `vignette("dust2")` describes `dust` by example, showing two simple systems and the methods that can drive them ([read on package website](https://mrc-ide.github.io/dust/articles/dust.html))
-* [`odin2`](https://mrc-ide.github.io/odin2) is the way most `dust2` system are written
-* The [odin & monty book](https://mrc-ide.github.io/odin-monty) book shows how the package works in context
+* [`odin2`](https://mrc-ide.github.io/odin2) is the way most `dust2` systems are written
+* The [odin & monty book](https://mrc-ide.github.io/odin-monty) shows how the package works in context
 * `vignette("writing")` shows how to write a `dust2` system by hand in C++
 * `vignette("packaging")` describes how to package a system for easy reuse
 
 ## Roadmap
 
-This package is a ground-up rewrite of [`dust`](https://mrc-ide.github.io/dust) and will eventually become version 2.0.0 of `dust`, which we will then release to CRAN.  It exists separately for now to facilitate development and use alongside the original `dust2`, and is being developed in parallel with [`odin2`](https://mrc-ide.github.io/odin2) and [`monty`](https://mrc-ide.github.io/monty) (previously [`mcstate`](https://mrc-ide.github.io/mcstate)).  Some of the functionality here was originally found in `mcstate` and some of the previous version of `dust` can now be found in `monty` (e.g., the random number library).
+This package is a ground-up rewrite of [`dust`](https://mrc-ide.github.io/dust) and will eventually become version 2.0.0 of `dust`, which we will then release to CRAN.  It exists separately for now to facilitate development and use alongside the original `dust`, and is being developed in parallel with [`odin2`](https://mrc-ide.github.io/odin2) and [`monty`](https://mrc-ide.github.io/monty) (previously [`mcstate`](https://mrc-ide.github.io/mcstate)).  Some of the functionality here was originally found in `mcstate` and some of the previous version of `dust` can now be found in `monty` (e.g., the random number library).
 
 ## Installation
 

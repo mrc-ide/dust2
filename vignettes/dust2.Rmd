@@ -57,7 +57,7 @@ dust_system_state(sys)
 
 Here there is one row per model state variable (there is only one here) and one column per particle (there are 20).  All systems start with a zero state unless you set them via `dust_system_set_state()`, `dust_system_set_state_initial()` or by running the system.
 
-and we can run the system for 100 time steps, then return the state at the end of the walk (and not at any intermediate times):
+We can run the system for 100 time steps, then return the state at the end of the walk (and not at any intermediate times):
 
 ```{r walk_run_1}
 dust_system_run_to_time(sys, 100)
@@ -177,7 +177,7 @@ dust_system_reorder(sys, index)
 dust_system_state(sys)
 ```
 
-We can then continue our random walk. There is no need to sample every particle and particles can appear multiple times in the sample, but the total number must be conserved.  Suppose that we want to to sample particles based on how close they are to 0:
+We can then continue our random walk. There is no need to sample every particle and particles can appear multiple times in the sample, but the total number must be conserved.  Suppose that we want to sample particles based on how close they are to 0:
 
 ```{r reorder_weighted_index}
 p <- dnorm(dust_system_state(sys))
@@ -215,7 +215,7 @@ dust_system_set_state(sys, matrix(c(1000, 1, 0, 0, 0), 5, 1))
 dust_system_state(sys)
 ```
 
-Now, when we run the model, far more of the epidemics fail to take off as the infected individual goes disappears before infecting anyone.
+Now, when we run the model, far more of the epidemics fail to take off as the infected individual disappears before infecting anyone.
 
 ```{r}
 state <- dust_system_simulate(sys, times)

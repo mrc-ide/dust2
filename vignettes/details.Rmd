@@ -23,6 +23,6 @@ knitr::opts_chunk$set(
 
 If you set this environment variable, then we'll create models here, each with a name in the pattern `dust_<hash>` where `<hash>` is the hash of the generated code.  This means that if your model changes we'll still recompile it.
 
-`DUST_QUIET`: an environment variable which controls the default level of verbosity when compiling dust models.  Set this to a truthy value (e.g., `TRUE`) to change the default.  This can always be overridden by providing a value for the `quiet` argument to [dust_compile()] and [dust_package()].
+`DUST_QUIET`: an environment variable which controls the default level of verbosity when compiling dust models.  Set this to a truthy value (e.g., `TRUE`) to change the default.  This can always be overridden by providing a value for the `quiet` argument to `dust_compile()` and `dust_package()`.
 
-`DUST_DEBUG`: an environment variable which controls how `pkgload::compile_dll()` compiles the C++ code.  Set this to a truthy value (e.g., `TRUE`) to disable optimisation, which allows faster compilation at the cost of slower runtime.  This can be overridden by the `debug` argument to [dust_compile()].
+`DUST_DEBUG`: an environment variable which controls how `pkgload::compile_dll()` compiles the C++ code.  Set this to a truthy value (e.g., `TRUE`) to disable optimisation, which allows faster compilation at the cost of slower runtime.  This can be overridden by the `debug` argument to `dust_compile()`.
