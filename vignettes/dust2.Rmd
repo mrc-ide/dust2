@@ -98,8 +98,6 @@ Consider now an SIR model (Susceptible - Infected - Recovered). This sort of mod
 sir <- dust_example("sir")
 ```
 
-To get information about the parameters, use `coef()` on the generator
-
 The model is initialised the same way as before:
 
 ```{r sir_create}

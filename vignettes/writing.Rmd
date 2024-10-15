@@ -61,7 +61,13 @@ stopifnot(length(i) == 1, i == 2)
 cc_output(annotations[[i]])
 ```
 
-If we had wanted a continuous time system of ODEs we would have written `// [[dust2::time_type(continuous)]]` and then later some of the rest of the code would be different; we will discuss this later.
+If we had wanted a continuous time system of ODEs we would have instead written:
+
+```cc
+// [[dust2::time_type(continuous)]]
+```
+
+and then later some of the rest of the code would be different; we will discuss this later.
 
 The remaining annotations tell `dust2` about the parameters.  It does not actually need to know about them, but this will be information that eventually we will surface in R so that you know what you can initialise the system with.
 
