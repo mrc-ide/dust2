@@ -1,0 +1,300 @@
+---
+title: "Writing dust2 systems"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Writing dust2 systems}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+source("support.R")
+```
+
+This vignette covers how to write `dust2` systems from scratch.  Users of this package via [`odin2`](https://mrc-ide.github.io/odin2) do not need to read or understand this vignette, though of course you are welcome to read it.  We will start with an almost comically trivial system and try to expand it over several sections.
+
+# First steps, a random walk
+
+Consider a unbiased random walk; at each time step we move our position with a draw from a normal distribution with mean 0 and some standard deviation.
+
+To implement this model in dust we write out a C++ file that looks like:
+
+```{r walk_code, echo = FALSE, results = "asis"}
+walk_code <- readLines("examples/walk.cpp")
+cc_output(walk_code)
+```
+
+All the code sits inside a class, though in this class every method is `static` (we have deleted the constructor by writing `walk() = delete;` to emphasise this).  All dust class definitions have the same components, but the order is not terribly important:
+
+* a series of annotations (the comments starting with `// [[dust2::`)
+* some type declarations and `struct` definitions
+* a series of `static` methods.  For these, the types of the arguments must match the interface described here
+
+We consider each of these pieces in turn here, and consider the *other* values that might have been used in place.
+
+## Support code
+
+We include a header from `dust2`; the path for the compiler to find this will be arranged by R using its `LinkingTo` system.  This include must be present.
+
+```{r, echo = FALSE, results = "asis"}
+i <- grep("#include", walk_code)
+stopifnot(i == 1)
+cc_output(walk_code[[i]])
+```
+
+## Annotations
+
+The first annotation tells `dust2` the name of the class that contains the system definition.  This may seem obvious but computers are actually not very clever and it's best to be blunt with them.
+
+```{r, echo = FALSE, results = "asis"}
+annotations <- walk_code[startsWith(walk_code, "// [[")]
+i <- grep("dust2::class", annotations)
+stopifnot(length(i) == 1, i == 1)
+cc_output(annotations[[i]])
+```
+
+The second annotation tells `dust2` that this is a discrete-time (as opposed to continuous time) system:
+
+```{r, echo = FALSE, results = "asis"}
+i <- grep("dust2::time_type", annotations)
+stopifnot(length(i) == 1, i == 2)
+cc_output(annotations[[i]])
+```
+
+If we had wanted a continuous time system of ODEs we would have instead written:
+
+```cc
+// [[dust2::time_type(continuous)]]
+```
+
+and then later some of the rest of the code would be different; we will discuss this later.
+
+The remaining annotations tell `dust2` about the parameters.  It does not actually need to know about them, but this will be information that eventually we will surface in R so that you know what you can initialise the system with.
+
+```{r, echo = FALSE, results = "asis"}
+i <- grep("dust2::parameter", annotations)
+stopifnot(length(i) == 1)
+cc_output(annotations[i])
+```
+
+The other annotations that we did not use here are
+
+* `// [[dust2::name(<value>)]]` - specify a different name in R for your system to the class name
+* `// [[dust2::default_dt(<value>)]]` - specify a default value for `dt`
+* `// [[dust2::has_compare()]]` - required to support comparison to data
+* `// [[dust2::has_adjoint()]]` - required to support likelihood gradients
+
+We will describe these later.
+
+## Type definitions
+
+The first type we need is one for the real type (*we might change this, depending on how rewriting the currently-absent GPU interface goes*).  But for now at least you must include this line and it's best if it is exactly as is written here.
+
+```{r, echo = FALSE, results = "asis"}
+i_real_type <- grep("using real_type =", walk_code)
+i_shared <- grep("struct shared_state", walk_code)
+i_internal <- grep("struct internal_state {};", walk_code, fixed = TRUE)
+i_rng_state <- grep("using rng_state_type", walk_code)
+stopifnot(
+  length(i_real_type) == 1,
+  length(i_shared) == 1,
+  length(i_internal) == 1,
+  length(i_rng_state) == 1,
+  i_real_type < i_shared,
+  i_shared < i_internal,
+  i_internal < i_rng_state)
+cc_output(walk_code[[i_real_type]])
+```
+
+If you have come from a C background, this `using` statement is a lot like writing `typedef double real_type;` except that the arguments go the other way around and it contains an equals sign.
+
+Second, we have the **shared state**:
+
+```{r, echo = FALSE, results = "asis"}
+j <- grep("^\\s*};", walk_code)
+j <- j[j > i_shared]
+stopifnot(length(j) >= 1)
+cc_output(walk_code[i_shared:j[[1]]])
+```
+
+Values in `shared_state` are quantities, often parameters, that do not vary after a system is initialised (or after running `dust_system_update_pars()`) and which are shared across all particles in a group.  They are read-only while the system is running (indeed through all the non-parameter methods below).  You can include derived quantities here too.  In this model we have one element, `sd`, which will represent the standard deviation of the random walk over a time unit.
+
+Third, we have an empty **internal state**:
+
+```{r, echo = FALSE, results = "asis"}
+cc_output(walk_code[[i_internal]])
+```
+
+Internal state is particle-specific state that can be used as scratch space that a particle can read and write to as it evaluates but which is not tied to a specific particle.
+
+Finally, we have the **random number state**:
+
+```{r, echo = FALSE, results = "asis"}
+cc_output(walk_code[[i_rng_state]])
+```
+
+As with `real_type` above, this was designed for flexibility in dust version 1 that we may not need here, so it may change in future.  However, we do need a convenient name for this type, so it is best left as is.
+
+## The methods
+
+```{r, include = FALSE}
+find_method <- function(name, code) {
+  i <- grep(sprintf("^  static .+ %s\\(", name), code)
+  stopifnot(length(i) == 1)
+  j <- grep("^  }$", code)
+  j <- j[j > i]
+  stopifnot(length(j) > 0)
+  seq(i, j[[1]])
+}
+
+methods_walk <- c("packing_state",
+                  "build_shared", "update_shared",
+                  "initial", "update")
+methods_walk <- setNames(lapply(methods_walk, find_method, walk_code), methods_walk)
+stopifnot(all(diff(vapply(methods_walk, "[[", 1, 1)) > 0))
+```
+
+First up, we describe how state is packed.  Here we have a single compartment `x`, which is a scalar.  This is described in the packing as:
+
+```{r, echo = FALSE, results = "asis"}
+cc_output(walk_code[methods_walk$packing_state])
+```
+
+The `{}` here indicates `x` is a scalar.  If it had been a vector the length would be within the braces (e.g., `{3}` or `{shared.len}`) and if it had been a matrix there would be two elements.  We'll describe this more fully later.
+
+Next, we have `build_shared`, which takes an R list (`cpp11::list`) and converts it into our `shared_state` type.  The implementation here can be whatever you fancy.
+
+```{r, echo = FALSE, results = "asis"}
+stopifnot(any(grepl("dust2::r::read_real", walk_code[methods_walk$build_shared])))
+cc_output(walk_code[methods_walk$build_shared])
+```
+
+Here, we have used a dust convenience function `dust2::r::read_real` to convert the R element `sd` from `pars` into a real and then construct the `struct` from that.  We might have written this manually as something like:
+
+```cc
+  static shared_state build_shared(cpp11::list pars) {
+    real_type sd = cpp11::as_cpp<real_type>(pars["sd"]);
+    return shared_state{sd};
+  }
+```
+
+but we find that the `cpp11` conversion functions produce error messages that are hard to action; if our list `pars` does not have an element `sd`, the *name* `sd` does not occur within the error message so the user does not really know what has gone wrong.
+
+The first sort of interesting method is `initial`, which computes initial conditions for our system.  Though in this case it's trivial so it's not terribly interesting:
+
+```{r, echo = FALSE, results = "asis"}
+cc_output(walk_code[methods_walk$initial])
+```
+
+This function takes as argument:
+
+* `time`, which is the time at which the system is being initialised.  Our initial conditions don't depend on time so we will ignore this, but some systems will find it useful.
+* `shared`, a **read only** (`const`) reference to our shared data (in this system a `struct` containing `sd`).  We will ignore this as well.
+* `internal`, a mutable reference to our internal state, which is an empty `struct`.  We ignore this as well.
+* `rng_state`, the state of the random number generator for this particle; we would use this to generate random numbers if we did so, which we don't, so you will be unsurprised to read that we ignore this one too.
+* `state_next`, the system state that we are initialising.  This one we will write to, and it will contain on exit the initial conditions.
+
+Note that `state_next` is a raw pointer, which is a bit gross if you are used to modern C++, but here we are writing into the middle of a big state vector that includes all our particles.  It is your responsibility not to write past the end of this (here we can write exactly one number but in complex systems the state for each particle could be quite long).  If we used C++20 we might have used [ranges support](https://en.cppreference.com/w/cpp/ranges) to do this more nicely.
+
+The actual implementation is trivial; we zero the initial condition!
+
+And finally we have the `update` method, which will usually be the bulk of a system implementation:
+
+```{r, echo = FALSE, results = "asis"}
+cc_output(walk_code[methods_walk$update])
+```
+
+As with `initial` there are quite a few arguments:
+
+* `time`, as for `initial` the time at the **start** of the step
+* `dt`, the size of the time step (so we will move to `time + dt`)
+* `state`, a **read-only** (`const`) pointer to the state at the start of the step
+* `shared`, `internal` and `rng_state`, as for `initial`
+* `state_next`, a mutable pointer to the state at the end of the step.
+
+The general pattern is to read variables from `state`, do some calculations and write to `state_next`, which is what we do here.  We use the `monty` random library to sample from a normal distribution, referencing the previous state `state[0]`, using the standard deviation of the process from `shared_state` (`shared.sd`) scaled by `dt` and using the random number state `rng_state`, writing this back into `state_next`.
+
+# Multiple variables, the SIR revisited
+
+Slightly more interestingly, consider the SIR model used elsewhere in the docs (`dust_example("sir")` and elsewhere).  Here, we'll show a minimal implementation of this, which shows off a few more features:
+
+```{r, echo = FALSE, results = "asis"}
+sir_code <- readLines("examples/sir.cpp")
+cc_output(sir_code)
+```
+
+This shows basically the same pattern as the random walk model above, and here we highlight the additions and differences.
+
+```{r, include = FALSE}
+methods_sir <- c("packing_state",
+                 "build_shared", "update_shared", "build_data",
+                 "initial", "update", "zero_every", "compare_data")
+methods_sir <- setNames(lapply(methods_sir, find_method, sir_code), methods_sir)
+stopifnot(all(diff(vapply(methods_sir, "[[", 1, 1)) > 0))
+```
+
+Our `packing_state` method looks more interesting and potentially more useful now:
+
+```{r, echo = FALSE, results = "asis"}
+cc_output(sir_code[methods_sir$packing_state])
+```
+
+Here, we have four variables; the `S`, `I` and `R` compartments and `cases_inc` which holds the *daily incidence* (the number of new cases per day).  As with the random walk model, these are still scalars (the second element of each pair is still `{}`) but there are four elements now and the order is determined by the order presented here.
+
+The `build_shared` and `update_shared` have not really changed in nature, but note that we've chosen only to support updating three of the parameters within `update_shared` (`I0`, `gamma` and `beta`).  The parameters `N` and `exp_noise` can only be set at initialisation.
+
+We've added a new type `data_type` and a `build_data` method which creates it.  The `data_type` `struct` can hold arbitrary data, and is used to represent an observation of one or more data streams at a single point in time.  When running within a particle filter (see `dust_filter_create()`) we will have `data.frame` representing a time series of these observations.
+
+```{r, echo = FALSE, results = "asis"}
+i_shared <- grep("struct data_type", sir_code)
+j <- grep("^\\s*};", sir_code)
+j <- j[j > i_shared]
+stopifnot(length(j) >= 1)
+cc_output(sir_code[i_shared:j[[1]]])
+```
+
+```{r, echo = FALSE, results = "asis"}
+cc_output(sir_code[methods_sir$build_data])
+```
+
+Our initial condition function now actually sets an initial condition!
+
+```{r, echo = FALSE, results = "asis"}
+cc_output(sir_code[methods_sir$initial])
+```
+
+The first element (`S`; see `packing_state`) is set to `N - I0` and the second element (`I`) is set to `I0` with the remaining two states zeroed.
+
+The `update` method is similar in nature to the random walk model, just a bit longer:
+
+```{r, echo = FALSE, results = "asis"}
+cc_output(sir_code[methods_sir$update])
+```
+
+The update for `cases_inc` deserves some extra attention:
+
+```cc
+    state_next[3] = cases_inc + n_SI;
+```
+
+You might think that this will simply compute **cumulative cases**, and you would be right if it were not for the `zero_every` method:
+
+```{r, echo = FALSE, results = "asis"}
+cc_output(sir_code[methods_sir$zero_every])
+```
+
+This declares that every `1` time unit (the first element of the inner `{}`) we will zero the data at element(s) `{3}`.  This latter argument might be a vector, so saying `{7, {3, 4, 5}}` would read as "every 7 time units, zero elements 3 to 5".  The outer `{}` allows us to have multiple different zeroed variables, so we could write `dust2::zero_every_type<real_type>{{1, {3}, {7, {4}}}` if we added another variable for weekly incidence.
+
+Finally, we have `compare_data`:
+
+```{r, echo = FALSE, results = "asis"}
+cc_output(sir_code[methods_sir$compare_data])
+```
+
+This has the same long sort of call signature as `initial` and `update` but with **read-only** `state` and **read-only** data.  Here, we return a single real number, being the log-likelihood at this point.  In this example we add some small random noise to the modelled data (to avoid `NaN`s where our modelled cases are zero) and compute the log density from a Poisson distribution for observing the cases in `data`.
+
+```{r, include = FALSE}
+# just to check these do actually compile, otherwise fail the build:
+dust2::dust_compile("examples/walk.cpp", debug = TRUE)
+dust2::dust_compile("examples/sir.cpp", debug = TRUE)
+```

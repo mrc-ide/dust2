@@ -28,7 +28,7 @@ return the previous value of the option they are setting.
 }
 \description{
 Control browser-based debugging of dust models.  This help page documents
-three funtions that can be used to control if and how the browser
+three functions that can be used to control if and how the browser
 is enabled.  You can't enter the debugger from any of these
 functions; it is only enabled if present in your C++ code (or if
 using \code{odin2} if you have enabled it).
@@ -39,7 +39,7 @@ are reading this message, there's a good chance you are inside it.
 It is built on top of R's \code{\link[=browser]{browser()}} and so all the usual tips,
 tricks and issues for working with this apply.  We recommend
 setting the R option \code{browserNLdisabled = TRUE} to avoid surprises
-from presssing \verb{<enter>}.
+from pressing \verb{<enter>}.
 \itemize{
 \item You can press \code{n} or \code{c} to proceed to the next enabled iteration
 \item You can press \code{Q} to quit the browser (this will end up as an
