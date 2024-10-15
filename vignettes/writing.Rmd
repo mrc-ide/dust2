@@ -295,6 +295,6 @@ This has the same long sort of call signature as `initial` and `update` but with
 
 ```{r, include = FALSE}
 # just to check these do actually compile, otherwise fail the build:
-dust_compile("examples/walk.cpp")
-dust_compile("examples/sir.cpp")
+dust2::dust_compile("examples/walk.cpp", debug = TRUE)
+dust2::dust_compile("examples/sir.cpp", debug = TRUE)
 ```
