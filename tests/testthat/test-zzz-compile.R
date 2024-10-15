@@ -73,7 +73,7 @@ test_that("generators can be serialised and used from other processes", {
       dust2::dust_system_state(dust2::dust_system_create(sys(), list(), 1))
     }, list(tmp), stdout = log, stderr = "2>&1"),
     numeric(5))
-  expect_match(cli::ansi_string(readLines(log)), "Loading mysir", all = FALSE)
+  expect_match(cli::ansi_strip(readLines(log)), "Loading mysir", all = FALSE)
 })
 
 

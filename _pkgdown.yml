@@ -51,6 +51,8 @@ reference:
     contents:
       - dust_unpack_state
       - dust_unpack_index
+      - dust_openmp_support
+      - dust_openmp_threads
   - title: Browser-based debugging
     contents:
       - dust_browser_enabled
