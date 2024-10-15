@@ -649,3 +649,11 @@ test_that("can run continuous-time filter", {
     "Can't use 'dust_filter_create()' with continuous-time models",
     fixed = TRUE)
 })
+
+
+test_that("sensible error when given unevaluated generator", {
+  d <- data.frame(time = c(4, 8, 12, 16), incidence = c(1, 2, 3, 4))
+  expect_error(
+    dust_filter_create(sir, 0, d, 200),
+    "Expected 'generator' to be a 'dust_system_generator' object")
+})
