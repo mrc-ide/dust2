@@ -1,5 +1,5 @@
 check_generator_for_filter <- function(generator, what, call = NULL) {
-  check_is_dust_system_generator(generator)
+  check_is_dust_system_generator(generator, substitute(generator))
   if (!generator$properties$has_compare) {
     cli::cli_abort(
       paste("Can't create {what}; the '{generator$name}' system does",
