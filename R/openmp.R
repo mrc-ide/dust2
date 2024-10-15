@@ -3,15 +3,15 @@
 ##' @title Information about OpenMP support
 ##'
 ##' @param check_compile Logical, indicating if we should check if we
-##'   can compile an openmp program - this is slow the first time.
+##'   can compile an OpenMP program - this is slow the first time.
 ##'
 ##' @seealso [dust_openmp_threads()] for setting a polite number of
 ##'   threads.
 ##'
-##' @return A list with information about the openmp support on your
+##' @return A list with information about the OpenMP support on your
 ##'   machine.
 ##'
-##' * The first few elements come from the openmp library directly:
+##' * The first few elements come from the OpenMP library directly:
 ##'   `num_proc`, `max_threads`, `thread_limit`; these correspond to a
 ##'   call to the function `omp_get_<name>()` in C and
 ##'   `openmp_version` which is the value of the `_OPENMP` macro.
@@ -51,7 +51,7 @@ dust_openmp_support <- function(check_compile = FALSE) {
 ##' are happy to use. We take `mc.cores` first, then `MC_CORES`, which
 ##' is the same behaviour as `parallel::mclapply` and friends.
 ##'
-##' The second limit comes from openmp. If you do not have OpenMP
+##' The second limit comes from OpenMP. If you do not have OpenMP
 ##' support, then we use one thread (higher numbers have no effect at
 ##' all in this case). If you do have OpenMP support, we take the
 ##' smallest of the number of "processors" (reported by
@@ -128,10 +128,10 @@ has_openmp_compiler_test <- function() {
 }
 
 
-## NOTE: This does not return if the *compiler* supports openmp, just
+## NOTE: This does not return if the *compiler* supports OpenMP, just
 ## the runtime.  While we are testing that will be the same thing, but
 ## after installation from binary this requires really a compile time
-## test of a simple openmp program.
+## test of a simple OpenMP program.
 openmp_info <- function() {
   env <- Sys.getenv(c("OMP_THREAD_LIMIT", "OMP_NUM_THREADS", "MC_CORES"))
   env <- set_names(as.list(as.integer(env)), names(env))
