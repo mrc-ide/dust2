@@ -292,3 +292,9 @@ cc_output(sir_code[methods_sir$compare_data])
 ```
 
 This has the same long sort of call signature as `initial` and `update` but with **read-only** `state` and **read-only** data.  Here, we return a single real number, being the log-likelihood at this point.  In this example we add some small random noise to the modelled data (to avoid `NaN`s where our modelled cases are zero) and compute the log density from a Poisson distribution for observing the cases in `data`.
+
+```{r, include = FALSE}
+# just to check these do actually compile, otherwise fail the build:
+dust_compile("examples/walk.cpp")
+dust_compile("examples/sir.cpp")
+```

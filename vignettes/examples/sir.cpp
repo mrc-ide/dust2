@@ -3,7 +3,6 @@
 // [[dust2::class(sir)]]
 // [[dust2::time_type(discrete)]]
 // [[dust2::has_compare()]]
-// [[dust2::has_adjoint()]]
 // [[dust2::parameter(I0)]]
 // [[dust2::parameter(N)]]
 // [[dust2::parameter(beta)]]
