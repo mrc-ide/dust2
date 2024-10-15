@@ -31,7 +31,7 @@ variable and \code{mc.cores} option as a guide to how many cores you
 are happy to use. We take \code{mc.cores} first, then \code{MC_CORES}, which
 is the same behaviour as \code{parallel::mclapply} and friends.
 
-The second limit comes from openmp. If you do not have OpenMP
+The second limit comes from OpenMP. If you do not have OpenMP
 support, then we use one thread (higher numbers have no effect at
 all in this case). If you do have OpenMP support, we take the
 smallest of the number of "processors" (reported by

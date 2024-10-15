@@ -8,13 +8,13 @@ dust_openmp_support(check_compile = FALSE)
 }
 \arguments{
 \item{check_compile}{Logical, indicating if we should check if we
-can compile an openmp program - this is slow the first time.}
+can compile an OpenMP program - this is slow the first time.}
 }
 \value{
-A list with information about the openmp support on your
+A list with information about the OpenMP support on your
 machine.
 \itemize{
-\item The first few elements come from the openmp library directly:
+\item The first few elements come from the OpenMP library directly:
 \code{num_proc}, \code{max_threads}, \code{thread_limit}; these correspond to a
 call to the function \verb{omp_get_<name>()} in C and
 \code{openmp_version} which is the value of the \verb{_OPENMP} macro.
