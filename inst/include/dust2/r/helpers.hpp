@@ -397,43 +397,21 @@ std::vector<typename T::data_type> check_data(cpp11::list r_data,
 }
 
 template <typename T>
-void set_state(T& obj, cpp11::sexp r_state, bool preserve_group_dimension,
-               const std::vector<size_t>& index_group) {
-  // Suppose that we have a n_state x n_particles x n_groups grouped
-  // system, we then require that we have a state array with rank 3;
-  // for an ungrouped system this will be rank 2 array.
-  //
-  // TODO: these checks would be nicer in R, just do it there and here
-  // we can just accept what we are given? (mrc-5565)
-  auto dim = cpp11::as_cpp<cpp11::integers>(r_state.attr("dim"));
-  const auto rank = dim.size();
-  const auto rank_expected = preserve_group_dimension ? 3 : 2;
-  if (rank != rank_expected) {
-    cpp11::stop("Expected 'state' to be a %dd array", rank_expected);
-  }
-  const int n_state = obj.n_state();
-  const int n_particles =
-    preserve_group_dimension ? obj.n_particles() :
-    obj.n_particles() * obj.n_groups();
-  const int n_groups = index_group.size();
-  if (dim[0] != n_state) {
-    cpp11::stop("Expected the first dimension of 'state' to have size %d",
-                n_state);
-  }
-  const auto recycle_particle = n_particles > 1 && dim[1] == 1;
-  if (dim[1] != n_particles && dim[1] != 1) {
-    cpp11::stop("Expected the second dimension of 'state' to have size %d or 1",
-                n_particles);
-  }
-
-  const auto recycle_group =
-    !preserve_group_dimension || (n_groups > 1 && dim[2] == 1);
-  if (preserve_group_dimension && dim[2] != n_groups && dim[2] != 1) {
-    cpp11::stop("Expected the third dimension of 'state' to have size %d or 1",
-                n_groups);
-  }
-  obj.set_state(REAL(r_state), recycle_particle, recycle_group,
-                index_group);
+void set_state(T& obj, cpp11::list r_state) {
+  cpp11::doubles r_value = cpp11::as_doubles(r_state[0]);
+  cpp11::sexp r_index_state = r_state[1];
+  cpp11::sexp r_index_particle = r_state[2];
+  cpp11::sexp r_index_group = r_state[3];
+  bool recycle_particle = cpp11::as_cpp<bool>(r_state[4]);
+  bool recycle_group = cpp11::as_cpp<bool>(r_state[5]);
+  const auto index_state =
+    check_index(r_index_state, obj.n_state(), "index_state");
+  const auto index_particle =
+    check_index(r_index_particle, obj.n_particles(), "index_particle");
+  const auto index_group =
+    check_index(r_index_group, obj.n_groups(), "index_group");
+  obj.set_state(REAL(r_value), index_state, index_particle, index_group,
+                recycle_particle, recycle_group);
 }
 
 template <typename T>
