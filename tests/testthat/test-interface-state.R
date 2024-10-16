@@ -7,13 +7,23 @@
 test_that("can provide a vector to set into a vector system", {
   expect_equal(
     prepare_state(1:3, NULL, NULL, NULL, 3, 1, 1, FALSE, FALSE),
-    list(recycle_particle = FALSE, recycle_group = FALSE))
+    list(state = 1:3,
+         index_state = NULL,
+         index_particle = NULL,
+         index_group = NULL,
+         recycle_particle = FALSE,
+         recycle_group = FALSE))
 })
 
 test_that("can provide a vector with index to set into vector system", {
   expect_equal(
     prepare_state(1:3, 3:5, NULL, NULL, 5, 1, 1, FALSE, FALSE),
-    list(recycle_particle = FALSE, recycle_group = FALSE))
+    list(state = 1:3,
+         index_state = 3:5,
+         index_particle = NULL,
+         index_group = NULL,
+         recycle_particle = FALSE,
+         recycle_group = FALSE))
 })
 
 
@@ -30,7 +40,7 @@ test_that("error if incorrect data provided to vector system", {
 
 test_that("validate that the index provided for state is reasonable", {
   expect_error(
-    prepare_state(1:4, 3:6, NULL, NULL, 5, 1, 1, FALSE, FALSE),
+    prepare_state(1:4, 3:6, NULL, NULL, 5, 1, 1, FALSE, FALSE, name = "state"),
     "All elements of 'index_state' must be at most 5")
 })
 
@@ -39,10 +49,10 @@ test_that("validate that the index provided for state is reasonable", {
 ## did recieve.
 test_that("error if incorrect length data provided to vector system", {
   expect_error(
-    prepare_state(1:3, NULL, NULL, NULL, 5, 1, 1, FALSE, FALSE),
+    prepare_state(1:3, NULL, NULL, NULL, 5, 1, 1, FALSE, FALSE, name = "state"),
     "Expected 'state' to have length 5")
-  expect_equal(
-    prepare_state(1:3, 3:6, NULL, NULL, 6, 1, 1, FALSE, FALSE),
+  expect_error(
+    prepare_state(1:3, 3:6, NULL, NULL, 6, 1, 1, FALSE, FALSE, name = "state"),
     "Expected 'state' to have length 4")
 })
 
@@ -50,40 +60,75 @@ test_that("error if incorrect length data provided to vector system", {
 test_that("can provide a vector to set into matrix (s x p) system", {
   expect_equal(
     prepare_state(1:3, NULL, NULL, NULL, 3, 5, 1, TRUE, FALSE),
-    list(recycle_particle = TRUE, recycle_group = FALSE))
+    list(state = 1:3,
+         index_state = NULL,
+         index_particle = NULL,
+         index_group = NULL,
+         recycle_particle = TRUE,
+         recycle_group = FALSE))
 })
 
 
 test_that("can provide a matrix to set into a matrix (s x p) sytem", {
   expect_equal(
     prepare_state(cbind(1:3), NULL, NULL, NULL, 3, 5, 1, TRUE, FALSE),
-    list(recycle_particle = TRUE, recycle_group = FALSE))
+    list(state = cbind(1:3),
+         index_state = NULL,
+         index_particle = NULL,
+         index_group = NULL,
+         recycle_particle = TRUE,
+         recycle_group = FALSE))
+  state <- matrix(1:15, 3)
   expect_equal(
     prepare_state(matrix(1:15, 3), NULL, NULL, NULL, 3, 5, 1, TRUE, FALSE),
-    list(recycle_particle = FALSE, recycle_group = FALSE))
+        list(state = state,
+         index_state = NULL,
+         index_particle = NULL,
+         index_group = NULL,
+         recycle_particle = FALSE,
+         recycle_group = FALSE))
 })
 
 
 test_that("can provide state with state index into matrix system", {
   expect_equal(
     prepare_state(1:3, 3:5, NULL, NULL, 7, 5, 1, TRUE, FALSE),
-    list(recycle_particle = TRUE, recycle_group = FALSE))
+    list(state = 1:3,
+         index_state = 3:5,
+         index_particle = NULL,
+         index_group = NULL,
+         recycle_particle = TRUE,
+         recycle_group = FALSE))
+  state <- matrix(1:15, 3:5)
   expect_equal(
-    prepare_state(matrix(1:15, 3), 3:5, NULL, NULL, 7, 5, 1, TRUE, FALSE),
-    list(recycle_particle = FALSE, recycle_group = FALSE))
+    prepare_state(state, 3:5, NULL, NULL, 7, 5, 1, TRUE, FALSE),
+    list(state = state,
+         index_state = 3:5,
+         index_particle = NULL,
+         index_group = NULL,
+         recycle_particle = FALSE,
+         recycle_group = FALSE))
 })
 
 
 test_that("can provide state with particle index into matrix system", {
   expect_equal(
     prepare_state(1:3, NULL, 2:3, NULL, 3, 5, 1, TRUE, FALSE),
-    list(recycle_particle = TRUE, recycle_group = FALSE))
+    list(state = 1:3,
+         index_state = NULL,
+         index_particle = 2:3,
+         index_group = NULL,
+         recycle_particle = TRUE,
+         recycle_group = FALSE))
+  state <- matrix(1:6, 3)
   expect_equal(
-    prepare_state(cbind(1:3), NULL, 2:3, NULL, 3, 5, 1, TRUE, FALSE),
-    list(recycle_particle = TRUE, recycle_group = FALSE))
-  expect_equal(
-    prepare_state(matrix(1:6, 3), NULL, 2:3, NULL, 3, 5, 1, TRUE, FALSE),
-    list(recycle_particle = FALSE, recycle_group = FALSE))
+    prepare_state(state, NULL, 2:3, NULL, 3, 5, 1, TRUE, FALSE),
+    list(state = state,
+         index_state = NULL,
+         index_particle = 2:3,
+         index_group = NULL,
+         recycle_particle = FALSE,
+         recycle_group = FALSE))
 })
 
 
