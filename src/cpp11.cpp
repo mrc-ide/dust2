@@ -188,17 +188,17 @@ extern "C" SEXP _dust2_dust2_system_malaria_simulate(SEXP ptr, SEXP r_times, SEX
   END_CPP11
 }
 // malaria.cpp
-SEXP dust2_unfilter_malaria_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::list r_time_control, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_n_threads, cpp11::sexp r_index_state);
-extern "C" SEXP _dust2_dust2_unfilter_malaria_alloc(SEXP r_pars, SEXP r_time_start, SEXP r_time, SEXP r_time_control, SEXP r_data, SEXP r_n_particles, SEXP r_n_groups, SEXP r_n_threads, SEXP r_index_state) {
+SEXP dust2_unfilter_malaria_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::list r_time_control, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_n_threads);
+extern "C" SEXP _dust2_dust2_unfilter_malaria_alloc(SEXP r_pars, SEXP r_time_start, SEXP r_time, SEXP r_time_control, SEXP r_data, SEXP r_n_particles, SEXP r_n_groups, SEXP r_n_threads) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_unfilter_malaria_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time_start), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_time_control), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_data), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_threads), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_state)));
+    return cpp11::as_sexp(dust2_unfilter_malaria_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time_start), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_time_control), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_data), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_threads)));
   END_CPP11
 }
 // malaria.cpp
-SEXP dust2_filter_malaria_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::list r_time_control, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_n_threads, cpp11::sexp r_index_state, cpp11::sexp r_seed);
-extern "C" SEXP _dust2_dust2_filter_malaria_alloc(SEXP r_pars, SEXP r_time_start, SEXP r_time, SEXP r_time_control, SEXP r_data, SEXP r_n_particles, SEXP r_n_groups, SEXP r_n_threads, SEXP r_index_state, SEXP r_seed) {
+SEXP dust2_filter_malaria_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::list r_time_control, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_n_threads, cpp11::sexp r_seed);
+extern "C" SEXP _dust2_dust2_filter_malaria_alloc(SEXP r_pars, SEXP r_time_start, SEXP r_time, SEXP r_time_control, SEXP r_data, SEXP r_n_particles, SEXP r_n_groups, SEXP r_n_threads, SEXP r_seed) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_filter_malaria_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time_start), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_time_control), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_data), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_threads), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_state), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_seed)));
+    return cpp11::as_sexp(dust2_filter_malaria_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time_start), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_time_control), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_data), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_threads), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_seed)));
   END_CPP11
 }
 // malaria.cpp
@@ -216,10 +216,10 @@ extern "C" SEXP _dust2_dust2_unfilter_malaria_update_pars(SEXP ptr, SEXP r_pars,
   END_CPP11
 }
 // malaria.cpp
-SEXP dust2_unfilter_malaria_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, cpp11::sexp r_index_group, bool preserve_particle_dimension, bool preserve_group_dimension);
-extern "C" SEXP _dust2_dust2_unfilter_malaria_run(SEXP ptr, SEXP r_initial, SEXP save_history, SEXP adjoint, SEXP r_index_group, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
+SEXP dust2_unfilter_malaria_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, cpp11::sexp r_index_state, cpp11::sexp r_index_group, bool preserve_particle_dimension, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_unfilter_malaria_run(SEXP ptr, SEXP r_initial, SEXP save_history, SEXP adjoint, SEXP r_index_state, SEXP r_index_group, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_unfilter_malaria_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(save_history), cpp11::as_cpp<cpp11::decay_t<bool>>(adjoint), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
+    return cpp11::as_sexp(dust2_unfilter_malaria_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(save_history), cpp11::as_cpp<cpp11::decay_t<bool>>(adjoint), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_state), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // malaria.cpp
@@ -244,10 +244,10 @@ extern "C" SEXP _dust2_dust2_filter_malaria_update_pars(SEXP ptr, SEXP r_pars, S
   END_CPP11
 }
 // malaria.cpp
-SEXP dust2_filter_malaria_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, cpp11::sexp index_group, bool preserve_particle_dimension, bool preserve_group_dimension);
-extern "C" SEXP _dust2_dust2_filter_malaria_run(SEXP ptr, SEXP r_initial, SEXP save_history, SEXP adjoint, SEXP index_group, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
+SEXP dust2_filter_malaria_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, cpp11::sexp index_state, cpp11::sexp index_group, bool preserve_particle_dimension, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_filter_malaria_run(SEXP ptr, SEXP r_initial, SEXP save_history, SEXP adjoint, SEXP index_state, SEXP index_group, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_filter_malaria_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(save_history), cpp11::as_cpp<cpp11::decay_t<bool>>(adjoint), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
+    return cpp11::as_sexp(dust2_filter_malaria_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(save_history), cpp11::as_cpp<cpp11::decay_t<bool>>(adjoint), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(index_state), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // malaria.cpp
@@ -370,17 +370,17 @@ extern "C" SEXP _dust2_dust2_system_sir_simulate(SEXP ptr, SEXP r_times, SEXP r_
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_unfilter_sir_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::list r_time_control, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_n_threads, cpp11::sexp r_index_state);
-extern "C" SEXP _dust2_dust2_unfilter_sir_alloc(SEXP r_pars, SEXP r_time_start, SEXP r_time, SEXP r_time_control, SEXP r_data, SEXP r_n_particles, SEXP r_n_groups, SEXP r_n_threads, SEXP r_index_state) {
+SEXP dust2_unfilter_sir_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::list r_time_control, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_n_threads);
+extern "C" SEXP _dust2_dust2_unfilter_sir_alloc(SEXP r_pars, SEXP r_time_start, SEXP r_time, SEXP r_time_control, SEXP r_data, SEXP r_n_particles, SEXP r_n_groups, SEXP r_n_threads) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_unfilter_sir_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time_start), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_time_control), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_data), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_threads), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_state)));
+    return cpp11::as_sexp(dust2_unfilter_sir_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time_start), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_time_control), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_data), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_threads)));
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_filter_sir_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::list r_time_control, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_n_threads, cpp11::sexp r_index_state, cpp11::sexp r_seed);
-extern "C" SEXP _dust2_dust2_filter_sir_alloc(SEXP r_pars, SEXP r_time_start, SEXP r_time, SEXP r_time_control, SEXP r_data, SEXP r_n_particles, SEXP r_n_groups, SEXP r_n_threads, SEXP r_index_state, SEXP r_seed) {
+SEXP dust2_filter_sir_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::list r_time_control, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_n_threads, cpp11::sexp r_seed);
+extern "C" SEXP _dust2_dust2_filter_sir_alloc(SEXP r_pars, SEXP r_time_start, SEXP r_time, SEXP r_time_control, SEXP r_data, SEXP r_n_particles, SEXP r_n_groups, SEXP r_n_threads, SEXP r_seed) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_filter_sir_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time_start), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_time_control), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_data), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_threads), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_state), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_seed)));
+    return cpp11::as_sexp(dust2_filter_sir_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time_start), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_time_control), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_data), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_threads), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_seed)));
   END_CPP11
 }
 // sir.cpp
@@ -398,10 +398,10 @@ extern "C" SEXP _dust2_dust2_unfilter_sir_update_pars(SEXP ptr, SEXP r_pars, SEX
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_unfilter_sir_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, cpp11::sexp r_index_group, bool preserve_particle_dimension, bool preserve_group_dimension);
-extern "C" SEXP _dust2_dust2_unfilter_sir_run(SEXP ptr, SEXP r_initial, SEXP save_history, SEXP adjoint, SEXP r_index_group, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
+SEXP dust2_unfilter_sir_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, cpp11::sexp r_index_state, cpp11::sexp r_index_group, bool preserve_particle_dimension, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_unfilter_sir_run(SEXP ptr, SEXP r_initial, SEXP save_history, SEXP adjoint, SEXP r_index_state, SEXP r_index_group, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_unfilter_sir_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(save_history), cpp11::as_cpp<cpp11::decay_t<bool>>(adjoint), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
+    return cpp11::as_sexp(dust2_unfilter_sir_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(save_history), cpp11::as_cpp<cpp11::decay_t<bool>>(adjoint), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_state), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // sir.cpp
@@ -426,10 +426,10 @@ extern "C" SEXP _dust2_dust2_filter_sir_update_pars(SEXP ptr, SEXP r_pars, SEXP 
   END_CPP11
 }
 // sir.cpp
-SEXP dust2_filter_sir_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, cpp11::sexp index_group, bool preserve_particle_dimension, bool preserve_group_dimension);
-extern "C" SEXP _dust2_dust2_filter_sir_run(SEXP ptr, SEXP r_initial, SEXP save_history, SEXP adjoint, SEXP index_group, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
+SEXP dust2_filter_sir_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, cpp11::sexp index_state, cpp11::sexp index_group, bool preserve_particle_dimension, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_filter_sir_run(SEXP ptr, SEXP r_initial, SEXP save_history, SEXP adjoint, SEXP index_state, SEXP index_group, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_filter_sir_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(save_history), cpp11::as_cpp<cpp11::decay_t<bool>>(adjoint), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
+    return cpp11::as_sexp(dust2_filter_sir_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(save_history), cpp11::as_cpp<cpp11::decay_t<bool>>(adjoint), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(index_state), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // sir.cpp
@@ -559,17 +559,17 @@ extern "C" SEXP _dust2_dust2_system_sirode_simulate(SEXP ptr, SEXP r_times, SEXP
   END_CPP11
 }
 // sirode.cpp
-SEXP dust2_unfilter_sirode_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::list r_time_control, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_n_threads, cpp11::sexp r_index_state);
-extern "C" SEXP _dust2_dust2_unfilter_sirode_alloc(SEXP r_pars, SEXP r_time_start, SEXP r_time, SEXP r_time_control, SEXP r_data, SEXP r_n_particles, SEXP r_n_groups, SEXP r_n_threads, SEXP r_index_state) {
+SEXP dust2_unfilter_sirode_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::list r_time_control, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_n_threads);
+extern "C" SEXP _dust2_dust2_unfilter_sirode_alloc(SEXP r_pars, SEXP r_time_start, SEXP r_time, SEXP r_time_control, SEXP r_data, SEXP r_n_particles, SEXP r_n_groups, SEXP r_n_threads) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_unfilter_sirode_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time_start), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_time_control), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_data), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_threads), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_state)));
+    return cpp11::as_sexp(dust2_unfilter_sirode_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time_start), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_time_control), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_data), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_threads)));
   END_CPP11
 }
 // sirode.cpp
-SEXP dust2_filter_sirode_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::list r_time_control, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_n_threads, cpp11::sexp r_index_state, cpp11::sexp r_seed);
-extern "C" SEXP _dust2_dust2_filter_sirode_alloc(SEXP r_pars, SEXP r_time_start, SEXP r_time, SEXP r_time_control, SEXP r_data, SEXP r_n_particles, SEXP r_n_groups, SEXP r_n_threads, SEXP r_index_state, SEXP r_seed) {
+SEXP dust2_filter_sirode_alloc(cpp11::list r_pars, cpp11::sexp r_time_start, cpp11::sexp r_time, cpp11::list r_time_control, cpp11::list r_data, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_n_threads, cpp11::sexp r_seed);
+extern "C" SEXP _dust2_dust2_filter_sirode_alloc(SEXP r_pars, SEXP r_time_start, SEXP r_time, SEXP r_time_control, SEXP r_data, SEXP r_n_particles, SEXP r_n_groups, SEXP r_n_threads, SEXP r_seed) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_filter_sirode_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time_start), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_time_control), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_data), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_threads), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_state), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_seed)));
+    return cpp11::as_sexp(dust2_filter_sirode_alloc(cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_pars), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time_start), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_time_control), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_data), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_particles), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_groups), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_n_threads), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_seed)));
   END_CPP11
 }
 // sirode.cpp
@@ -587,10 +587,10 @@ extern "C" SEXP _dust2_dust2_unfilter_sirode_update_pars(SEXP ptr, SEXP r_pars, 
   END_CPP11
 }
 // sirode.cpp
-SEXP dust2_unfilter_sirode_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, cpp11::sexp r_index_group, bool preserve_particle_dimension, bool preserve_group_dimension);
-extern "C" SEXP _dust2_dust2_unfilter_sirode_run(SEXP ptr, SEXP r_initial, SEXP save_history, SEXP adjoint, SEXP r_index_group, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
+SEXP dust2_unfilter_sirode_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, cpp11::sexp r_index_state, cpp11::sexp r_index_group, bool preserve_particle_dimension, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_unfilter_sirode_run(SEXP ptr, SEXP r_initial, SEXP save_history, SEXP adjoint, SEXP r_index_state, SEXP r_index_group, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_unfilter_sirode_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(save_history), cpp11::as_cpp<cpp11::decay_t<bool>>(adjoint), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
+    return cpp11::as_sexp(dust2_unfilter_sirode_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(save_history), cpp11::as_cpp<cpp11::decay_t<bool>>(adjoint), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_state), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // sirode.cpp
@@ -615,10 +615,10 @@ extern "C" SEXP _dust2_dust2_filter_sirode_update_pars(SEXP ptr, SEXP r_pars, SE
   END_CPP11
 }
 // sirode.cpp
-SEXP dust2_filter_sirode_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, cpp11::sexp index_group, bool preserve_particle_dimension, bool preserve_group_dimension);
-extern "C" SEXP _dust2_dust2_filter_sirode_run(SEXP ptr, SEXP r_initial, SEXP save_history, SEXP adjoint, SEXP index_group, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
+SEXP dust2_filter_sirode_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, cpp11::sexp index_state, cpp11::sexp index_group, bool preserve_particle_dimension, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_filter_sirode_run(SEXP ptr, SEXP r_initial, SEXP save_history, SEXP adjoint, SEXP index_state, SEXP index_group, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_filter_sirode_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(save_history), cpp11::as_cpp<cpp11::decay_t<bool>>(adjoint), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
+    return cpp11::as_sexp(dust2_filter_sirode_run(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_initial), cpp11::as_cpp<cpp11::decay_t<bool>>(save_history), cpp11::as_cpp<cpp11::decay_t<bool>>(adjoint), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(index_state), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(index_group), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // sirode.cpp
@@ -664,10 +664,10 @@ extern "C" SEXP _dust2_test_scale_log_weights(SEXP w) {
   END_CPP11
 }
 // test.cpp
-cpp11::sexp test_history_(cpp11::doubles r_time, cpp11::list r_state, cpp11::sexp r_order, cpp11::sexp r_index_group, cpp11::sexp r_select_particle, bool reorder);
-extern "C" SEXP _dust2_test_history_(SEXP r_time, SEXP r_state, SEXP r_order, SEXP r_index_group, SEXP r_select_particle, SEXP reorder) {
+cpp11::sexp test_history_(cpp11::doubles r_time, cpp11::list r_state, cpp11::sexp r_order, cpp11::sexp r_index_state, cpp11::sexp r_index_group, cpp11::sexp r_select_particle, bool reorder);
+extern "C" SEXP _dust2_test_history_(SEXP r_time, SEXP r_state, SEXP r_order, SEXP r_index_state, SEXP r_index_group, SEXP r_select_particle, SEXP reorder) {
   BEGIN_CPP11
-    return cpp11::as_sexp(test_history_(cpp11::as_cpp<cpp11::decay_t<cpp11::doubles>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_state), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_order), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_select_particle), cpp11::as_cpp<cpp11::decay_t<bool>>(reorder)));
+    return cpp11::as_sexp(test_history_(cpp11::as_cpp<cpp11::decay_t<cpp11::doubles>>(r_time), cpp11::as_cpp<cpp11::decay_t<cpp11::list>>(r_state), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_order), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_state), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_index_group), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_select_particle), cpp11::as_cpp<cpp11::decay_t<bool>>(reorder)));
   END_CPP11
 }
 // test_helpers.cpp
@@ -834,124 +834,124 @@ extern "C" SEXP _dust2_dust2_system_walk_simulate(SEXP ptr, SEXP r_times, SEXP r
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
-    {"_dust2_cpp_openmp_info",                         (DL_FUNC) &_dust2_cpp_openmp_info,                          0},
-    {"_dust2_dust2_filter_malaria_alloc",              (DL_FUNC) &_dust2_dust2_filter_malaria_alloc,              10},
-    {"_dust2_dust2_filter_malaria_last_history",       (DL_FUNC) &_dust2_dust2_filter_malaria_last_history,        5},
-    {"_dust2_dust2_filter_malaria_last_state",         (DL_FUNC) &_dust2_dust2_filter_malaria_last_state,          5},
-    {"_dust2_dust2_filter_malaria_rng_state",          (DL_FUNC) &_dust2_dust2_filter_malaria_rng_state,           1},
-    {"_dust2_dust2_filter_malaria_run",                (DL_FUNC) &_dust2_dust2_filter_malaria_run,                 7},
-    {"_dust2_dust2_filter_malaria_set_rng_state",      (DL_FUNC) &_dust2_dust2_filter_malaria_set_rng_state,       2},
-    {"_dust2_dust2_filter_malaria_update_pars",        (DL_FUNC) &_dust2_dust2_filter_malaria_update_pars,         3},
-    {"_dust2_dust2_filter_sir_alloc",                  (DL_FUNC) &_dust2_dust2_filter_sir_alloc,                  10},
-    {"_dust2_dust2_filter_sir_last_history",           (DL_FUNC) &_dust2_dust2_filter_sir_last_history,            5},
-    {"_dust2_dust2_filter_sir_last_state",             (DL_FUNC) &_dust2_dust2_filter_sir_last_state,              5},
-    {"_dust2_dust2_filter_sir_rng_state",              (DL_FUNC) &_dust2_dust2_filter_sir_rng_state,               1},
-    {"_dust2_dust2_filter_sir_run",                    (DL_FUNC) &_dust2_dust2_filter_sir_run,                     7},
-    {"_dust2_dust2_filter_sir_set_rng_state",          (DL_FUNC) &_dust2_dust2_filter_sir_set_rng_state,           2},
-    {"_dust2_dust2_filter_sir_update_pars",            (DL_FUNC) &_dust2_dust2_filter_sir_update_pars,             3},
-    {"_dust2_dust2_filter_sirode_alloc",               (DL_FUNC) &_dust2_dust2_filter_sirode_alloc,               10},
-    {"_dust2_dust2_filter_sirode_last_history",        (DL_FUNC) &_dust2_dust2_filter_sirode_last_history,         5},
-    {"_dust2_dust2_filter_sirode_last_state",          (DL_FUNC) &_dust2_dust2_filter_sirode_last_state,           5},
-    {"_dust2_dust2_filter_sirode_rng_state",           (DL_FUNC) &_dust2_dust2_filter_sirode_rng_state,            1},
-    {"_dust2_dust2_filter_sirode_run",                 (DL_FUNC) &_dust2_dust2_filter_sirode_run,                  7},
-    {"_dust2_dust2_filter_sirode_set_rng_state",       (DL_FUNC) &_dust2_dust2_filter_sirode_set_rng_state,        2},
-    {"_dust2_dust2_filter_sirode_update_pars",         (DL_FUNC) &_dust2_dust2_filter_sirode_update_pars,          3},
-    {"_dust2_dust2_system_logistic_alloc",             (DL_FUNC) &_dust2_dust2_system_logistic_alloc,              8},
-    {"_dust2_dust2_system_logistic_internals",         (DL_FUNC) &_dust2_dust2_system_logistic_internals,          2},
-    {"_dust2_dust2_system_logistic_reorder",           (DL_FUNC) &_dust2_dust2_system_logistic_reorder,            2},
-    {"_dust2_dust2_system_logistic_rng_state",         (DL_FUNC) &_dust2_dust2_system_logistic_rng_state,          1},
-    {"_dust2_dust2_system_logistic_run_to_time",       (DL_FUNC) &_dust2_dust2_system_logistic_run_to_time,        2},
-    {"_dust2_dust2_system_logistic_set_rng_state",     (DL_FUNC) &_dust2_dust2_system_logistic_set_rng_state,      2},
-    {"_dust2_dust2_system_logistic_set_state",         (DL_FUNC) &_dust2_dust2_system_logistic_set_state,          3},
-    {"_dust2_dust2_system_logistic_set_state_initial", (DL_FUNC) &_dust2_dust2_system_logistic_set_state_initial,  1},
-    {"_dust2_dust2_system_logistic_set_time",          (DL_FUNC) &_dust2_dust2_system_logistic_set_time,           2},
-    {"_dust2_dust2_system_logistic_simulate",          (DL_FUNC) &_dust2_dust2_system_logistic_simulate,           5},
-    {"_dust2_dust2_system_logistic_state",             (DL_FUNC) &_dust2_dust2_system_logistic_state,              6},
-    {"_dust2_dust2_system_logistic_time",              (DL_FUNC) &_dust2_dust2_system_logistic_time,               1},
-    {"_dust2_dust2_system_logistic_update_pars",       (DL_FUNC) &_dust2_dust2_system_logistic_update_pars,        2},
-    {"_dust2_dust2_system_malaria_alloc",              (DL_FUNC) &_dust2_dust2_system_malaria_alloc,               8},
-    {"_dust2_dust2_system_malaria_compare_data",       (DL_FUNC) &_dust2_dust2_system_malaria_compare_data,        4},
-    {"_dust2_dust2_system_malaria_internals",          (DL_FUNC) &_dust2_dust2_system_malaria_internals,           2},
-    {"_dust2_dust2_system_malaria_reorder",            (DL_FUNC) &_dust2_dust2_system_malaria_reorder,             2},
-    {"_dust2_dust2_system_malaria_rng_state",          (DL_FUNC) &_dust2_dust2_system_malaria_rng_state,           1},
-    {"_dust2_dust2_system_malaria_run_to_time",        (DL_FUNC) &_dust2_dust2_system_malaria_run_to_time,         2},
-    {"_dust2_dust2_system_malaria_set_rng_state",      (DL_FUNC) &_dust2_dust2_system_malaria_set_rng_state,       2},
-    {"_dust2_dust2_system_malaria_set_state",          (DL_FUNC) &_dust2_dust2_system_malaria_set_state,           3},
-    {"_dust2_dust2_system_malaria_set_state_initial",  (DL_FUNC) &_dust2_dust2_system_malaria_set_state_initial,   1},
-    {"_dust2_dust2_system_malaria_set_time",           (DL_FUNC) &_dust2_dust2_system_malaria_set_time,            2},
-    {"_dust2_dust2_system_malaria_simulate",           (DL_FUNC) &_dust2_dust2_system_malaria_simulate,            5},
-    {"_dust2_dust2_system_malaria_state",              (DL_FUNC) &_dust2_dust2_system_malaria_state,               6},
-    {"_dust2_dust2_system_malaria_time",               (DL_FUNC) &_dust2_dust2_system_malaria_time,                1},
-    {"_dust2_dust2_system_malaria_update_pars",        (DL_FUNC) &_dust2_dust2_system_malaria_update_pars,         2},
-    {"_dust2_dust2_system_sir_alloc",                  (DL_FUNC) &_dust2_dust2_system_sir_alloc,                   8},
-    {"_dust2_dust2_system_sir_compare_data",           (DL_FUNC) &_dust2_dust2_system_sir_compare_data,            4},
-    {"_dust2_dust2_system_sir_reorder",                (DL_FUNC) &_dust2_dust2_system_sir_reorder,                 2},
-    {"_dust2_dust2_system_sir_rng_state",              (DL_FUNC) &_dust2_dust2_system_sir_rng_state,               1},
-    {"_dust2_dust2_system_sir_run_to_time",            (DL_FUNC) &_dust2_dust2_system_sir_run_to_time,             2},
-    {"_dust2_dust2_system_sir_set_rng_state",          (DL_FUNC) &_dust2_dust2_system_sir_set_rng_state,           2},
-    {"_dust2_dust2_system_sir_set_state",              (DL_FUNC) &_dust2_dust2_system_sir_set_state,               3},
-    {"_dust2_dust2_system_sir_set_state_initial",      (DL_FUNC) &_dust2_dust2_system_sir_set_state_initial,       1},
-    {"_dust2_dust2_system_sir_set_time",               (DL_FUNC) &_dust2_dust2_system_sir_set_time,                2},
-    {"_dust2_dust2_system_sir_simulate",               (DL_FUNC) &_dust2_dust2_system_sir_simulate,                5},
-    {"_dust2_dust2_system_sir_state",                  (DL_FUNC) &_dust2_dust2_system_sir_state,                   6},
-    {"_dust2_dust2_system_sir_time",                   (DL_FUNC) &_dust2_dust2_system_sir_time,                    1},
-    {"_dust2_dust2_system_sir_update_pars",            (DL_FUNC) &_dust2_dust2_system_sir_update_pars,             2},
-    {"_dust2_dust2_system_sirode_alloc",               (DL_FUNC) &_dust2_dust2_system_sirode_alloc,                8},
-    {"_dust2_dust2_system_sirode_compare_data",        (DL_FUNC) &_dust2_dust2_system_sirode_compare_data,         4},
-    {"_dust2_dust2_system_sirode_internals",           (DL_FUNC) &_dust2_dust2_system_sirode_internals,            2},
-    {"_dust2_dust2_system_sirode_reorder",             (DL_FUNC) &_dust2_dust2_system_sirode_reorder,              2},
-    {"_dust2_dust2_system_sirode_rng_state",           (DL_FUNC) &_dust2_dust2_system_sirode_rng_state,            1},
-    {"_dust2_dust2_system_sirode_run_to_time",         (DL_FUNC) &_dust2_dust2_system_sirode_run_to_time,          2},
-    {"_dust2_dust2_system_sirode_set_rng_state",       (DL_FUNC) &_dust2_dust2_system_sirode_set_rng_state,        2},
-    {"_dust2_dust2_system_sirode_set_state",           (DL_FUNC) &_dust2_dust2_system_sirode_set_state,            3},
-    {"_dust2_dust2_system_sirode_set_state_initial",   (DL_FUNC) &_dust2_dust2_system_sirode_set_state_initial,    1},
-    {"_dust2_dust2_system_sirode_set_time",            (DL_FUNC) &_dust2_dust2_system_sirode_set_time,             2},
-    {"_dust2_dust2_system_sirode_simulate",            (DL_FUNC) &_dust2_dust2_system_sirode_simulate,             5},
-    {"_dust2_dust2_system_sirode_state",               (DL_FUNC) &_dust2_dust2_system_sirode_state,                6},
-    {"_dust2_dust2_system_sirode_time",                (DL_FUNC) &_dust2_dust2_system_sirode_time,                 1},
-    {"_dust2_dust2_system_sirode_update_pars",         (DL_FUNC) &_dust2_dust2_system_sirode_update_pars,          2},
-    {"_dust2_dust2_system_walk_alloc",                 (DL_FUNC) &_dust2_dust2_system_walk_alloc,                  8},
-    {"_dust2_dust2_system_walk_reorder",               (DL_FUNC) &_dust2_dust2_system_walk_reorder,                2},
-    {"_dust2_dust2_system_walk_rng_state",             (DL_FUNC) &_dust2_dust2_system_walk_rng_state,              1},
-    {"_dust2_dust2_system_walk_run_to_time",           (DL_FUNC) &_dust2_dust2_system_walk_run_to_time,            2},
-    {"_dust2_dust2_system_walk_set_rng_state",         (DL_FUNC) &_dust2_dust2_system_walk_set_rng_state,          2},
-    {"_dust2_dust2_system_walk_set_state",             (DL_FUNC) &_dust2_dust2_system_walk_set_state,              3},
-    {"_dust2_dust2_system_walk_set_state_initial",     (DL_FUNC) &_dust2_dust2_system_walk_set_state_initial,      1},
-    {"_dust2_dust2_system_walk_set_time",              (DL_FUNC) &_dust2_dust2_system_walk_set_time,               2},
-    {"_dust2_dust2_system_walk_simulate",              (DL_FUNC) &_dust2_dust2_system_walk_simulate,               5},
-    {"_dust2_dust2_system_walk_state",                 (DL_FUNC) &_dust2_dust2_system_walk_state,                  6},
-    {"_dust2_dust2_system_walk_time",                  (DL_FUNC) &_dust2_dust2_system_walk_time,                   1},
-    {"_dust2_dust2_system_walk_update_pars",           (DL_FUNC) &_dust2_dust2_system_walk_update_pars,            2},
-    {"_dust2_dust2_unfilter_malaria_alloc",            (DL_FUNC) &_dust2_dust2_unfilter_malaria_alloc,             9},
-    {"_dust2_dust2_unfilter_malaria_last_history",     (DL_FUNC) &_dust2_dust2_unfilter_malaria_last_history,      5},
-    {"_dust2_dust2_unfilter_malaria_last_state",       (DL_FUNC) &_dust2_dust2_unfilter_malaria_last_state,        5},
-    {"_dust2_dust2_unfilter_malaria_run",              (DL_FUNC) &_dust2_dust2_unfilter_malaria_run,               7},
-    {"_dust2_dust2_unfilter_malaria_update_pars",      (DL_FUNC) &_dust2_dust2_unfilter_malaria_update_pars,       3},
-    {"_dust2_dust2_unfilter_sir_alloc",                (DL_FUNC) &_dust2_dust2_unfilter_sir_alloc,                 9},
-    {"_dust2_dust2_unfilter_sir_last_gradient",        (DL_FUNC) &_dust2_dust2_unfilter_sir_last_gradient,         4},
-    {"_dust2_dust2_unfilter_sir_last_history",         (DL_FUNC) &_dust2_dust2_unfilter_sir_last_history,          5},
-    {"_dust2_dust2_unfilter_sir_last_state",           (DL_FUNC) &_dust2_dust2_unfilter_sir_last_state,            5},
-    {"_dust2_dust2_unfilter_sir_run",                  (DL_FUNC) &_dust2_dust2_unfilter_sir_run,                   7},
-    {"_dust2_dust2_unfilter_sir_update_pars",          (DL_FUNC) &_dust2_dust2_unfilter_sir_update_pars,           3},
-    {"_dust2_dust2_unfilter_sirode_alloc",             (DL_FUNC) &_dust2_dust2_unfilter_sirode_alloc,              9},
-    {"_dust2_dust2_unfilter_sirode_last_history",      (DL_FUNC) &_dust2_dust2_unfilter_sirode_last_history,       5},
-    {"_dust2_dust2_unfilter_sirode_last_state",        (DL_FUNC) &_dust2_dust2_unfilter_sirode_last_state,         5},
-    {"_dust2_dust2_unfilter_sirode_run",               (DL_FUNC) &_dust2_dust2_unfilter_sirode_run,                7},
-    {"_dust2_dust2_unfilter_sirode_update_pars",       (DL_FUNC) &_dust2_dust2_unfilter_sirode_update_pars,        3},
-    {"_dust2_test_check_dimensions",                   (DL_FUNC) &_dust2_test_check_dimensions,                    3},
-    {"_dust2_test_history_",                           (DL_FUNC) &_dust2_test_history_,                            6},
-    {"_dust2_test_interpolate_constant1",              (DL_FUNC) &_dust2_test_interpolate_constant1,               3},
-    {"_dust2_test_interpolate_constant2",              (DL_FUNC) &_dust2_test_interpolate_constant2,               3},
-    {"_dust2_test_interpolate_linear1",                (DL_FUNC) &_dust2_test_interpolate_linear1,                 3},
-    {"_dust2_test_interpolate_linear2",                (DL_FUNC) &_dust2_test_interpolate_linear2,                 3},
-    {"_dust2_test_interpolate_search",                 (DL_FUNC) &_dust2_test_interpolate_search,                  2},
-    {"_dust2_test_interpolate_spline1",                (DL_FUNC) &_dust2_test_interpolate_spline1,                 3},
-    {"_dust2_test_interpolate_spline2",                (DL_FUNC) &_dust2_test_interpolate_spline2,                 3},
-    {"_dust2_test_min",                                (DL_FUNC) &_dust2_test_min,                                 2},
-    {"_dust2_test_read_dimensions",                    (DL_FUNC) &_dust2_test_read_dimensions,                     3},
-    {"_dust2_test_resample_weight",                    (DL_FUNC) &_dust2_test_resample_weight,                     2},
-    {"_dust2_test_scale_log_weights",                  (DL_FUNC) &_dust2_test_scale_log_weights,                   1},
-    {"_dust2_test_sum",                                (DL_FUNC) &_dust2_test_sum,                                 2},
+    {"_dust2_cpp_openmp_info",                         (DL_FUNC) &_dust2_cpp_openmp_info,                         0},
+    {"_dust2_dust2_filter_malaria_alloc",              (DL_FUNC) &_dust2_dust2_filter_malaria_alloc,              9},
+    {"_dust2_dust2_filter_malaria_last_history",       (DL_FUNC) &_dust2_dust2_filter_malaria_last_history,       5},
+    {"_dust2_dust2_filter_malaria_last_state",         (DL_FUNC) &_dust2_dust2_filter_malaria_last_state,         5},
+    {"_dust2_dust2_filter_malaria_rng_state",          (DL_FUNC) &_dust2_dust2_filter_malaria_rng_state,          1},
+    {"_dust2_dust2_filter_malaria_run",                (DL_FUNC) &_dust2_dust2_filter_malaria_run,                8},
+    {"_dust2_dust2_filter_malaria_set_rng_state",      (DL_FUNC) &_dust2_dust2_filter_malaria_set_rng_state,      2},
+    {"_dust2_dust2_filter_malaria_update_pars",        (DL_FUNC) &_dust2_dust2_filter_malaria_update_pars,        3},
+    {"_dust2_dust2_filter_sir_alloc",                  (DL_FUNC) &_dust2_dust2_filter_sir_alloc,                  9},
+    {"_dust2_dust2_filter_sir_last_history",           (DL_FUNC) &_dust2_dust2_filter_sir_last_history,           5},
+    {"_dust2_dust2_filter_sir_last_state",             (DL_FUNC) &_dust2_dust2_filter_sir_last_state,             5},
+    {"_dust2_dust2_filter_sir_rng_state",              (DL_FUNC) &_dust2_dust2_filter_sir_rng_state,              1},
+    {"_dust2_dust2_filter_sir_run",                    (DL_FUNC) &_dust2_dust2_filter_sir_run,                    8},
+    {"_dust2_dust2_filter_sir_set_rng_state",          (DL_FUNC) &_dust2_dust2_filter_sir_set_rng_state,          2},
+    {"_dust2_dust2_filter_sir_update_pars",            (DL_FUNC) &_dust2_dust2_filter_sir_update_pars,            3},
+    {"_dust2_dust2_filter_sirode_alloc",               (DL_FUNC) &_dust2_dust2_filter_sirode_alloc,               9},
+    {"_dust2_dust2_filter_sirode_last_history",        (DL_FUNC) &_dust2_dust2_filter_sirode_last_history,        5},
+    {"_dust2_dust2_filter_sirode_last_state",          (DL_FUNC) &_dust2_dust2_filter_sirode_last_state,          5},
+    {"_dust2_dust2_filter_sirode_rng_state",           (DL_FUNC) &_dust2_dust2_filter_sirode_rng_state,           1},
+    {"_dust2_dust2_filter_sirode_run",                 (DL_FUNC) &_dust2_dust2_filter_sirode_run,                 8},
+    {"_dust2_dust2_filter_sirode_set_rng_state",       (DL_FUNC) &_dust2_dust2_filter_sirode_set_rng_state,       2},
+    {"_dust2_dust2_filter_sirode_update_pars",         (DL_FUNC) &_dust2_dust2_filter_sirode_update_pars,         3},
+    {"_dust2_dust2_system_logistic_alloc",             (DL_FUNC) &_dust2_dust2_system_logistic_alloc,             8},
+    {"_dust2_dust2_system_logistic_internals",         (DL_FUNC) &_dust2_dust2_system_logistic_internals,         2},
+    {"_dust2_dust2_system_logistic_reorder",           (DL_FUNC) &_dust2_dust2_system_logistic_reorder,           2},
+    {"_dust2_dust2_system_logistic_rng_state",         (DL_FUNC) &_dust2_dust2_system_logistic_rng_state,         1},
+    {"_dust2_dust2_system_logistic_run_to_time",       (DL_FUNC) &_dust2_dust2_system_logistic_run_to_time,       2},
+    {"_dust2_dust2_system_logistic_set_rng_state",     (DL_FUNC) &_dust2_dust2_system_logistic_set_rng_state,     2},
+    {"_dust2_dust2_system_logistic_set_state",         (DL_FUNC) &_dust2_dust2_system_logistic_set_state,         3},
+    {"_dust2_dust2_system_logistic_set_state_initial", (DL_FUNC) &_dust2_dust2_system_logistic_set_state_initial, 1},
+    {"_dust2_dust2_system_logistic_set_time",          (DL_FUNC) &_dust2_dust2_system_logistic_set_time,          2},
+    {"_dust2_dust2_system_logistic_simulate",          (DL_FUNC) &_dust2_dust2_system_logistic_simulate,          5},
+    {"_dust2_dust2_system_logistic_state",             (DL_FUNC) &_dust2_dust2_system_logistic_state,             6},
+    {"_dust2_dust2_system_logistic_time",              (DL_FUNC) &_dust2_dust2_system_logistic_time,              1},
+    {"_dust2_dust2_system_logistic_update_pars",       (DL_FUNC) &_dust2_dust2_system_logistic_update_pars,       2},
+    {"_dust2_dust2_system_malaria_alloc",              (DL_FUNC) &_dust2_dust2_system_malaria_alloc,              8},
+    {"_dust2_dust2_system_malaria_compare_data",       (DL_FUNC) &_dust2_dust2_system_malaria_compare_data,       4},
+    {"_dust2_dust2_system_malaria_internals",          (DL_FUNC) &_dust2_dust2_system_malaria_internals,          2},
+    {"_dust2_dust2_system_malaria_reorder",            (DL_FUNC) &_dust2_dust2_system_malaria_reorder,            2},
+    {"_dust2_dust2_system_malaria_rng_state",          (DL_FUNC) &_dust2_dust2_system_malaria_rng_state,          1},
+    {"_dust2_dust2_system_malaria_run_to_time",        (DL_FUNC) &_dust2_dust2_system_malaria_run_to_time,        2},
+    {"_dust2_dust2_system_malaria_set_rng_state",      (DL_FUNC) &_dust2_dust2_system_malaria_set_rng_state,      2},
+    {"_dust2_dust2_system_malaria_set_state",          (DL_FUNC) &_dust2_dust2_system_malaria_set_state,          3},
+    {"_dust2_dust2_system_malaria_set_state_initial",  (DL_FUNC) &_dust2_dust2_system_malaria_set_state_initial,  1},
+    {"_dust2_dust2_system_malaria_set_time",           (DL_FUNC) &_dust2_dust2_system_malaria_set_time,           2},
+    {"_dust2_dust2_system_malaria_simulate",           (DL_FUNC) &_dust2_dust2_system_malaria_simulate,           5},
+    {"_dust2_dust2_system_malaria_state",              (DL_FUNC) &_dust2_dust2_system_malaria_state,              6},
+    {"_dust2_dust2_system_malaria_time",               (DL_FUNC) &_dust2_dust2_system_malaria_time,               1},
+    {"_dust2_dust2_system_malaria_update_pars",        (DL_FUNC) &_dust2_dust2_system_malaria_update_pars,        2},
+    {"_dust2_dust2_system_sir_alloc",                  (DL_FUNC) &_dust2_dust2_system_sir_alloc,                  8},
+    {"_dust2_dust2_system_sir_compare_data",           (DL_FUNC) &_dust2_dust2_system_sir_compare_data,           4},
+    {"_dust2_dust2_system_sir_reorder",                (DL_FUNC) &_dust2_dust2_system_sir_reorder,                2},
+    {"_dust2_dust2_system_sir_rng_state",              (DL_FUNC) &_dust2_dust2_system_sir_rng_state,              1},
+    {"_dust2_dust2_system_sir_run_to_time",            (DL_FUNC) &_dust2_dust2_system_sir_run_to_time,            2},
+    {"_dust2_dust2_system_sir_set_rng_state",          (DL_FUNC) &_dust2_dust2_system_sir_set_rng_state,          2},
+    {"_dust2_dust2_system_sir_set_state",              (DL_FUNC) &_dust2_dust2_system_sir_set_state,              3},
+    {"_dust2_dust2_system_sir_set_state_initial",      (DL_FUNC) &_dust2_dust2_system_sir_set_state_initial,      1},
+    {"_dust2_dust2_system_sir_set_time",               (DL_FUNC) &_dust2_dust2_system_sir_set_time,               2},
+    {"_dust2_dust2_system_sir_simulate",               (DL_FUNC) &_dust2_dust2_system_sir_simulate,               5},
+    {"_dust2_dust2_system_sir_state",                  (DL_FUNC) &_dust2_dust2_system_sir_state,                  6},
+    {"_dust2_dust2_system_sir_time",                   (DL_FUNC) &_dust2_dust2_system_sir_time,                   1},
+    {"_dust2_dust2_system_sir_update_pars",            (DL_FUNC) &_dust2_dust2_system_sir_update_pars,            2},
+    {"_dust2_dust2_system_sirode_alloc",               (DL_FUNC) &_dust2_dust2_system_sirode_alloc,               8},
+    {"_dust2_dust2_system_sirode_compare_data",        (DL_FUNC) &_dust2_dust2_system_sirode_compare_data,        4},
+    {"_dust2_dust2_system_sirode_internals",           (DL_FUNC) &_dust2_dust2_system_sirode_internals,           2},
+    {"_dust2_dust2_system_sirode_reorder",             (DL_FUNC) &_dust2_dust2_system_sirode_reorder,             2},
+    {"_dust2_dust2_system_sirode_rng_state",           (DL_FUNC) &_dust2_dust2_system_sirode_rng_state,           1},
+    {"_dust2_dust2_system_sirode_run_to_time",         (DL_FUNC) &_dust2_dust2_system_sirode_run_to_time,         2},
+    {"_dust2_dust2_system_sirode_set_rng_state",       (DL_FUNC) &_dust2_dust2_system_sirode_set_rng_state,       2},
+    {"_dust2_dust2_system_sirode_set_state",           (DL_FUNC) &_dust2_dust2_system_sirode_set_state,           3},
+    {"_dust2_dust2_system_sirode_set_state_initial",   (DL_FUNC) &_dust2_dust2_system_sirode_set_state_initial,   1},
+    {"_dust2_dust2_system_sirode_set_time",            (DL_FUNC) &_dust2_dust2_system_sirode_set_time,            2},
+    {"_dust2_dust2_system_sirode_simulate",            (DL_FUNC) &_dust2_dust2_system_sirode_simulate,            5},
+    {"_dust2_dust2_system_sirode_state",               (DL_FUNC) &_dust2_dust2_system_sirode_state,               6},
+    {"_dust2_dust2_system_sirode_time",                (DL_FUNC) &_dust2_dust2_system_sirode_time,                1},
+    {"_dust2_dust2_system_sirode_update_pars",         (DL_FUNC) &_dust2_dust2_system_sirode_update_pars,         2},
+    {"_dust2_dust2_system_walk_alloc",                 (DL_FUNC) &_dust2_dust2_system_walk_alloc,                 8},
+    {"_dust2_dust2_system_walk_reorder",               (DL_FUNC) &_dust2_dust2_system_walk_reorder,               2},
+    {"_dust2_dust2_system_walk_rng_state",             (DL_FUNC) &_dust2_dust2_system_walk_rng_state,             1},
+    {"_dust2_dust2_system_walk_run_to_time",           (DL_FUNC) &_dust2_dust2_system_walk_run_to_time,           2},
+    {"_dust2_dust2_system_walk_set_rng_state",         (DL_FUNC) &_dust2_dust2_system_walk_set_rng_state,         2},
+    {"_dust2_dust2_system_walk_set_state",             (DL_FUNC) &_dust2_dust2_system_walk_set_state,             3},
+    {"_dust2_dust2_system_walk_set_state_initial",     (DL_FUNC) &_dust2_dust2_system_walk_set_state_initial,     1},
+    {"_dust2_dust2_system_walk_set_time",              (DL_FUNC) &_dust2_dust2_system_walk_set_time,              2},
+    {"_dust2_dust2_system_walk_simulate",              (DL_FUNC) &_dust2_dust2_system_walk_simulate,              5},
+    {"_dust2_dust2_system_walk_state",                 (DL_FUNC) &_dust2_dust2_system_walk_state,                 6},
+    {"_dust2_dust2_system_walk_time",                  (DL_FUNC) &_dust2_dust2_system_walk_time,                  1},
+    {"_dust2_dust2_system_walk_update_pars",           (DL_FUNC) &_dust2_dust2_system_walk_update_pars,           2},
+    {"_dust2_dust2_unfilter_malaria_alloc",            (DL_FUNC) &_dust2_dust2_unfilter_malaria_alloc,            8},
+    {"_dust2_dust2_unfilter_malaria_last_history",     (DL_FUNC) &_dust2_dust2_unfilter_malaria_last_history,     5},
+    {"_dust2_dust2_unfilter_malaria_last_state",       (DL_FUNC) &_dust2_dust2_unfilter_malaria_last_state,       5},
+    {"_dust2_dust2_unfilter_malaria_run",              (DL_FUNC) &_dust2_dust2_unfilter_malaria_run,              8},
+    {"_dust2_dust2_unfilter_malaria_update_pars",      (DL_FUNC) &_dust2_dust2_unfilter_malaria_update_pars,      3},
+    {"_dust2_dust2_unfilter_sir_alloc",                (DL_FUNC) &_dust2_dust2_unfilter_sir_alloc,                8},
+    {"_dust2_dust2_unfilter_sir_last_gradient",        (DL_FUNC) &_dust2_dust2_unfilter_sir_last_gradient,        4},
+    {"_dust2_dust2_unfilter_sir_last_history",         (DL_FUNC) &_dust2_dust2_unfilter_sir_last_history,         5},
+    {"_dust2_dust2_unfilter_sir_last_state",           (DL_FUNC) &_dust2_dust2_unfilter_sir_last_state,           5},
+    {"_dust2_dust2_unfilter_sir_run",                  (DL_FUNC) &_dust2_dust2_unfilter_sir_run,                  8},
+    {"_dust2_dust2_unfilter_sir_update_pars",          (DL_FUNC) &_dust2_dust2_unfilter_sir_update_pars,          3},
+    {"_dust2_dust2_unfilter_sirode_alloc",             (DL_FUNC) &_dust2_dust2_unfilter_sirode_alloc,             8},
+    {"_dust2_dust2_unfilter_sirode_last_history",      (DL_FUNC) &_dust2_dust2_unfilter_sirode_last_history,      5},
+    {"_dust2_dust2_unfilter_sirode_last_state",        (DL_FUNC) &_dust2_dust2_unfilter_sirode_last_state,        5},
+    {"_dust2_dust2_unfilter_sirode_run",               (DL_FUNC) &_dust2_dust2_unfilter_sirode_run,               8},
+    {"_dust2_dust2_unfilter_sirode_update_pars",       (DL_FUNC) &_dust2_dust2_unfilter_sirode_update_pars,       3},
+    {"_dust2_test_check_dimensions",                   (DL_FUNC) &_dust2_test_check_dimensions,                   3},
+    {"_dust2_test_history_",                           (DL_FUNC) &_dust2_test_history_,                           7},
+    {"_dust2_test_interpolate_constant1",              (DL_FUNC) &_dust2_test_interpolate_constant1,              3},
+    {"_dust2_test_interpolate_constant2",              (DL_FUNC) &_dust2_test_interpolate_constant2,              3},
+    {"_dust2_test_interpolate_linear1",                (DL_FUNC) &_dust2_test_interpolate_linear1,                3},
+    {"_dust2_test_interpolate_linear2",                (DL_FUNC) &_dust2_test_interpolate_linear2,                3},
+    {"_dust2_test_interpolate_search",                 (DL_FUNC) &_dust2_test_interpolate_search,                 2},
+    {"_dust2_test_interpolate_spline1",                (DL_FUNC) &_dust2_test_interpolate_spline1,                3},
+    {"_dust2_test_interpolate_spline2",                (DL_FUNC) &_dust2_test_interpolate_spline2,                3},
+    {"_dust2_test_min",                                (DL_FUNC) &_dust2_test_min,                                2},
+    {"_dust2_test_read_dimensions",                    (DL_FUNC) &_dust2_test_read_dimensions,                    3},
+    {"_dust2_test_resample_weight",                    (DL_FUNC) &_dust2_test_resample_weight,                    2},
+    {"_dust2_test_scale_log_weights",                  (DL_FUNC) &_dust2_test_scale_log_weights,                  1},
+    {"_dust2_test_sum",                                (DL_FUNC) &_dust2_test_sum,                                2},
     {NULL, NULL, 0}
 };
 }

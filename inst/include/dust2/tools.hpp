@@ -52,5 +52,20 @@ T prod(const std::vector<T>& x) {
   return std::accumulate(x.begin(), x.end(), 1, std::multiplies<>{});
 }
 
+inline bool is_trivial_index(const std::vector<size_t>& index, size_t n) {
+  if (index.empty() == 0) {
+    return true;
+  }
+  if (index.size() != n) {
+    return false;
+  }
+  for (size_t i = 0; i < n; ++i) {
+    if (index[i] != i) {
+      return false;
+    }
+  }
+  return true;
+}
+
 }
 }

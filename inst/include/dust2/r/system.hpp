@@ -226,6 +226,7 @@ SEXP dust2_system_compare_data(cpp11::sexp ptr,
   return ret;
 }
 
+// TODO: expose index_group here too?
 template <typename T>
 SEXP dust2_system_simulate(cpp11::sexp ptr,
                            cpp11::sexp r_times,
@@ -247,14 +248,10 @@ SEXP dust2_system_simulate(cpp11::sexp ptr,
   const auto n_times = times.size();
 
   dust2::history<real_type> h(n_state_save, n_particles, n_groups, n_times);
+  h.set_index_and_reset(index_state, index_group);
   for (size_t i = 0; i < n_times; ++i) {
     obj->run_to_time(times[i], index_group);
-    if (use_index_state) {
-      h.add_with_index(times[i], obj->state().begin(), index_state.begin(),
-                       n_state, index_group);
-    } else {
-      h.add(times[i], obj->state().begin(), index_group);
-    }
+    h.add(times[i], obj->state().begin());
   }
 
   // There is an extra copy here vs using the R memory to back the
@@ -262,7 +259,8 @@ SEXP dust2_system_simulate(cpp11::sexp ptr,
   // make later.
   const auto len = n_state_save * n_particles * n_groups * n_times;
   cpp11::sexp ret = cpp11::writable::doubles(len);
-  h.export_state(REAL(ret), false, index_group, {});
+  const auto reorder = false;
+  h.export_state(REAL(ret), reorder, {});
   if (preserve_group_dimension && preserve_particle_dimension) {
     set_array_dims(ret, {n_state_save, n_particles, n_groups, n_times});
   } else if (preserve_group_dimension || preserve_particle_dimension) {

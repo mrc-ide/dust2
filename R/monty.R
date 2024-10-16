@@ -134,7 +134,8 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
           obj,
           pars,
           initial = if (is.null(initial)) NULL else initial(pars),
-          save_history = save_history$enabled)
+          save_history = save_history$enabled,
+          index_state = save_history$index)
         attr(obj$ptr, "last_density") <- ret
         attr(obj$ptr, "last_gradient") <- NULL
       }

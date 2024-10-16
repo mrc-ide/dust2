@@ -20,7 +20,7 @@
 dust_unfilter_create <- function(generator, time_start, data,
                                  n_particles = 1, n_groups = NULL,
                                  dt = NULL, ode_control = NULL,
-                                 n_threads = 1, index_state = NULL,
+                                 n_threads = 1,
                                  preserve_particle_dimension = FALSE,
                                  preserve_group_dimension = FALSE) {
   call <- environment()
@@ -36,7 +36,6 @@ dust_unfilter_create <- function(generator, time_start, data,
   preserve_group_dimension <- preserve_group_dimension || n_groups > 1
   preserve_particle_dimension <- preserve_particle_dimension || n_particles > 1
 
-  index_state <- check_index(index_state, call = call)
   n_threads <- check_n_threads(n_threads, n_particles, n_groups)
 
   inputs <- list(time_start = time_start,
@@ -46,7 +45,6 @@ dust_unfilter_create <- function(generator, time_start, data,
                  n_particles = n_particles,
                  n_groups = n_groups,
                  n_threads = n_threads,
-                 index_state = index_state,
                  preserve_particle_dimension = preserve_particle_dimension,
                  preserve_group_dimension = preserve_group_dimension)
 
@@ -60,7 +58,6 @@ dust_unfilter_create <- function(generator, time_start, data,
          generator = generator,
          methods = generator$methods$unfilter,
          time_control = time_control,
-         index_state = index_state,
          preserve_particle_dimension = preserve_particle_dimension,
          preserve_group_dimension = preserve_group_dimension),
     parent = emptyenv())
@@ -79,8 +76,7 @@ unfilter_create <- function(unfilter, pars) {
                            inputs$data,
                            inputs$n_particles,
                            inputs$n_groups,
-                           inputs$n_threads,
-                           inputs$index_state),
+                           inputs$n_threads),
     unfilter)
   unfilter$packer_state <- monty::monty_packer(array = unfilter$packing_state)
   if (!is.null(unfilter$packing_gradient)) {

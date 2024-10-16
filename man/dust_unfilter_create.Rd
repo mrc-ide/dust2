@@ -13,7 +13,6 @@ dust_unfilter_create(
   dt = NULL,
   ode_control = NULL,
   n_threads = 1,
-  index_state = NULL,
   preserve_particle_dimension = FALSE,
   preserve_group_dimension = FALSE
 )
@@ -49,12 +48,6 @@ It is an error to provide this with discrete-time systems.}
 
 \item{n_threads}{Integer, the number of threads to use in
 parallelisable calculations.  See Details.}
-
-\item{index_state}{An optional index of states to extract.  If
-given, then we subset the system state on return.  You can use
-this to return fewer system states than the system ran with, to
-reorder states, or to name them on exit (names present on the
-index will be copied into the rownames of the returned array).}
 
 \item{preserve_particle_dimension}{Logical, indicating if output
 from the system should preserve the particle dimension in the

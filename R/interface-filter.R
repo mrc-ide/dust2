@@ -33,7 +33,7 @@
 ##' @export
 dust_filter_create <- function(generator, time_start, data,
                                n_particles, n_groups = NULL, dt = NULL,
-                               ode_control = NULL, index_state = NULL,
+                               ode_control = NULL,
                                n_threads = 1, preserve_group_dimension = FALSE,
                                seed = NULL) {
   call <- environment()
@@ -48,7 +48,6 @@ dust_filter_create <- function(generator, time_start, data,
   n_groups <- data$n_groups
   preserve_group_dimension <- preserve_group_dimension || n_groups > 1
 
-  index_state <- check_index(index_state, call = call)
   n_threads <- check_n_threads(n_threads, n_particles, n_groups)
 
   if (generator$properties$time_type == "continuous") {
@@ -66,7 +65,6 @@ dust_filter_create <- function(generator, time_start, data,
                  n_particles = n_particles,
                  n_groups = n_groups,
                  n_threads = n_threads,
-                 index_state = index_state,
                  preserve_group_dimension = preserve_group_dimension)
 
   res <- list2env(
@@ -80,7 +78,6 @@ dust_filter_create <- function(generator, time_start, data,
          generator = generator,
          methods = generator$methods$filter,
          time_control = time_control,
-         index_state = index_state,
          preserve_particle_dimension = TRUE,
          preserve_group_dimension = preserve_group_dimension),
     parent = emptyenv())
@@ -100,7 +97,6 @@ filter_create <- function(obj, pars) {
                       inputs$n_particles,
                       inputs$n_groups,
                       inputs$n_threads,
-                      inputs$index_state,
                       obj$initial_rng_state),
     obj)
   obj$initial_rng_state <- NULL

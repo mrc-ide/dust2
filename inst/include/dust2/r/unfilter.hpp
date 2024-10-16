@@ -22,11 +22,14 @@ cpp11::sexp dust2_unfilter_update_pars(cpp11::sexp ptr,
 template <typename T>
 cpp11::sexp dust2_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
                                bool save_history, bool adjoint,
+                               cpp11::sexp r_index_state,
                                cpp11::sexp r_index_group,
                                bool preserve_particle_dimension,
                                bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
+  const auto index_state = check_index(r_index_state, obj->sys.n_state(),
+                                       "index_state");
   const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
     check_index(r_index_group, obj->sys.n_groups(), "index_group");
 
@@ -34,9 +37,10 @@ cpp11::sexp dust2_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
     set_state(obj->sys, r_initial, preserve_group_dimension, index_group);
   }
   if (adjoint) {
-    obj->run_adjoint(r_initial == R_NilValue, save_history, index_group);
+    obj->run_adjoint(r_initial == R_NilValue, save_history, index_state,
+                     index_group);
   } else {
-    obj->run(r_initial == R_NilValue, save_history, index_group);
+    obj->run(r_initial == R_NilValue, save_history, index_state, index_group);
   }
 
   const auto n_groups = index_group.size();
@@ -86,7 +90,7 @@ cpp11::sexp dust2_unfilter_last_history(cpp11::sexp ptr,
 
   const auto len = n_state * n_particles * n_groups * n_times;
   cpp11::sexp ret = cpp11::writable::doubles(len);
-  history.export_state(REAL(ret), reorder, index_group, {});
+  history.export_state(REAL(ret), reorder, {});
   if (preserve_group_dimension && preserve_particle_dimension) {
     set_array_dims(ret, {n_state, n_particles, n_groups, n_times});
   } else if (preserve_group_dimension || preserve_particle_dimension) {
