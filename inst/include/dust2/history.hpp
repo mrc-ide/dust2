@@ -19,11 +19,7 @@ public:
     n_times_(n_times),
     len_state_(n_state_total_ * n_particles_ * n_groups_total_),
     len_order_(n_particles_ * n_groups_total_),
-    position_(0),
-    times_(n_times_),
-    state_(len_state_ * n_times_),
-    order_(len_order_ * n_times_),
-    reorder_(n_times) {
+    position_(0) {
   }
 
   void set_index_and_reset(const std::vector<size_t>& index_state,
@@ -35,6 +31,12 @@ public:
     n_state_ = use_index_state_ ? index_state.size() : n_state_total_;
     n_groups_ = use_index_group_ ? index_group.size() : n_groups_total_;
     len_state_ = n_state_ * n_particles_ * n_groups_;
+
+    times_.resize(n_times_);
+    state_.resize(len_state_ * n_times_);
+    order_.resize(len_order_ * n_times_);
+    reorder_.resize(n_times_);
+
     position_ = 0;
   }
 
