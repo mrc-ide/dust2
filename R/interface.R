@@ -226,7 +226,10 @@ dust_system_state <- function(sys, index_state = NULL, index_particle = NULL,
 
 ##' Set system state.  Takes a multidimensional array (2- or 3d
 ##' depending on if the system is grouped or not).  Dimensions of
-##' length 1 will be recycled as appropriate.
+##' length 1 will be recycled as appropriate.  For continuous time
+##' systems, we will initialise the solver immediately after setting
+##' state, which may cause errors if your initial state is invalid for
+##' your system.
 ##'
 ##' @title Set system state
 ##'
@@ -234,7 +237,24 @@ dust_system_state <- function(sys, index_state = NULL, index_particle = NULL,
 ##'
 ##' @param state A matrix or array of state.  If ungrouped, the
 ##'   dimension order expected is state x particle.  If grouped the
-##'   order is state x particle x group.
+##'   order is state x particle x group.  If you have a grouped system
+##'   with 1 particle and `preserve_state_dimension = FALSE` then the
+##'   state has size state x group.  You can omit higher dimensions,
+##'   so if you pass a vector it will be treated as if all higher
+##'   dimensions are length 1 (oif if you have a grouped system you
+##'   can provide a matrix and treat it as if the third dimension had
+##'   length 1).  If you provide any `index_` argument then the length
+##'   of the corresponding state dimension must match the index
+##'   length.
+##'
+##' @param index_state An index to control which state variables we
+##'   set.  You can use this to set a subset of state variables.
+##'
+##' @param index_particle An index to control which particles have
+##'   their state updated
+##'
+##' @param index_group An index to control which groups have their
+##'   state updated.
 ##'
 ##' @return Nothing, called for side effects only
 ##' @export
