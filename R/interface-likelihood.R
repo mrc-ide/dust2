@@ -13,9 +13,7 @@
 ##'
 ##' @param initial Optional initial conditions, as a matrix (state x
 ##'   particle) or 3d array (state x particle x group).  If not
-##'   provided, the system initial conditions are used.  Use of this
-##'   argument is currently discouraged as we work out what it needs
-##'   to look like longer term.
+##'   provided, the system initial conditions are used.
 ##'
 ##' @param save_history Logical, indicating if the simulation history
 ##'   should be saved while the simulation runs; this has a small
