@@ -828,7 +828,19 @@ prepare_state <- function(state,
     d <- c(d, rep(1L, rank_expected - rank))
   }
 
-  if (d[[1]] != len_state) {
+  ok <- d == expected | c(FALSE, d[-1] == 1)
+  if (all(ok)) {
+    ## We will access this by position from the C++ code but name it
+    ## here for clarity.
+    return(list(state = state,
+                index_state = index_state,
+                index_particle = index_particle,
+                index_group = index_group,
+                recycle_particle = n_particles > 1 && d[[2]] == 1,
+                recycle_group = n_groups > 1 && last(d) == 1))
+  }
+
+  if (!ok[[1]]) {
     if (rank == 1) {
       msg <- "Expected '{name}' to have length {len_state}"
     } else if (rank == 2) {
@@ -836,9 +848,7 @@ prepare_state <- function(state,
     } else {
       msg <- "Expected dimension 1 of '{name}' to be length {len_state}"
     }
-    cli::cli_abort(msg, arg = name, call = call)
-  }
-  if (rank_expected >= 2 && d[[2]] != 1 && d[[2]] != expected[[2]]) {
+  } else if (!ok[[2]]) {
     expected_str <-
       if (expected[[2]] == 1) "1" else sprintf("1 or %d", expected[[2]])
     if (rank == 2) {
@@ -846,20 +856,11 @@ prepare_state <- function(state,
     } else {
       msg <- "Expected dimension 2 of '{name}' to be length {expected_str}"
     }
-    cli::cli_abort(msg, arg = name, call = call)
-  }
-  if (rank_expected == 3 && d[[3]] != 1 && d[[3]] != expected[[3]]) {
+  } else {
     expected_str <-
       if (expected[[3]] == 1) "1" else sprintf("1 or %d", expected[[3]])
     msg <- "Expected dimension 3 of '{name}' to be length {expected_str}"
   }
 
-  ## We will access this by position from the C++ code but name it
-  ## here for clarity.
-  list(state = state,
-       index_state = index_state,
-       index_particle = index_particle,
-       index_group = index_group,
-       recycle_particle = n_particles > 1 && d[[2]] == 1,
-       recycle_group = n_groups > 1 && last(d) == 1)
+  cli::cli_abort(msg, arg = name, call = call)
 }

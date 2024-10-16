@@ -402,8 +402,8 @@ void set_state(T& obj, cpp11::list r_state) {
   cpp11::sexp r_index_state = r_state[1];
   cpp11::sexp r_index_particle = r_state[2];
   cpp11::sexp r_index_group = r_state[3];
-  bool recycle_particle = r_state[4];
-  bool recycle_group = r_state[4];
+  bool recycle_particle = cpp11::as_cpp<bool>(r_state[4]);
+  bool recycle_group = cpp11::as_cpp<bool>(r_state[5]);
   const auto index_state =
     check_index(r_index_state, obj.n_state(), "index_state");
   const auto index_particle =

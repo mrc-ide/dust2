@@ -192,7 +192,7 @@ public:
                                 index_state, index_particle, index_group,
                                 recycle_particle, recycle_group,
                                 n_threads_);
-    initialise_solver_(index_group);
+    initialise_solver_(index_group.empty() ? all_groups_ : index_group);
   }
 
   // iter here is an iterator to our *reordering index*, which will be

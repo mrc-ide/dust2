@@ -309,13 +309,13 @@ test_that("can set state where n_state > 1", {
   ## Appropriate errors:
   expect_error(
     dust_system_set_state(obj, matrix(0, 2, 10)),
-    "Expected the first dimension of 'state' to have size 3")
+    "Expected 'state' to have 3 rows")
   expect_error(
     dust_system_set_state(obj, matrix(0, 3, 15)),
-    "Expected the second dimension of 'state' to have size 10 or 1")
+    "Expected 'state' to have 1 or 10 columns")
   expect_error(
     dust_system_set_state(obj, array(0, c(3, 10, 1))),
-    "Expected 'state' to be a 2d array")
+    "Expected 'state' to be a matrix")
 })
 
 
@@ -351,16 +351,16 @@ test_that("can set state where n_state > 1 and groups are present", {
   ## Appropriate errors:
   expect_error(
     dust_system_set_state(obj, array(0, c(2, 10, 4))),
-    "Expected the first dimension of 'state' to have size 3")
+    "Expected dimension 1 of 'state' to be length 3")
   expect_error(
     dust_system_set_state(obj, array(0, c(3, 15, 4))),
-    "Expected the second dimension of 'state' to have size 10 or 1")
+    "Expected dimension 2 of 'state' to be length 1 or 10")
   expect_error(
     dust_system_set_state(obj, array(0, c(3, 10, 2))),
-    "Expected the third dimension of 'state' to have size 4 or 1")
+    "Expected dimension 3 of 'state' to be length 1 or 4")
   expect_error(
-    dust_system_set_state(obj, array(0, c(3, 10))),
-    "Expected 'state' to be a 3d array")
+    dust_system_set_state(obj, array(0, c(3, 10, 2, 1))),
+    "Expected 'state' to be a 3-dimensional array")
 })
 
 
