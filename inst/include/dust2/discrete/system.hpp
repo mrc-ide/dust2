@@ -7,6 +7,7 @@
 #include <map>
 #include <vector>
 #include <dust2/errors.hpp>
+#include <dust2/internals.hpp>
 #include <dust2/packing.hpp>
 #include <dust2/properties.hpp>
 #include <dust2/tools.hpp>
@@ -143,6 +144,22 @@ public:
     errors_.report();
   }
 
+  template <typename Iter>
+  void set_state(Iter iter,
+                 const std::vector<size_t>& index_state,
+                 const std::vector<size_t>& index_particle,
+                 const std::vector<size_t>& index_group,
+                 bool recycle_particle,
+                 bool recycle_group) {
+    errors_.reset();
+    dust2::internals::set_state(state_, iter,
+                                n_state_, n_particles_, n_groups_,
+                                index_state, index_particle, index_group,
+                                recycle_particle, recycle_group,
+                                n_threads_);
+  }
+
+  // This is the old implementation that we seek to remove.
   template <typename Iter>
   void set_state(Iter iter, bool recycle_particle, bool recycle_group,
                  const std::vector<size_t>& index_group) {

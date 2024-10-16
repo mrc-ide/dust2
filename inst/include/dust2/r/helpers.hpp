@@ -437,6 +437,22 @@ void set_state(T& obj, cpp11::sexp r_state, bool preserve_group_dimension,
 }
 
 template <typename T>
+void set_state2(T& obj, cpp11::sexp r_state,
+                cpp11::sexp r_index_state,
+                cpp11::sexp r_index_particle,
+                cpp11::sexp r_index_group,
+                bool recycle_particle, bool recycle_group) {
+  const auto index_state =
+    check_index(r_index_state, obj.n_state(), "index_state");
+  const auto index_particle =
+    check_index(r_index_state, obj.n_particles(), "index_particle");
+  const auto index_group =
+    check_index(r_index_group, obj.n_groups(), "index_group");
+  obj.set_state(REAL(r_state), index_state, index_particle, index_group,
+                recycle_particle, recycle_group);
+}
+
+template <typename T>
 SEXP rng_state_as_raw(const std::vector<T>& state) {
   const auto len = sizeof(T) * state.size();
   cpp11::writable::raws ret(len);

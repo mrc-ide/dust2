@@ -1,0 +1,100 @@
+## There are many tests for checking that state conforms to a system,
+## so they're all here so that we can have a nice set of labelled
+## tests.  This is quite repetitive (as is the implementation) but the
+## aim is to convey some hint to the user about what they have done
+## wrong.
+
+test_that("can provide a vector to set into a vector system", {
+  expect_equal(
+    prepare_state(1:3, NULL, NULL, NULL, 3, 1, 1, FALSE, FALSE),
+    list(recycle_particle = FALSE, recycle_group = FALSE))
+})
+
+test_that("can provide a vector with index to set into vector system", {
+  expect_equal(
+    prepare_state(1:3, 3:5, NULL, NULL, 5, 1, 1, FALSE, FALSE),
+    list(recycle_particle = FALSE, recycle_group = FALSE))
+})
+
+
+test_that("error if incorrect data provided to vector system", {
+  expect_error(
+    prepare_state(cbind(1:3), NULL, NULL, NULL, 3, 1, 1, FALSE, FALSE),
+    "Expected 'state' to be a vector but was given a matrix")
+  expect_error(
+    prepare_state(array(1:3, c(3, 1, 1)), NULL, NULL, NULL, 3, 1, 1,
+                  FALSE, FALSE),
+    "Expected 'state' to be a vector but was given a 3-dimensional array")
+})
+
+
+test_that("validate that the index provided for state is reasonable", {
+  expect_error(
+    prepare_state(1:4, 3:6, NULL, NULL, 5, 1, 1, FALSE, FALSE),
+    "All elements of 'index_state' must be at most 5")
+})
+
+
+## TODO: hint here about if we have provided an index, and what we
+## did recieve.
+test_that("error if incorrect length data provided to vector system", {
+  expect_error(
+    prepare_state(1:3, NULL, NULL, NULL, 5, 1, 1, FALSE, FALSE),
+    "Expected 'state' to have length 5")
+  expect_equal(
+    prepare_state(1:3, 3:6, NULL, NULL, 6, 1, 1, FALSE, FALSE),
+    "Expected 'state' to have length 4")
+})
+
+
+test_that("can provide a vector to set into matrix (s x p) system", {
+  expect_equal(
+    prepare_state(1:3, NULL, NULL, NULL, 3, 5, 1, TRUE, FALSE),
+    list(recycle_particle = TRUE, recycle_group = FALSE))
+})
+
+
+test_that("can provide a matrix to set into a matrix (s x p) sytem", {
+  expect_equal(
+    prepare_state(cbind(1:3), NULL, NULL, NULL, 3, 5, 1, TRUE, FALSE),
+    list(recycle_particle = TRUE, recycle_group = FALSE))
+  expect_equal(
+    prepare_state(matrix(1:15, 3), NULL, NULL, NULL, 3, 5, 1, TRUE, FALSE),
+    list(recycle_particle = FALSE, recycle_group = FALSE))
+})
+
+
+test_that("can provide state with state index into matrix system", {
+  expect_equal(
+    prepare_state(1:3, 3:5, NULL, NULL, 7, 5, 1, TRUE, FALSE),
+    list(recycle_particle = TRUE, recycle_group = FALSE))
+  expect_equal(
+    prepare_state(matrix(1:15, 3), 3:5, NULL, NULL, 7, 5, 1, TRUE, FALSE),
+    list(recycle_particle = FALSE, recycle_group = FALSE))
+})
+
+
+test_that("can provide state with particle index into matrix system", {
+  expect_equal(
+    prepare_state(1:3, NULL, 2:3, NULL, 3, 5, 1, TRUE, FALSE),
+    list(recycle_particle = TRUE, recycle_group = FALSE))
+  expect_equal(
+    prepare_state(cbind(1:3), NULL, 2:3, NULL, 3, 5, 1, TRUE, FALSE),
+    list(recycle_particle = TRUE, recycle_group = FALSE))
+  expect_equal(
+    prepare_state(matrix(1:6, 3), NULL, 2:3, NULL, 3, 5, 1, TRUE, FALSE),
+    list(recycle_particle = FALSE, recycle_group = FALSE))
+})
+
+
+test_that("validate that the index provided for particle is reasonable", {
+  expect_error(
+    prepare_state(1:4, NULL, 5:6, NULL, 4, 2, 1, TRUE, FALSE),
+    "All elements of 'index_particle' must be at most 2")
+  expect_error(
+    prepare_state(1:4, NULL, c(-1, 0), NULL, 4, 2, 1, TRUE, FALSE),
+    "All elements of 'index_particle' must be at least 1")
+  expect_error(
+    prepare_state(1:4, NULL, c(1, 1, 2), NULL, 4, 2, 1, TRUE, FALSE),
+    "All elements of 'index_particle' must be distinct")
+})
