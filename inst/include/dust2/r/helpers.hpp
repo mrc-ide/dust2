@@ -437,18 +437,20 @@ void set_state(T& obj, cpp11::sexp r_state, bool preserve_group_dimension,
 }
 
 template <typename T>
-void set_state2(T& obj, cpp11::sexp r_state,
-                cpp11::sexp r_index_state,
-                cpp11::sexp r_index_particle,
-                cpp11::sexp r_index_group,
-                bool recycle_particle, bool recycle_group) {
+void set_state2(T& obj, cpp11::list r_state) {
+  cpp11::sexp r_value = r_state[0];
+  cpp11::sexp r_index_state = r_state[1];
+  cpp11::sexp r_index_particle = r_state[2];
+  cpp11::sexp r_index_group = r_state[3];
+  bool recycle_particle = r_state[4];
+  bool recycle_group = r_state[4];
   const auto index_state =
     check_index(r_index_state, obj.n_state(), "index_state");
   const auto index_particle =
     check_index(r_index_state, obj.n_particles(), "index_particle");
   const auto index_group =
     check_index(r_index_group, obj.n_groups(), "index_group");
-  obj.set_state(REAL(r_state), index_state, index_particle, index_group,
+  obj.set_state(REAL(r_value), index_state, index_particle, index_group,
                 recycle_particle, recycle_group);
 }
 

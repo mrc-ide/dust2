@@ -116,8 +116,8 @@ SEXP dust2_system_walk_set_state_initial(cpp11::sexp ptr) {
 }
 
 [[cpp11::register]]
-SEXP dust2_system_walk_set_state(cpp11::sexp ptr, cpp11::sexp r_state, cpp11::sexp index_state, cpp11::sexp index_particle, cpp11::sexp index_group, bool recycle_particle, bool recycle_group) {
-  return dust2::r::dust2_system_set_state<dust2::dust_discrete<walk>>(ptr, r_state, index_state, index_particle, index_group, recycle_particle, recycle_group);
+SEXP dust2_system_walk_set_state(cpp11::sexp ptr, cpp11::list r_state) {
+  return dust2::r::dust2_system_set_state<dust2::dust_discrete<walk>>(ptr, r_state);
 }
 
 [[cpp11::register]]

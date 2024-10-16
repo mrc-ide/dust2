@@ -13,7 +13,9 @@
 ##'
 ##' @param initial Optional initial conditions, as a matrix (state x
 ##'   particle) or 3d array (state x particle x group).  If not
-##'   provided, the system initial conditions are used.
+##'   provided, the system initial conditions are used.  Use of this
+##'   argument is currently discouraged as we work out what it needs
+##'   to look like longer term.
 ##'
 ##' @param save_history Logical, indicating if the simulation history
 ##'   should be saved while the simulation runs; this has a small
@@ -68,6 +70,17 @@ dust_likelihood_run <- function(obj, pars, initial = NULL,
   } else {
     assert_scalar_logical(adjoint, call = environment())
     ## Here we might check for adjoint = TRUE in a stochastic model?
+  }
+  if (!is.null(initial)) {
+    initial <- prepare_state(initial,
+                             index_state,
+                             index_particle,
+                             index_group,
+                             sys$n_state,
+                             sys$n_particles,
+                             sys$n_groups,
+                             sys$preserve_particle_dimension,
+                             sys$preserve_group_dimension)
   }
   obj$methods$run(obj$ptr,
                   initial,

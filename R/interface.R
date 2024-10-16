@@ -241,22 +241,16 @@ dust_system_state <- function(sys, index_state = NULL, index_particle = NULL,
 dust_system_set_state <- function(sys, state, index_state = NULL,
                                   index_particle = NULL, index_group = NULL) {
   check_is_dust_system(sys)
-  res <- prepare_state(state,
-                       index_state,
-                       index_particle,
-                       index_group,
-                       sys$n_state,
-                       sys$n_particles,
-                       sys$n_groups,
-                       sys$preserve_particle_dimension,
-                       sys$preserve_group_dimension)
-  sys$methods$set_state(sys$ptr,
-                        state,
-                        index_state,
-                        index_particle,
-                        index_group,
-                        res$recycle_particle,
-                        res$recycle_group)
+  state <- prepare_state(state,
+                         index_state,
+                         index_particle,
+                         index_group,
+                         sys$n_state,
+                         sys$n_particles,
+                         sys$n_groups,
+                         sys$preserve_particle_dimension,
+                         sys$preserve_group_dimension)
+  sys$methods$set_state(sys$ptr, state)
   invisible()
 }
 
@@ -781,6 +775,7 @@ prepare_state <- function(state,
                           n_groups,
                           preserve_particle_dimension,
                           preserve_group_dimension,
+                          name = deparse(substitute(state)),
                           call = parent.frame()) {
   len_from_index <- function(n, idx, name_index = deparse(substitute(idx))) {
     if (is.null(idx)) {
@@ -807,7 +802,7 @@ prepare_state <- function(state,
     cli::cli_abort(
       paste("Expected 'state' to be a {rank_description(rank_expected)}",
             "but was given a {rank_description(rank)}"),
-      arg = "state", call = call)
+      arg = name, call = call)
   }
   if (rank < rank_expected) {
     d <- c(d, rep(1L, rank_expected - rank))
@@ -815,30 +810,36 @@ prepare_state <- function(state,
 
   if (d[[1]] != len_state) {
     if (rank == 1) {
-      msg <- "Expected 'state' to have length {len_state}"
+      msg <- "Expected '{name}' to have length {len_state}"
     } else if (rank == 2) {
-      msg <- "Expected 'state' to have {len_state} rows"
+      msg <- "Expected '{name}' to have {len_state} rows"
     } else {
-      msg <- "Expected dimension 1 of 'state' to be length {len_state}"
+      msg <- "Expected dimension 1 of '{name}' to be length {len_state}"
     }
-    cli::cli_abort(msg, arg = "state", call = call)
+    cli::cli_abort(msg, arg = name, call = call)
   }
   if (rank_expected >= 2 && d[[2]] != 1 && d[[2]] != expected[[2]]) {
     expected_str <-
       if (expected[[2]] == 1) "1" else sprintf("1 or %d", expected[[2]])
     if (rank == 2) {
-      msg <- "Expected 'state' to have {expected_str} columns"
+      msg <- "Expected '{name}' to have {expected_str} columns"
     } else {
-      msg <- "Expected dimension 2 of 'state' to be length {expected_str}"
+      msg <- "Expected dimension 2 of '{name}' to be length {expected_str}"
     }
-    cli::cli_abort(msg, arg = "state", call = call)
+    cli::cli_abort(msg, arg = name, call = call)
   }
   if (rank_expected == 3 && d[[3]] != 1 && d[[3]] != expected[[3]]) {
     expected_str <-
       if (expected[[3]] == 1) "1" else sprintf("1 or %d", expected[[3]])
-    msg <- "Expected dimension 3 of 'state' to be length {expected_str}"
+    msg <- "Expected dimension 3 of '{name}' to be length {expected_str}"
   }
 
-  list(recycle_particle = n_particles > 1 && d[[2]] == 1,
+  ## We will access this by position from the C++ code but name it
+  ## here for clarity.
+  list(state = state,
+       index_state = index_state,
+       index_particle = index_particle,
+       index_group = index_group,
+       recycle_particle = n_particles > 1 && d[[2]] == 1,
        recycle_group = n_groups > 1 && last(d) == 1)
 }

@@ -131,16 +131,9 @@ SEXP dust2_system_set_state_initial(cpp11::sexp ptr) {
 
 template <typename T>
 SEXP dust2_system_set_state(cpp11::sexp ptr,
-                            cpp11::sexp r_state,
-                            cpp11::sexp index_state,
-                            cpp11::sexp index_particle,
-                            cpp11::sexp index_group,
-                            bool recycle_particle,
-                            bool recycle_group) {
+                            cpp11::list r_state) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
-  set_state2(*obj, r_state,
-             index_state, index_particle, index_group,
-             recycle_particle, recycle_group);
+  set_state2(*obj, r_state); // what is this indirection for?
   return R_NilValue;
 }
 
