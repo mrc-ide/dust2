@@ -65,23 +65,27 @@ cpp11::sexp dust2_unfilter_last_history(cpp11::sexp ptr,
                                         bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
-  const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
-    check_index(r_index_group, obj->sys.n_groups(), "index_group");
+
+  // See r/filter.hpp; this is the same code.
+  if (r_index_group != R_NilValue) {
+    cpp11::stop("last_history() with 'index_group' disabled for now at least");
+  }
+
+  const auto& history = obj->last_history();
+  const auto& index_group = history.index_group();
   const auto& is_current = obj->last_history_is_current();
-  for (auto i : index_group) {
-    if (!is_current[i]) {
-      if (!tools::any(is_current)) {
-        cpp11::stop("History is not current");
-      } else {
-        cpp11::stop("History for group '%d' is not current",
-                    static_cast<int>(i + 1));
-      }
+  if (!tools::any(is_current)) {
+    cpp11::stop("History is not current");
+  }
+  for (size_t i = 0; i < index_group.size(); ++i) {
+    if (is_current[index_group[i]]) {
+    } else {
+      cpp11::stop("History for group '%d' is not current",
+                  static_cast<int>(i + 1));
     }
   }
 
   constexpr bool reorder = false; // never needed
-
-  const auto& history = obj->last_history();
 
   const auto n_state = history.n_state(); // might be filtered
   const auto n_particles = obj->sys.n_particles();

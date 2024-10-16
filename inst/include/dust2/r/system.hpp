@@ -247,7 +247,7 @@ SEXP dust2_system_simulate(cpp11::sexp ptr,
   const auto n_groups = index_group.size();
   const auto n_times = times.size();
 
-  dust2::history<real_type> h(n_state_save, n_particles, n_groups, n_times);
+  dust2::history<real_type> h(n_state, n_particles, n_groups, n_times);
   h.set_index_and_reset(index_state, index_group);
   for (size_t i = 0; i < n_times; ++i) {
     obj->run_to_time(times[i], index_group);

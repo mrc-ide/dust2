@@ -1,5 +1,3 @@
-#include <R_ext/Print.h>
-
 #include <dust2/filter_details.hpp>
 #include <dust2/history.hpp>
 #include <dust2/r/helpers.hpp>
