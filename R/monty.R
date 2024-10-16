@@ -132,7 +132,9 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
     density <- function(x) {
       pars <- packer_unpack(packer, x)
       was_uninitialised <- dust_likelihood_ensure_initialised(obj, pars)
-      if (was_uninitialised && save_history$enabled) {
+      needs_history_index <- was_uninitialised &&
+        save_history$enabled && !is.null(save_history$subset)
+      if (needs_history_index) {
         env$save_history$index <-
           obj$packer_state$subset(save_history$subset)$index
       }
@@ -163,7 +165,9 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
     density <- function(x) {
       pars <- packer_unpack(packer, x)
       was_uninitialised <- dust_likelihood_ensure_initialised(obj, pars)
-      if (was_uninitialised && save_history$enabled) {
+      needs_history_index <- was_uninitialised &&
+        save_history$enabled && !is.null(save_history$subset)
+      if (needs_history_index) {
         env$save_history$index <-
           obj$packer_state$subset(save_history$subset)$index
       }
