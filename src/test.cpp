@@ -1,3 +1,5 @@
+#include <R_ext/Print.h>
+
 #include <dust2/filter_details.hpp>
 #include <dust2/history.hpp>
 #include <dust2/r/helpers.hpp>
@@ -5,6 +7,7 @@
 #include <cpp11/integers.hpp>
 #include <cpp11/doubles.hpp>
 #include <cpp11/list.hpp>
+
 
 [[cpp11::register]]
 cpp11::integers test_resample_weight(std::vector<double> w, double u) {

@@ -71,6 +71,10 @@ public:
     return position_;
   }
 
+  auto& index_group() const {
+    return index_group_;
+  }
+
   template <typename Iter>
   void export_time(Iter iter) const {
     std::copy_n(times_.begin(), position_, iter);
@@ -227,7 +231,7 @@ private:
       for (size_t i = 0; i < n_groups_; ++i) {
         for (size_t j = 0; j < n_particles_; ++j) {
           const auto iter_src_i = iter_src +
-            index_group_[i] * n_particles_ * n_state_total_;
+            (index_group_[i] * n_particles_ + j) * n_state_total_;
           for (size_t k = 0; k < n_state_; ++k, ++iter_dst) {
             *iter_dst = *(iter_src_i + index_state_[k]);
           }

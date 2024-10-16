@@ -79,7 +79,7 @@ dust_likelihood_run <- function(obj, pars, initial = NULL,
 
   ## This must be evaluated *after* we're guaranteed to be initialised
   ## so that we can access `n_groups`
-  index_state <- check_index(index_state, max = obj$n_groups,
+  index_state <- check_index(index_state, max = obj$n_state,
                              unique = TRUE)
   obj$methods$run(obj$ptr,
                   initial,
