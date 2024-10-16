@@ -6,6 +6,7 @@
 \usage{
 dust_likelihood_last_history(
   obj,
+  index_state = NULL,
   index_group = NULL,
   select_random_particle = FALSE
 )
@@ -14,6 +15,10 @@ dust_likelihood_last_history(
 \item{obj}{A \code{dust_filter} object, created by
 \link{dust_filter_create} or a \code{dust_unfilter} object created by
 \link{dust_unfilter_create}}
+
+\item{index_state}{An optional vector of state indices to save
+where \code{save_history} is \code{TRUE}.  If omitted all state is saved
+and if \code{save_history = FALSE} this has no effect.}
 
 \item{index_group}{An optional vector of group indices to run the
 calculation for.  You can use this to run a subset of possible

@@ -29,6 +29,10 @@
 ##'   an adjoint you will not be able to compute gradients.  This has
 ##'   no effect for stochastic models.
 ##'
+##' @param index_state An optional vector of state indices to save
+##'   where `save_history` is `TRUE`.  If omitted all state is saved
+##'   and if `save_history = FALSE` this has no effect.
+##'
 ##' @param index_group An optional vector of group indices to run the
 ##'   calculation for.  You can use this to run a subset of possible
 ##'   groups, once `obj` is initialised (this argument must be `NULL`
@@ -39,9 +43,12 @@
 ##'
 ##' @export
 dust_likelihood_run <- function(obj, pars, initial = NULL,
-                                save_history = FALSE, adjoint = NULL,
+                                save_history = FALSE,
+                                adjoint = NULL,
+                                index_state = NULL,
                                 index_group = NULL) {
   check_is_dust_likelihood(obj)
+
   index_group <- check_index(index_group, max = obj$n_groups,
                              unique = TRUE)
   if (!is.null(pars)) {
@@ -69,13 +76,31 @@ dust_likelihood_run <- function(obj, pars, initial = NULL,
     assert_scalar_logical(adjoint, call = environment())
     ## Here we might check for adjoint = TRUE in a stochastic model?
   }
+
+  ## This must be evaluated *after* we're guaranteed to be initialised
+  ## so that we can access `n_groups`
+  index_state <- check_index(index_state, max = obj$n_groups,
+                             unique = TRUE)
   obj$methods$run(obj$ptr,
                   initial,
                   save_history,
                   adjoint,
+                  index_state,
                   index_group,
                   obj$preserve_particle_dimension,
                   obj$preserve_group_dimension)
+}
+
+
+dust_likelihood_ensure_initialised <- function(obj, pars) {
+  is_uninitialised <- is.null(obj$ptr)
+  if (is_uninitialised) {
+    index_group <- NULL
+    pars <- check_pars(pars, obj$n_groups, index_group,
+                       obj$preserve_group_dimension)
+    obj$initialise(obj, pars)
+  }
+  is_uninitialised
 }
 
 
@@ -130,7 +155,9 @@ dust_likelihood_copy <- function(obj, seed = NULL) {
 ##'   second (particle) dimension will be dropped.
 ##'
 ##' @export
-dust_likelihood_last_history <- function(obj, index_group = NULL,
+dust_likelihood_last_history <- function(obj,
+                                         index_state = NULL,
+                                         index_group = NULL,
                                          select_random_particle = FALSE) {
   check_is_dust_likelihood(obj)
   if (is.null(obj$ptr)) {
@@ -138,10 +165,13 @@ dust_likelihood_last_history <- function(obj, index_group = NULL,
       "History is not current",
       i = "Likelihood has not yet been run"))
   }
-  index_group <- check_index(index_group, max = obj$n_groups,
-                             unique = TRUE)
+  ## TODO: once we allow setting an index, we need to check that this
+  ## index is achievable.
+  index_state <- check_index(index_state, max = obj$n_state, unique = TRUE)
+  index_group <- check_index(index_group, max = obj$n_groups, unique = TRUE)
   assert_scalar_logical(select_random_particle)
-  obj$methods$last_history(obj$ptr, index_group,
+  obj$methods$last_history(obj$ptr,
+                           index_group,
                            select_random_particle,
                            obj$preserve_particle_dimension,
                            obj$preserve_group_dimension)
