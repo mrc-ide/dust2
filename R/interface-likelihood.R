@@ -71,14 +71,14 @@ dust_likelihood_run <- function(obj, pars, initial = NULL,
   }
   if (!is.null(initial)) {
     initial <- prepare_state(initial,
-                             index_state,
-                             index_particle,
+                             NULL, # index_state
+                             NULL, # index_particle
                              index_group,
-                             sys$n_state,
-                             sys$n_particles,
-                             sys$n_groups,
-                             sys$preserve_particle_dimension,
-                             sys$preserve_group_dimension)
+                             obj$n_state,
+                             obj$n_particles,
+                             obj$n_groups,
+                             obj$preserve_particle_dimension,
+                             obj$preserve_group_dimension)
   }
   obj$methods$run(obj$ptr,
                   initial,

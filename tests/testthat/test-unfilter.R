@@ -95,7 +95,7 @@ test_that("can get partial unfilter history", {
 
 test_that("can run an unfilter with manually set state", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
-  state <- matrix(c(1000 - 17, 17, 0, 0, 0), ncol = 1)
+  state <- c(1000 - 17, 17, 0, 0, 0)
 
   time_start <- 0
   data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)

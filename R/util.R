@@ -138,8 +138,10 @@ dim2 <- function(x) {
 
 
 rank_description <- function(rank) {
-  if (rank == 1) {
+  if (rank == 0) {
     "scalar"
+  } else if (rank == 1) {
+    "vector"
   } else if (rank == 2) {
     "matrix"
   } else {
