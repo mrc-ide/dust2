@@ -247,8 +247,8 @@ SEXP dust2_filter_malaria_update_pars(cpp11::sexp ptr, cpp11::list r_pars, cpp11
 }
 
 [[cpp11::register]]
-SEXP dust2_filter_malaria_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, cpp11::sexp index_group, bool preserve_particle_dimension, bool preserve_group_dimension) {
-  return dust2::r::dust2_filter_run<dust2::dust_continuous<malaria>>(ptr, r_initial, save_history, adjoint, index_group, preserve_particle_dimension, preserve_group_dimension);
+SEXP dust2_filter_malaria_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_history, bool adjoint, cpp11::sexp index_group) {
+  return dust2::r::dust2_filter_run<dust2::dust_continuous<malaria>>(ptr, r_initial, save_history, adjoint, index_group);
 }
 
 [[cpp11::register]]
