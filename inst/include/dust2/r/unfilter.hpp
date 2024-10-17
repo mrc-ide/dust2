@@ -99,11 +99,10 @@ cpp11::sexp dust2_unfilter_last_state(cpp11::sexp ptr,
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
 
-  const auto index_group = obj->last_index_group();
   const auto& state = obj->sys.state();
   const auto n_state = obj->sys.n_state();
   const auto n_particles = obj->sys.n_particles();
-  const auto n_groups = index_group.size();
+  const auto n_groups = obj->last_index_group().size();
 
   const auto len = n_state * n_particles * n_groups;
   cpp11::sexp ret = cpp11::writable::doubles(len);
@@ -118,34 +117,25 @@ cpp11::sexp dust2_unfilter_last_state(cpp11::sexp ptr,
 
 template <typename T>
 cpp11::sexp dust2_discrete_unfilter_last_gradient(cpp11::sexp ptr,
-                                                  cpp11::sexp r_index_group,
                                                   bool preserve_particle_dimension,
                                                   bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
-  const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
-    check_index(r_index_group, obj->sys.n_groups(), "index_group");
   const auto& is_current = obj->adjoint_is_current();
-  for (auto i : index_group) {
-    if (!is_current[i]) {
-      if (!tools::any(is_current)) {
-        cpp11::stop("System was not run with 'adjoint = TRUE'");
-      } else {
-        cpp11::stop("Adjoint history for group '%d' is not current",
-                    static_cast<int>(i + 1));
-      }
-    }
+  if (!tools::any(is_current)) {
+    cpp11::stop("System was not run with 'adjoint = TRUE'");
   }
+
   const auto n_gradient = obj->sys.packing_gradient().size();
   const auto n_particles = obj->sys.n_particles();
-  const auto n_groups = index_group.size();
+  const auto n_groups = obj->last_index_group().size();
   const auto len = n_gradient * n_particles * n_groups;
 
   if (n_particles > 1) {
     cpp11::stop("n_particles > 1 not yet supported; see mrc-5406");
   }
   cpp11::sexp ret = cpp11::writable::doubles(len);
-  obj->last_gradient(REAL(ret), index_group);
+  obj->last_gradient(REAL(ret));
   if (preserve_group_dimension && preserve_particle_dimension) {
     set_array_dims(ret, {n_gradient, n_particles, n_groups});
   } else if (preserve_group_dimension || preserve_particle_dimension) {

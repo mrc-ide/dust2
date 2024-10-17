@@ -252,17 +252,14 @@ dust_likelihood_set_rng_state <- function(obj, rng_state) {
 ##' @return A vector (if ungrouped) or a matrix (if grouped).
 ##'
 ##' @export
-dust_likelihood_last_gradient <- function(obj, index_group = NULL) {
+dust_likelihood_last_gradient <- function(obj) {
   check_is_dust_likelihood(obj)
   if (is.null(obj$ptr)) {
     cli::cli_abort(c(
       "Gradient is not current",
       i = "Likelihood has not yet been run"))
   }
-  index_group <- check_index(index_group, max = obj$n_groups,
-                             unique = TRUE)
   obj$methods$last_gradient(obj$ptr,
-                            index_group,
                             obj$preserve_particle_dimension,
                             obj$preserve_group_dimension)
 }

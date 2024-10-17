@@ -127,7 +127,8 @@ public:
   }
 
   template <typename Iter>
-  void last_gradient(Iter iter, const std::vector<size_t>& index_group) {
+  void last_gradient(Iter iter) {
+    const auto& index_group = last_index_group();
     if (!gradient_is_current_) {
       compute_gradient_(index_group);
     }

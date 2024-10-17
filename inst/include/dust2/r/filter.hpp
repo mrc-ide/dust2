@@ -103,7 +103,7 @@ cpp11::sexp dust2_filter_last_state(cpp11::sexp ptr,
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
 
-  const auto index_group = obj->last_index_group();
+  const auto& index_group = obj->last_index_group();
 
   const auto& state = obj->sys.state();
   const auto n_state = obj->sys.n_state();
