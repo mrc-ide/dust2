@@ -398,7 +398,7 @@ std::vector<typename T::data_type> check_data(cpp11::list r_data,
 
 template <typename T>
 void set_state(T& obj, cpp11::list r_state) {
-  cpp11::doubles r_value = cpp11::as_cpp<cpp11::doubles>(r_state[0]);
+  cpp11::doubles r_value = cpp11::as_doubles(r_state[0]);
   cpp11::sexp r_index_state = r_state[1];
   cpp11::sexp r_index_particle = r_state[2];
   cpp11::sexp r_index_group = r_state[3];

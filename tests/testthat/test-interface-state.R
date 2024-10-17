@@ -147,7 +147,7 @@ test_that("validate that the index provided for particle is reasonable", {
 
 test_that("can set state from vector", {
   sys <- dust_system_create(sir(), list(), n_particles = 3)
-  dust_system_set_state(sys, as.numeric(1:5)) # TODO: fix in cpp
+  dust_system_set_state(sys, as.numeric(1:5))
   expect_equal(dust_system_state(sys), matrix(1:5, 5, 3))
 })
 
