@@ -133,7 +133,7 @@ template <typename T>
 SEXP dust2_system_set_state(cpp11::sexp ptr,
                             cpp11::list r_state) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
-  set_state(*obj, r_state); // what is this indirection for?
+  set_state(*obj, r_state);
   return R_NilValue;
 }
 

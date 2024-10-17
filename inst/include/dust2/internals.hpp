@@ -19,22 +19,21 @@ void set_state(std::vector<real_type>& state,
   const bool use_index_particle = !index_particle.empty();
   const bool use_index_group = !index_group.empty();
 
-  const auto n_state_in =
-    use_index_state ? index_state.size() : n_state;
-  const auto n_particles_in =
-    use_index_particle ? index_particle.size() : n_particles;
-  const auto n_groups_in =
-    use_index_group ? index_group.size() : n_groups;
-  const auto offset_src_particle = recycle_particle ? 0 : n_state_in;
-  const auto offset_src_group = recycle_group ? 0 :
-    (n_state_in * (recycle_particle ? 1 : n_particles_in));
-
   bool do_simple_copy =
     !use_index_state && !use_index_particle && !use_index_group &&
     !recycle_particle && !recycle_group;
   if (do_simple_copy) {
     std::copy_n(iter, state.size(), state.begin());
   } else {
+    const auto n_state_in =
+      use_index_state ? index_state.size() : n_state;
+    const auto n_particles_in =
+      use_index_particle ? index_particle.size() : n_particles;
+    const auto n_groups_in =
+      use_index_group ? index_group.size() : n_groups;
+    const auto offset_src_particle = recycle_particle ? 0 : n_state_in;
+    const auto offset_src_group = recycle_group ? 0 :
+      (n_state_in * (recycle_particle ? 1 : n_particles_in));
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) num_threads(n_threads) collapse(2)
 #endif
@@ -47,9 +46,9 @@ void set_state(std::vector<real_type>& state,
         const auto offset_dst = (n_particles * i_dst + j_dst) * n_state;
         const auto iter_src = iter + offset_src;
         auto iter_dst = state.begin() + offset_dst;
-        if (use_index_particle) {
+        if (use_index_state) {
           for (size_t k = 0; k < n_state_in; ++k) {
-            *(iter_dst + index_state[k]) = *(iter + offset_src + k);
+            *(iter_dst + index_state[k]) = *(iter_src + k);
           }
         } else {
           std::copy_n(iter_src, n_state, iter_dst);

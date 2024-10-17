@@ -398,7 +398,7 @@ std::vector<typename T::data_type> check_data(cpp11::list r_data,
 
 template <typename T>
 void set_state(T& obj, cpp11::list r_state) {
-  cpp11::sexp r_value = r_state[0];
+  cpp11::doubles r_value = cpp11::as_cpp<cpp11::doubles>(r_state[0]);
   cpp11::sexp r_index_state = r_state[1];
   cpp11::sexp r_index_particle = r_state[2];
   cpp11::sexp r_index_group = r_state[3];
@@ -407,7 +407,7 @@ void set_state(T& obj, cpp11::list r_state) {
   const auto index_state =
     check_index(r_index_state, obj.n_state(), "index_state");
   const auto index_particle =
-    check_index(r_index_state, obj.n_particles(), "index_particle");
+    check_index(r_index_particle, obj.n_particles(), "index_particle");
   const auto index_group =
     check_index(r_index_group, obj.n_groups(), "index_group");
   obj.set_state(REAL(r_value), index_state, index_particle, index_group,
