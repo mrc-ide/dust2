@@ -296,3 +296,13 @@ test_that("can unpack state", {
   expect_equal(obj$packer_state$unpack(m),
                list(S = 990, I = 10, R = 0, cases_cumul = 0, cases_inc = 0))
 })
+
+
+test_that("can set state from a vector", {
+  set.seed(1)
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  sys <- dust_system_create(sir(), pars, n_particles = 10)
+  s <- c(1000, 10, 0, 0, 0)
+  dust_system_set_state(sys, s)
+  expect_equal(dust_system_state(sys), matrix(s, 5, 10))
+})

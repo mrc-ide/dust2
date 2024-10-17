@@ -69,6 +69,17 @@ dust_likelihood_run <- function(obj, pars, initial = NULL,
     assert_scalar_logical(adjoint, call = environment())
     ## Here we might check for adjoint = TRUE in a stochastic model?
   }
+  if (!is.null(initial)) {
+    initial <- prepare_state(initial,
+                             NULL, # index_state
+                             NULL, # index_particle
+                             index_group,
+                             obj$n_state,
+                             obj$n_particles,
+                             obj$n_groups,
+                             obj$preserve_particle_dimension,
+                             obj$preserve_group_dimension)
+  }
   obj$methods$run(obj$ptr,
                   initial,
                   save_history,

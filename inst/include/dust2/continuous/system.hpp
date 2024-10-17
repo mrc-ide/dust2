@@ -9,6 +9,7 @@
 #include <dust2/continuous/control.hpp>
 #include <dust2/continuous/solver.hpp>
 #include <dust2/errors.hpp>
+#include <dust2/internals.hpp>
 #include <dust2/packing.hpp>
 #include <dust2/properties.hpp>
 #include <dust2/tools.hpp>
@@ -179,35 +180,19 @@ public:
   }
 
   template <typename Iter>
-  void set_state(Iter iter, bool recycle_particle, bool recycle_group,
-                 const std::vector<size_t>& index_group) {
+  void set_state(Iter iter,
+                 const std::vector<size_t>& index_state,
+                 const std::vector<size_t>& index_particle,
+                 const std::vector<size_t>& index_group,
+                 bool recycle_particle,
+                 bool recycle_group) {
     errors_.reset();
-    const auto offset_read_group = recycle_group ? 0 :
-      (n_state_ * (recycle_particle ? 1 : n_particles_));
-    const auto offset_read_particle = recycle_particle ? 0 : n_state_;
-
-    real_type * state_data = state_.data();
-#ifdef _OPENMP
-#pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
-#endif
-    for (auto i : index_group) {
-      for (size_t j = 0; j < n_particles_; ++j) {
-        const auto k = n_particles_ * i + j;
-        const auto offset_read =
-          i * offset_read_group + j * offset_read_particle;
-        const auto offset_write = k * n_state_;
-        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
-        real_type* y = state_data + offset_write;
-        std::copy_n(iter + offset_read, n_state_, y);
-        try {
-          solver_.initialise(time_, y, ode_internals_[k],
-                             rhs_(shared_[i], internal_i));
-        } catch (std::exception const& e) {
-          errors_.capture(e, k);
-        }
-      }
-    }
-    errors_.report();
+    dust2::internals::set_state(state_, iter,
+                                n_state_, n_particles_, n_groups_,
+                                index_state, index_particle, index_group,
+                                recycle_particle, recycle_group,
+                                n_threads_);
+    initialise_solver_(index_group.empty() ? all_groups_ : index_group);
   }
 
   // iter here is an iterator to our *reordering index*, which will be
@@ -377,6 +362,29 @@ private:
     return [&](real_type t, const real_type* y, real_type* dydt) {
              T::rhs(t, y, shared, internal, dydt);
            };
+  }
+
+  void initialise_solver_(std::vector<size_t> index_group) {
+    errors_.reset();
+    real_type * state_data = state_.data();
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
+#endif
+    for (auto i : index_group) {
+      for (size_t j = 0; j < n_particles_; ++j) {
+        const auto k = n_particles_ * i + j;
+        const auto offset = k * n_state_;
+        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
+        real_type * y = state_data + offset;
+        try {
+          solver_.initialise(time_, y, ode_internals_[k],
+                             rhs_(shared_[i], internal_i));
+        } catch (std::exception const& e) {
+          errors_.capture(e, k);
+        }
+      }
+    }
+    errors_.report();
   }
 };
 

@@ -24,8 +24,8 @@ dust2_system_logistic_set_state_initial <- function(ptr) {
   .Call(`_dust2_dust2_system_logistic_set_state_initial`, ptr)
 }
 
-dust2_system_logistic_set_state <- function(ptr, r_state, preserve_group_dimension) {
-  .Call(`_dust2_dust2_system_logistic_set_state`, ptr, r_state, preserve_group_dimension)
+dust2_system_logistic_set_state <- function(ptr, r_state) {
+  .Call(`_dust2_dust2_system_logistic_set_state`, ptr, r_state)
 }
 
 dust2_system_logistic_reorder <- function(ptr, r_index) {
@@ -76,8 +76,8 @@ dust2_system_malaria_set_state_initial <- function(ptr) {
   .Call(`_dust2_dust2_system_malaria_set_state_initial`, ptr)
 }
 
-dust2_system_malaria_set_state <- function(ptr, r_state, preserve_group_dimension) {
-  .Call(`_dust2_dust2_system_malaria_set_state`, ptr, r_state, preserve_group_dimension)
+dust2_system_malaria_set_state <- function(ptr, r_state) {
+  .Call(`_dust2_dust2_system_malaria_set_state`, ptr, r_state)
 }
 
 dust2_system_malaria_reorder <- function(ptr, r_index) {
@@ -180,8 +180,8 @@ dust2_system_sir_set_state_initial <- function(ptr) {
   .Call(`_dust2_dust2_system_sir_set_state_initial`, ptr)
 }
 
-dust2_system_sir_set_state <- function(ptr, r_state, preserve_group_dimension) {
-  .Call(`_dust2_dust2_system_sir_set_state`, ptr, r_state, preserve_group_dimension)
+dust2_system_sir_set_state <- function(ptr, r_state) {
+  .Call(`_dust2_dust2_system_sir_set_state`, ptr, r_state)
 }
 
 dust2_system_sir_reorder <- function(ptr, r_index) {
@@ -288,8 +288,8 @@ dust2_system_sirode_set_state_initial <- function(ptr) {
   .Call(`_dust2_dust2_system_sirode_set_state_initial`, ptr)
 }
 
-dust2_system_sirode_set_state <- function(ptr, r_state, preserve_group_dimension) {
-  .Call(`_dust2_dust2_system_sirode_set_state`, ptr, r_state, preserve_group_dimension)
+dust2_system_sirode_set_state <- function(ptr, r_state) {
+  .Call(`_dust2_dust2_system_sirode_set_state`, ptr, r_state)
 }
 
 dust2_system_sirode_reorder <- function(ptr, r_index) {
@@ -444,8 +444,8 @@ dust2_system_walk_set_state_initial <- function(ptr) {
   .Call(`_dust2_dust2_system_walk_set_state_initial`, ptr)
 }
 
-dust2_system_walk_set_state <- function(ptr, r_state, preserve_group_dimension) {
-  .Call(`_dust2_dust2_system_walk_set_state`, ptr, r_state, preserve_group_dimension)
+dust2_system_walk_set_state <- function(ptr, r_state) {
+  .Call(`_dust2_dust2_system_walk_set_state`, ptr, r_state)
 }
 
 dust2_system_walk_reorder <- function(ptr, r_index) {
