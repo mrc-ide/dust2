@@ -229,7 +229,10 @@ dust_system_state <- function(sys, index_state = NULL, index_particle = NULL,
 ##' length 1 will be recycled as appropriate.  For continuous time
 ##' systems, we will initialise the solver immediately after setting
 ##' state, which may cause errors if your initial state is invalid for
-##' your system.
+##' your system.  There are many ways that you can use this function
+##' to set different fractions of state (a subset of states, particles
+##' or parameter groups, recycling over any dimensions that are
+##' missing).  Please see the Examples section for usage.
 ##'
 ##' @title Set system state
 ##'
@@ -258,6 +261,45 @@ dust_system_state <- function(sys, index_state = NULL, index_particle = NULL,
 ##'
 ##' @return Nothing, called for side effects only
 ##' @export
+##' @examples
+##' # Consider a system with 3 particles and 1 group:
+##' sys <- dust_system_create(sir(), list(), n_particles = 3)
+##' # The state for this system is packed as S, I, R, cases_cumul, cases_inc:
+##' dust_unpack_index(sys)
+##'
+##' # Set all particles to the same state:
+##' dust_system_set_state(sys, c(1000, 10, 0, 0, 0))
+##' dust_system_state(sys)
+##'
+##' # We can set everything to different states by passing a vector
+##' # with this shape:
+##' m <- cbind(c(1000, 10, 0, 0, 0), c(999, 11, 0, 0, 0), c(998, 12, 0, 0, 0))
+##' dust_system_set_state(sys, m)
+##' dust_system_state(sys)
+##'
+##' # Or set the state for just one state:
+##' dust_system_set_state(sys, 1, index_state = 4)
+##' dust_system_state(sys)
+##'
+##' # If you want to set a different state across particles, you must
+##' # provide a *matrix* (a vector always sets the same state into
+##' # every particle)
+##' dust_system_set_state(sys, rbind(c(1, 2, 3)), index_state = 4)
+##' dust_system_state(sys)
+##'
+##' # This will not work as it can it can be ambiguous what you are
+##' # trying to do:
+##' #> dust_system_set_state(sys, c(1, 2, 3), index_state = 4)
+##'
+##' # State can be set for specific particles:
+##' dust_system_set_state(sys, c(900, 100, 0, 0, 0), index_particle = 2)
+##' dust_system_state(sys)
+##'
+##' # And you can combine 'index_particle' with 'index_state' to set
+##' # small rectangles of state:
+##' dust_system_set_state(sys, matrix(c(1, 2, 3, 4), 2, 2),
+##'                       index_particle = 2:3, index_state = 4:5)
+##' dust_system_state(sys)
 dust_system_set_state <- function(sys, state, index_state = NULL,
                                   index_particle = NULL, index_group = NULL) {
   check_is_dust_system(sys)
