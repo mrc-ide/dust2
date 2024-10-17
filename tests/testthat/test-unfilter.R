@@ -335,18 +335,13 @@ test_that("can run a subset of an unfilter", {
                         save_history = TRUE),
     rev(ll1))
 
-  skip("FIXME")
-  expect_equal(dust_likelihood_last_history(obj2, index_group = 3:1),
-               h1[, 3:1, ])
+  expect_equal(dust_likelihood_last_history(obj2), h1[, 3:1, ])
 
   for (i in 1:3) {
     ll_i <- dust_likelihood_run(obj2, pars1[i], index_group = i,
                               save_history = TRUE)
-    expect_equal(dust_likelihood_last_history(obj2, index_group = i),
+    expect_equal(dust_likelihood_last_history(obj2),
                  h1[, i, , drop = FALSE])
-    j <- i %% 3 + 1
-    expect_error(dust_likelihood_last_history(obj2, index_group = j),
-                 sprintf("History for group '%d' is not current", j))
   }
 })
 
