@@ -52,6 +52,7 @@ missing).  Please see the Examples section for usage.
 }
 \examples{
 # Consider a system with 3 particles and 1 group:
+sir <- dust_example("sir")
 sys <- dust_system_create(sir(), list(), n_particles = 3)
 # The state for this system is packed as S, I, R, cases_cumul, cases_inc:
 dust_unpack_index(sys)
