@@ -226,3 +226,50 @@ test_that("can set a fraction of both particles and states", {
   m[c(2, 4), c(2, 4, 6)] <- m2
   expect_equal(dust_system_state(sys), m)
 })
+
+
+test_that("can set vector into grouped sytem", {
+  sys <- dust_system_create(walk(), rep(list(list(len = 5, sd = 1)), 3),
+                            n_particles = 4,
+                            n_groups = 3)
+  dust_system_set_state(sys, 1:5)
+  expect_equal(dust_system_state(sys), array(1:5, c(5, 4, 3)))
+})
+
+
+test_that("can set matrix into grouped sytem", {
+  sys <- dust_system_create(walk(), rep(list(list(len = 5, sd = 1)), 3),
+                            n_particles = 4,
+                            n_groups = 3)
+  m <- matrix(1:20, 5, 4)
+  dust_system_set_state(sys, m)
+  expect_equal(dust_system_state(sys), array(m, c(5, 4, 3)))
+})
+
+
+test_that("can set array into grouped sytem", {
+  sys <- dust_system_create(walk(), rep(list(list(len = 5, sd = 1)), 3),
+                            n_particles = 4,
+                            n_groups = 3)
+  m <- array(1:60, c(5, 4, 3))
+  dust_system_set_state(sys, m)
+  expect_equal(dust_system_state(sys), m)
+})
+
+
+test_that("can set subset into grouped system", {
+  sys <- dust_system_create(walk(), rep(list(list(len = 5, sd = 1)), 3),
+                            n_particles = 4,
+                            n_groups = 3)
+  m1 <- array(1:60, c(5, 4, 3))
+  dust_system_set_state(sys, m1)
+
+  i <- c(2, 4)
+  j <- c(1, 3)
+  k <- c(2, 3)
+  m2 <- array(100 + seq_len(8), c(2, 2, 2))
+  dust_system_set_state(sys, m2, index_state = i, index_particle = j,
+                        index_group = k)
+  m1[i, j, k] <- m2
+  expect_equal(dust_system_state(sys), m1)
+})
