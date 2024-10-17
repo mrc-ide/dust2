@@ -4,17 +4,12 @@
 \alias{dust_likelihood_last_gradient}
 \title{Fetch last likelihood gradient}
 \usage{
-dust_likelihood_last_gradient(obj, index_group = NULL)
+dust_likelihood_last_gradient(obj)
 }
 \arguments{
 \item{obj}{A \code{dust_filter} object, created by
 \link{dust_filter_create} or a \code{dust_unfilter} object created by
 \link{dust_unfilter_create}}
-
-\item{index_group}{An optional vector of group indices to run the
-calculation for.  You can use this to run a subset of possible
-groups, once \code{obj} is initialised (this argument must be \code{NULL}
-on the \strong{first} call).}
 }
 \value{
 A vector (if ungrouped) or a matrix (if grouped).

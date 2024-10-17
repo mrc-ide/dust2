@@ -2,6 +2,7 @@
 
 #include <dust2/filter_details.hpp>
 #include <dust2/history.hpp>
+#include <dust2/tools.hpp>
 #include <monty/random/random.hpp>
 
 namespace dust2 {
@@ -21,7 +22,6 @@ public:
          real_type time_start,
          std::vector<real_type> time,
          std::vector<data_type> data,
-         std::vector<size_t> history_index_state,
          const std::vector<rng_int_type>& seed) :
     sys(sys_),
     time_start_(time_start),
@@ -33,22 +33,19 @@ public:
     rng_(n_groups_, seed, false),
     ll_(n_groups_, 0),
     ll_step_(n_groups_ * n_particles_, 0),
-    history_index_state_(history_index_state),
-    history_(history_index_state_.size() > 0 ? history_index_state_.size() : n_state_,
-             n_particles_, n_groups_, time_.size()),
+    history_(n_state_, n_particles_, n_groups_, time_.size()),
     history_is_current_(n_groups_, false),
     random_particle_(n_groups_, n_particles_) {
   }
 
   void run(bool set_initial, bool save_history,
+           const std::vector<size_t>& index_state,
            const std::vector<size_t>& index_group) {
-    reset(set_initial, save_history);
+    reset(set_initial, save_history, index_state, index_group);
 
     // Just store this here; later once we have state to save we can
     // probably use that vector instead.
     std::vector<size_t> index(n_particles_ * n_groups_);
-
-    const bool use_index = history_index_state_.size() > 0;
 
     auto it_data = data_.begin();
     for (auto time : time_) {
@@ -84,14 +81,7 @@ public:
       sys.reorder(index.begin(), index_group);
 
       if (save_history) {
-        if (use_index) {
-          history_.add_with_index(time, sys.state().begin(), index.begin(),
-                                  history_index_state_.begin(), n_state_,
-                                  index_group);
-        } else {
-          history_.add(time, sys.state().begin(), index.begin(),
-                       index_group);
-        }
+        history_.add(time, sys.state().begin(), index.begin());
       }
       // early exit (perhaps)
       // save snapshots (perhaps)
@@ -101,6 +91,9 @@ public:
       for (auto i : index_group) {
         history_is_current_[i] = true;
       }
+    }
+    if (!tools::is_trivial_index(index_group, n_groups_)) {
+      last_index_group_ = index_group;
     }
   }
 
@@ -114,6 +107,10 @@ public:
 
   auto& last_history_is_current() const {
     return history_is_current_;
+  }
+
+  auto& last_index_group() const {
+    return last_index_group_.empty() ? sys.all_groups() : last_index_group_;
   }
 
   auto rng_state() const {
@@ -144,15 +141,17 @@ private:
   monty::random::prng<rng_state_type> rng_;
   std::vector<real_type> ll_;
   std::vector<real_type> ll_step_;
-  std::vector<size_t> history_index_state_;
   history<real_type> history_;
   std::vector<bool> history_is_current_;
+  std::vector<size_t> last_index_group_;
   std::vector<size_t> random_particle_;
 
-  void reset(bool set_initial, bool save_history) {
+  void reset(bool set_initial, bool save_history,
+             const std::vector<size_t>& index_state,
+             const std::vector<size_t>& index_group) {
     std::fill(history_is_current_.begin(), history_is_current_.end(), false);
     if (save_history) {
-      history_.reset();
+      history_.set_index_and_reset(index_state, index_group);
     }
     std::fill(ll_.begin(), ll_.end(), 0);
     sys.set_time(time_start_);
@@ -160,6 +159,7 @@ private:
       sys.set_state_initial(sys.all_groups());
     }
     std::fill(random_particle_.begin(), random_particle_.end(), n_particles_);
+    last_index_group_.clear();
   }
 };
 

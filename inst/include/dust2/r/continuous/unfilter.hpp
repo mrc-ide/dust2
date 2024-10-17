@@ -19,8 +19,7 @@ cpp11::sexp dust2_continuous_unfilter_alloc(cpp11::list r_pars,
                                             cpp11::list r_data,
                                             cpp11::sexp r_n_particles,
                                             cpp11::sexp r_n_groups,
-                                            cpp11::sexp r_n_threads,
-                                            cpp11::sexp r_index_state) {
+                                            cpp11::sexp r_n_threads) {
   using rng_state_type = typename T::rng_state_type;
   using real_type = typename  T::real_type;
 
@@ -48,11 +47,8 @@ cpp11::sexp dust2_continuous_unfilter_alloc(cpp11::list r_pars,
   // going to feel weirder overall.
   const auto system = dust2::dust_continuous<T>(shared, internal, time_start, dt, ode_control, n_particles,
                                                 seed, deterministic, n_threads);
-  const auto index_state = check_index(r_index_state, system.n_state(),
-                                       "index_state");
 
-  auto obj = new unfilter<dust_continuous<T>>(system, time_start, time, data,
-                                              index_state);
+  auto obj = new unfilter<dust_continuous<T>>(system, time_start, time, data);
   cpp11::external_pointer<unfilter<dust_continuous<T>>> ptr(obj, true, false);
 
   cpp11::sexp r_n_state = cpp11::as_sexp(obj->sys.n_state());

@@ -92,7 +92,7 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
 
   domain <- monty::monty_domain_expand(domain, packer)
   save_history <- validate_save_history(save_history, call = call)
-  observer <- dust_observer(obj, save_state, save_history)
+  observer <- dust_observer(obj, save_state, save_history$enabled)
 
   ## We configure saving trajectories on creation I think, which then
   ## affects density.  Start without trajectories?  Realistically
@@ -112,6 +112,8 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
 
   gradient <- NULL
 
+  env <- environment()
+
   if (obj$deterministic) {
     ## We might move this cache into the unfilter itself, but that
     ## will take a bit of an effort to get right.  The other option
@@ -129,12 +131,20 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
     ## object.
     density <- function(x) {
       pars <- packer_unpack(packer, x)
+      was_uninitialised <- dust_likelihood_ensure_initialised(obj, pars)
+      needs_history_index <- was_uninitialised &&
+        save_history$enabled && !is.null(save_history$subset)
+      if (needs_history_index) {
+        env$save_history$index <-
+          obj$packer_state$subset(save_history$subset)$index
+      }
       if (!identical(x, attr(obj$ptr, "last_pars"))) {
         ret <- dust_likelihood_run(
           obj,
           pars,
           initial = if (is.null(initial)) NULL else initial(pars),
-          save_history = save_history$enabled)
+          save_history = save_history$enabled,
+          index_state = save_history$index)
         attr(obj$ptr, "last_density") <- ret
         attr(obj$ptr, "last_gradient") <- NULL
       }
@@ -154,11 +164,19 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
   } else {
     density <- function(x) {
       pars <- packer_unpack(packer, x)
+      was_uninitialised <- dust_likelihood_ensure_initialised(obj, pars)
+      needs_history_index <- was_uninitialised &&
+        save_history$enabled && !is.null(save_history$subset)
+      if (needs_history_index) {
+        env$save_history$index <-
+          obj$packer_state$subset(save_history$subset)$index
+      }
       dust_likelihood_run(
         obj,
         pars,
         initial = if (is.null(initial)) NULL else initial(pars),
-        save_history = save_history$enabled)
+        save_history = save_history$enabled,
+        index_state = save_history$index)
     }
   }
 
@@ -237,12 +255,9 @@ dust_observer <- function(obj, save_state, save_history,
                           call = parent.frame()) {
   assert_scalar_logical(save_state, call = call)
 
-  if (!save_history$enabled && !save_state) {
+  if (!save_history && !save_state) {
     return(NULL)
   }
-
-  env <- environment()
-  env$uninitialised <- !is.null(save_history$subset)
 
   observe <- function() {
     ret <- list()
@@ -251,23 +266,10 @@ dust_observer <- function(obj, save_state, save_history,
         obj, select_random_particle = TRUE)
     }
 
-    if (save_history$enabled) {
-      if (env$uninitialised) {
-        env$save_history$index <-
-          obj$packer_state$subset(save_history$subset)$index
-        env$uninitialised <- FALSE
-      }
-
-      ## TODO: we'll create a index_state argument to
-      ## dust_likelihood_last_history which will simplify this, but
-      ## that requires slightly more surgery and I've moved it into
-      ## another ticket (mrc-5863)
-      history <- dust_likelihood_last_history(
-        obj, select_random_particle = TRUE)
-      if (!is.null(save_history$index)) {
-        history <- history[save_history$index, , drop = FALSE]
-      }
-      ret$history <- history
+    if (save_history) {
+      ret$history <- dust_likelihood_last_history(
+        obj,
+        select_random_particle = TRUE)
     }
 
     ret

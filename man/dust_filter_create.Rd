@@ -12,7 +12,6 @@ dust_filter_create(
   n_groups = NULL,
   dt = NULL,
   ode_control = NULL,
-  index_state = NULL,
   n_threads = 1,
   preserve_group_dimension = FALSE,
   seed = NULL
@@ -48,12 +47,6 @@ with continuous-time systems.}
 \item{ode_control}{The ODE integration control for continuous time
 systems.  Defaults to the default return of \link{dust_ode_control}.
 It is an error to provide this with discrete-time systems.}
-
-\item{index_state}{An optional index of states to extract.  If
-given, then we subset the system state on return.  You can use
-this to return fewer system states than the system ran with, to
-reorder states, or to name them on exit (names present on the
-index will be copied into the rownames of the returned array).}
 
 \item{n_threads}{Integer, the number of threads to use in
 parallelisable calculations.  See Details.}

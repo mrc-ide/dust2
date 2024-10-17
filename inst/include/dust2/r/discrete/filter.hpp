@@ -18,7 +18,6 @@ cpp11::sexp dust2_discrete_filter_alloc(cpp11::list r_pars,
                                         cpp11::sexp r_n_particles,
                                         cpp11::sexp r_n_groups,
                                         cpp11::sexp r_n_threads,
-                                        cpp11::sexp r_index_state,
                                         cpp11::sexp r_seed) {
   using rng_state_type = typename T::rng_state_type;
   using rng_seed_type = std::vector<typename rng_state_type::int_type>;
@@ -77,10 +76,8 @@ cpp11::sexp dust2_discrete_filter_alloc(cpp11::list r_pars,
   const auto system = dust2::dust_discrete<T>(shared, internal, time_start, dt, n_particles,
                                               seed_system, deterministic, n_threads);
 
-  const auto index_state = check_index(r_index_state, system.n_state(),
-                                       "index_state");
 
-  auto obj = new filter<dust_discrete<T>>(system, time_start, time, data, index_state, seed_filter);
+  auto obj = new filter<dust_discrete<T>>(system, time_start, time, data, seed_filter);
   cpp11::external_pointer<filter<dust_discrete<T>>> ptr(obj, true, false);
 
   cpp11::sexp r_n_state = cpp11::as_sexp(obj->sys.n_state());
