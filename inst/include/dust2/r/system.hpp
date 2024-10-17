@@ -226,7 +226,6 @@ SEXP dust2_system_compare_data(cpp11::sexp ptr,
   return ret;
 }
 
-// TODO: expose index_group here too?
 template <typename T>
 SEXP dust2_system_simulate(cpp11::sexp ptr,
                            cpp11::sexp r_times,

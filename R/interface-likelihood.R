@@ -48,7 +48,6 @@ dust_likelihood_run <- function(obj, pars, initial = NULL,
                                 index_state = NULL,
                                 index_group = NULL) {
   check_is_dust_likelihood(obj)
-
   index_group <- check_index(index_group, max = obj$n_groups,
                              unique = TRUE)
   if (!is.null(pars)) {
