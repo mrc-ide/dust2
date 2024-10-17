@@ -293,8 +293,8 @@ SEXP dust2_unfilter_sir_last_history(cpp11::sexp ptr, bool select_random_particl
 }
 
 [[cpp11::register]]
-SEXP dust2_unfilter_sir_last_state(cpp11::sexp ptr, cpp11::sexp r_index_group, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension) {
-  return dust2::r::dust2_unfilter_last_state<dust2::dust_discrete<sir>>(ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension);
+SEXP dust2_unfilter_sir_last_state(cpp11::sexp ptr, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_unfilter_last_state<dust2::dust_discrete<sir>>(ptr, select_random_particle, preserve_particle_dimension, preserve_group_dimension);
 }
 
 [[cpp11::register]]
@@ -313,8 +313,8 @@ SEXP dust2_filter_sir_last_history(cpp11::sexp ptr, bool select_random_particle,
 }
 
 [[cpp11::register]]
-SEXP dust2_filter_sir_last_state(cpp11::sexp ptr, cpp11::sexp r_index_group, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension) {
-  return dust2::r::dust2_filter_last_state<dust2::dust_discrete<sir>>(ptr, r_index_group, select_random_particle, preserve_particle_dimension, preserve_group_dimension);
+SEXP dust2_filter_sir_last_state(cpp11::sexp ptr, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_filter_last_state<dust2::dust_discrete<sir>>(ptr, select_random_particle, preserve_particle_dimension, preserve_group_dimension);
 }
 
 [[cpp11::register]]

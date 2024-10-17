@@ -4,11 +4,7 @@
 \alias{dust_likelihood_last_state}
 \title{Get likelihood state}
 \usage{
-dust_likelihood_last_state(
-  obj,
-  index_group = NULL,
-  select_random_particle = FALSE
-)
+dust_likelihood_last_state(obj, select_random_particle = FALSE)
 }
 \arguments{
 \item{obj}{A \code{dust_filter} object, created by

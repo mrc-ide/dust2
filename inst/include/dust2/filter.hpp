@@ -2,6 +2,7 @@
 
 #include <dust2/filter_details.hpp>
 #include <dust2/history.hpp>
+#include <dust2/tools.hpp>
 #include <monty/random/random.hpp>
 
 namespace dust2 {
@@ -91,6 +92,9 @@ public:
         history_is_current_[i] = true;
       }
     }
+    if (!tools::is_trivial_index(index_group, n_groups_)) {
+      last_index_group_ = index_group;
+    }
   }
 
   auto& last_log_likelihood() const {
@@ -103,6 +107,10 @@ public:
 
   auto& last_history_is_current() const {
     return history_is_current_;
+  }
+
+  auto& last_index_group() const {
+    return last_index_group_.empty() ? sys.all_groups() : last_index_group_;
   }
 
   auto rng_state() const {
@@ -135,6 +143,7 @@ private:
   std::vector<real_type> ll_step_;
   history<real_type> history_;
   std::vector<bool> history_is_current_;
+  std::vector<size_t> last_index_group_;
   std::vector<size_t> random_particle_;
 
   void reset(bool set_initial, bool save_history,
@@ -150,6 +159,7 @@ private:
       sys.set_state_initial(sys.all_groups());
     }
     std::fill(random_particle_.begin(), random_particle_.end(), n_particles_);
+    last_index_group_.clear();
   }
 };
 

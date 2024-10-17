@@ -187,18 +187,15 @@ dust_likelihood_last_history <- function(obj, select_random_particle = FALSE) {
 ##'   always return all state).
 ##'
 ##' @export
-dust_likelihood_last_state <- function(obj, index_group = NULL,
-                                       select_random_particle = FALSE) {
+dust_likelihood_last_state <- function(obj, select_random_particle = FALSE) {
   check_is_dust_likelihood(obj)
   if (is.null(obj$ptr)) {
     cli::cli_abort(c(
       "History is not current",
       i = "Likelihood has not yet been run"))
   }
-  index_group <- check_index(index_group, max = obj$n_groups,
-                             unique = TRUE)
   assert_scalar_logical(select_random_particle)
-  obj$methods$last_state(obj$ptr, index_group,
+  obj$methods$last_state(obj$ptr,
                          select_random_particle,
                          obj$preserve_particle_dimension,
                          obj$preserve_group_dimension)

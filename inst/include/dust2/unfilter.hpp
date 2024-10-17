@@ -62,6 +62,10 @@ public:
         history_is_current_[i] = true;
       }
     }
+
+    if (!tools::is_trivial_index(index_group, n_groups_)) {
+      last_index_group_ = index_group;
+    }
   }
 
   // This part here we can _always_ do, even if the system does not
@@ -96,6 +100,10 @@ public:
       adjoint_is_current_[i] = true;
       history_is_current_[i] = save_history;
     }
+
+    if (!tools::is_trivial_index(index_group, n_groups_)) {
+      last_index_group_ = index_group;
+    }
   }
 
   auto& last_log_likelihood() const {
@@ -108,6 +116,10 @@ public:
 
   auto& last_history_is_current() const {
     return history_is_current_;
+  }
+
+  auto& last_index_group() const {
+    return last_index_group_.empty() ? sys.all_groups() : last_index_group_;
   }
 
   auto& adjoint_is_current() const {
@@ -134,6 +146,7 @@ private:
   history<real_type> history_;
   adjoint_data<real_type> adjoint_;
   std::vector<bool> history_is_current_;
+  std::vector<size_t> last_index_group_;
   std::vector<bool> adjoint_is_current_;
   bool gradient_is_current_;
 
@@ -155,6 +168,7 @@ private:
     if (set_initial) {
       sys.set_state_initial(sys.all_groups());
     }
+    last_index_group_.clear();
   }
 
   void compute_gradient_(const std::vector<size_t>& index_group) {

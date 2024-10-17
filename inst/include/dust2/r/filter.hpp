@@ -97,14 +97,13 @@ cpp11::sexp dust2_filter_last_history(cpp11::sexp ptr,
 
 template <typename T>
 cpp11::sexp dust2_filter_last_state(cpp11::sexp ptr,
-                                    cpp11::sexp r_index_group,
                                     bool select_random_particle,
                                     bool preserve_particle_dimension,
                                     bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
-  const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
-    check_index(r_index_group, obj->sys.n_groups(), "index_group");
+
+  const auto index_group = obj->last_index_group();
 
   const auto& state = obj->sys.state();
   const auto n_state = obj->sys.n_state();
@@ -123,13 +122,8 @@ cpp11::sexp dust2_filter_last_state(cpp11::sexp ptr,
       const auto offset = i * n_stride + index_particle[i] * n_state;
       iter_dst = std::copy_n(state.begin() + offset, n_state, iter_dst);
     }
-  } else if (r_index_group == R_NilValue) {
-    std::copy_n(state.begin(), len, iter_dst);
   } else {
-    const auto n_copy = n_state * n_particles;
-    for (auto i : index_group) {
-      iter_dst = std::copy_n(state.begin() + i * n_copy, n_copy, iter_dst);
-    }
+    std::copy_n(state.begin(), len, iter_dst);
   }
 
   preserve_particle_dimension =
