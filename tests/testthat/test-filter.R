@@ -300,34 +300,6 @@ test_that("validate the starting time", {
 })
 
 
-test_that("can extract a subset of an filter run in its entirety", {
-  pars <- list(
-    list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6),
-    list(beta = 0.2, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6))
-  time_start <- 0
-  n_particles <- 100
-  data <- data.frame(time = rep(c(4, 8, 12, 16), 2),
-                     group = rep(1:2, each = 4),
-                     incidence = 1:8)
-  obj <- dust_filter_create(sir(), time_start, data, n_particles = n_particles,
-                            seed = 42)
-  dust_likelihood_run(obj, pars, save_history = TRUE)
-  ## On the first read we get invald *write*, so we have the wrong
-  ## size on exit here.
-
-  ## This is fine
-  h <- dust_likelihood_last_history(obj)
-
-  ## This fails badly(history.hpp:118) 125->186 because this simply is
-  ## not how index_group works any more!
-  skip("FIXME: DISABLED")
-  h1 <- dust_likelihood_last_history(obj, index_group = 1)
-  h2 <- dust_likelihood_last_history(obj, index_group = 2)
-  expect_equal(h1, h[, , 1, , drop = FALSE])
-  expect_equal(h2, h[, , 2, , drop = FALSE])
-})
-
-
 test_that("can extract a state-filtered subset of an filter run", {
   pars <- list(
     list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6),
@@ -403,9 +375,6 @@ test_that("can run a subset of an filter", {
                             save_history = TRUE)
     expect_equal(dust_likelihood_last_history(obj2),
                  h2[, , i, , drop = FALSE])
-    ## j <- i %% 3 + 1
-    ## expect_error(dust_likelihood_last_history(obj2, index_group = j),
-    ##              sprintf("History for group '%d' is not current", j))
   }
 })
 

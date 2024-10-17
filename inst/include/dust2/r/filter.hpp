@@ -52,36 +52,16 @@ cpp11::sexp dust2_filter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
 // validation of the index used.
 template <typename T>
 cpp11::sexp dust2_filter_last_history(cpp11::sexp ptr,
-                                      cpp11::sexp r_index_group,
                                       bool select_random_particle,
                                       bool preserve_particle_dimension,
                                       bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
 
-  if (r_index_group != R_NilValue) {
-    cpp11::stop("last_history() with 'index_group' disabled for now at least");
-  }
-
   const auto& history = obj->last_history();
-  const auto& index_group = history.index_group();
   const auto& is_current = obj->last_history_is_current();
   if (!tools::any(is_current)) {
     cpp11::stop("History is not current");
-  }
-  for (size_t i = 0; i < index_group.size(); ++i) {
-    if (is_current[index_group[i]]) {
-      // const auto j = std::find(index_group_run.begin(), index_group_run.end(),
-      //                          index_run[i]);
-      // if (j == index_group_run.end()) {
-      //   cpp11::stop("History for group '%d' is not current (a bug I think?)",
-      //               static_cast<int>(i + 1));
-      // }
-      // index_group[i] = j;
-    } else {
-      cpp11::stop("History for group '%d' is not current",
-                  static_cast<int>(i + 1));
-    }
   }
 
   // We might relax this later, but will require some tools to work
@@ -89,14 +69,12 @@ cpp11::sexp dust2_filter_last_history(cpp11::sexp ptr,
   constexpr bool reorder = true;
 
   const auto n_state = history.n_state(); // might be filtered
-  const auto n_particles = select_random_particle ? 1 : obj->sys.n_particles();
-  const auto n_groups = index_group.size();
+  const auto n_particles = select_random_particle ? 1 : history.n_particles();
+  const auto n_groups = history.n_groups();
   const auto n_times = history.n_times();
 
-  std::vector<size_t> all_particles;
-
   const auto& index_particle = select_random_particle ?
-    obj->select_random_particle(index_group) : all_particles;
+    obj->select_random_particle(history.index_group()) : std::vector<size_t>{};
 
   const auto len = n_state * n_particles * n_groups * n_times;
   cpp11::sexp ret = cpp11::writable::doubles(len);

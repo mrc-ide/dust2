@@ -63,6 +63,10 @@ public:
     return n_state_;
   }
 
+  auto n_particles() const {
+    return n_particles_;
+  }
+
   auto n_groups() const {
     return n_groups_;
   }

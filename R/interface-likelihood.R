@@ -135,7 +135,9 @@ dust_likelihood_copy <- function(obj, seed = NULL) {
 
 ##' Fetch the last history created by running a likelihood.  This
 ##' errors if the last call to [dust_likelihood_run] did not use
-##' `save_history = TRUE`.
+##' `save_history = TRUE`.  We return the states and groups that were
+##' run via the `index_state` and `index_group` arguments to
+##' [dust_likelihood_run].
 ##'
 ##' @title Fetch last likelihood history
 ##'
@@ -155,23 +157,15 @@ dust_likelihood_copy <- function(obj, seed = NULL) {
 ##'   second (particle) dimension will be dropped.
 ##'
 ##' @export
-dust_likelihood_last_history <- function(obj,
-                                         index_state = NULL,
-                                         index_group = NULL,
-                                         select_random_particle = FALSE) {
+dust_likelihood_last_history <- function(obj, select_random_particle = FALSE) {
   check_is_dust_likelihood(obj)
   if (is.null(obj$ptr)) {
     cli::cli_abort(c(
       "History is not current",
       i = "Likelihood has not yet been run"))
   }
-  ## TODO: once we allow setting an index, we need to check that this
-  ## index is achievable.
-  index_state <- check_index(index_state, max = obj$n_state, unique = TRUE)
-  index_group <- check_index(index_group, max = obj$n_groups, unique = TRUE)
   assert_scalar_logical(select_random_particle)
   obj$methods$last_history(obj$ptr,
-                           index_group,
                            select_random_particle,
                            obj$preserve_particle_dimension,
                            obj$preserve_group_dimension)

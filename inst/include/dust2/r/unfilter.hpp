@@ -59,37 +59,23 @@ cpp11::sexp dust2_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
 
 template <typename T>
 cpp11::sexp dust2_unfilter_last_history(cpp11::sexp ptr,
-                                        cpp11::sexp r_index_group,
                                         bool select_random_particle,
                                         bool preserve_particle_dimension,
                                         bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
 
-  // See r/filter.hpp; this is the same code.
-  if (r_index_group != R_NilValue) {
-    cpp11::stop("last_history() with 'index_group' disabled for now at least");
-  }
-
   const auto& history = obj->last_history();
-  const auto& index_group = history.index_group();
   const auto& is_current = obj->last_history_is_current();
   if (!tools::any(is_current)) {
     cpp11::stop("History is not current");
-  }
-  for (size_t i = 0; i < index_group.size(); ++i) {
-    if (is_current[index_group[i]]) {
-    } else {
-      cpp11::stop("History for group '%d' is not current",
-                  static_cast<int>(i + 1));
-    }
   }
 
   constexpr bool reorder = false; // never needed
 
   const auto n_state = history.n_state(); // might be filtered
-  const auto n_particles = obj->sys.n_particles();
-  const auto n_groups = index_group.size();
+  const auto n_particles = history.n_particles();
+  const auto n_groups = history.n_groups();
   const auto n_times = history.n_times();
 
   const auto len = n_state * n_particles * n_groups * n_times;
