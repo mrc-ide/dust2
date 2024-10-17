@@ -143,3 +143,86 @@ test_that("validate that the index provided for particle is reasonable", {
     prepare_state(1:4, NULL, c(1, 1, 2), NULL, 4, 2, 1, TRUE, FALSE),
     "All elements of 'index_particle' must be distinct")
 })
+
+
+test_that("can set state from vector", {
+  sys <- dust_system_create(sir(), list(), n_particles = 3)
+  dust_system_set_state(sys, as.numeric(1:5)) # TODO: fix in cpp
+  expect_equal(dust_system_state(sys), matrix(1:5, 5, 3))
+})
+
+
+test_that("can set state from matrix", {
+  sys <- dust_system_create(sir(), list(), n_particles = 3)
+  m <- matrix(runif(15), 5, 3)
+  dust_system_set_state(sys, m)
+  expect_equal(dust_system_state(sys), m)
+})
+
+
+test_that("can set a fraction of states", {
+  sys <- dust_system_create(sir(), list(), n_particles = 3)
+  m <- matrix(runif(15), 5, 3)
+  dust_system_set_state(sys, m)
+  m2 <- matrix(seq(16, length.out = 6), 2, 3)
+  dust_system_set_state(sys, m2, index_state = c(2, 4))
+  m[c(2, 4), ] <- m2
+  expect_equal(dust_system_state(sys), m)
+})
+
+
+test_that("can set a fraction of states from a vector", {
+  sys <- dust_system_create(sir(), list(), n_particles = 3)
+  m <- matrix(runif(15), 5, 3)
+  dust_system_set_state(sys, m)
+  m2 <- c(16, 17)
+  dust_system_set_state(sys, m2, index_state = c(2, 4))
+  m[c(2, 4), ] <- m2
+  expect_equal(dust_system_state(sys), m)
+})
+
+
+test_that("can set a fraction of states from a scalar", {
+  sys <- dust_system_create(sir(), list(), n_particles = 3)
+  m <- matrix(runif(15), 5, 3)
+  dust_system_set_state(sys, m)
+  m2 <- 16
+  dust_system_set_state(sys, m2, index_state = 2)
+  m[2, ] <- m2
+  expect_equal(dust_system_state(sys), m)
+})
+
+
+test_that("can set a fraction of particles", {
+  sys <- dust_system_create(sir(), list(), n_particles = 6)
+  m <- matrix(as.numeric(1:30), 5, 6)
+  dust_system_set_state(sys, m)
+  m2 <- matrix(seq(31, length.out = 15), 5, 3)
+  dust_system_set_state(sys, m2, index_particle = c(2, 4, 6))
+  m[, c(2, 4, 6)] <- m2
+  expect_equal(dust_system_state(sys), m)
+})
+
+
+test_that("can set a fraction of particles from a vector", {
+  sys <- dust_system_create(sir(), list(), n_particles = 6)
+  m <- matrix(as.numeric(1:30), 5, 6)
+  dust_system_set_state(sys, m)
+  m2 <- seq(31, length.out = 5)
+  dust_system_set_state(sys, m2, index_particle = c(2, 4, 6))
+  m[, c(2, 4, 6)] <- m2
+  expect_equal(dust_system_state(sys), m)
+})
+
+
+test_that("can set a fraction of both particles and states", {
+  sys <- dust_system_create(sir(), list(), n_particles = 6)
+  m <- matrix(as.numeric(1:30), 5, 6)
+  dust_system_set_state(sys, m)
+  m2 <- matrix(seq(31, length.out = 6), 2, 3)
+  dust_system_set_state(sys, m2,
+                        index_state = c(2, 4),
+                        index_particle = c(2, 4, 6))
+  m[c(2, 4), c(2, 4, 6)] <- m2
+  expect_equal(dust_system_state(sys), m)
+})
