@@ -21,7 +21,7 @@ order is state x particle x group.  If you have a grouped system
 with 1 particle and \code{preserve_state_dimension = FALSE} then the
 state has size state x group.  You can omit higher dimensions,
 so if you pass a vector it will be treated as if all higher
-dimensions are length 1 (oif if you have a grouped system you
+dimensions are length 1 (or if you have a grouped system you
 can provide a matrix and treat it as if the third dimension had
 length 1).  If you provide any \code{index_} argument then the length
 of the corresponding state dimension must match the index
@@ -77,7 +77,7 @@ dust_system_state(sys)
 dust_system_set_state(sys, rbind(c(1, 2, 3)), index_state = 4)
 dust_system_state(sys)
 
-# This will not work as it can it can be ambiguous what you are
+# This will not work as it can be ambiguous what you are
 # trying to do:
 #> dust_system_set_state(sys, c(1, 2, 3), index_state = 4)
 
