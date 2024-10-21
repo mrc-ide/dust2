@@ -33,6 +33,7 @@ test_that("can use history", {
           c(n_state, n_particles, n_groups))
   })
   s_arr <- array(unlist(s), c(n_state, n_particles, n_groups, n_time))
+
   expect_equal(test_history(time, s, reorder = TRUE),
                list(time, s_arr))
   expect_equal(test_history(time, s, reorder = FALSE),
@@ -160,7 +161,9 @@ test_that("can extract history with group index, no reordering", {
   n_groups <- 3
   n_time <- length(time)
   s <- lapply(seq_along(time), function(i) {
-    array(runif(n_state * n_particles * n_groups),
+    len <- n_state * n_particles * n_groups
+    # runif(n_state * n_particles * n_groups)
+    array(seq_len(len) + (i - 1) * len,
           c(n_state, n_particles, n_groups))
   })
 
@@ -185,7 +188,7 @@ test_that("can extract history with group index, no reordering", {
   expect_equal(
     test_history(time, s,
                  index_group = c(3, 1),
-                 select_particle = c(6, 4, 2))[[2]],
+                 select_particle = c(2, 6))[[2]],
     m[, c(3, 1), ])
 })
 
@@ -202,8 +205,11 @@ test_that("can reorder history on the way out", {
   true <- array(NA_real_, c(n_state, n_particles, n_groups, n_time))
   s <- array(0, c(n_state, n_particles, n_groups))
   set.seed(1)
+  offset <- 0
   for (i in seq_along(time)) {
-    s <- s + runif(length(s))
+    s[] <- offset + seq_along(s)
+    offset <- offset + length(s)
+    # s <- s + runif(length(s))
     if (i > 1 && i %% 2 == 0) {
       k <- replicate(n_groups, sample(n_particles, replace = TRUE))
       order[[i]] <- as.integer(k - 1L)
@@ -233,6 +239,11 @@ test_that("can reorder history on the way out", {
   expect_equal(
     test_history(time, state, order = order, reorder = TRUE, index_group = 3),
     list(time, true[, , 3, , drop = FALSE]))
+
+  expect_equal(
+    test_history(time, state, order = order, reorder = TRUE, index_group = 3:2),
+    list(time, true[, , 3:2, , drop = FALSE]))
+
   expect_equal(
     test_history(time, state, order = order, reorder = TRUE, index_group = 3:1),
     list(time, true[, , 3:1, ]))
@@ -243,10 +254,9 @@ test_that("can reorder history on the way out", {
   expect_equal(m[, 2, ], true[, 4, 2, ])
   expect_equal(m[, 3, ], true[, 2, 3, ])
 
-  ## Last error case
-  ## expect_equal(
-  ##   test_history(time, state, order = order, reorder = TRUE,
-  ##                index_group = c(3, 1),
-  ##                select_particle = c(6, 4, 2))[[2]],
-  ##   m[, c(3, 1), ])
+  expect_equal(
+    test_history(time, state, order = order, reorder = TRUE,
+                 index_group = c(3, 1),
+                 select_particle = c(2, 6))[[2]],
+    m[, c(3, 1), ])
 })

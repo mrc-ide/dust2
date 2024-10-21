@@ -21,8 +21,7 @@ public:
   unfilter(T sys_,
            real_type time_start,
            std::vector<real_type> time,
-           std::vector<data_type> data,
-           std::vector<size_t> history_index_state) :
+           std::vector<data_type> data) :
     sys(sys_),
     time_start_(time_start),
     time_(time),
@@ -32,9 +31,7 @@ public:
     n_groups_(sys.n_groups()),
     ll_(n_particles_ * n_groups_, 0),
     ll_step_(n_particles_ * n_groups_, 0),
-    history_index_state_(history_index_state),
-    history_(history_index_state_.size() > 0 ? history_index_state_.size() : n_state_,
-             n_particles_, n_groups_, time_.size()),
+    history_(n_state_, n_particles_, n_groups_, time_.size()),
     adjoint_(n_state_, n_particles_, n_groups_),
     history_is_current_(n_particles_ * n_groups_),
     adjoint_is_current_(n_particles_ * n_groups_),
@@ -42,11 +39,11 @@ public:
   }
 
   void run(bool set_initial, bool save_history,
+           const std::vector<size_t>& index_state,
            const std::vector<size_t>& index_group) {
-    reset(set_initial, save_history, /* adjoint = */ false);
+    const bool adjoint = false;
+    reset(set_initial, save_history, index_state, index_group, adjoint);
     const auto n_times = time_.size();
-
-    const bool use_index = history_index_state_.size() > 0;
 
     auto it_data = data_.begin();
     for (size_t i = 0; i < n_times; ++i, it_data += n_groups_) {
@@ -56,14 +53,7 @@ public:
         ll_[j] += ll_step_[j];
       }
       if (save_history) {
-        if (use_index) {
-          history_.add_with_index(time_[i], sys.state().begin(),
-                                  history_index_state_.begin(), n_state_,
-                                  index_group);
-        } else {
-          history_.add(time_[i], sys.state().begin(),
-                       index_group);
-        }
+        history_.add(time_[i], sys.state().begin());
       }
     }
 
@@ -72,14 +62,20 @@ public:
         history_is_current_[i] = true;
       }
     }
+
+    if (!tools::is_trivial_index(index_group, n_groups_)) {
+      last_index_group_ = index_group;
+    }
   }
 
   // This part here we can _always_ do, even if the system does not
   // actually support adjoint methods.  It should give exactly the
   // same answers as the normal version, at the cost of more memory.
   void run_adjoint(bool set_initial, bool save_history,
+                   const std::vector<size_t>& index_state,
                    const std::vector<size_t>& index_group) {
-    reset(set_initial, save_history, /* adjoint = */ true);
+    const bool adjoint = true;
+    reset(set_initial, save_history, index_state, index_group, adjoint);
 
     // Run the entire forward time simulation
     sys.run_to_time(time_.back(), index_group, adjoint_.state(0));
@@ -87,7 +83,6 @@ public:
     // Then all the data comparison in one pass.  This bit can
     // theoretically be parallelised but it's unlikely to be
     // important in most models.
-    const bool use_index = history_index_state_.size() > 0;
     const auto n_times = time_.size();
     for (size_t i = 0; i < n_times; ++i) {
       const auto state_i = adjoint_.state(i + 1);
@@ -97,19 +92,17 @@ public:
         ll_[j] += ll_step_[j];
       }
       if (save_history) {
-        if (use_index) {
-          history_.add_with_index(time_[i], state_i,
-                                  history_index_state_.begin(), n_state_,
-                                  index_group);
-        } else {
-          history_.add(time_[i], state_i, index_group);
-        }
+        history_.add(time_[i], state_i);
       }
     }
 
     for (auto i : index_group) {
       adjoint_is_current_[i] = true;
       history_is_current_[i] = save_history;
+    }
+
+    if (!tools::is_trivial_index(index_group, n_groups_)) {
+      last_index_group_ = index_group;
     }
   }
 
@@ -125,12 +118,17 @@ public:
     return history_is_current_;
   }
 
+  auto& last_index_group() const {
+    return last_index_group_.empty() ? sys.all_groups() : last_index_group_;
+  }
+
   auto& adjoint_is_current() const {
     return adjoint_is_current_;
   }
 
   template <typename Iter>
-  void last_gradient(Iter iter, const std::vector<size_t>& index_group) {
+  void last_gradient(Iter iter) {
+    const auto& index_group = last_index_group();
     if (!gradient_is_current_) {
       compute_gradient_(index_group);
     }
@@ -146,19 +144,22 @@ private:
   size_t n_groups_;
   std::vector<real_type> ll_;
   std::vector<real_type> ll_step_;
-  std::vector<size_t> history_index_state_;
   history<real_type> history_;
   adjoint_data<real_type> adjoint_;
   std::vector<bool> history_is_current_;
+  std::vector<size_t> last_index_group_;
   std::vector<bool> adjoint_is_current_;
   bool gradient_is_current_;
 
-  void reset(bool set_initial, bool save_history, bool adjoint) {
+  void reset(bool set_initial, bool save_history,
+             const std::vector<size_t>& index_state,
+             const std::vector<size_t>& index_group,
+             bool adjoint) {
     std::fill(history_is_current_.begin(), history_is_current_.end(), false);
     std::fill(adjoint_is_current_.begin(), adjoint_is_current_.end(), false);
     gradient_is_current_ = false;
     if (save_history) {
-      history_.reset();
+      history_.set_index_and_reset(index_state, index_group);
     }
     if (adjoint) {
       adjoint_.init_history(time_start_, time_, sys.dt());
@@ -168,6 +169,7 @@ private:
     if (set_initial) {
       sys.set_state_initial(sys.all_groups());
     }
+    last_index_group_.clear();
   }
 
   void compute_gradient_(const std::vector<size_t>& index_group) {

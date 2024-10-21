@@ -4,21 +4,12 @@
 \alias{dust_likelihood_last_state}
 \title{Get likelihood state}
 \usage{
-dust_likelihood_last_state(
-  obj,
-  index_group = NULL,
-  select_random_particle = FALSE
-)
+dust_likelihood_last_state(obj, select_random_particle = FALSE)
 }
 \arguments{
 \item{obj}{A \code{dust_filter} object, created by
 \link{dust_filter_create} or a \code{dust_unfilter} object created by
 \link{dust_unfilter_create}}
-
-\item{index_group}{An optional vector of group indices to run the
-calculation for.  You can use this to run a subset of possible
-groups, once \code{obj} is initialised (this argument must be \code{NULL}
-on the \strong{first} call).}
 
 \item{select_random_particle}{Logical, indicating if we should
 return a history for one randomly selected particle (rather than

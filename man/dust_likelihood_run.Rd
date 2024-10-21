@@ -10,6 +10,7 @@ dust_likelihood_run(
   initial = NULL,
   save_history = FALSE,
   adjoint = NULL,
+  index_state = NULL,
   index_group = NULL
 )
 }
@@ -38,6 +39,10 @@ has an adjoint, but can be disabled or enabled even when your
 model does not support adjoints! But if you don't actually have
 an adjoint you will not be able to compute gradients.  This has
 no effect for stochastic models.}
+
+\item{index_state}{An optional vector of state indices to save
+where \code{save_history} is \code{TRUE}.  If omitted all state is saved
+and if \code{save_history = FALSE} this has no effect.}
 
 \item{index_group}{An optional vector of group indices to run the
 calculation for.  You can use this to run a subset of possible

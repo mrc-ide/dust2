@@ -22,17 +22,21 @@ cpp11::sexp dust2_filter_update_pars(cpp11::sexp ptr,
 template <typename T>
 cpp11::sexp dust2_filter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
                              bool save_history, bool adjoint,
+                             cpp11::sexp r_index_state,
                              cpp11::sexp r_index_group,
                              bool preserve_particle_dimension,
                              bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
+  const auto index_state = check_index(r_index_state, obj->sys.n_state(),
+                                       "index_state");
   const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
     check_index(r_index_group, obj->sys.n_groups(), "index_group");
+
   if (r_initial != R_NilValue) {
     set_state(obj->sys, r_initial, preserve_group_dimension, index_group);
   }
-  obj->run(r_initial == R_NilValue, save_history, index_group);
+  obj->run(r_initial == R_NilValue, save_history, index_state, index_group);
 
   const auto& ll = obj->last_log_likelihood();
   cpp11::writable::doubles ret(index_group.size());
@@ -44,47 +48,37 @@ cpp11::sexp dust2_filter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
   return ret;
 }
 
+// We might accept index_state here too later, allowing subsetting and
+// validation of the index used.
 template <typename T>
 cpp11::sexp dust2_filter_last_history(cpp11::sexp ptr,
-                                      cpp11::sexp r_index_group,
                                       bool select_random_particle,
                                       bool preserve_particle_dimension,
                                       bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
-  const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
-    check_index(r_index_group, obj->sys.n_groups(), "index_group");
+
+  const auto& history = obj->last_history();
   const auto& is_current = obj->last_history_is_current();
-  for (auto i : index_group) {
-    if (!is_current[i]) {
-      if (!tools::any(is_current)) {
-        cpp11::stop("History is not current");
-      } else {
-        cpp11::stop("History for group '%d' is not current",
-                    static_cast<int>(i + 1));
-      }
-    }
+  if (!tools::any(is_current)) {
+    cpp11::stop("History is not current");
   }
 
   // We might relax this later, but will require some tools to work
   // with the output, really.
   constexpr bool reorder = true;
 
-  const auto& history = obj->last_history();
-
   const auto n_state = history.n_state(); // might be filtered
-  const auto n_particles = select_random_particle ? 1 : obj->sys.n_particles();
-  const auto n_groups = index_group.size();
+  const auto n_particles = select_random_particle ? 1 : history.n_particles();
+  const auto n_groups = history.n_groups();
   const auto n_times = history.n_times();
 
-  std::vector<size_t> all_particles;
-
   const auto& index_particle = select_random_particle ?
-    obj->select_random_particle(index_group) : all_particles;
+    obj->select_random_particle(history.index_group()) : std::vector<size_t>{};
 
   const auto len = n_state * n_particles * n_groups * n_times;
   cpp11::sexp ret = cpp11::writable::doubles(len);
-  history.export_state(REAL(ret), reorder, index_group, index_particle);
+  history.export_state(REAL(ret), reorder, index_particle);
   if (select_random_particle) {
     if (preserve_group_dimension) {
       set_array_dims(ret, {n_state, n_particles * n_groups, n_times});
@@ -103,14 +97,13 @@ cpp11::sexp dust2_filter_last_history(cpp11::sexp ptr,
 
 template <typename T>
 cpp11::sexp dust2_filter_last_state(cpp11::sexp ptr,
-                                    cpp11::sexp r_index_group,
                                     bool select_random_particle,
                                     bool preserve_particle_dimension,
                                     bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
-  const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
-    check_index(r_index_group, obj->sys.n_groups(), "index_group");
+
+  const auto& index_group = obj->last_index_group();
 
   const auto& state = obj->sys.state();
   const auto n_state = obj->sys.n_state();
@@ -129,13 +122,8 @@ cpp11::sexp dust2_filter_last_state(cpp11::sexp ptr,
       const auto offset = i * n_stride + index_particle[i] * n_state;
       iter_dst = std::copy_n(state.begin() + offset, n_state, iter_dst);
     }
-  } else if (r_index_group == R_NilValue) {
-    std::copy_n(state.begin(), len, iter_dst);
   } else {
-    const auto n_copy = n_state * n_particles;
-    for (auto i : index_group) {
-      iter_dst = std::copy_n(state.begin() + i * n_copy, n_copy, iter_dst);
-    }
+    std::copy_n(state.begin(), len, iter_dst);
   }
 
   preserve_particle_dimension =

@@ -7,77 +7,49 @@
 
 namespace dust2 {
 
-// We might want a version of this that saves a subset of state too,
-// we can think about that later though.  We also need a version that
-// can allow working back through the graph of history.
 template <typename real_type>
 class history {
 public:
   history(size_t n_state, size_t n_particles, size_t n_groups, size_t n_times) :
     n_state_(n_state),
+    n_state_total_(n_state),
     n_particles_(n_particles),
     n_groups_(n_groups),
+    n_groups_total_(n_groups),
     n_times_(n_times),
-    len_state_(n_state_ * n_particles_ * n_groups_),
-    len_order_(n_particles * n_groups_),
-    position_(0),
-    times_(n_times_),
-    state_(len_state_ * n_times_),
-    order_(len_order_ * n_times_),
-    reorder_(n_times) {
+    len_state_(n_state_total_ * n_particles_ * n_groups_total_),
+    len_order_(n_particles_ * n_groups_total_),
+    position_(0) {
   }
 
-  void resize_state(size_t n_state) {
-    if (n_state_ != n_state) {
-      n_state_ = n_state;
-      len_state_ = (n_state_ * n_particles_ * n_groups_);
-      state_.resize(len_state_ * n_times_);
-    }
-    reset();
-  }
+  void set_index_and_reset(const std::vector<size_t>& index_state,
+                           const std::vector<size_t>& index_group) {
+    index_state_ = index_state;
+    index_group_ = index_group;
+    use_index_state_ = tools::is_trivial_index(index_state_, n_state_total_);
+    use_index_group_ = tools::is_trivial_index(index_group_, n_groups_total_);
+    n_state_ = use_index_state_ ? index_state.size() : n_state_total_;
+    n_groups_ = use_index_group_ ? index_group.size() : n_groups_total_;
+    len_state_ = n_state_ * n_particles_ * n_groups_;
 
-  void resize_time(size_t n_times) {
-    if (n_times_ != n_times) {
-      n_times_ = n_times;
-      state_.resize(len_state_ * n_times_);
-      order_.resize(len_order_ * n_times_);
-    }
-    reset();
-  }
+    times_.resize(n_times_);
+    state_.resize(len_state_ * n_times_);
+    order_.resize(len_order_ * n_times_);
+    reorder_.resize(n_times_);
 
-  void reset() {
     position_ = 0;
   }
 
   template <typename IterReal>
-  void add(real_type time, IterReal iter_state,
-           const std::vector<size_t>& index_group) {
-    copy_state_(iter_state, index_group);
+  void add(real_type time, IterReal iter_state) {
+    copy_state_(iter_state);
     update_position(time, false);
   }
 
   template <typename IterReal, typename IterSize>
-  void add(real_type time, IterReal iter_state, IterSize iter_order,
-           const std::vector<size_t>& index_group) {
-    copy_state_(iter_state, index_group);
-    copy_order_(iter_order, index_group);
-    update_position(time, true);
-  }
-
-  template <typename IterReal, typename IterSize>
-  void add_with_index(real_type time, IterReal iter_state, IterSize iter_index,
-                      size_t n_state_total,
-                      const std::vector<size_t>& index_group) {
-    copy_state_with_index_(iter_state, iter_index, n_state_total, index_group);
-    update_position(time, false);
-  }
-
-  template <typename IterReal, typename IterSize>
-  void add_with_index(real_type time, IterReal iter_state, IterSize iter_order,
-                      IterSize iter_index, size_t n_state_total,
-                      const std::vector<size_t>& index_group) {
-    copy_state_with_index_(iter_state, iter_index, n_state_total, index_group);
-    copy_order_(iter_order, index_group);
+  void add(real_type time, IterReal iter_state, IterSize iter_order) {
+    copy_state_(iter_state);
+    copy_order_(iter_order);
     update_position(time, true);
   }
 
@@ -87,20 +59,24 @@ public:
     return position_;
   }
 
-  auto size_state() const {
-    return position_ * len_state_;
-  }
-
-  auto size_order() const {
-    return position_ * len_order_;
-  }
-
   auto n_state() const {
     return n_state_;
   }
 
+  auto n_particles() const {
+    return n_particles_;
+  }
+
+  auto n_groups() const {
+    return n_groups_;
+  }
+
   auto n_times() const {
     return position_;
+  }
+
+  auto& index_group() const {
+    return index_group_;
   }
 
   template <typename Iter>
@@ -114,23 +90,13 @@ public:
   // but pairs of (group,particle)'s.
   template <typename Iter>
   void export_state(Iter iter, bool reorder,
-                    const std::vector<size_t>& index_group,
                     const std::vector<size_t>& select_particle) const {
     reorder = reorder && n_particles_ > 1 && position_ > 0 &&
       tools::any(reorder_);
 
     auto use_select_particle = !select_particle.empty();
-    auto use_index_group = index_group.size() < n_groups_;
-    if (!use_index_group) {
-      for (size_t i = 0; i < n_groups_; ++i) {
-        if (index_group[i] != i) {
-          use_index_group = true;
-          break;
-        }
-      }
-    }
 
-    if (!reorder && !use_index_group && !use_select_particle) {
+    if (!reorder && !use_select_particle) {
       // Optimised for simplest case of just dumping out everything
       std::copy_n(state_.begin(), position_ * len_state_, iter);
     } else if (reorder) {
@@ -146,18 +112,16 @@ public:
         }
       }
 
-      const auto len_state_output =
-        n_state_ * n_particles_out * index_group.size();
+      const auto len_state_out = n_state_ * n_particles_out * n_groups_;
       for (size_t irev = 0; irev < position_; ++irev) {
         const auto i = position_ - irev - 1;
         const auto iter_order = order_.begin() + i * len_order_;
         const auto iter_state = state_.begin() + i * len_state_;
-        for (size_t j = 0; j < index_group.size(); ++j) {
-          const auto k = index_group[j];
-          const auto offset_state = k * n_state_ * n_particles_;
-          const auto offset_index = k * n_particles_;
+        for (size_t j = 0; j < n_groups_; ++j) {
+          const auto offset_state = j * n_state_ * n_particles_;
+          const auto offset_index = j * n_particles_;
           const auto offset_output =
-            i * len_state_output + j * n_state_ * n_particles_out;
+            i * len_state_out + j * n_state_ * n_particles_out;
           if (use_select_particle) {
             reorder_single_(iter_state + offset_state,
                             iter_order + offset_index,
@@ -174,10 +138,9 @@ public:
         }
       }
     } else {
-      // when use_index_group || use_select_particle (or both!)
       for (size_t i = 0; i < position_; ++i) {
         const auto iter_state = state_.begin() + i * len_state_;
-        for (auto j : index_group) {
+        for (size_t j = 0; j < n_groups_; ++j) {
           const auto offset_state = j * n_state_ * n_particles_;
           if (use_select_particle) {
             const auto offset_j = select_particle[j] * n_state_;
@@ -201,8 +164,10 @@ public:
 
 private:
   size_t n_state_;
+  size_t n_state_total_;
   size_t n_particles_;
   size_t n_groups_;
+  size_t n_groups_total_;
   size_t n_times_;
   size_t len_state_; // length of an update to state
   size_t len_order_; // length of an update to order
@@ -211,6 +176,10 @@ private:
   std::vector<real_type> state_;
   std::vector<size_t> order_;
   std::vector<bool> reorder_;
+  std::vector<size_t> index_state_;
+  std::vector<size_t> index_group_;
+  bool use_index_state_;
+  bool use_index_group_;
 
   // Reference implementation for this is mcstate::history_single and
   // mcstate::history_multiple
@@ -252,28 +221,41 @@ private:
   }
 
   template <typename IterReal>
-  void copy_state_(IterReal iter, const std::vector<size_t>& index_state) {
-    std::copy_n(iter, len_state_, state_.begin() + len_state_ * position_);
+  void copy_state_(IterReal iter_src) {
+    auto iter_dst = state_.begin() + position_ * len_state_;
+    if (!use_index_state_ && !use_index_group_) {
+      std::copy_n(iter_src, len_state_, iter_dst);
+    } else if (!use_index_state_) {
+      const auto len = n_state_ * n_particles_;
+      for (auto i : index_group_) {
+        const auto iter_src_i = iter_src + i * n_particles_ * n_state_total_;
+        iter_dst = std::copy_n(iter_src_i, len, iter_dst);
+      }
+    } else { // we always end up here if we have a state index
+      for (size_t i = 0; i < n_groups_; ++i) {
+        for (size_t j = 0; j < n_particles_; ++j) {
+          const auto iter_src_i = iter_src +
+            (index_group_[i] * n_particles_ + j) * n_state_total_;
+          for (size_t k = 0; k < n_state_; ++k, ++iter_dst) {
+            *iter_dst = *(iter_src_i + index_state_[k]);
+          }
+        }
+      }
+    }
   }
 
   template <typename IterSize>
-  void copy_order_(IterSize iter_order,
-                   const std::vector<size_t>& index_state) {
-    std::copy_n(iter_order, len_order_,
-                order_.begin() + position_ * len_order_);
-  }
-
-  template <typename IterReal, typename IterSize>
-  void copy_state_with_index_(IterReal iter_state,
-                              IterSize iter_index_state,
-                              size_t n_state_total,
-                              const std::vector<size_t>& index_group) {
-    auto iter_dest = state_.begin() + position_ * len_state_;
-    for (size_t i = 0; i < n_groups_ * n_particles_; ++i) {
-      const auto iter_state_i = iter_state + i * n_state_total;
-      auto iter_index_state_i = iter_index_state;
-      for (size_t k = 0; k < n_state_; ++k, ++iter_dest, ++iter_index_state_i) {
-        *iter_dest = *(iter_state_i + *iter_index_state_i);
+  void copy_order_(IterSize iter_src) {
+    auto iter_dst = order_.begin() + position_ * len_order_;
+    if (!use_index_group_) {
+      std::copy_n(iter_src,
+                  len_order_,
+                  iter_dst);
+    } else {
+      for (auto i : index_group_) {
+        iter_dst = std::copy_n(iter_src + i * n_particles_,
+                               n_particles_,
+                               iter_dst);
       }
     }
   }
