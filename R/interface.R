@@ -716,13 +716,16 @@ check_time_control <- function(generator, dt, ode_control,
 }
 
 
-dust_package_env <- function(env, quiet = FALSE) {
-  if (is.environment(env)) {
-    env
-  } else if (isNamespaceLoaded(env$name)) {
-    asNamespace(env$name)
+dust_package_env <- function(generator, quiet = FALSE) {
+  name <- attr(generator, "name")
+  pkg <- attr(generator, "package")
+  path <- attr(generator, "path")
+  if (is.null(path)) {
+    environment(generator)
+  } else if (isNamespaceLoaded(pkg)) {
+    asNamespace(pkg)
   } else {
-    env <- load_temporary_package(env$path, env$name, quiet)
+    load_temporary_package(path, pkg, quiet)
   }
 }
 
@@ -813,7 +816,7 @@ prepare_state <- function(state,
 dust_system_generator_methods <- function(generator) {
   name <- attr(generator, "name")
   properties <- attr(generator, "properties")
-  env <- environment(generator)
+  env <- dust_package_env(generator)
   time_type <- properties$time_type
   has_compare <- properties$has_compare
 
