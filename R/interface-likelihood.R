@@ -284,14 +284,14 @@ check_is_dust_likelihood <- function(obj, name = deparse(substitute(obj)),
 
 ##' @export
 print.dust_likelihood <- function(x, ...) {
-  cli::cli_h1("<dust_likelihood ({x$generator$name})>")
+  cli::cli_h1("<dust_likelihood ({attr(x$generator, 'name')})>")
   cli::cli_alert_info(format_dimensions(x))
   type <- if (x$deterministic) "deterministic" else "stochastic"
   cli::cli_alert_info("The likelihood is {type}")
   ## TODO:
   ## * has gradient
   ## Link to docs
-  if (x$generator$properties$time_type == "discrete") {
+  if (attr(x$generator, "properties")$time_type == "discrete") {
     cli::cli_bullets(c(
       i = "The system runs in discrete time with dt = {x$time_control$dt}"))
   } else {

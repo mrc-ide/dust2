@@ -38,6 +38,8 @@ dust_filter_create <- function(generator, time_start, data,
                                seed = NULL) {
   call <- environment()
   check_generator_for_filter(generator, "filter", call = call)
+  methods <- dust_system_generator_methods(generator)
+
   assert_scalar_size(n_particles, allow_zero = FALSE, call = call)
   assert_scalar_logical(preserve_group_dimension, call = call)
 
@@ -50,7 +52,7 @@ dust_filter_create <- function(generator, time_start, data,
 
   n_threads <- check_n_threads(n_threads, n_particles, n_groups)
 
-  if (generator$properties$time_type == "continuous") {
+  if (attr(generator, "properties")$time_type == "continuous") {
     cli::cli_abort(
       c("Can't use 'dust_filter_create()' with continuous-time models",
         i = paste("We'll support this in future, but you need a place where",
@@ -76,7 +78,7 @@ dust_filter_create <- function(generator, time_start, data,
          deterministic = FALSE,
          has_adjoint = FALSE,
          generator = generator,
-         methods = generator$methods$filter,
+         methods = methods$filter,
          time_control = time_control,
          preserve_particle_dimension = TRUE,
          preserve_group_dimension = preserve_group_dimension),

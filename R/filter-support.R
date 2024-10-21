@@ -1,8 +1,9 @@
 check_generator_for_filter <- function(generator, what, call = NULL) {
   check_is_dust_system_generator(generator, substitute(generator))
-  if (!generator$properties$has_compare) {
+  if (!attr(generator, "properties")$has_compare) {
+    name <- attr(generator, "name")
     cli::cli_abort(
-      paste("Can't create {what}; the '{generator$name}' system does",
+      paste("Can't create {what}; the '{name}' system does",
             "not have 'compare_data' support"),
       arg = "generator")
   }
@@ -11,14 +12,14 @@ check_generator_for_filter <- function(generator, what, call = NULL) {
 
 
 check_system_dt <- function(dt, generator, name = "dt", call = NULL) {
-  time_type <- generator$properties$time_type
+  time_type <- properties <- attr(generator, "properties")$time_type
   if (time_type == "continuous") {
     if (!is.null(dt)) {
       cli::cli_abort("Can't use '{name}' with continuous-time systems",
                      call = call)
     }
   } else {
-    check_dt(dt %||% generator$default_dt,
+    check_dt(dt %||% attr(generator, "default_dt"),
              allow_null = time_type == "mixed",
              name = name,
              call = call)
@@ -28,7 +29,7 @@ check_system_dt <- function(dt, generator, name = "dt", call = NULL) {
 
 check_system_ode_control <- function(ode_control, generator,
                                      name = "ode_control", call = NULL) {
-  time_type <- generator$properties$time_type
+  time_type <- attr(generator, "properties")$time_type
   if (time_type == "discrete") {
     if (!is.null(ode_control)) {
       cli::cli_abort("Can't use 'ode_control' with discrete-time systems")

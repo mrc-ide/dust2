@@ -134,6 +134,7 @@ dust_generate <- function(config, filename, linking_to, cpp_std,
                           optimisation_level, compiler_options, mangle) {
   system <- read_lines(filename)
   data <- dust_template_data(config$name, config$class, config$time_type,
+                             config$has_compare, config$has_adjoint,
                              config$default_dt, linking_to, cpp_std,
                              optimisation_level, compiler_options, mangle)
   data$system_requirements <- data$cpp_std %||% "R (>= 4.0.0)"
@@ -189,6 +190,8 @@ dust_generate_cpp <- function(system, config, data) {
 dust_template_data <- function(name,
                                class,
                                time_type,
+                               has_compare,
+                               has_adjoint,
                                default_dt,
                                linking_to = NULL,
                                cpp_std = NULL,
@@ -209,6 +212,8 @@ dust_template_data <- function(name,
        class = class,
        time_type_property = time_type,
        time_type = if (time_type == "mixed") "continuous" else time_type,
+       has_compare = deparse1(has_compare),
+       has_adjoint = deparse1(has_adjoint),
        default_dt = deparse1(default_dt),
        package = paste0(name, mangle %||% ""),
        linking_to = linking_to,

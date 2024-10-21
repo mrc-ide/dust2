@@ -25,6 +25,8 @@ dust_unfilter_create <- function(generator, time_start, data,
                                  preserve_group_dimension = FALSE) {
   call <- environment()
   check_generator_for_filter(generator, "unfilter", call = call)
+  methods <- dust_system_generator_methods(generator)
+
   assert_scalar_size(n_particles, allow_zero = FALSE, call = call)
   assert_scalar_logical(preserve_particle_dimension, call = call)
 
@@ -54,9 +56,9 @@ dust_unfilter_create <- function(generator, time_start, data,
          n_particles = as.integer(n_particles),
          n_groups = as.integer(n_groups),
          deterministic = TRUE,
-         has_adjoint = generator$properties$has_adjoint,
+         has_adjoint = attr(generator, "properties")$has_adjoint,
          generator = generator,
-         methods = generator$methods$unfilter,
+         methods = methods$unfilter,
          time_control = time_control,
          preserve_particle_dimension = preserve_particle_dimension,
          preserve_group_dimension = preserve_group_dimension),

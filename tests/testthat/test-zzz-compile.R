@@ -7,8 +7,8 @@ test_that("can compile simple system", {
   expect_true(is.function(gen))
   res <- gen()
   expect_s3_class(res, "dust_system_generator")
-  expect_equal(res$name, "mysir")
-  expect_true(res$properties$has_compare)
+  expect_equal(attr(res, "name"), "mysir")
+  expect_true(attr(res, "properties")$has_compare)
 
   obj1 <- dust_system_create(gen(), list(), n_particles = 10, seed = 1)
   dust_system_set_state_initial(obj1)
@@ -21,9 +21,6 @@ test_that("can compile simple system", {
   res <- evaluate_promise(dust_compile(filename, quiet = FALSE, debug = TRUE))
   expect_identical(res$result, gen)
   expect_match(res$messages, "Using cached generator")
-
-  skip_on_covr()
-  expect_true(is_uncalled_generator(gen))
 })
 
 
@@ -69,8 +66,8 @@ test_that("generators can be serialised and used from other processes", {
   log <- withr::local_tempfile()
   expect_equal(
     callr::r(function(path) {
-      sys <- readRDS(path)
-      dust2::dust_system_state(dust2::dust_system_create(sys(), list(), 1))
+      generator <- readRDS(path)
+      dust2::dust_system_state(dust2::dust_system_create(generator, list(), 1))
     }, list(tmp), stdout = log, stderr = "2>&1"),
     numeric(5))
   expect_match(cli::ansi_strip(readLines(log)), "Loading mysir", all = FALSE)
