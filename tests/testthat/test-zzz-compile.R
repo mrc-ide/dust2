@@ -21,9 +21,6 @@ test_that("can compile simple system", {
   res <- evaluate_promise(dust_compile(filename, quiet = FALSE, debug = TRUE))
   expect_identical(res$result, gen)
   expect_match(res$messages, "Using cached generator")
-
-  skip_on_covr()
-  expect_true(is_uncalled_generator(gen))
 })
 
 

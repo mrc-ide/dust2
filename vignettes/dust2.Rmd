@@ -36,16 +36,16 @@ However, this is also bundled into the package and can be loaded with:
 walk <- dust_example("walk")
 ```
 
-`walk` is a function which returns a `dust_system_generator` object:
+`walk` is a `dust_system_generator` object:
 
 ```{r walk_object}
-walk()
+walk
 ```
 
 Create an instance of the system using `dust_system_create()`.
 
 ```{r walk_create}
-sys <- dust_system_create(walk(), list(sd = 1), n_particles = 20)
+sys <- dust_system_create(walk, list(sd = 1), n_particles = 20)
 sys
 ```
 
@@ -67,7 +67,7 @@ dust_system_state(sys)
 At this point our particles have been run for 100 time steps with standard deviation 1 at each step so they [will be distributed following Normal(0, 10)](https://en.wikipedia.org/wiki/Random_walk#Gaussian_random_walk).  This is easier to see if we simulate a lot of particles, here 20,000:
 
 ```{r walk_simulate_many}
-sys <- dust_system_create(walk(), list(sd = 1), n_particles = 20000)
+sys <- dust_system_create(walk, list(sd = 1), n_particles = 20000)
 dust_system_run_to_time(sys, 100)
 hist(dust_system_state(sys), freq = FALSE, las = 1, col = "steelblue2", main = "",
      ylim = c(0., 0.04), xlab = "State")
@@ -81,7 +81,7 @@ The approach above still runs everything in serial, one particle after another. 
 Provided that your computer can compile with OpenMP the following code will execute in parallel using 2 threads
 
 ```{r, walk_parallel}
-sys <- dust_system_create(walk(), list(sd = 1), n_particles = 20, n_threads = 2)
+sys <- dust_system_create(walk, list(sd = 1), n_particles = 20, n_threads = 2)
 dust_system_run_to_time(sys, 100)
 dust_system_state(sys)
 ```
@@ -101,7 +101,7 @@ sir <- dust_example("sir")
 The model is initialised the same way as before:
 
 ```{r sir_create}
-sys <- dust_system_create(sir(), list(), n_particles = 2)
+sys <- dust_system_create(sir, list(), n_particles = 2)
 ```
 
 This system has a non-trivial initial state; we can set it with `dust_system_set_state_initial()`:
@@ -117,7 +117,7 @@ Because we have 5 states per particle, this is a 5 x 2 matrix.
 In order to run the simulation beginning-to-end, we use the `$simulate` method on a dust object, which runs over a set of time steps and records the state at each.  Let's do this with 200 particles:x
 
 ```{r sir_run_collect}
-sys <- dust_system_create(sir(), list(), n_particles = 200)
+sys <- dust_system_create(sir, list(), n_particles = 200)
 dust_system_set_state_initial(sys)
 times <- seq(0, 150)
 state <- dust_system_simulate(sys, times)
@@ -156,7 +156,7 @@ There are a few other methods on the dust objects that may be useful.
 This method exists to support particle filtering, and allows resampling or reordering of particles.
 
 ```{r reorder_setup}
-sys <- dust_system_create(walk(), list(sd = 1), n_particles = 20)
+sys <- dust_system_create(walk, list(sd = 1), n_particles = 20)
 dust_system_run_to_time(sys, 1)
 dust_system_state(sys)
 ```
@@ -208,7 +208,7 @@ The `update_state` method allows setting any or all of these components.
 By default every particle starts from the initial condition specified by your model classes `initial()` method. However, you can specify a state directly using the `$update_state()` method. Here, we initialise our SIR model with only 1 infected individual rather than 10:
 
 ```{r update_state}
-sys <- dust_system_create(sir(), list(), n_particles = 20)
+sys <- dust_system_create(sir, list(), n_particles = 20)
 dust_system_set_state(sys, matrix(c(1000, 1, 0, 0, 0), 5, 1))
 dust_system_state(sys)
 ```

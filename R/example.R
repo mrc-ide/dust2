@@ -51,9 +51,9 @@
 ##' @export
 ##' @examples
 ##' walk <- dust_example("walk")
-##' walk()
+##' walk
 ##'
-##' sys <- dust_system_create(walk(), list(sd = 1), 20)
+##' sys <- dust_system_create(walk, list(sd = 1), 20)
 ##' y <- dust_system_simulate(sys, 0:50)
 ##' matplot(t(y[1, , ]), type = "l", col = "#0000ff55", lty = 1,
 ##'         xlab = "Time", ylab = "Value")

@@ -1,85 +1,3 @@
-##' Create a system generator.  This function is not intended to be
-##' used by users directly, but will be called from packages built
-##' using [dust_package]
-##'
-##' @title Create a system generator
-##'
-##' @param name The name of the generator
-##'
-##' @param time_type The time type (discrete or continuous).  Using
-##'   the wrong time here will lead to crashes or failure to create
-##'   the generator.
-##'
-##' @param default_dt The default value for `dt` on initialisation
-##'
-##' @param env The environment where the generator is defined.
-##'
-##' @return A `dust_system_generator` object
-##'
-##' @export
-##' @keywords internal
-##' @examples
-##' # This creates the "sir" generator
-##' dust_system_generator("sir", "discrete", 1, asNamespace("dust2"))
-##'
-##' # This is the same code as in "dust2:::sir", except there we find
-##' # the correct environment automatically
-##' dust2:::sir
-dust_system_generator <- function(name, time_type, default_dt,
-                                  env = parent.env(parent.frame())) {
-  ## I don't love that this requires running through sprintf() each
-  ## time we create a generator, but using a function for the generator (see
-  ## sir()), rather than an object, means that it's easier to think
-  ## about the dependencies among packages.  This is also essentially
-  ## how DBI works.
-  get_methods <- function(nms, component, name) {
-    set_names(
-      lapply(sprintf("dust2_%s_%s_%s", component, name, nms),
-             function(x) env[[x]]),
-      nms)
-  }
-
-  env <- dust_package_env(env)
-
-  methods_core <- c("alloc",
-                    "state", "set_state", "set_state_initial",
-                    "time", "set_time",
-                    "rng_state", "set_rng_state",
-                    "update_pars",
-                    "run_to_time", "simulate",
-                    "reorder",
-                    if (time_type == "continuous") "internals")
-  methods_compare <- "compare_data"
-  methods <- get_methods(c(methods_core, methods_compare), "system", name)
-  ok <- !vapply(methods[methods_core], is.null, TRUE)
-  stopifnot(all(ok))
-
-  has_compare <- !is.null(methods$compare_data)
-
-  if (has_compare) {
-    methods_unfilter <- c("alloc", "run", "update_pars", "last_history",
-                          "last_state", "last_gradient")
-    methods$unfilter <- get_methods(methods_unfilter, "unfilter", name)
-    methods_filter <- c("alloc", "run", "update_pars", "last_history",
-                        "last_state", "rng_state", "set_rng_state")
-    methods$filter <- get_methods(methods_filter, "filter", name)
-  }
-
-  properties <- list(
-    time_type = time_type,
-    has_compare = has_compare,
-    has_adjoint = !is.null(methods$unfilter$last_gradient))
-
-  ret <- list(name = name,
-              methods = methods,
-              default_dt = default_dt,
-              properties = properties)
-
-  class(ret) <- "dust_system_generator"
-  ret
-}
-
-
 ##' Create a dust system object from a system generator.  This allocates a
 ##' system and sets an initial set of parameters.  Once created you can use
 ##' other dust functions to interact with it.
@@ -152,6 +70,7 @@ dust_system_create <- function(generator, pars, n_particles = 1, n_groups = 1,
                                preserve_group_dimension = FALSE) {
   call <- environment()
   check_is_dust_system_generator(generator, substitute(generator))
+  methods <- dust_system_generator_methods(generator)
 
   time_control <- check_time_control(generator, dt, ode_control, call = call)
   check_time(time, time_control, call = call)
@@ -166,11 +85,11 @@ dust_system_create <- function(generator, pars, n_particles = 1, n_groups = 1,
   preserve_group_dimension <- preserve_group_dimension || n_groups > 1
 
   pars <- check_pars(pars, n_groups, NULL, preserve_group_dimension)
-  res <- generator$methods$alloc(pars, time, time_control, n_particles,
-                                 n_groups, seed, deterministic, n_threads)
+  res <- methods$alloc(pars, time, time_control, n_particles,
+                       n_groups, seed, deterministic, n_threads)
 
   ## Here, we augment things slightly
-  res$name <- generator$name
+  res$name <- attr(generator, "name")
   res$packer_state <- monty::monty_packer(array = res$packing_state)
   if (!is.null(res$packing_gradient)) {
     res$packer_gradient <-
@@ -180,8 +99,8 @@ dust_system_create <- function(generator, pars, n_particles = 1, n_groups = 1,
   res$n_groups <- as.integer(n_groups)
   res$n_threads <- check_n_threads(n_threads, n_particles, n_groups)
   res$deterministic <- deterministic
-  res$methods <- generator$methods
-  res$properties <- generator$properties
+  res$methods <- methods
+  res$properties <- attr(generator, "properties")
   res$preserve_particle_dimension <- preserve_particle_dimension
   res$preserve_group_dimension <- preserve_group_dimension
   res$time_control <- time_control
@@ -636,26 +555,29 @@ print.dust_system <- function(x, ...) {
 
 ##' @export
 print.dust_system_generator <- function(x, ...) {
-  cli::cli_h1("<dust_system_generator: {x$name}>")
+  name <- attr(x, "name")
+  properties <- attr(x, "properties")
+  default_dt <- attr(x, "default_dt")
+  cli::cli_h1("<dust_system_generator: {name}>")
   cli::cli_alert_info(
     "Use 'dust2::dust_system_create()' to create a system with this generator")
-  if (x$properties$has_compare) {
+  if (properties$has_compare) {
     cli::cli_bullets(c(
       i = "This system has 'compare_data' support"))
   }
-  if (x$properties$time_type == "discrete") {
+  if (properties$time_type == "discrete") {
     cli::cli_bullets(c(
       i = paste("This system runs in discrete time",
-                "with a default dt of {x$default_dt}")))
-  } else if (x$properties$time_type == "mixed") {
-    if (is.null(x$default_dt)) {
+                "with a default dt of {default_dt}")))
+  } else if (properties$time_type == "mixed") {
+    if (is.null(default_dt)) {
       cli::cli_bullets(c(
         i = paste("This system runs in both continuous time",
                   "and discrete time with discrete time disabled by default")))
     } else {
       cli::cli_bullets(c(
         i = paste("This system runs in both continuous time",
-                  "and discrete time with a default dt of {x$default_dt}")))
+                  "and discrete time with a default dt of {default_dt}")))
     }
   } else {
     cli::cli_bullets(c(
@@ -675,17 +597,7 @@ dim.dust_system <- function(x, ...) {
 
 check_is_dust_system_generator <- function(generator, called_as,
                                            call = parent.frame()) {
-  if (!inherits(generator, "dust_system_generator")) {
-    hint <- NULL
-    if (is_uncalled_generator(generator) && is.symbol(called_as)) {
-      hint <- c(
-        i = "Did you mean '{deparse(called_as)}()' (i.e., with parentheses)")
-    }
-    cli::cli_abort(
-      c("Expected 'generator' to be a 'dust_system_generator' object",
-        hint),
-      arg = "generator")
-  }
+  assert_is(generator, "dust_system_generator", call = call)
 }
 
 
@@ -761,17 +673,6 @@ check_time_sequence <- function(time, time_control,
   }
 
   as.numeric(time)
-}
-
-
-is_uncalled_generator <- function(sys) {
-  if (!is.function(sys)) {
-    return(FALSE)
-  }
-  code <- body(sys)
-  rlang::is_call(code, "{") &&
-    length(code) %in% 2:3 &&
-    rlang::is_call(last(code), "dust_system_generator")
 }
 
 
@@ -906,4 +807,45 @@ prepare_state <- function(state,
   }
 
   cli::cli_abort(msg, arg = name, call = call)
+}
+
+
+dust_system_generator_methods <- function(generator) {
+  name <- attr(generator, "name")
+  properties <- attr(generator, "properties")
+  env <- environment(generator)
+  time_type <- properties$time_type
+  has_compare <- properties$has_compare
+
+  get_methods <- function(nms, component, name) {
+    set_names(
+      lapply(sprintf("dust2_%s_%s_%s", component, name, nms),
+             function(x) env[[x]]),
+      nms)
+  }
+  methods_core <- c("alloc",
+                    "state", "set_state", "set_state_initial",
+                    "time", "set_time",
+                    "rng_state", "set_rng_state",
+                    "update_pars",
+                    "run_to_time", "simulate",
+                    "reorder",
+                    if (time_type == "continuous") "internals")
+  methods_compare <- "compare_data"
+  methods <- get_methods(c(methods_core, methods_compare), "system", name)
+  ok <- !vapply(methods[methods_core], is.null, TRUE)
+  stopifnot(all(ok))
+
+  has_compare <- !is.null(methods$compare_data)
+
+  if (has_compare) {
+    methods_unfilter <- c("alloc", "run", "update_pars", "last_history",
+                          "last_state", "last_gradient")
+    methods$unfilter <- get_methods(methods_unfilter, "unfilter", name)
+    methods_filter <- c("alloc", "run", "update_pars", "last_history",
+                        "last_state", "rng_state", "set_rng_state")
+    methods$filter <- get_methods(methods_filter, "filter", name)
+  }
+
+  methods
 }

@@ -1,76 +1,80 @@
 test_that("can construct template data", {
   expect_equal(
-    dust_template_data("foo", "foo", "discrete", 1),
+    dust_template_data("foo", "foo", "discrete", FALSE, FALSE, 1),
     list(name = "foo", class = "foo",
          time_type_property = "discrete", time_type = "discrete",
-         default_dt = "1",
+         has_compare = "FALSE", has_adjoint = "FALSE", default_dt = "1",
          package = "foo", linking_to = "cpp11, dust2, monty", cpp_std = NULL,
          compiler_options = ""))
   expect_equal(
-    dust_template_data("foo", "bar", "discrete", 1, mangle = "abc"),
+    dust_template_data("foo", "bar", "discrete", FALSE, FALSE, 1,
+                       mangle = "abc"),
     list(name = "foo", class = "bar",
          time_type_property = "discrete", time_type = "discrete",
-         default_dt = "1",
+         has_compare = "FALSE", has_adjoint = "FALSE", default_dt = "1",
          package = "fooabc",
          linking_to = "cpp11, dust2, monty", cpp_std = NULL,
          compiler_options = ""))
   expect_equal(
-    dust_template_data("foo", "foo", "discrete", 1, linking_to = "baz"),
+    dust_template_data("foo", "foo", "discrete", FALSE, FALSE, 1,
+                       linking_to = "baz"),
     list(name = "foo", class = "foo",
          time_type_property = "discrete", time_type = "discrete",
-         default_dt = "1",
+         has_compare = "FALSE", has_adjoint = "FALSE", default_dt = "1",
          package = "foo", linking_to = "cpp11, dust2, monty, baz",
          cpp_std = NULL, compiler_options = ""))
   expect_equal(
-    dust_template_data("foo", "foo", "discrete", 1,
+    dust_template_data("foo", "foo", "discrete", FALSE, FALSE, 1,
                        linking_to = c("x", "dust2", "y")),
     list(name = "foo", class = "foo",
          time_type_property = "discrete", time_type = "discrete",
-         default_dt = "1",
+         has_compare = "FALSE", has_adjoint = "FALSE", default_dt = "1",
          package = "foo", linking_to = "cpp11, dust2, monty, x, y",
          cpp_std = NULL, compiler_options = ""))
   expect_equal(
-    dust_template_data("foo", "foo", "discrete", 1, compiler_options = "-Xf"),
-    list(name = "foo", class = "foo",
-         time_type_property = "discrete", time_type = "discrete",
-         default_dt = "1",
-         package = "foo", linking_to = "cpp11, dust2, monty", cpp_std = NULL,
-         compiler_options = "-Xf"))
-  expect_equal(
-    dust_template_data("foo", "foo", "discrete", 1, optimisation_level = "none",
+    dust_template_data("foo", "foo", "discrete", FALSE, FALSE, 1,
                        compiler_options = "-Xf"),
     list(name = "foo", class = "foo",
          time_type_property = "discrete", time_type = "discrete",
-         default_dt = "1",
+         has_compare = "FALSE", has_adjoint = "FALSE", default_dt = "1",
+         package = "foo", linking_to = "cpp11, dust2, monty", cpp_std = NULL,
+         compiler_options = "-Xf"))
+  expect_equal(
+    dust_template_data("foo", "foo", "discrete", FALSE, FALSE, 1,
+                       optimisation_level = "none",compiler_options = "-Xf"),
+    list(name = "foo", class = "foo",
+         time_type_property = "discrete", time_type = "discrete",
+         has_compare = "FALSE", has_adjoint = "FALSE", default_dt = "1",
          package = "foo", linking_to = "cpp11, dust2, monty", cpp_std = NULL,
          compiler_options = "-Xf -O0"))
   expect_equal(
-    dust_template_data("foo", "foo", "discrete", 1, cpp_std = "c++14"),
+    dust_template_data("foo", "foo", "discrete", FALSE, FALSE, 1,
+                       cpp_std = "c++14"),
     list(name = "foo", class = "foo",
          time_type_property = "discrete", time_type = "discrete",
-         default_dt = "1",
+         has_compare = "FALSE", has_adjoint = "FALSE", default_dt = "1",
          package = "foo", linking_to = "cpp11, dust2, monty", cpp_std = "c++14",
          compiler_options = ""))
   expect_equal(
-    dust_template_data("foo", "foo", "discrete", 0.25),
+    dust_template_data("foo", "foo", "discrete", FALSE, FALSE, 0.25),
     list(name = "foo", class = "foo",
          time_type_property = "discrete", time_type = "discrete",
-         default_dt = "0.25",
+         has_compare = "FALSE", has_adjoint = "FALSE", default_dt = "0.25",
          package = "foo", linking_to = "cpp11, dust2, monty", cpp_std = NULL,
          compiler_options = ""))
   expect_equal(
-    dust_template_data("foo", "foo", "continuous", NULL),
+    dust_template_data("foo", "foo", "continuous", FALSE, FALSE, NULL),
     list(name = "foo", class = "foo",
          time_type_property = "continuous", time_type = "continuous",
-         default_dt = "NULL", package = "foo",
-         linking_to = "cpp11, dust2, monty", cpp_std = NULL,
+         has_compare = "FALSE", has_adjoint = "FALSE", default_dt = "NULL",
+         package = "foo", linking_to = "cpp11, dust2, monty", cpp_std = NULL,
          compiler_options = ""))
   expect_equal(
-    dust_template_data("foo", "foo", "mixed", NULL),
+    dust_template_data("foo", "foo", "mixed", FALSE, FALSE, NULL),
     list(name = "foo", class = "foo",
          time_type_property = "mixed", time_type = "continuous",
-         default_dt = "NULL", package = "foo",
-         linking_to = "cpp11, dust2, monty", cpp_std = NULL,
+         has_compare = "FALSE", has_adjoint = "FALSE", default_dt = "NULL",
+         package = "foo", linking_to = "cpp11, dust2, monty", cpp_std = NULL,
          compiler_options = ""))
 })
 

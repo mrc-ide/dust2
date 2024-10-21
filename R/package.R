@@ -222,6 +222,7 @@ package_generate <- function(filename, call) {
   config <- parse_metadata(filename, call = call)
   system <- read_lines(filename)
   data <- dust_template_data(config$name, config$class, config$time_type,
+                             config$has_compare, config$has_adjoint,
                              config$default_dt)
   list(r = substitute_dust_template(data, "package.R"),
        cpp = dust_generate_cpp(system, config, data))
