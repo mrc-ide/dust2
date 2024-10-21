@@ -4,6 +4,7 @@ examples <- c("logistic.cpp", "malaria.cpp", "sir.cpp", "sirode.cpp",
 
 setwd(here::here())
 unlink(file.path("src", basename(examples)))
+unlink("R/dust.R")
 
 unlink("inst/dust", recursive = TRUE)
 dir.create("inst/dust", FALSE)

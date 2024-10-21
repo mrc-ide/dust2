@@ -130,3 +130,21 @@ drop_last <- function(x, n = 1) {
   len <- length(x)
   x[if (len < n) integer(0) else seq_len(len - n)]
 }
+
+
+dim2 <- function(x) {
+  dim(x) %||% length(x)
+}
+
+
+rank_description <- function(rank) {
+  if (rank == 0) {
+    "scalar"
+  } else if (rank == 1) {
+    "vector"
+  } else if (rank == 2) {
+    "matrix"
+  } else {
+    sprintf("%d-dimensional array", rank)
+  }
+}

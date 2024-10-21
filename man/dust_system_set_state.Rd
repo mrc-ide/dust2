@@ -4,14 +4,37 @@
 \alias{dust_system_set_state}
 \title{Set system state}
 \usage{
-dust_system_set_state(sys, state)
+dust_system_set_state(
+  sys,
+  state,
+  index_state = NULL,
+  index_particle = NULL,
+  index_group = NULL
+)
 }
 \arguments{
 \item{sys}{A \code{dust_system} object}
 
 \item{state}{A matrix or array of state.  If ungrouped, the
 dimension order expected is state x particle.  If grouped the
-order is state x particle x group.}
+order is state x particle x group.  If you have a grouped system
+with 1 particle and \code{preserve_state_dimension = FALSE} then the
+state has size state x group.  You can omit higher dimensions,
+so if you pass a vector it will be treated as if all higher
+dimensions are length 1 (or if you have a grouped system you
+can provide a matrix and treat it as if the third dimension had
+length 1).  If you provide any \code{index_} argument then the length
+of the corresponding state dimension must match the index
+length.}
+
+\item{index_state}{An index to control which state variables we
+set.  You can use this to set a subset of state variables.}
+
+\item{index_particle}{An index to control which particles have
+their state updated}
+
+\item{index_group}{An index to control which groups have their
+state updated.}
 }
 \value{
 Nothing, called for side effects only
@@ -19,5 +42,52 @@ Nothing, called for side effects only
 \description{
 Set system state.  Takes a multidimensional array (2- or 3d
 depending on if the system is grouped or not).  Dimensions of
-length 1 will be recycled as appropriate.
+length 1 will be recycled as appropriate.  For continuous time
+systems, we will initialise the solver immediately after setting
+state, which may cause errors if your initial state is invalid for
+your system.  There are many ways that you can use this function
+to set different fractions of state (a subset of states, particles
+or parameter groups, recycling over any dimensions that are
+missing).  Please see the Examples section for usage.
+}
+\examples{
+# Consider a system with 3 particles and 1 group:
+sir <- dust_example("sir")
+sys <- dust_system_create(sir(), list(), n_particles = 3)
+# The state for this system is packed as S, I, R, cases_cumul, cases_inc:
+dust_unpack_index(sys)
+
+# Set all particles to the same state:
+dust_system_set_state(sys, c(1000, 10, 0, 0, 0))
+dust_system_state(sys)
+
+# We can set everything to different states by passing a vector
+# with this shape:
+m <- cbind(c(1000, 10, 0, 0, 0), c(999, 11, 0, 0, 0), c(998, 12, 0, 0, 0))
+dust_system_set_state(sys, m)
+dust_system_state(sys)
+
+# Or set the state for just one state:
+dust_system_set_state(sys, 1, index_state = 4)
+dust_system_state(sys)
+
+# If you want to set a different state across particles, you must
+# provide a *matrix* (a vector always sets the same state into
+# every particle)
+dust_system_set_state(sys, rbind(c(1, 2, 3)), index_state = 4)
+dust_system_state(sys)
+
+# This will not work as it can be ambiguous what you are
+# trying to do:
+#> dust_system_set_state(sys, c(1, 2, 3), index_state = 4)
+
+# State can be set for specific particles:
+dust_system_set_state(sys, c(900, 100, 0, 0, 0), index_particle = 2)
+dust_system_state(sys)
+
+# And you can combine 'index_particle' with 'index_state' to set
+# small rectangles of state:
+dust_system_set_state(sys, matrix(c(1, 2, 3, 4), 2, 2),
+                      index_particle = 2:3, index_state = 4:5)
+dust_system_state(sys)
 }

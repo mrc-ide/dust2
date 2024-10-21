@@ -80,6 +80,17 @@ dust_likelihood_run <- function(obj, pars, initial = NULL,
   ## so that we can access `n_groups`
   index_state <- check_index(index_state, max = obj$n_state,
                              unique = TRUE)
+  if (!is.null(initial)) {
+    initial <- prepare_state(initial,
+                             NULL, # index_state
+                             NULL, # index_particle
+                             index_group,
+                             obj$n_state,
+                             obj$n_particles,
+                             obj$n_groups,
+                             obj$preserve_particle_dimension,
+                             obj$preserve_group_dimension)
+  }
   obj$methods$run(obj$ptr,
                   initial,
                   save_history,

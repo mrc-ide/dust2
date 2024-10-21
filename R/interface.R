@@ -226,7 +226,13 @@ dust_system_state <- function(sys, index_state = NULL, index_particle = NULL,
 
 ##' Set system state.  Takes a multidimensional array (2- or 3d
 ##' depending on if the system is grouped or not).  Dimensions of
-##' length 1 will be recycled as appropriate.
+##' length 1 will be recycled as appropriate.  For continuous time
+##' systems, we will initialise the solver immediately after setting
+##' state, which may cause errors if your initial state is invalid for
+##' your system.  There are many ways that you can use this function
+##' to set different fractions of state (a subset of states, particles
+##' or parameter groups, recycling over any dimensions that are
+##' missing).  Please see the Examples section for usage.
 ##'
 ##' @title Set system state
 ##'
@@ -234,15 +240,80 @@ dust_system_state <- function(sys, index_state = NULL, index_particle = NULL,
 ##'
 ##' @param state A matrix or array of state.  If ungrouped, the
 ##'   dimension order expected is state x particle.  If grouped the
-##'   order is state x particle x group.
+##'   order is state x particle x group.  If you have a grouped system
+##'   with 1 particle and `preserve_state_dimension = FALSE` then the
+##'   state has size state x group.  You can omit higher dimensions,
+##'   so if you pass a vector it will be treated as if all higher
+##'   dimensions are length 1 (or if you have a grouped system you
+##'   can provide a matrix and treat it as if the third dimension had
+##'   length 1).  If you provide any `index_` argument then the length
+##'   of the corresponding state dimension must match the index
+##'   length.
+##'
+##' @param index_state An index to control which state variables we
+##'   set.  You can use this to set a subset of state variables.
+##'
+##' @param index_particle An index to control which particles have
+##'   their state updated
+##'
+##' @param index_group An index to control which groups have their
+##'   state updated.
 ##'
 ##' @return Nothing, called for side effects only
 ##' @export
-dust_system_set_state <- function(sys, state) {
+##' @examples
+##' # Consider a system with 3 particles and 1 group:
+##' sir <- dust_example("sir")
+##' sys <- dust_system_create(sir(), list(), n_particles = 3)
+##' # The state for this system is packed as S, I, R, cases_cumul, cases_inc:
+##' dust_unpack_index(sys)
+##'
+##' # Set all particles to the same state:
+##' dust_system_set_state(sys, c(1000, 10, 0, 0, 0))
+##' dust_system_state(sys)
+##'
+##' # We can set everything to different states by passing a vector
+##' # with this shape:
+##' m <- cbind(c(1000, 10, 0, 0, 0), c(999, 11, 0, 0, 0), c(998, 12, 0, 0, 0))
+##' dust_system_set_state(sys, m)
+##' dust_system_state(sys)
+##'
+##' # Or set the state for just one state:
+##' dust_system_set_state(sys, 1, index_state = 4)
+##' dust_system_state(sys)
+##'
+##' # If you want to set a different state across particles, you must
+##' # provide a *matrix* (a vector always sets the same state into
+##' # every particle)
+##' dust_system_set_state(sys, rbind(c(1, 2, 3)), index_state = 4)
+##' dust_system_state(sys)
+##'
+##' # This will not work as it can be ambiguous what you are
+##' # trying to do:
+##' #> dust_system_set_state(sys, c(1, 2, 3), index_state = 4)
+##'
+##' # State can be set for specific particles:
+##' dust_system_set_state(sys, c(900, 100, 0, 0, 0), index_particle = 2)
+##' dust_system_state(sys)
+##'
+##' # And you can combine 'index_particle' with 'index_state' to set
+##' # small rectangles of state:
+##' dust_system_set_state(sys, matrix(c(1, 2, 3, 4), 2, 2),
+##'                       index_particle = 2:3, index_state = 4:5)
+##' dust_system_state(sys)
+dust_system_set_state <- function(sys, state, index_state = NULL,
+                                  index_particle = NULL, index_group = NULL) {
   check_is_dust_system(sys)
-  ## TODO: check rank etc here (mrc-5565), and support
-  ## preserve_particle_dimension
-  sys$methods$set_state(sys$ptr, state, sys$preserve_group_dimension)
+  state <- prepare_state(state,
+                         index_state,
+                         index_particle,
+                         index_group,
+                         sys$n_state,
+                         sys$n_particles,
+                         sys$n_groups,
+                         sys$preserve_particle_dimension,
+                         sys$preserve_group_dimension)
+  sys$methods$set_state(sys$ptr, state)
   invisible()
 }
 
@@ -752,4 +823,87 @@ dust_package_env <- function(env, quiet = FALSE) {
   } else {
     env <- load_temporary_package(env$path, env$name, quiet)
   }
+}
+
+
+## This does a bunch of bookkeeping to work out if we can set state
+## into a system, and works out what we'll need to recycle when
+## setting it.
+prepare_state <- function(state,
+                          index_state,
+                          index_particle,
+                          index_group,
+                          n_state,
+                          n_particles,
+                          n_groups,
+                          preserve_particle_dimension,
+                          preserve_group_dimension,
+                          name = deparse(substitute(state)),
+                          call = parent.frame()) {
+  len_from_index <- function(n, idx, name_index = deparse(substitute(idx))) {
+    if (is.null(idx)) {
+      n
+    } else {
+      check_index(idx, n, unique = TRUE, name = name_index)
+      length(idx)
+    }
+  }
+  len_state <- len_from_index(n_state, index_state)
+  len_particles <- len_from_index(n_particles, index_particle)
+  len_groups <- len_from_index(n_groups, index_group)
+
+  stopifnot(preserve_particle_dimension || n_particles == 1)
+  stopifnot(preserve_group_dimension || n_groups == 1)
+
+  d <- dim2(state)
+  rank <- length(d)
+  expected <- c(state = len_state,
+                particle = if (preserve_particle_dimension) len_particles,
+                group = if (preserve_group_dimension) len_groups)
+  rank_expected <- length(expected)
+  if (rank > rank_expected) {
+    cli::cli_abort(
+      paste("Expected 'state' to be a {rank_description(rank_expected)}",
+            "but was given a {rank_description(rank)}"),
+      arg = name, call = call)
+  }
+  if (rank < rank_expected) {
+    d <- c(d, rep(1L, rank_expected - rank))
+  }
+
+  ok <- d == expected | c(FALSE, d[-1] == 1)
+  if (all(ok)) {
+    ## We will access this by position from the C++ code but name it
+    ## here for clarity.
+    return(list(state = state,
+                index_state = index_state,
+                index_particle = index_particle,
+                index_group = index_group,
+                recycle_particle = n_particles > 1 && d[[2]] == 1,
+                recycle_group = n_groups > 1 && last(d) == 1))
+  }
+
+  if (!ok[[1]]) {
+    if (rank == 1) {
+      msg <- "Expected '{name}' to have length {len_state}"
+    } else if (rank == 2) {
+      msg <- "Expected '{name}' to have {len_state} rows"
+    } else {
+      msg <- "Expected dimension 1 of '{name}' to be length {len_state}"
+    }
+  } else if (!ok[[2]]) {
+    expected_str <-
+      if (expected[[2]] == 1) "1" else sprintf("1 or %d", expected[[2]])
+    if (rank == 2) {
+      msg <- "Expected '{name}' to have {expected_str} columns"
+    } else {
+      msg <- "Expected dimension 2 of '{name}' to be length {expected_str}"
+    }
+  } else {
+    expected_str <-
+      if (expected[[3]] == 1) "1" else sprintf("1 or %d", expected[[3]])
+    msg <- "Expected dimension 3 of '{name}' to be length {expected_str}"
+  }
+
+  cli::cli_abort(msg, arg = name, call = call)
 }
