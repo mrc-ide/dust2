@@ -13,18 +13,18 @@ dust_likelihood_last_state(obj, select_random_particle = FALSE)
 
 \item{select_random_particle}{Logical, indicating if we should
 return a history for one randomly selected particle (rather than
-the entire history).  If this is \code{TRUE}, the particle will be
-selected independently for each group, if the object is grouped.
-This option is intended to help select a representative
-trajectory during an MCMC.  When \code{TRUE}, we drop the \code{particle}
-dimension of the return value.}
+the entire set of trajectories over all particles).  If this is
+\code{TRUE}, the particle will be selected independently for each
+group, if the object is grouped.  This option is intended to
+help select a representative trajectory during an MCMC.  When
+\code{TRUE}, we drop the \code{particle} dimension of the return value.}
 }
 \value{
 An array.  If ungrouped this will have dimensions \code{state}
 x \code{particle}, and if grouped then \code{state} x \code{particle} x
 \code{group}.  If \code{select_random_particle = TRUE}, the second
 (particle) dimension will be dropped.  This is the same as the
-state returned by \link{dust_likelihood_last_history} without the time
+state returned by \link{dust_likelihood_last_trajectories} without the time
 dimension but also without any state index applied (i.e., we
 always return all state).
 }

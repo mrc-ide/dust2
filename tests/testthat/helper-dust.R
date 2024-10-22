@@ -13,7 +13,7 @@ sir_filter_manual <- function(pars, time_start, data, dt, n_particles,
   n_time <- nrow(data)
   time <- data$time
 
-  function(pars, initial = NULL, save_history = FALSE) {
+  function(pars, initial = NULL, save_trajectories = FALSE) {
     if (!is.null(pars)) {
       dust_system_update_pars(obj, pars)
     }
@@ -24,7 +24,7 @@ sir_filter_manual <- function(pars, time_start, data, dt, n_particles,
       dust_system_set_state(obj, initial)
     }
     ll <- 0
-    history <- array(NA_real_, c(n_state, n_particles, n_time))
+    trajectories <- array(NA_real_, c(n_state, n_particles, n_time))
     for (i in seq_along(time)) {
       dust_system_run_to_time(obj, time[[i]])
       tmp <- dust_system_compare_data(obj, as.list(data[i, ]))
@@ -33,13 +33,14 @@ sir_filter_manual <- function(pars, time_start, data, dt, n_particles,
       u <- r$random_real(1)
       k <- test_resample_weight(w, u) + 1L
       state <- dust_system_state(obj)
-      if (save_history) {
-        history[, , i] <- state
-        history <- history[, k, , drop = FALSE]
+      if (save_trajectories) {
+        trajectories[, , i] <- state
+        trajectories <- trajectories[, k, , drop = FALSE]
       }
       dust_system_set_state(obj, state[, k])
     }
-    list(log_likelihood = ll, history = if (save_history) history)
+    list(log_likelihood = ll,
+         trajectories = if (save_trajectories) trajectories)
   }
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <dust2/r/helpers.hpp>
-#include <dust2/history.hpp>
+#include <dust2/trajectories.hpp>
 
 namespace dust2 {
 namespace r {
@@ -246,7 +246,7 @@ SEXP dust2_system_simulate(cpp11::sexp ptr,
   const auto n_groups = index_group.size();
   const auto n_times = times.size();
 
-  dust2::history<real_type> h(n_state, n_particles, n_groups, n_times);
+  dust2::trajectories<real_type> h(n_state, n_particles, n_groups, n_times);
   h.set_index_and_reset(index_state, index_group);
   for (size_t i = 0; i < n_times; ++i) {
     obj->run_to_time(times[i], index_group);
@@ -254,7 +254,7 @@ SEXP dust2_system_simulate(cpp11::sexp ptr,
   }
 
   // There is an extra copy here vs using the R memory to back the
-  // history.  That's an optimisation that would be fairly easy to
+  // trajectories.  That's an optimisation that would be fairly easy to
   // make later.
   const auto len = n_state_save * n_particles * n_groups * n_times;
   cpp11::sexp ret = cpp11::writable::doubles(len);

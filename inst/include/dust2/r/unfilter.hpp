@@ -21,7 +21,7 @@ cpp11::sexp dust2_unfilter_update_pars(cpp11::sexp ptr,
 
 template <typename T>
 cpp11::sexp dust2_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
-                               bool save_history, bool adjoint,
+                               bool save_trajectories, bool adjoint,
                                cpp11::sexp r_index_state,
                                cpp11::sexp r_index_group,
                                bool preserve_particle_dimension,
@@ -37,10 +37,10 @@ cpp11::sexp dust2_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
     set_state(obj->sys, cpp11::as_cpp<cpp11::list>(r_initial));
   }
   if (adjoint) {
-    obj->run_adjoint(r_initial == R_NilValue, save_history, index_state,
+    obj->run_adjoint(r_initial == R_NilValue, save_trajectories, index_state,
                      index_group);
   } else {
-    obj->run(r_initial == R_NilValue, save_history, index_state, index_group);
+    obj->run(r_initial == R_NilValue, save_trajectories, index_state, index_group);
   }
 
   const auto n_groups = index_group.size();
@@ -58,29 +58,29 @@ cpp11::sexp dust2_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
 }
 
 template <typename T>
-cpp11::sexp dust2_unfilter_last_history(cpp11::sexp ptr,
-                                        bool select_random_particle,
-                                        bool preserve_particle_dimension,
-                                        bool preserve_group_dimension) {
+cpp11::sexp dust2_unfilter_last_trajectories(cpp11::sexp ptr,
+                                             bool select_random_particle,
+                                             bool preserve_particle_dimension,
+                                             bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
 
-  const auto& history = obj->last_history();
-  const auto& is_current = obj->last_history_is_current();
+  const auto& trajectories = obj->last_trajectories();
+  const auto& is_current = obj->last_trajectories_are_current();
   if (!tools::any(is_current)) {
-    cpp11::stop("History is not current");
+    cpp11::stop("Trajectories are not current");
   }
 
   constexpr bool reorder = false; // never needed
 
-  const auto n_state = history.n_state(); // might be filtered
-  const auto n_particles = history.n_particles();
-  const auto n_groups = history.n_groups();
-  const auto n_times = history.n_times();
+  const auto n_state = trajectories.n_state(); // might be filtered
+  const auto n_particles = trajectories.n_particles();
+  const auto n_groups = trajectories.n_groups();
+  const auto n_times = trajectories.n_times();
 
   const auto len = n_state * n_particles * n_groups * n_times;
   cpp11::sexp ret = cpp11::writable::doubles(len);
-  history.export_state(REAL(ret), reorder, {});
+  trajectories.export_state(REAL(ret), reorder, {});
   if (preserve_group_dimension && preserve_particle_dimension) {
     set_array_dims(ret, {n_state, n_particles, n_groups, n_times});
   } else if (preserve_group_dimension || preserve_particle_dimension) {

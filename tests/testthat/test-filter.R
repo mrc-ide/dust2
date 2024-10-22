@@ -36,7 +36,7 @@ test_that("can only use pars = NULL on initialised filter", {
 })
 
 
-test_that("can run particle filter and save history", {
+test_that("can run particle filter and save trajectories", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
 
   time_start <- 0
@@ -47,29 +47,32 @@ test_that("can run particle filter and save history", {
 
   obj <- dust_filter_create(sir(), time_start, data,
                             n_particles = n_particles, seed = seed)
-  expect_error(dust_likelihood_last_history(obj), "History is not current")
+  expect_error(dust_likelihood_last_trajectories(obj),
+               "Trajectories are not current")
   res1 <- dust_likelihood_run(obj, pars)
-  expect_error(dust_likelihood_last_history(obj), "History is not current")
-  res2 <- dust_likelihood_run(obj, NULL, save_history = TRUE)
-  h2 <- dust_likelihood_last_history(obj)
+  expect_error(dust_likelihood_last_trajectories(obj),
+               "Trajectories are not current")
+  res2 <- dust_likelihood_run(obj, NULL, save_trajectories = TRUE)
+  h2 <- dust_likelihood_last_trajectories(obj)
   expect_equal(dim(h2), c(5, 100, 4))
   res3 <- dust_likelihood_run(obj, NULL)
-  expect_error(dust_likelihood_last_history(obj), "History is not current")
+  expect_error(dust_likelihood_last_trajectories(obj),
+               "Trajectories are not current")
 
   cmp_filter <- sir_filter_manual(
     pars, time_start, data, dt, n_particles, seed)
   cmp1 <- cmp_filter(NULL)
-  cmp2 <- cmp_filter(NULL, save_history = TRUE)
+  cmp2 <- cmp_filter(NULL, save_trajectories = TRUE)
   cmp3 <- cmp_filter(NULL)
 
   expect_equal(res1, cmp1$log_likelihood)
   expect_equal(res2, cmp2$log_likelihood)
   expect_equal(res3, cmp3$log_likelihood)
-  expect_equal(h2, cmp2$history)
+  expect_equal(h2, cmp2$trajectories)
 })
 
 
-test_that("can get partial filter history", {
+test_that("can get partial filter trajectories", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
 
   time_start <- 0
@@ -83,11 +86,12 @@ test_that("can get partial filter history", {
                              n_particles = n_particles, seed = seed)
 
   expect_equal(
-    dust_likelihood_run(obj1, pars, save_history = TRUE),
-    dust_likelihood_run(obj2, pars, save_history = TRUE, index_state = c(2, 4)))
+    dust_likelihood_run(obj1, pars, save_trajectories = TRUE),
+    dust_likelihood_run(obj2, pars, save_trajectories = TRUE,
+                        index_state = c(2, 4)))
 
-  h1 <- dust_likelihood_last_history(obj1)
-  h2 <- dust_likelihood_last_history(obj2)
+  h1 <- dust_likelihood_last_trajectories(obj1)
+  h2 <- dust_likelihood_last_trajectories(obj2)
   expect_equal(dim(h1), c(5, 100, 4))
   expect_equal(dim(h2), c(2, 100, 4))
   expect_equal(h2, h1[c(2, 4), , , drop = FALSE])
@@ -118,7 +122,7 @@ test_that("can run a nested particle filter and get the same result", {
 
   expect_true(obj$preserve_group_dimension)
 
-  res <- replicate(20, dust_likelihood_run(obj, pars, save_history = TRUE))
+  res <- replicate(20, dust_likelihood_run(obj, pars, save_trajectories = TRUE))
 
   ## now compare
   data1 <- data[data$group == 1, -2]
@@ -126,7 +130,8 @@ test_that("can run a nested particle filter and get the same result", {
                              n_particles = n_particles, seed = seed)
   s1 <- dust_likelihood_rng_state(obj1)
   res1 <- replicate(20,
-                    dust_likelihood_run(obj1, pars[[1]], save_history = TRUE))
+                    dust_likelihood_run(obj1, pars[[1]],
+                                        save_trajectories = TRUE))
   expect_equal(res1, res[1, ])
   expect_equal(s1, s[1:3232])
 
@@ -136,14 +141,15 @@ test_that("can run a nested particle filter and get the same result", {
                              n_particles = n_particles, seed = seed2)
   s2 <- dust_likelihood_rng_state(obj2)
   res2 <- replicate(20,
-                    dust_likelihood_run(obj2, pars[[2]], save_history = TRUE))
+                    dust_likelihood_run(obj2, pars[[2]],
+                                        save_trajectories = TRUE))
   expect_equal(res2, res[2, ])
   expect_equal(s2, s[3233:6464])
 
-  h <- dust_likelihood_last_history(obj)
+  h <- dust_likelihood_last_trajectories(obj)
   expect_equal(dim(h), c(5, 100, 2, 4))
-  expect_equal(h[, , 1, ], dust_likelihood_last_history(obj1))
-  expect_equal(h[, , 2, ], dust_likelihood_last_history(obj2))
+  expect_equal(h[, , 1, ], dust_likelihood_last_trajectories(obj1))
+  expect_equal(h[, , 2, ], dust_likelihood_last_trajectories(obj2))
 })
 
 
@@ -319,16 +325,16 @@ test_that("can extract a state-filtered subset of an filter run", {
   expect_true(dust_likelihood_ensure_initialised(obj2, pars))
 
   ll1 <- dust_likelihood_run(obj1, pars, index_state = c(1, 3, 5),
-                             save_history = TRUE)
-  h1 <- dust_likelihood_last_history(obj1)
+                             save_trajectories = TRUE)
+  h1 <- dust_likelihood_last_trajectories(obj1)
 
   ll2a <- dust_likelihood_run(obj2, pars[1], index_state = c(1, 3, 5),
-                              index_group = 1, save_history = TRUE)
-  h2a <- dust_likelihood_last_history(obj2)
+                              index_group = 1, save_trajectories = TRUE)
+  h2a <- dust_likelihood_last_trajectories(obj2)
 
   ll2b <- dust_likelihood_run(obj2, pars[2], index_state = c(1, 3, 5),
-                              index_group = 2, save_history = TRUE)
-  h2b <- dust_likelihood_last_history(obj2)
+                              index_group = 2, save_trajectories = TRUE)
+  h2b <- dust_likelihood_last_trajectories(obj2)
 
   expect_equal(ll2a, ll1[[1]])
   expect_equal(ll2b, ll1[[2]])
@@ -354,26 +360,26 @@ test_that("can run a subset of an filter", {
   obj1 <- dust_filter_create(sir(), time_start, data, n_particles = 100,
                              seed = 42)
   ll0 <- dust_likelihood_run(obj1, pars0)
-  ll1 <- dust_likelihood_run(obj1, pars1, save_history = TRUE)
-  h1 <- dust_likelihood_last_history(obj1)
-  ll2 <- dust_likelihood_run(obj1, pars1, save_history = TRUE)
-  h2 <- dust_likelihood_last_history(obj1)
+  ll1 <- dust_likelihood_run(obj1, pars1, save_trajectories = TRUE)
+  h1 <- dust_likelihood_last_trajectories(obj1)
+  ll2 <- dust_likelihood_run(obj1, pars1, save_trajectories = TRUE)
+  h2 <- dust_likelihood_last_trajectories(obj1)
 
   obj2 <- dust_filter_create(sir(), time_start, data, n_particles = 100,
                              seed = 42)
   ll0 <- dust_likelihood_run(obj2, pars0)
   expect_equal(
     dust_likelihood_run(obj2, pars1[3:1], index_group = 3:1,
-                        save_history = TRUE),
+                        save_trajectories = TRUE),
     rev(ll1))
 
-  expect_equal(dust_likelihood_last_history(obj2),
+  expect_equal(dust_likelihood_last_trajectories(obj2),
                h1[, , 3:1, ])
 
   for (i in 1:3) {
     ll_i <- dust_likelihood_run(obj2, pars1[i], index_group = i,
-                            save_history = TRUE)
-    expect_equal(dust_likelihood_last_history(obj2),
+                            save_trajectories = TRUE)
+    expect_equal(dust_likelihood_last_trajectories(obj2),
                  h2[, , i, , drop = FALSE])
   }
 })
@@ -487,12 +493,12 @@ test_that("can extract random trajectory", {
   obj2 <- dust_filter_create(sir(), time_start, data,
                              n_particles = n_particles, seed = seed)
 
-  ll1 <- dust_likelihood_run(obj1, pars, save_history = TRUE)
-  ll2 <- dust_likelihood_run(obj2, pars, save_history = TRUE)
+  ll1 <- dust_likelihood_run(obj1, pars, save_trajectories = TRUE)
+  ll2 <- dust_likelihood_run(obj2, pars, save_trajectories = TRUE)
   expect_identical(ll1, ll2)
 
-  h1 <- dust_likelihood_last_history(obj1)
-  h2 <- dust_likelihood_last_history(obj2, select_random_particle = TRUE)
+  h1 <- dust_likelihood_last_trajectories(obj1)
+  h2 <- dust_likelihood_last_trajectories(obj2, select_random_particle = TRUE)
   expect_equal(dim(h1), c(5, 100, 3, 10))
   expect_equal(dim(h2), c(5, 3, 10))
 
@@ -504,7 +510,7 @@ test_that("can extract random trajectory", {
   expect_gt(length(unique(row(hash1)[i])), 1)
 
   expect_identical(
-    dust_likelihood_last_history(obj2, select_random_particle = TRUE),
+    dust_likelihood_last_trajectories(obj2, select_random_particle = TRUE),
     h2)
 })
 
@@ -515,8 +521,8 @@ test_that("can extract final state from a filter", {
   data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
   obj <- dust_filter_create(sir(), time_start, data, n_particles = 10)
 
-  dust_likelihood_run(obj, pars, save_history = TRUE)
-  h <- dust_likelihood_last_history(obj)
+  dust_likelihood_run(obj, pars, save_trajectories = TRUE)
+  h <- dust_likelihood_last_trajectories(obj)
   s <- dust_likelihood_last_state(obj)
   expect_equal(dim(s), c(5, 10))
   expect_equal(s, h[, , 4])
@@ -524,8 +530,9 @@ test_that("can extract final state from a filter", {
   expect_equal(names(dust_unpack_state(obj, s)),
                c("S", "I", "R", "cases_cumul", "cases_inc"))
 
-  dust_likelihood_run(obj, pars, save_history = FALSE)
-  expect_error(dust_likelihood_last_history(obj), "History is not current")
+  dust_likelihood_run(obj, pars, save_trajectories = FALSE)
+  expect_error(dust_likelihood_last_trajectories(obj),
+               "Trajectories are not current")
   expect_no_error(dust_likelihood_last_state(obj))
 })
 
@@ -536,8 +543,8 @@ test_that("can extract final state from a filter, ignoring state index", {
   data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
   obj <- dust_filter_create(sir(), time_start, data, n_particles = 10)
 
-  dust_likelihood_run(obj, pars, index_state = 1:3, save_history = TRUE)
-  h <- dust_likelihood_last_history(obj)
+  dust_likelihood_run(obj, pars, index_state = 1:3, save_trajectories = TRUE)
+  h <- dust_likelihood_last_trajectories(obj)
   s <- dust_likelihood_last_state(obj)
   expect_equal(s[1:3, ], h[, , 4])
   expect_equal(dim(s), c(5, 10))
@@ -556,18 +563,19 @@ test_that("can extract final state from grouped filter", {
                      incidence = 1:12)
 
   obj <- dust_filter_create(sir(), time_start, data, n_particles = 10)
-  dust_likelihood_run(obj, pars, save_history = TRUE)
-  h <- dust_likelihood_last_history(obj)
+  dust_likelihood_run(obj, pars, save_trajectories = TRUE)
+  h <- dust_likelihood_last_trajectories(obj)
   s <- dust_likelihood_last_state(obj)
   expect_equal(s, h[, , , 4])
 
-  dust_likelihood_run(obj, pars, save_history = FALSE)
-  expect_error(dust_likelihood_last_history(obj), "History is not current")
+  dust_likelihood_run(obj, pars, save_trajectories = FALSE)
+  expect_error(dust_likelihood_last_trajectories(obj),
+               "Trajectories are not current")
   expect_no_error(dust_likelihood_last_state(obj))
 })
 
 
-test_that("can extract a random particle from the history", {
+test_that("can extract a random particle from the trajectories", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
   time_start <- 0
   data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
@@ -617,7 +625,7 @@ test_that("can extract a random particle from a nested filter", {
 
   obj <- dust_filter_create(sir(), time_start, data, n_particles = 100,
                             seed = 42)
-  dust_likelihood_run(obj, pars, save_history = TRUE)
+  dust_likelihood_run(obj, pars, save_trajectories = TRUE)
   s1 <- dust_likelihood_last_state(obj)
   s2 <- dust_likelihood_last_state(obj, select_random_particle = TRUE)
 

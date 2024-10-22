@@ -15,12 +15,12 @@
 ##'   particle) or 3d array (state x particle x group).  If not
 ##'   provided, the system initial conditions are used.
 ##'
-##' @param save_history Logical, indicating if the simulation history
-##'   should be saved while the simulation runs; this has a small
-##'   overhead in runtime and in memory.  History (particle
-##'   trajectories) will be saved at each time for which you have
-##'   data.  If `obj` was constructed using a non-`NULL` `index_state`
-##'   parameter, the history is restricted to these states.
+##' @param save_trajectories Logical, indicating if the trajectories
+##'   from the simulation history should be saved while the simulation
+##'   runs; this has a small overhead in runtime and in memory.
+##'   Particle trajectories will be saved at each time for which you
+##'   have data.  If `index_state` is non-`NULL`, the trajectories are
+##'   limited to these states.
 ##'
 ##' @param adjoint Optional logical, indicating if we should enable
 ##'   adjoint history saving. This is enabled by default if your model
@@ -30,8 +30,8 @@
 ##'   no effect for stochastic models.
 ##'
 ##' @param index_state An optional vector of state indices to save
-##'   where `save_history` is `TRUE`.  If omitted all state is saved
-##'   and if `save_history = FALSE` this has no effect.
+##'   where `save_trajectories` is `TRUE`.  If omitted all state is saved
+##'   and if `save_trajectories = FALSE` this has no effect.
 ##'
 ##' @param index_group An optional vector of group indices to run the
 ##'   calculation for.  You can use this to run a subset of possible
@@ -43,7 +43,7 @@
 ##'
 ##' @export
 dust_likelihood_run <- function(obj, pars, initial = NULL,
-                                save_history = FALSE,
+                                save_trajectories = FALSE,
                                 adjoint = NULL,
                                 index_state = NULL,
                                 index_group = NULL) {
@@ -93,7 +93,7 @@ dust_likelihood_run <- function(obj, pars, initial = NULL,
   }
   obj$methods$run(obj$ptr,
                   initial,
-                  save_history,
+                  save_trajectories,
                   adjoint,
                   index_state,
                   index_group,
@@ -143,23 +143,23 @@ dust_likelihood_copy <- function(obj, seed = NULL) {
 }
 
 
-##' Fetch the last history created by running a likelihood.  This
+##' Fetch the last trajectories created by running a likelihood.  This
 ##' errors if the last call to [dust_likelihood_run] did not use
-##' `save_history = TRUE`.  We return the states and groups that were
-##' run via the `index_state` and `index_group` arguments to
+##' `save_trajectories = TRUE`.  We return the states and groups that
+##' were run via the `index_state` and `index_group` arguments to
 ##' [dust_likelihood_run].
 ##'
-##' @title Fetch last likelihood history
+##' @title Fetch last likelihood trajectories
 ##'
 ##' @inheritParams dust_likelihood_run
 ##'
 ##' @param select_random_particle Logical, indicating if we should
 ##'   return a history for one randomly selected particle (rather than
-##'   the entire history).  If this is `TRUE`, the particle will be
-##'   selected independently for each group, if the object is grouped.
-##'   This option is intended to help select a representative
-##'   trajectory during an MCMC.  When `TRUE`, we drop the `particle`
-##'   dimension of the return value.
+##'   the entire set of trajectories over all particles).  If this is
+##'   `TRUE`, the particle will be selected independently for each
+##'   group, if the object is grouped.  This option is intended to
+##'   help select a representative trajectory during an MCMC.  When
+##'   `TRUE`, we drop the `particle` dimension of the return value.
 ##'
 ##' @return An array.  If ungrouped this will have dimensions `state`
 ##'   x `particle` x `time`, and if grouped then `state` x `particle`
@@ -167,18 +167,19 @@ dust_likelihood_copy <- function(obj, seed = NULL) {
 ##'   second (particle) dimension will be dropped.
 ##'
 ##' @export
-dust_likelihood_last_history <- function(obj, select_random_particle = FALSE) {
+dust_likelihood_last_trajectories <- function(obj,
+                                              select_random_particle = FALSE) {
   check_is_dust_likelihood(obj)
   if (is.null(obj$ptr)) {
     cli::cli_abort(c(
-      "History is not current",
+      "Trajectories are not current",
       i = "Likelihood has not yet been run"))
   }
   assert_scalar_logical(select_random_particle)
-  obj$methods$last_history(obj$ptr,
-                           select_random_particle,
-                           obj$preserve_particle_dimension,
-                           obj$preserve_group_dimension)
+  obj$methods$last_trajectories(obj$ptr,
+                                select_random_particle,
+                                obj$preserve_particle_dimension,
+                                obj$preserve_group_dimension)
 }
 
 
@@ -186,13 +187,13 @@ dust_likelihood_last_history <- function(obj, select_random_particle = FALSE) {
 ##'
 ##' @title Get likelihood state
 ##'
-##' @inheritParams dust_likelihood_last_history
+##' @inheritParams dust_likelihood_last_trajectories
 ##'
 ##' @return An array.  If ungrouped this will have dimensions `state`
 ##'   x `particle`, and if grouped then `state` x `particle` x
 ##'   `group`.  If `select_random_particle = TRUE`, the second
 ##'   (particle) dimension will be dropped.  This is the same as the
-##'   state returned by [dust_likelihood_last_history] without the time
+##'   state returned by [dust_likelihood_last_trajectories] without the time
 ##'   dimension but also without any state index applied (i.e., we
 ##'   always return all state).
 ##'
@@ -201,7 +202,7 @@ dust_likelihood_last_state <- function(obj, select_random_particle = FALSE) {
   check_is_dust_likelihood(obj)
   if (is.null(obj$ptr)) {
     cli::cli_abort(c(
-      "History is not current",
+      "State is not current",
       i = "Likelihood has not yet been run"))
   }
   assert_scalar_logical(select_random_particle)
