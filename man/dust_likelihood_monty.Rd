@@ -11,7 +11,7 @@ dust_likelihood_monty(
   domain = NULL,
   failure_is_impossible = FALSE,
   save_state = FALSE,
-  save_history = FALSE
+  save_trajectories = FALSE
 )
 }
 \arguments{
@@ -49,7 +49,7 @@ on that parameter set and continuing is the best option.}
 \item{save_state}{Logical, indicating if the state should be saved
 at the time series.}
 
-\item{save_history}{Logical, indicating if particle trajectories
+\item{save_trajectories}{Logical, indicating if particle trajectories
 should be saved.  This can also be a character vector indicating
 the logical compartments, or an integer vector being an index
 into the state.}

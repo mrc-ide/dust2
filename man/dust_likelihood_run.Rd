@@ -8,7 +8,7 @@ dust_likelihood_run(
   obj,
   pars,
   initial = NULL,
-  save_history = FALSE,
+  save_trajectories = FALSE,
   adjoint = NULL,
   index_state = NULL,
   index_group = NULL
@@ -26,12 +26,12 @@ If not provided, parameters are not updated}
 particle) or 3d array (state x particle x group).  If not
 provided, the system initial conditions are used.}
 
-\item{save_history}{Logical, indicating if the simulation history
-should be saved while the simulation runs; this has a small
-overhead in runtime and in memory.  History (particle
-trajectories) will be saved at each time for which you have
-data.  If \code{obj} was constructed using a non-\code{NULL} \code{index_state}
-parameter, the history is restricted to these states.}
+\item{save_trajectories}{Logical, indicating if the trajectories
+from the simulation history should be saved while the simulation
+runs; this has a small overhead in runtime and in memory.
+Particle trajectories will be saved at each time for which you
+have data.  If \code{index_state} is non-\code{NULL}, the trajectories are
+limited to these states.}
 
 \item{adjoint}{Optional logical, indicating if we should enable
 adjoint history saving. This is enabled by default if your model
@@ -41,8 +41,8 @@ an adjoint you will not be able to compute gradients.  This has
 no effect for stochastic models.}
 
 \item{index_state}{An optional vector of state indices to save
-where \code{save_history} is \code{TRUE}.  If omitted all state is saved
-and if \code{save_history = FALSE} this has no effect.}
+where \code{save_trajectories} is \code{TRUE}.  If omitted all state is saved
+and if \code{save_trajectories = FALSE} this has no effect.}
 
 \item{index_group}{An optional vector of group indices to run the
 calculation for.  You can use this to run a subset of possible
