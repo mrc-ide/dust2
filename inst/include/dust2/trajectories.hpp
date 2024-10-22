@@ -8,9 +8,9 @@
 namespace dust2 {
 
 template <typename real_type>
-class history {
+class trajectories {
 public:
-  history(size_t n_state, size_t n_particles, size_t n_groups, size_t n_times) :
+  trajectories(size_t n_state, size_t n_particles, size_t n_groups, size_t n_times) :
     n_state_(n_state),
     n_state_total_(n_state),
     n_particles_(n_particles),

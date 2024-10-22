@@ -126,18 +126,18 @@ abline(v = ll_k, col = "red", lty = 2, lwd = 2)
 abline(v = range(ll), col = "orange", lty = 3, lwd = 2)
 ```
 
-If you run a particle filter with `save_history = TRUE`, it will record the (filtered) trajectories, which you can then extract with `dust_filter_last_history()`:
+If you run a particle filter with `save_trajectories = TRUE`, it will record the (filtered) trajectories, which you can then extract with `dust_filter_last_trajectories()`:
 
 ```{r}
-dust_likelihood_run(filter, pars, save_history = TRUE)
-history <- dust_likelihood_last_history(filter)
-dim(history)
+dust_likelihood_run(filter, pars, save_trajectories = TRUE)
+trajectories <- dust_likelihood_last_trajectories(filter)
+dim(trajectories)
 ```
 
 This is a `n_state` (here 1) x `n_particles` (1000) x `n_time` (100) 3d array, but we will drop the first rank of this for plotting, and transpose so that time is the first axis:
 
 ```{r}
-matplot(data$time, t(drop(history)), xlab = "Time", ylab = "Value",
+matplot(data$time, t(drop(trajectories)), xlab = "Time", ylab = "Value",
         las = 1, type = "l", lty = 1, col = "#00000002")
 points(observed ~ time, data, col = "red", pch = 19)
 ```

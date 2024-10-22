@@ -74,7 +74,7 @@
 ##' @param save_state Logical, indicating if the state should be saved
 ##'   at the time series.
 ##'
-##' @param save_history Logical, indicating if particle trajectories
+##' @param save_trajectories Logical, indicating if particle trajectories
 ##'   should be saved.  This can also be a character vector indicating
 ##'   the logical compartments, or an integer vector being an index
 ##'   into the state.
@@ -85,14 +85,13 @@
 dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
                                   failure_is_impossible = FALSE,
                                   save_state = FALSE,
-                                  save_history = FALSE) {
-  call <- environment()
-  assert_is(obj, "dust_likelihood", call = call)
-  assert_is(packer, "monty_packer", call = call)
+                                  save_trajectories = FALSE) {
+  assert_is(obj, "dust_likelihood")
+  assert_is(packer, "monty_packer")
 
   domain <- monty::monty_domain_expand(domain, packer)
-  save_history <- validate_save_history(save_history, call = call)
-  observer <- dust_observer(obj, save_state, save_history$enabled)
+  save_trajectories <- validate_save_trajectories(save_trajectories)
+  observer <- dust_observer(obj, save_state, save_trajectories$enabled)
 
   ## We configure saving trajectories on creation I think, which then
   ## affects density.  Start without trajectories?  Realistically
@@ -132,19 +131,19 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
     density <- function(x) {
       pars <- packer_unpack(packer, x)
       was_uninitialised <- dust_likelihood_ensure_initialised(obj, pars)
-      needs_history_index <- was_uninitialised &&
-        save_history$enabled && !is.null(save_history$subset)
-      if (needs_history_index) {
-        env$save_history$index <-
-          obj$packer_state$subset(save_history$subset)$index
+      needs_trajectories_index <- was_uninitialised &&
+        save_trajectories$enabled && !is.null(save_trajectories$subset)
+      if (needs_trajectories_index) {
+        env$save_trajectories$index <-
+          obj$packer_state$subset(save_trajectories$subset)$index
       }
       if (!identical(x, attr(obj$ptr, "last_pars"))) {
         ret <- dust_likelihood_run(
           obj,
           pars,
           initial = if (is.null(initial)) NULL else initial(pars),
-          save_history = save_history$enabled,
-          index_state = save_history$index)
+          save_trajectories = save_trajectories$enabled,
+          index_state = save_trajectories$index)
         attr(obj$ptr, "last_density") <- ret
         attr(obj$ptr, "last_gradient") <- NULL
       }
@@ -165,18 +164,18 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
     density <- function(x) {
       pars <- packer_unpack(packer, x)
       was_uninitialised <- dust_likelihood_ensure_initialised(obj, pars)
-      needs_history_index <- was_uninitialised &&
-        save_history$enabled && !is.null(save_history$subset)
-      if (needs_history_index) {
-        env$save_history$index <-
-          obj$packer_state$subset(save_history$subset)$index
+      needs_trajectories_index <- was_uninitialised &&
+        save_trajectories$enabled && !is.null(save_trajectories$subset)
+      if (needs_trajectories_index) {
+        env$save_trajectories$index <-
+          obj$packer_state$subset(save_trajectories$subset)$index
       }
       dust_likelihood_run(
         obj,
         pars,
         initial = if (is.null(initial)) NULL else initial(pars),
-        save_history = save_history$enabled,
-        index_state = save_history$index)
+        save_trajectories = save_trajectories$enabled,
+        index_state = save_trajectories$index)
     }
   }
 
@@ -231,31 +230,32 @@ packer_unpack <- function(packer, x) {
 }
 
 
-validate_save_history <- function(save_history, call = parent.frame()) {
-  if (isFALSE(save_history)) {
+validate_save_trajectories <- function(save_trajectories,
+                                       call = parent.frame()) {
+  if (isFALSE(save_trajectories)) {
     return(list(enabled = FALSE))
   }
 
-  if (isTRUE(save_history)) {
+  if (isTRUE(save_trajectories)) {
     return(list(enabled = TRUE, index = NULL, subset = NULL))
   }
 
-  if (!is.character(save_history)) {
+  if (!is.character(save_trajectories)) {
     cli::cli_abort(
-      paste("Invalid value for 'save_history', expected a scalar",
+      paste("Invalid value for 'save_trajectories', expected a scalar",
             "logical or a character vector"),
-      arg = "save_history", call = call)
+      arg = "save_trajectories", call = call)
   }
 
-  list(enabled = TRUE, index = NULL, subset = save_history)
+  list(enabled = TRUE, index = NULL, subset = save_trajectories)
 }
 
 
-dust_observer <- function(obj, save_state, save_history,
+dust_observer <- function(obj, save_state, save_trajectories,
                           call = parent.frame()) {
   assert_scalar_logical(save_state, call = call)
 
-  if (!save_history && !save_state) {
+  if (!save_trajectories && !save_state) {
     return(NULL)
   }
 
@@ -266,8 +266,8 @@ dust_observer <- function(obj, save_state, save_history,
         obj, select_random_particle = TRUE)
     }
 
-    if (save_history) {
-      ret$history <- dust_likelihood_last_history(
+    if (save_trajectories) {
+      ret$trajectories <- dust_likelihood_last_trajectories(
         obj,
         select_random_particle = TRUE)
     }

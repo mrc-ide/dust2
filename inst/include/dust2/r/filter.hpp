@@ -21,7 +21,7 @@ cpp11::sexp dust2_filter_update_pars(cpp11::sexp ptr,
 
 template <typename T>
 cpp11::sexp dust2_filter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
-                             bool save_history, bool adjoint,
+                             bool save_trajectories, bool adjoint,
                              cpp11::sexp r_index_state,
                              cpp11::sexp r_index_group,
                              bool preserve_particle_dimension,
@@ -36,7 +36,7 @@ cpp11::sexp dust2_filter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
   if (r_initial != R_NilValue) {
     set_state(obj->sys, cpp11::as_cpp<cpp11::list>(r_initial));
   }
-  obj->run(r_initial == R_NilValue, save_history, index_state, index_group);
+  obj->run(r_initial == R_NilValue, save_trajectories, index_state, index_group);
 
   const auto& ll = obj->last_log_likelihood();
   cpp11::writable::doubles ret(index_group.size());
@@ -51,34 +51,34 @@ cpp11::sexp dust2_filter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
 // We might accept index_state here too later, allowing subsetting and
 // validation of the index used.
 template <typename T>
-cpp11::sexp dust2_filter_last_history(cpp11::sexp ptr,
-                                      bool select_random_particle,
-                                      bool preserve_particle_dimension,
-                                      bool preserve_group_dimension) {
+cpp11::sexp dust2_filter_last_trajectories(cpp11::sexp ptr,
+                                           bool select_random_particle,
+                                           bool preserve_particle_dimension,
+                                           bool preserve_group_dimension) {
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
 
-  const auto& history = obj->last_history();
-  const auto& is_current = obj->last_history_is_current();
+  const auto& trajectories = obj->last_trajectories();
+  const auto& is_current = obj->last_trajectories_are_current();
   if (!tools::any(is_current)) {
-    cpp11::stop("History is not current");
+    cpp11::stop("Trajectories are not current");
   }
 
   // We might relax this later, but will require some tools to work
   // with the output, really.
   constexpr bool reorder = true;
 
-  const auto n_state = history.n_state(); // might be filtered
-  const auto n_particles = select_random_particle ? 1 : history.n_particles();
-  const auto n_groups = history.n_groups();
-  const auto n_times = history.n_times();
+  const auto n_state = trajectories.n_state(); // might be filtered
+  const auto n_particles = select_random_particle ? 1 : trajectories.n_particles();
+  const auto n_groups = trajectories.n_groups();
+  const auto n_times = trajectories.n_times();
 
   const auto& index_particle = select_random_particle ?
-    obj->select_random_particle(history.index_group()) : std::vector<size_t>{};
+    obj->select_random_particle(trajectories.index_group()) : std::vector<size_t>{};
 
   const auto len = n_state * n_particles * n_groups * n_times;
   cpp11::sexp ret = cpp11::writable::doubles(len);
-  history.export_state(REAL(ret), reorder, index_particle);
+  trajectories.export_state(REAL(ret), reorder, index_particle);
   if (select_random_particle) {
     if (preserve_group_dimension) {
       set_array_dims(ret, {n_state, n_particles * n_groups, n_times});

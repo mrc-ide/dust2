@@ -119,7 +119,7 @@ test_that("can get trajectories from model", {
   packer <- monty::monty_packer(
     c("beta", "gamma"),
     fixed = list(N = 1000, I0 = 10, exp_noise = 1e6))
-  m <- dust_likelihood_monty(obj, packer, save_history = TRUE)
+  m <- dust_likelihood_monty(obj, packer, save_trajectories = TRUE)
   expect_true(m$properties$has_observer)
 
   prior <- monty::monty_dsl({
@@ -133,8 +133,8 @@ test_that("can get trajectories from model", {
   res <- monty::monty_sample(posterior, sampler, 27, initial = c(.2, .1),
                              n_chains = 3)
 
-  expect_equal(names(res$observations), "history")
-  expect_equal(dim(res$observations$history), c(5, 4, 27, 3))
+  expect_equal(names(res$observations), "trajectories")
+  expect_equal(dim(res$observations$trajectories), c(5, 4, 27, 3))
 })
 
 
@@ -156,21 +156,22 @@ test_that("can subset trajectories from model", {
   sampler <- monty::monty_sampler_random_walk(diag(2) * c(0.02, 0.02))
 
   set.seed(1)
-  m1 <- dust_likelihood_monty(obj, packer, save_history = c("I", "cases_inc"))
+  m1 <- dust_likelihood_monty(obj, packer,
+                              save_trajectories = c("I", "cases_inc"))
   p1 <- m1 + prior
   res1 <- monty::monty_sample(p1, sampler, 13, initial = c(.2, .1),
                               n_chains = 3)
 
   set.seed(1)
-  m2 <- dust_likelihood_monty(obj, packer, save_history = TRUE)
+  m2 <- dust_likelihood_monty(obj, packer, save_trajectories = TRUE)
   p2 <- m2 + prior
   res2 <- monty::monty_sample(p2, sampler, 13, initial = c(.2, .1),
                               n_chains = 3)
 
-  expect_equal(dim(res1$observations$history), c(2, 4, 13, 3))
-  expect_equal(res1$observations$history,
-               res2$observations$history[c(2, 5), , , ])
-  expect_equal(names(res1$observations), "history")
+  expect_equal(dim(res1$observations$trajectories), c(2, 4, 13, 3))
+  expect_equal(res1$observations$trajectories,
+               res2$observations$trajectories[c(2, 5), , , ])
+  expect_equal(names(res1$observations), "trajectories")
 })
 
 
@@ -219,24 +220,24 @@ test_that("can record both state and trajectories", {
 
   set.seed(1)
   m <- dust_likelihood_monty(obj, packer, save_state = TRUE,
-                             save_history = TRUE)
+                             save_trajectories = TRUE)
   expect_true(m$properties$has_observer)
   res <- monty::monty_sample(m + prior, sampler, 13, n_chains = 3)
-  expect_equal(names(res$observations), c("state", "history"))
+  expect_equal(names(res$observations), c("state", "trajectories"))
   expect_equal(dim(res$observations$state), c(5, 13, 3))
-  expect_equal(dim(res$observations$history), c(5, 4, 13, 3))
-  expect_equal(res$observations$state, res$observations$history[, 4, , ])
+  expect_equal(dim(res$observations$trajectories), c(5, 4, 13, 3))
+  expect_equal(res$observations$state, res$observations$trajectories[, 4, , ])
 })
 
 
-test_that("validate request to save history", {
-  expect_equal(validate_save_history(FALSE), list(enabled = FALSE))
-  expect_equal(validate_save_history(TRUE),
+test_that("validate request to save trajectories", {
+  expect_equal(validate_save_trajectories(FALSE), list(enabled = FALSE))
+  expect_equal(validate_save_trajectories(TRUE),
                list(enabled = TRUE, index = NULL, subset = NULL))
-  expect_error(validate_save_history(NULL),
-               "Invalid value for 'save_history'")
-  expect_error(validate_save_history(1:3),
-               "Invalid value for 'save_history'")
-  expect_equal(validate_save_history(c("a", "b")),
+  expect_error(validate_save_trajectories(NULL),
+               "Invalid value for 'save_trajectories'")
+  expect_error(validate_save_trajectories(1:3),
+               "Invalid value for 'save_trajectories'")
+  expect_equal(validate_save_trajectories(c("a", "b")),
                list(enabled = TRUE, index = NULL, subset = c("a", "b")))
 })

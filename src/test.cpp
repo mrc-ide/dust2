@@ -1,5 +1,5 @@
 #include <dust2/filter_details.hpp>
-#include <dust2/history.hpp>
+#include <dust2/trajectories.hpp>
 #include <dust2/r/helpers.hpp>
 
 #include <cpp11/integers.hpp>
@@ -22,16 +22,16 @@ cpp11::list test_scale_log_weights(std::vector<double> w) {
   return cpp11::writable::list{cpp11::as_sexp(res), cpp11::as_sexp(w)};
 }
 
-// Simple driver for exercising the history saving outside of any
+// Simple driver for exercising the trajectory saving outside of any
 // particle filter.
 [[cpp11::register]]
-cpp11::sexp test_history_(cpp11::doubles r_time,
-                          cpp11::list r_state,
-                          cpp11::sexp r_order,
-                          cpp11::sexp r_index_state,
-                          cpp11::sexp r_index_group,
-                          cpp11::sexp r_select_particle,
-                          bool reorder) {
+cpp11::sexp test_trajectories_(cpp11::doubles r_time,
+                               cpp11::list r_state,
+                               cpp11::sexp r_order,
+                               cpp11::sexp r_index_state,
+                               cpp11::sexp r_index_group,
+                               cpp11::sexp r_select_particle,
+                               bool reorder) {
   const size_t n_times = r_time.size();
   cpp11::sexp el0 = r_state[0];
   auto r_dim = cpp11::as_cpp<cpp11::integers>(el0.attr("dim"));
@@ -57,7 +57,7 @@ cpp11::sexp test_history_(cpp11::doubles r_time,
                                             "select_particle");
   }
 
-  dust2::history<double> h(n_state, n_particles, n_groups, n_times);
+  dust2::trajectories<double> h(n_state, n_particles, n_groups, n_times);
   h.set_index_and_reset(index_state, index_group);
   for (size_t i = 0; i < static_cast<size_t>(r_state.size()); ++i) {
     if (r_order == R_NilValue) {

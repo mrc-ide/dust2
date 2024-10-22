@@ -98,18 +98,20 @@ test_that("can compute multiple gradients at once", {
 })
 
 
-test_that("can save history while running unfilter with adjoint", {
+test_that("can save trajectories while running unfilter with adjoint", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
 
   time_start <- 0
   data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
 
   obj <- dust_unfilter_create(sir(), time_start, data)
-  ll1 <- dust_likelihood_run(obj, pars, adjoint = FALSE, save_history = TRUE)
-  h1 <- dust_likelihood_last_history(obj)
+  ll1 <- dust_likelihood_run(obj, pars, adjoint = FALSE,
+                             save_trajectories = TRUE)
+  h1 <- dust_likelihood_last_trajectories(obj)
 
-  ll2 <- dust_likelihood_run(obj, pars, adjoint = TRUE, save_history = TRUE)
-  h2 <- dust_likelihood_last_history(obj)
+  ll2 <- dust_likelihood_run(obj, pars, adjoint = TRUE,
+                             save_trajectories = TRUE)
+  h2 <- dust_likelihood_last_trajectories(obj)
   expect_identical(ll2, ll1)
   expect_identical(h2, h1)
 })

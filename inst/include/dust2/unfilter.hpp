@@ -2,7 +2,7 @@
 
 #include <dust2/adjoint_data.hpp>
 #include <dust2/filter_details.hpp>
-#include <dust2/history.hpp>
+#include <dust2/trajectories.hpp>
 #include <monty/random/random.hpp>
 
 namespace dust2 {
@@ -31,18 +31,18 @@ public:
     n_groups_(sys.n_groups()),
     ll_(n_particles_ * n_groups_, 0),
     ll_step_(n_particles_ * n_groups_, 0),
-    history_(n_state_, n_particles_, n_groups_, time_.size()),
+    trajectories_(n_state_, n_particles_, n_groups_, time_.size()),
     adjoint_(n_state_, n_particles_, n_groups_),
-    history_is_current_(n_particles_ * n_groups_),
+    trajectories_are_current_(n_particles_ * n_groups_),
     adjoint_is_current_(n_particles_ * n_groups_),
     gradient_is_current_(false) {
   }
 
-  void run(bool set_initial, bool save_history,
+  void run(bool set_initial, bool save_trajectories,
            const std::vector<size_t>& index_state,
            const std::vector<size_t>& index_group) {
     const bool adjoint = false;
-    reset(set_initial, save_history, index_state, index_group, adjoint);
+    reset(set_initial, save_trajectories, index_state, index_group, adjoint);
     const auto n_times = time_.size();
 
     auto it_data = data_.begin();
@@ -52,14 +52,14 @@ public:
       for (size_t j = 0; j < ll_.size(); ++j) {
         ll_[j] += ll_step_[j];
       }
-      if (save_history) {
-        history_.add(time_[i], sys.state().begin());
+      if (save_trajectories) {
+        trajectories_.add(time_[i], sys.state().begin());
       }
     }
 
-    if (save_history) {
+    if (save_trajectories) {
       for (auto i : index_group) {
-        history_is_current_[i] = true;
+        trajectories_are_current_[i] = true;
       }
     }
 
@@ -71,11 +71,11 @@ public:
   // This part here we can _always_ do, even if the system does not
   // actually support adjoint methods.  It should give exactly the
   // same answers as the normal version, at the cost of more memory.
-  void run_adjoint(bool set_initial, bool save_history,
+  void run_adjoint(bool set_initial, bool save_trajectories,
                    const std::vector<size_t>& index_state,
                    const std::vector<size_t>& index_group) {
     const bool adjoint = true;
-    reset(set_initial, save_history, index_state, index_group, adjoint);
+    reset(set_initial, save_trajectories, index_state, index_group, adjoint);
 
     // Run the entire forward time simulation
     sys.run_to_time(time_.back(), index_group, adjoint_.state(0));
@@ -91,14 +91,14 @@ public:
       for (size_t j = 0; j < ll_.size(); ++j) {
         ll_[j] += ll_step_[j];
       }
-      if (save_history) {
-        history_.add(time_[i], state_i);
+      if (save_trajectories) {
+        trajectories_.add(time_[i], state_i);
       }
     }
 
     for (auto i : index_group) {
       adjoint_is_current_[i] = true;
-      history_is_current_[i] = save_history;
+      trajectories_are_current_[i] = save_trajectories;
     }
 
     if (!tools::is_trivial_index(index_group, n_groups_)) {
@@ -110,12 +110,12 @@ public:
     return ll_;
   }
 
-  auto& last_history() const {
-    return history_;
+  auto& last_trajectories() const {
+    return trajectories_;
   }
 
-  auto& last_history_is_current() const {
-    return history_is_current_;
+  auto& last_trajectories_are_current() const {
+    return trajectories_are_current_;
   }
 
   auto& last_index_group() const {
@@ -144,22 +144,24 @@ private:
   size_t n_groups_;
   std::vector<real_type> ll_;
   std::vector<real_type> ll_step_;
-  history<real_type> history_;
+  trajectories<real_type> trajectories_;
   adjoint_data<real_type> adjoint_;
-  std::vector<bool> history_is_current_;
+  std::vector<bool> trajectories_are_current_;
   std::vector<size_t> last_index_group_;
   std::vector<bool> adjoint_is_current_;
   bool gradient_is_current_;
 
-  void reset(bool set_initial, bool save_history,
+  void reset(bool set_initial, bool save_trajectories,
              const std::vector<size_t>& index_state,
              const std::vector<size_t>& index_group,
              bool adjoint) {
-    std::fill(history_is_current_.begin(), history_is_current_.end(), false);
+    std::fill(trajectories_are_current_.begin(),
+              trajectories_are_current_.end(),
+              false);
     std::fill(adjoint_is_current_.begin(), adjoint_is_current_.end(), false);
     gradient_is_current_ = false;
-    if (save_history) {
-      history_.set_index_and_reset(index_state, index_group);
+    if (save_trajectories) {
+      trajectories_.set_index_and_reset(index_state, index_group);
     }
     if (adjoint) {
       adjoint_.init_history(time_start_, time_, sys.dt());

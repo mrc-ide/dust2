@@ -1,8 +1,8 @@
 #pragma once
 
 #include <dust2/filter_details.hpp>
-#include <dust2/history.hpp>
 #include <dust2/tools.hpp>
+#include <dust2/trajectories.hpp>
 #include <monty/random/random.hpp>
 
 namespace dust2 {
@@ -33,15 +33,15 @@ public:
     rng_(n_groups_, seed, false),
     ll_(n_groups_, 0),
     ll_step_(n_groups_ * n_particles_, 0),
-    history_(n_state_, n_particles_, n_groups_, time_.size()),
-    history_is_current_(n_groups_, false),
+    trajectories_(n_state_, n_particles_, n_groups_, time_.size()),
+    trajectories_are_current_(n_groups_, false),
     random_particle_(n_groups_, n_particles_) {
   }
 
-  void run(bool set_initial, bool save_history,
+  void run(bool set_initial, bool save_trajectories,
            const std::vector<size_t>& index_state,
            const std::vector<size_t>& index_group) {
-    reset(set_initial, save_history, index_state, index_group);
+    reset(set_initial, save_trajectories, index_state, index_group);
 
     // Just store this here; later once we have state to save we can
     // probably use that vector instead.
@@ -80,16 +80,16 @@ public:
 
       sys.reorder(index.begin(), index_group);
 
-      if (save_history) {
-        history_.add(time, sys.state().begin(), index.begin());
+      if (save_trajectories) {
+        trajectories_.add(time, sys.state().begin(), index.begin());
       }
       // early exit (perhaps)
       // save snapshots (perhaps)
     }
 
-    if (save_history) {
+    if (save_trajectories) {
       for (auto i : index_group) {
-        history_is_current_[i] = true;
+        trajectories_are_current_[i] = true;
       }
     }
     if (!tools::is_trivial_index(index_group, n_groups_)) {
@@ -101,12 +101,12 @@ public:
     return ll_;
   }
 
-  auto& last_history() const {
-    return history_;
+  auto& last_trajectories() const {
+    return trajectories_;
   }
 
-  auto& last_history_is_current() const {
-    return history_is_current_;
+  auto& last_trajectories_are_current() const {
+    return trajectories_are_current_;
   }
 
   auto& last_index_group() const {
@@ -141,17 +141,19 @@ private:
   monty::random::prng<rng_state_type> rng_;
   std::vector<real_type> ll_;
   std::vector<real_type> ll_step_;
-  history<real_type> history_;
-  std::vector<bool> history_is_current_;
+  trajectories<real_type> trajectories_;
+  std::vector<bool> trajectories_are_current_;
   std::vector<size_t> last_index_group_;
   std::vector<size_t> random_particle_;
 
-  void reset(bool set_initial, bool save_history,
+  void reset(bool set_initial, bool save_trajectories,
              const std::vector<size_t>& index_state,
              const std::vector<size_t>& index_group) {
-    std::fill(history_is_current_.begin(), history_is_current_.end(), false);
-    if (save_history) {
-      history_.set_index_and_reset(index_state, index_group);
+    std::fill(trajectories_are_current_.begin(),
+              trajectories_are_current_.end(),
+              false);
+    if (save_trajectories) {
+      trajectories_.set_index_and_reset(index_state, index_group);
     }
     std::fill(ll_.begin(), ll_.end(), 0);
     sys.set_time(time_start_);
