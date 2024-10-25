@@ -2,9 +2,9 @@
 
 // [[dust2::class(walk)]]
 // [[dust2::time_type(discrete)]]
-// [[dust2::parameter(sd)]]
-// [[dust2::parameter(len)]]
-// [[dust2::parameter(random_initial)]]
+// [[dust2::parameter(sd, required = TRUE, constant = FALSE)]]
+// [[dust2::parameter(len, required = FALSE, constant = TRUE, type = "int")]]
+// [[dust2::parameter(random_initial, required = FALSE, constant = TRUE, type = "bool")]]
 class walk {
 public:
   // No constructor - turning this off is optional

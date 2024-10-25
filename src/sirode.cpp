@@ -5,11 +5,11 @@
 // [[dust2::class(sirode)]]
 // [[dust2::time_type(continuous)]]
 // [[dust2::has_compare()]]
-// [[dust2::parameter(I0)]]
-// [[dust2::parameter(N)]]
-// [[dust2::parameter(beta)]]
-// [[dust2::parameter(gamma)]]
-// [[dust2::parameter(exp_noise)]]
+// [[dust2::parameter(I0, rank = 0, constant = FALSE, required = FALSE)]]
+// [[dust2::parameter(N, rank = 0, constant = TRUE, required = FALSE)]]
+// [[dust2::parameter(beta, rank = 0, constant = FALSE, required = FALSE)]]
+// [[dust2::parameter(gamma, rank = 0, constant = FALSE, required = FALSE)]]
+// [[dust2::parameter(exp_noise, rank = 0, constant = TRUE, required = FALSE)]]
 class sirode {
 public:
   sirode() = delete;

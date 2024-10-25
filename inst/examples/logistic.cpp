@@ -3,9 +3,9 @@
 
 // [[dust2::class(logistic)]]
 // [[dust2::time_type(continuous)]]
-// [[dust2::parameter(n)]]
-// [[dust2::parameter(r)]]
-// [[dust2::parameter(K)]]
+// [[dust2::parameter(n, type = "int", constant = TRUE, required = FALSE, rank = 0)]]
+// [[dust2::parameter(r, required = TRUE, constant = FALSE, rank = 1)]]
+// [[dust2::parameter(K, required = TRUE, constant = FALSE, rank = 1)]]
 class logistic {
 public:
   logistic() = delete;

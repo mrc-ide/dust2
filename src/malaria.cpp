@@ -5,6 +5,13 @@
 // [[dust2::class(malaria)]]
 // [[dust2::time_type(mixed)]]
 // [[dust2::has_compare()]]
+// [[dust2::parameter(a, required = FALSE, constant = FALSE)]]
+// [[dust2::parameter(n_rates, required = FALSE, constant = TRUE, type = "int")]]
+// [[dust2::parameter(r, required = FALSE, constant = FALSE)]]
+// [[dust2::parameter(tau, required = FALSE, constant = FALSE)]]
+// [[dust2::parameter(initial_Ih, required = FALSE, constant = TRUE)]]
+// [[dust2::parameter(initial_Iv, required = FALSE, constant = TRUE)]]
+// [[dust2::parameter(initial_Sv, required = FALSE, constant = TRUE)]]
 class malaria {
 public:
   malaria() = delete;
