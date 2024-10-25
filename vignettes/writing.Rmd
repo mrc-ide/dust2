@@ -293,8 +293,85 @@ cc_output(sir_code[methods_sir$compare_data])
 
 This has the same long sort of call signature as `initial` and `update` but with **read-only** `state` and **read-only** data.  Here, we return a single real number, being the log-likelihood at this point.  In this example we add some small random noise to the modelled data (to avoid `NaN`s where our modelled cases are zero) and compute the log density from a Poisson distribution for observing the cases in `data`.
 
+# Continuous time (ODE) models
+
+The interface looks slightly different for ODE models, because we are not updating the system from one time to the next but computing the *rate of change* at a given time and an [ODE solver](https://en.wikipedia.org/wiki/Numerical_methods_for_ordinary_differential_equations) is updating the values of the system.  So rather than an `update()` method, we will write an `rhs()` method.  The implementation here follows as that of the sir model above, and very little has changed:
+
+```{r, echo = FALSE, results = "asis"}
+sirode_code <- readLines("examples/sirode.cpp")
+cc_output(sir_code)
+```
+
+We have made changes to the annotations, replaced `update` with `rhs` and updated `compare_data`, otherwise everything remains the same (except for a minor change dropping the `exp_noise` parameter which was not needed here).
+
+The annotations have replaced
+
+```cc
+// [[dust2::time_type(discrete)]]
+```
+
+with
+
+```cc
+// [[dust2::time_type(continous)]]
+```
+
+```{r, include = FALSE}
+methods_sirode <- names(methods_sir)
+methods_sirode[methods_sirode == "update"] <- "rhs"
+methods_sirode <- setNames(lapply(methods_sirode, find_method, sirode_code),
+                           methods_sirode)
+stopifnot(all(diff(vapply(methods_sirode, "[[", 1, 1)) > 0))
+```
+
+The `rhs` method follows the `sir` model's update one closely, but returns rates into `state_deriv` rather than updating `state_next`.   Note that this function does not accept an `rng_state` argument.
+
+```{r, echo = FALSE, results = "asis"}
+cc_output(sir_code[methods_sir$rhs])
+```
+
+The `compare_data` method has changed slightly as we no longer add random noise to the modelled data:
+
+```{r, echo = FALSE, results = "asis"}
+cc_output(sir_code[methods_sir$compare_data])
+```
+
+# Continuous time models with additional output
+
+Sometimes it will be convenient to have models where you have variables that are not updated as ODEs, but with some variables being a compound expression of your variables.  You can always do this in post processing, but this can save pulling a lot of data back into R or allow reusing values that you have computed in your `shared` object.
+
+To do this, list the variables as normal in `packing_state` but make sure that they are the final variables.  Suppose that in the `sirode` model above, we wanted to track `N`, the total population size (ignore that this is a parameter and assume perhaps that we have an open system or that we are aggregating over age groups).  We could then write:
+
+```cc
+  static dust2::packing packing_state(const shared_state& shared) {
+    return dust2::packing{{"S", {}}, {"I", {}}, {"R", {}}, {"cases_inc", {}}, {"N", {}}};
+  }
+```
+
+to add the additional "variable" into our state.  We then write
+
+```cc
+  static size_t size_output() {
+    return 1;
+  }
+```
+
+to indicate that the last 1 entry in `packing_state` is not an ODE variable.  Finally we could define
+
+```cc
+  static void output(real_type time,
+                     real_type * state,
+                     const shared_state& shared,
+                     internal_state& internal) {
+    state[4] = state[0] + state[1] + state[2];
+  }
+```
+
+which would set the 5th element of `state` to the sum over the first three (`N = S + I + R`).  Note that this takes `state` as a read-write variable and not a constant variable.
+
 ```{r, include = FALSE}
 # just to check these do actually compile, otherwise fail the build:
 dust2::dust_compile("examples/walk.cpp", debug = TRUE)
 dust2::dust_compile("examples/sir.cpp", debug = TRUE)
+dust2::dust_compile("examples/sirode.cpp", debug = TRUE)
 ```
