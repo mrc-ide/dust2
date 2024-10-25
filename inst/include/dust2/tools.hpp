@@ -53,7 +53,7 @@ T prod(const std::vector<T>& x) {
 }
 
 inline bool is_trivial_index(const std::vector<size_t>& index, size_t n) {
-  if (index.empty() == 0) {
+  if (index.empty()) {
     return true;
   }
   if (index.size() != n) {

@@ -22,17 +22,12 @@ public:
     size_ = std::accumulate(len_.begin(), len_.end(), 0);
   }
 
-  // We can support an incremental interface easily enough like this
-  // if the initializer list version proves too annoying:
-  //
-  // void add(mapping_type x) {
-  //   data_.push_back(x);
-  //   len_.push_back(tools::prod(data_.back().second));
-  //   size_ += len_.back();
-  // }
-
   auto size() const {
     return size_;
+  }
+
+  auto& len() const {
+    return len_;
   }
 
   auto& data() const {
