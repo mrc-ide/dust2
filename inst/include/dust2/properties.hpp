@@ -33,6 +33,11 @@ struct test_has_rhs: std::false_type {};
 template <class T>
 struct test_has_rhs<T, std::void_t<decltype(T::rhs)>>: std::true_type {};
 
+template <class T, class = void>
+struct test_has_output: std::false_type {};
+template <class T>
+struct test_has_output<T, std::void_t<decltype(T::output)>>: std::true_type {};
+
 }
 
 template<typename T>
@@ -41,6 +46,7 @@ struct properties {
   using has_packing_gradient = internals::test_has_packing_gradient<T>;
   using has_zero_every = internals::test_has_zero_every<T>;
   using is_mixed_time = typename std::conditional<internals::test_has_rhs<T>::value && internals::test_has_update<T>::value, std::true_type, std::false_type>::type;
+  using has_output = typename std::conditional<internals::test_has_rhs<T>::value && internals::test_has_output<T>::value, std::true_type, std::false_type>::type;
 };
 
 // wrappers around some uses of member functions that may or may not
@@ -65,6 +71,19 @@ dust2::packing do_packing_gradient(const typename T::shared_state &shared) {
   return dust2::packing{};
 }
 
+
+template <typename T, typename std::enable_if<properties<T>::has_output::value, T>::type* = nullptr>
+size_t do_n_state_output(const dust2::packing& packing) {
+  return std::accumulate(packing.len().begin() + T::size_output(),
+                         packing.len().end(),
+                         0);
+}
+
+template <typename T, typename std::enable_if<!properties<T>::has_output::value, T>::type* = nullptr>
+size_t do_n_state_output(const dust2::packing& packing) {
+  return 0;
+}
+
 template <typename T, typename std::enable_if<properties<T>::has_zero_every::value, T>::type* = nullptr>
 auto zero_every_vec(const std::vector<typename T::shared_state>& shared) {
   using real_type = typename T::real_type;
@@ -81,5 +100,8 @@ auto zero_every_vec(const std::vector<typename T::shared_state>& shared) {
   using real_type = typename T::real_type;
   return std::vector<zero_every_type<real_type>>(shared.size(), dust2::zero_every_type<real_type>());
 }
+
+
+
 
 }

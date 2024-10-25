@@ -18,6 +18,10 @@
 
 namespace dust2 {
 
+namespace {
+
+}
+
 template <typename T>
 class dust_continuous {
 public:
@@ -39,6 +43,8 @@ public:
     packing_state_(T::packing_state(shared[0])),
     packing_gradient_(do_packing_gradient<T>(shared[0])),
     n_state_(packing_state_.size()),
+    n_state_output_(do_n_state_output<T>(packing_state_)),
+    n_state_ode_(n_state_ - n_state_output_),
     n_particles_(n_particles),
     n_groups_(shared.size()),
     n_particles_total_(n_particles_ * n_groups_),
@@ -47,11 +53,11 @@ public:
     control_(control),
 
     state_(n_state_ * n_particles_total_),
-    ode_internals_(n_particles_total_, n_state_),
+    ode_internals_(n_particles_total_, n_state_ode_),
 
     // For reordering to work:
     state_other_(n_state_ * n_particles_total_),
-    ode_internals_other_(n_particles_total_, n_state_),
+    ode_internals_other_(n_particles_total_, n_state_ode_),
 
     shared_(shared),
     internal_(internal),
@@ -61,8 +67,9 @@ public:
     zero_every_(zero_every_vec<T>(shared_)),
     errors_(n_particles_total_),
     rng_(n_particles_total_, seed, deterministic),
-    solver_(n_state_, control_),
-    n_threads_(n_threads) {
+    solver_(n_state_ode_, control_),
+    n_threads_(n_threads),
+    output_is_current_(n_groups_) {
     // TODO: above, filter rng states need adding here too, or
     // somewhere at least (we might move the filter elsewhere though,
     // in which case that particular bit of weirdness goes away).
@@ -99,6 +106,7 @@ public:
     }
     errors_.report();
     time_ = time;
+    update_output_is_current(index_group, false);
   }
 
   template <typename mixed_time = typename dust2::properties<T>::is_mixed_time>
@@ -130,7 +138,7 @@ public:
             solver_.run(t0, t1, y, zero_every_[i],
                         ode_internals_[k],
                         rhs_(shared_[i], internal_i));
-            std::copy_n(y, n_state_, y_other);
+            std::copy_n(y, n_state_ode_, y_other);
             T::update(t1, dt_, y, shared_[i], internal_i, rng_state, y_other);
             std::swap(y, y_other);
             solver_.initialise(time_, y, ode_internals_[k],
@@ -146,6 +154,7 @@ public:
       std::swap(state_, state_other_);
     }
     time_ = time;
+    update_output_is_current(index_group, false);
   }
 
   void run_to_time(real_type time,
@@ -177,6 +186,8 @@ public:
       }
     }
     errors_.report();
+    // Assume not current, because most models would want to call output here()
+    update_output_is_current(index_group, false);
   }
 
   template <typename Iter>
@@ -193,6 +204,13 @@ public:
                                 recycle_particle, recycle_group,
                                 n_threads_);
     initialise_solver_(index_group.empty() ? all_groups_ : index_group);
+    // I'm not sure what is best here; this (and to a degree
+    // T::initial) are the two places where we might end up with
+    // inconsistent output (e.g., the user has set a state that
+    // includes output but the output is wrong).  This approach gives
+    // them some flexibility at least.
+    bool update_is_current = tools::is_trivial_index(index_state, n_state_);
+    update_output_is_current(index_group, update_is_current);
   }
 
   // iter here is an iterator to our *reordering index*, which will be
@@ -217,8 +235,10 @@ public:
       for (size_t j = 0; j < n_particles_; ++j) {
         const auto k_to = n_particles_ * i + j;
         const auto k_from = n_particles_ * i + *(iter + k_to);
+        const auto n_state_copy =
+          output_is_current_[i] ? n_state_ : n_state_ode_;
         std::copy_n(state_.begin() + k_from * n_state_,
-                    n_state_,
+                    n_state_copy,
                     state_other_.begin() + k_to * n_state_);
         ode_internals_other_[k_to] = ode_internals_[k_from];
       }
@@ -227,7 +247,8 @@ public:
     std::swap(ode_internals_, ode_internals_other_);
   }
 
-  auto& state() const {
+  const auto& state() {
+    update_output();
     return state_;
   }
 
@@ -272,6 +293,10 @@ public:
 
   void set_time(real_type time) {
     time_ = time;
+    // We should set output_is_current here but I will wait until
+    // updating time_ to make it vary by group. Practically the next
+    // thing anyone does after this is to update initial conditions so
+    // this is fine for now.
   }
 
   auto rng_state() const {
@@ -334,6 +359,8 @@ private:
   dust2::packing packing_state_;
   dust2::packing packing_gradient_;
   size_t n_state_;
+  size_t n_state_output_;
+  size_t n_state_ode_;
   size_t n_particles_;
   size_t n_groups_;
   size_t n_particles_total_;
@@ -357,6 +384,7 @@ private:
   monty::random::prng<rng_state_type> rng_;
   ode::solver<real_type> solver_;
   size_t n_threads_;
+  std::vector<bool> output_is_current_;
 
   static auto rhs_(const shared_state& shared, internal_state& internal) {
     return [&](real_type t, const real_type* y, real_type* dydt) {
@@ -385,6 +413,43 @@ private:
       }
     }
     errors_.report();
+  }
+
+  // Default implementation does nothing
+  template <typename has_output = typename dust2::properties<T>::has_output>
+  typename std::enable_if<!has_output::value, void>::type
+  update_output() {
+  }
+
+  template <typename has_output = typename dust2::properties<T>::has_output>
+  typename std::enable_if<has_output::value, void>::type
+  update_output() {
+    real_type * state_data = state_.data();
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
+#endif
+    for (size_t i = 0; i < n_groups_; ++i) {
+      for (size_t j = 0; j < n_particles_; ++j) {
+        const auto k = n_particles_ * i + j;
+        const auto offset = k * n_state_;
+        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
+        real_type * y = state_data + offset;
+        if (!output_is_current_[i]) {
+          T::output(time_, y, shared_[i], internal_i);
+        }
+      }
+    }
+    update_output_is_current({}, true);
+  }
+
+  void update_output_is_current(std::vector<size_t> index_group, bool value) {
+    if (index_group.empty()) {
+      std::fill(output_is_current_.begin(), output_is_current_.end(), value);
+    } else {
+      for (auto i : index_group) {
+        output_is_current_[i] = value;
+      }
+    }
   }
 };
 

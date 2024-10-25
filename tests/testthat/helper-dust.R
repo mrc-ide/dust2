@@ -55,6 +55,7 @@ skip_for_compilation <- function() {
 
 logistic_analytic <- function(r, k, times, y0) {
   len <- max(length(r), length(k), length(y0))
-  vapply(times, function(t) k / (1 + (k / y0 - 1) * exp(-r * t)),
-         numeric(len))
+  y <- vapply(times, function(t) k / (1 + (k / y0 - 1) * exp(-r * t)),
+              numeric(len))
+  rbind(y, colSums(y))
 }

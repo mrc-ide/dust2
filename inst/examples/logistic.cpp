@@ -23,10 +23,14 @@ public:
   using rng_state_type = monty::random::generator<real_type>;
 
   static dust2::packing packing_state(const shared_state& shared) {
-    return dust2::packing{{"x", {shared.n}}};
+    return dust2::packing{{"x", {shared.n}}, {"total", {}}};
   }
 
-  static size_t size_output(const shared_state& shared) {
+  // Based on packing_state; the *last* 'n' elements here are output.
+  // We might change this later but this is quite convenient from a
+  // data layout view and has the advantage that this can be computed
+  // without using any reference to shared.
+  static size_t size_output() {
     return 1;
   }
 
@@ -51,13 +55,11 @@ public:
   }
 
   static void output(real_type time,
-                     const real_type * state,
+                     real_type * state,
                      const shared_state& shared,
-                     internal_state& internal,
-                     real_type * output) {
-    // We will change this to use a delay (e.g., growth over last
-    // period) to give the history a good workout right away.
-    output[0] = std::accumulate(state, state + shared.n, 0);
+                     internal_state& internal) {
+    state[shared.n] = std::accumulate(state, state + shared.n,
+                                      static_cast<real_type>(0));
   }
 
   static shared_state build_shared(cpp11::list pars) {

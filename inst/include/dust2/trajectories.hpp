@@ -26,8 +26,8 @@ public:
                            const std::vector<size_t>& index_group) {
     index_state_ = index_state;
     index_group_ = index_group;
-    use_index_state_ = tools::is_trivial_index(index_state_, n_state_total_);
-    use_index_group_ = tools::is_trivial_index(index_group_, n_groups_total_);
+    use_index_state_ = !tools::is_trivial_index(index_state_, n_state_total_);
+    use_index_group_ = !tools::is_trivial_index(index_group_, n_groups_total_);
     n_state_ = use_index_state_ ? index_state.size() : n_state_total_;
     n_groups_ = use_index_group_ ? index_group.size() : n_groups_total_;
     len_state_ = n_state_ * n_particles_ * n_groups_;
