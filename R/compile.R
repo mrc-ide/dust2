@@ -135,8 +135,9 @@ dust_generate <- function(config, filename, linking_to, cpp_std,
   system <- read_lines(filename)
   data <- dust_template_data(config$name, config$class, config$time_type,
                              config$has_compare, config$has_adjoint,
-                             config$default_dt, linking_to, cpp_std,
-                             optimisation_level, compiler_options, mangle)
+                             config$parameters, config$default_dt,
+                             linking_to, cpp_std, optimisation_level,
+                             compiler_options, mangle)
   data$system_requirements <- data$cpp_std %||% "R (>= 4.0.0)"
 
   list(
@@ -192,6 +193,7 @@ dust_template_data <- function(name,
                                time_type,
                                has_compare,
                                has_adjoint,
+                               parameters,
                                default_dt,
                                linking_to = NULL,
                                cpp_std = NULL,
@@ -214,6 +216,7 @@ dust_template_data <- function(name,
        time_type = if (time_type == "mixed") "continuous" else time_type,
        has_compare = deparse1(has_compare),
        has_adjoint = deparse1(has_adjoint),
+       parameters = deparse_parameters_df(parameters),
        default_dt = deparse1(default_dt),
        package = paste0(name, mangle %||% ""),
        linking_to = linking_to,
@@ -316,4 +319,19 @@ dust_debug <- function(debug, call = parent.frame()) {
   } else {
     assert_scalar_logical(debug, call = call)
   }
+}
+
+
+deparse_parameters_df <- function(df) {
+  if (is.null(df)) {
+    return("NULL")
+  }
+  values <- vcapply(df, function(x) {
+    str <- paste(vcapply(x, deparse), collapse = ", ")
+    if (length(x) == 1) str else sprintf("c(%s)", str)
+  })
+  ret <- c("data.frame(",
+           sprintf("    %s = %s", names(df), values))
+  suffix <- rep(c("\n", ",\n", ")"), c(1, ncol(df) - 1, 1))
+  paste0(ret, suffix, collapse = "")
 }

@@ -4,6 +4,7 @@
   name = "{{name}}",
   package = "{{package}}",
   path = {{{{path_pkg}}}},
+  parameters = {{parameters}},
   properties = list(
     time_type = "{{time_type_property}}",
     has_compare = {{has_compare}},

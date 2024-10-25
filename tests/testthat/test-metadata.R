@@ -8,6 +8,7 @@ test_that("can read sir metadata", {
                data.frame(name = c("I0", "N", "beta", "gamma", "exp_noise"),
                           type = "real_type",
                           constant = c(FALSE, TRUE, FALSE, FALSE, TRUE),
+                          required = FALSE,
                           rank = 0L))
 })
 

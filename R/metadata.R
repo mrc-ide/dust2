@@ -153,6 +153,9 @@ parse_metadata_has_feature <- function(name, data, call = NULL) {
 
 parse_metadata_parameters <- function(data, call = NULL) {
   data <- data[data$decoration == "dust2::parameter", ]
+  if (nrow(data) == 0) {
+    return(NULL)
+  }
   res <- lapply(seq_len(nrow(data)), function(i) {
     tryCatch(
       parse_metadata_parameter_single(data$params[[i]]),
@@ -208,12 +211,11 @@ parse_metadata_parameter_single <- function(args) {
     error = function(e) {
       cli::cli_abort(
         "Invalid arguments to attribute [[dust2::parameter()]]",
-        call = call, parent = e)
+        parent = e)
     })
   name_arg <- if (is.null(args$name)) "first argument" else "'name'"
   if (rlang::is_missing(d$name) || !is.name(d$name)) {
-    cli::cli_abort("Expected {name_arg} to be an unquoted string",
-                   call = call)
+    cli::cli_abort("Expected {name_arg} to be an unquoted string")
   }
   d$name <- as.character(d$name)
   match_value(d$type, c("real_type", "int", "bool"), "type")
