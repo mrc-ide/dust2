@@ -152,17 +152,100 @@ parse_metadata_has_feature <- function(name, data, call = NULL) {
 
 
 parse_metadata_parameters <- function(data, call = NULL) {
-  res <- data$params[data$decoration == "dust2::parameter"]
-  ok <- vlapply(res, function(x) {
-   length(x) == 1 && !nzchar(names(x)[[1]]) && is.symbol(x[[1]])
+  data <- data[data$decoration == "dust2::parameter", ]
+  res <- lapply(seq_len(nrow(data)), function(i) {
+    tryCatch(
+      parse_metadata_parameter_single(data$params[[i]]),
+      error = function(e) {
+        line <- data$line[[i]]
+        cli::cli_abort(
+          "Invalid arguments to [[dust2::parameter()]] on line {line}",
+          call = call, parent = e)
+      })
   })
-  if (!all(ok)) {
+  ret <- data_frame(
+    name = vcapply(res, "[[", "name"),
+    type = vcapply(res, "[[", "type"),
+    constant = vlapply(res, "[[", "constant"),
+    required = vlapply(res, "[[", "required"),
+    rank = viapply(res, "[[", "rank"),
+    min = vnapply(res, "[[", "min"),
+    max = vnapply(res, "[[", "max"))
+
+
+  if (anyDuplicated(ret$name)) {
+    dups <- unique(ret$name[duplicated(ret$name)])
     cli::cli_abort(
-      paste("Expected an unnamed unquoted string argument to",
-            "'[[dust2::parameter()]]'"),
+      paste("Duplicate parameter names across '[[dust2::paramneter()]]'",
+            "entries: {squote(dups)}"),
       call = call)
   }
-  data_frame(name = vcapply(res, function(x) deparse(x[[1]])))
+
+  for (v in c("constant", "required", "rank")) {
+    i <- is.na(ret[[v]])
+    if (any(i) && !all(i)) {
+      cli::cli_abort(
+        c("Only some '[[dust2::parameter()]]' entries have arguments for '{v}'",
+          i = paste("If any of your parameters include this argument, then",
+                    "all parameters must have it, otherwise it's confusing")),
+        call = call)
+    }
+  }
+
+  ret[!vlapply(ret, function(x) all(is.na(x)))]
+}
+
+
+parse_metadata_parameter_single <- function(args) {
+  fn <- function(name, type = "real_type", required = NA, constant = NA,
+                 min = NA_real_, max = NA_real_,
+                 rank = NA_integer_) {
+  }
+
+  call <- rlang::call2("fn", !!!args)
+  d <- tryCatch(
+    as.list(rlang::call_match(call, fn, defaults = TRUE)[-1]),
+    error = function(e) {
+      cli::cli_abort(
+        "Invalid arguments to attribute [[dust2::parameter()]]",
+        call = call, parent = e)
+    })
+  name_arg <- if (is.null(args$name)) "first argument" else "'name'"
+  if (rlang::is_missing(d$name) || !is.name(d$name)) {
+    cli::cli_abort("Expected {name_arg} to be an unquoted string",
+                   call = call)
+  }
+  d$name <- as.character(d$name)
+  match_value(d$type, c("real_type", "int", "bool"), "type")
+  if (d$type == "bool") {
+    for (v in c("min", "max")) {
+      if (!is.na(d[[v]])) {
+        cli::cli_abort(
+          "Argument '{v}' does not make sense with 'type = \"bool\"'")
+      }
+    }
+  } else {
+    if (!is.na(d$min)) {
+      assert_scalar_numeric(d$min, "min")
+    }
+    if (!is.na(d$max)) {
+      assert_scalar_numeric(d$max, "max")
+    }
+    if (isTRUE(d$min > d$max)) {
+      cli::cli_abort("'min' is greater than 'max'")
+    }
+  }
+  if (!is.na(d$rank)) {
+    assert_scalar_size(d$rank, name = "rank")
+  }
+  if (!is.na(d$required)) {
+    assert_scalar_logical(d$required, name = "required")
+  }
+  if (!is.na(d$constant)) {
+    assert_scalar_logical(d$constant, name = "constant")
+  }
+  d$rank <- as.integer(d$rank)
+  d
 }
 
 

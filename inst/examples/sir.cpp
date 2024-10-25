@@ -4,11 +4,11 @@
 // [[dust2::time_type(discrete)]]
 // [[dust2::has_compare()]]
 // [[dust2::has_adjoint()]]
-// [[dust2::parameter(I0)]]
-// [[dust2::parameter(N)]]
-// [[dust2::parameter(beta)]]
-// [[dust2::parameter(gamma)]]
-// [[dust2::parameter(exp_noise)]]
+// [[dust2::parameter(I0, rank = 0, constant = FALSE)]]
+// [[dust2::parameter(N, rank = 0, constant = TRUE)]]
+// [[dust2::parameter(beta, rank = 0, constant = FALSE)]]
+// [[dust2::parameter(gamma, rank = 0, constant = FALSE)]]
+// [[dust2::parameter(exp_noise, rank = 0, constant = TRUE)]]
 class sir {
 public:
   sir() = delete;
