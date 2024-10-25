@@ -3,6 +3,8 @@ logistic <- structure(
   function() get("logistic"),
   class = "dust_system_generator",
   name = "logistic",
+  package = "dust2",
+  path = NULL,
   properties = list(
     time_type = "continuous",
     has_compare = FALSE,
@@ -12,6 +14,8 @@ malaria <- structure(
   function() get("malaria"),
   class = "dust_system_generator",
   name = "malaria",
+  package = "dust2",
+  path = NULL,
   properties = list(
     time_type = "mixed",
     has_compare = TRUE,
@@ -21,6 +25,8 @@ sir <- structure(
   function() get("sir"),
   class = "dust_system_generator",
   name = "sir",
+  package = "dust2",
+  path = NULL,
   properties = list(
     time_type = "discrete",
     has_compare = TRUE,
@@ -30,6 +36,8 @@ sirode <- structure(
   function() get("sirode"),
   class = "dust_system_generator",
   name = "sirode",
+  package = "dust2",
+  path = NULL,
   properties = list(
     time_type = "continuous",
     has_compare = TRUE,
@@ -39,6 +47,8 @@ walk <- structure(
   function() get("walk"),
   class = "dust_system_generator",
   name = "walk",
+  package = "dust2",
+  path = NULL,
   properties = list(
     time_type = "discrete",
     has_compare = FALSE,
