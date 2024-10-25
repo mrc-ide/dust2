@@ -18,14 +18,17 @@ struct control {
   real_type factor_max = 10.0; // from dopri5.f:281, retard.f:333
   real_type beta = 0.04;
   real_type constant = 0.2 - 0.04 * 0.75; // 0.04 is beta
+  bool save_history = false;
   bool debug_record_step_times = false;
 
   control(size_t max_steps, real_type atol, real_type rtol,
           real_type step_size_min, real_type step_size_max,
+          bool save_history,
           bool debug_record_step_times) :
       max_steps(max_steps), atol(atol), rtol(rtol),
       step_size_min(step_size_min),
       step_size_max(step_size_max),
+      save_history(save_history),
       debug_record_step_times(debug_record_step_times) {}
 
   control() {}

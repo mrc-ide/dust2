@@ -4,8 +4,8 @@ dust2_system_logistic_alloc <- function(r_pars, r_time, r_time_control, r_n_part
   .Call(`_dust2_dust2_system_logistic_alloc`, r_pars, r_time, r_time_control, r_n_particles, r_n_groups, r_seed, r_deterministic, r_n_threads)
 }
 
-dust2_system_logistic_internals <- function(ptr, include_coefficients) {
-  .Call(`_dust2_dust2_system_logistic_internals`, ptr, include_coefficients)
+dust2_system_logistic_internals <- function(ptr, include_coefficients, include_history) {
+  .Call(`_dust2_dust2_system_logistic_internals`, ptr, include_coefficients, include_history)
 }
 
 dust2_system_logistic_run_to_time <- function(ptr, r_time) {
@@ -56,8 +56,8 @@ dust2_system_malaria_alloc <- function(r_pars, r_time, r_time_control, r_n_parti
   .Call(`_dust2_dust2_system_malaria_alloc`, r_pars, r_time, r_time_control, r_n_particles, r_n_groups, r_seed, r_deterministic, r_n_threads)
 }
 
-dust2_system_malaria_internals <- function(ptr, include_coefficients) {
-  .Call(`_dust2_dust2_system_malaria_internals`, ptr, include_coefficients)
+dust2_system_malaria_internals <- function(ptr, include_coefficients, include_history) {
+  .Call(`_dust2_dust2_system_malaria_internals`, ptr, include_coefficients, include_history)
 }
 
 dust2_system_malaria_run_to_time <- function(ptr, r_time) {
@@ -268,8 +268,8 @@ dust2_system_sirode_alloc <- function(r_pars, r_time, r_time_control, r_n_partic
   .Call(`_dust2_dust2_system_sirode_alloc`, r_pars, r_time, r_time_control, r_n_particles, r_n_groups, r_seed, r_deterministic, r_n_threads)
 }
 
-dust2_system_sirode_internals <- function(ptr, include_coefficients) {
-  .Call(`_dust2_dust2_system_sirode_internals`, ptr, include_coefficients)
+dust2_system_sirode_internals <- function(ptr, include_coefficients, include_history) {
+  .Call(`_dust2_dust2_system_sirode_internals`, ptr, include_coefficients, include_history)
 }
 
 dust2_system_sirode_run_to_time <- function(ptr, r_time) {

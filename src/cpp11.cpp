@@ -13,10 +13,10 @@ extern "C" SEXP _dust2_dust2_system_logistic_alloc(SEXP r_pars, SEXP r_time, SEX
   END_CPP11
 }
 // logistic.cpp
-SEXP dust2_system_logistic_internals(cpp11::sexp ptr, bool include_coefficients);
-extern "C" SEXP _dust2_dust2_system_logistic_internals(SEXP ptr, SEXP include_coefficients) {
+SEXP dust2_system_logistic_internals(cpp11::sexp ptr, bool include_coefficients, bool include_history);
+extern "C" SEXP _dust2_dust2_system_logistic_internals(SEXP ptr, SEXP include_coefficients, SEXP include_history) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_system_logistic_internals(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(include_coefficients)));
+    return cpp11::as_sexp(dust2_system_logistic_internals(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(include_coefficients), cpp11::as_cpp<cpp11::decay_t<bool>>(include_history)));
   END_CPP11
 }
 // logistic.cpp
@@ -104,10 +104,10 @@ extern "C" SEXP _dust2_dust2_system_malaria_alloc(SEXP r_pars, SEXP r_time, SEXP
   END_CPP11
 }
 // malaria.cpp
-SEXP dust2_system_malaria_internals(cpp11::sexp ptr, bool include_coefficients);
-extern "C" SEXP _dust2_dust2_system_malaria_internals(SEXP ptr, SEXP include_coefficients) {
+SEXP dust2_system_malaria_internals(cpp11::sexp ptr, bool include_coefficients, bool include_history);
+extern "C" SEXP _dust2_dust2_system_malaria_internals(SEXP ptr, SEXP include_coefficients, SEXP include_history) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_system_malaria_internals(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(include_coefficients)));
+    return cpp11::as_sexp(dust2_system_malaria_internals(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(include_coefficients), cpp11::as_cpp<cpp11::decay_t<bool>>(include_history)));
   END_CPP11
 }
 // malaria.cpp
@@ -475,10 +475,10 @@ extern "C" SEXP _dust2_dust2_system_sirode_alloc(SEXP r_pars, SEXP r_time, SEXP 
   END_CPP11
 }
 // sirode.cpp
-SEXP dust2_system_sirode_internals(cpp11::sexp ptr, bool include_coefficients);
-extern "C" SEXP _dust2_dust2_system_sirode_internals(SEXP ptr, SEXP include_coefficients) {
+SEXP dust2_system_sirode_internals(cpp11::sexp ptr, bool include_coefficients, bool include_history);
+extern "C" SEXP _dust2_dust2_system_sirode_internals(SEXP ptr, SEXP include_coefficients, SEXP include_history) {
   BEGIN_CPP11
-    return cpp11::as_sexp(dust2_system_sirode_internals(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(include_coefficients)));
+    return cpp11::as_sexp(dust2_system_sirode_internals(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(include_coefficients), cpp11::as_cpp<cpp11::decay_t<bool>>(include_history)));
   END_CPP11
 }
 // sirode.cpp
@@ -857,7 +857,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_filter_sirode_set_rng_state",        (DL_FUNC) &_dust2_dust2_filter_sirode_set_rng_state,        2},
     {"_dust2_dust2_filter_sirode_update_pars",          (DL_FUNC) &_dust2_dust2_filter_sirode_update_pars,          3},
     {"_dust2_dust2_system_logistic_alloc",              (DL_FUNC) &_dust2_dust2_system_logistic_alloc,              8},
-    {"_dust2_dust2_system_logistic_internals",          (DL_FUNC) &_dust2_dust2_system_logistic_internals,          2},
+    {"_dust2_dust2_system_logistic_internals",          (DL_FUNC) &_dust2_dust2_system_logistic_internals,          3},
     {"_dust2_dust2_system_logistic_reorder",            (DL_FUNC) &_dust2_dust2_system_logistic_reorder,            2},
     {"_dust2_dust2_system_logistic_rng_state",          (DL_FUNC) &_dust2_dust2_system_logistic_rng_state,          1},
     {"_dust2_dust2_system_logistic_run_to_time",        (DL_FUNC) &_dust2_dust2_system_logistic_run_to_time,        2},
@@ -871,7 +871,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_system_logistic_update_pars",        (DL_FUNC) &_dust2_dust2_system_logistic_update_pars,        2},
     {"_dust2_dust2_system_malaria_alloc",               (DL_FUNC) &_dust2_dust2_system_malaria_alloc,               8},
     {"_dust2_dust2_system_malaria_compare_data",        (DL_FUNC) &_dust2_dust2_system_malaria_compare_data,        4},
-    {"_dust2_dust2_system_malaria_internals",           (DL_FUNC) &_dust2_dust2_system_malaria_internals,           2},
+    {"_dust2_dust2_system_malaria_internals",           (DL_FUNC) &_dust2_dust2_system_malaria_internals,           3},
     {"_dust2_dust2_system_malaria_reorder",             (DL_FUNC) &_dust2_dust2_system_malaria_reorder,             2},
     {"_dust2_dust2_system_malaria_rng_state",           (DL_FUNC) &_dust2_dust2_system_malaria_rng_state,           1},
     {"_dust2_dust2_system_malaria_run_to_time",         (DL_FUNC) &_dust2_dust2_system_malaria_run_to_time,         2},
@@ -898,7 +898,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_system_sir_update_pars",             (DL_FUNC) &_dust2_dust2_system_sir_update_pars,             2},
     {"_dust2_dust2_system_sirode_alloc",                (DL_FUNC) &_dust2_dust2_system_sirode_alloc,                8},
     {"_dust2_dust2_system_sirode_compare_data",         (DL_FUNC) &_dust2_dust2_system_sirode_compare_data,         4},
-    {"_dust2_dust2_system_sirode_internals",            (DL_FUNC) &_dust2_dust2_system_sirode_internals,            2},
+    {"_dust2_dust2_system_sirode_internals",            (DL_FUNC) &_dust2_dust2_system_sirode_internals,            3},
     {"_dust2_dust2_system_sirode_reorder",              (DL_FUNC) &_dust2_dust2_system_sirode_reorder,              2},
     {"_dust2_dust2_system_sirode_rng_state",            (DL_FUNC) &_dust2_dust2_system_sirode_rng_state,            1},
     {"_dust2_dust2_system_sirode_run_to_time",          (DL_FUNC) &_dust2_dust2_system_sirode_run_to_time,          2},

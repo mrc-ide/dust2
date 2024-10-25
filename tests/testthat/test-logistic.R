@@ -345,3 +345,26 @@ test_that("can save step times for debugging", {
   expect_equal(d$step_times[[1]][[d$n_steps + 1]], 10)
   expect_false(any(diff(d$step_times[[1]]) <= 0))
 })
+
+
+
+
+test_that("can save history", {
+  pars <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
+  ctl <- dust_ode_control(save_history = TRUE, debug_record_step_times = TRUE)
+  sys <- dust_system_create(logistic(), pars, n_particles = 1,
+                            preserve_particle_dimension = TRUE,
+                            deterministic = TRUE, ode_control = ctl)
+  dust_system_set_state_initial(sys)
+  dust_system_run_to_time(sys, 10)
+  d <- dust_system_internals(sys,
+                             include_coefficients = TRUE,
+                             include_history = TRUE)
+  expect_true("history" %in% names(d))
+  history <- d$history[[1]]
+  n_steps <- d$n_steps_accepted
+  expect_length(history$time, n_steps)
+  expect_equal(history$time, d$step_times[[1]][-(n_steps + 1)])
+  expect_equal(history$size, diff(d$step_times[[1]]))
+  expect_equal(history$coefficients[, , n_steps], d$coefficients[[1]])
+})
