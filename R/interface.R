@@ -88,6 +88,11 @@ dust_system_create <- function(generator, pars, n_particles = 1, n_groups = 1,
   res <- methods$alloc(pars, time, time_control, n_particles,
                        n_groups, seed, deterministic, n_threads)
 
+  parameters <- coef(generator)
+  if (!is.null(parameters$constant)) {
+    parameters <- parameters[!parameters$constant, ]
+  }
+
   ## Here, we augment things slightly
   res$name <- attr(generator, "name")
   res$packer_state <- monty::monty_packer(array = res$packing_state)
@@ -101,6 +106,7 @@ dust_system_create <- function(generator, pars, n_particles = 1, n_groups = 1,
   res$deterministic <- deterministic
   res$methods <- methods
   res$properties <- attr(generator, "properties")
+  res$parameters <- parameters
   res$preserve_particle_dimension <- preserve_particle_dimension
   res$preserve_group_dimension <- preserve_group_dimension
   res$time_control <- time_control
@@ -535,6 +541,15 @@ print.dust_system <- function(x, ...) {
   }
   cli::cli_bullets(
     c(i = describe_time(x$properties$time_type, NULL, x$time_control$dt)))
+  n_pars <- NROW(x$parameters)
+  cli::cli_alert_info(paste(
+    "This system has {cli::no(n_pars)} parameter{?s} that can",
+    "be updated via {.run dust_system_update_pars}"))
+  if (n_pars > 0) {
+    cli::cli_bullets(c(">" = "{squote(x$parameters$name)}"))
+  }
+  cli::cli_alert_info(
+    "Use 'coef()' to get more information on parameters")
   invisible(x)
 }
 
@@ -544,6 +559,7 @@ print.dust_system_generator <- function(x, ...) {
   name <- attr(x, "name")
   properties <- attr(x, "properties")
   default_dt <- attr(x, "default_dt")
+  parameters <- attr(x, "parameters")$name
   cli::cli_h1("<dust_system_generator: {name}>")
   cli::cli_alert_info(
     "Use 'dust2::dust_system_create()' to create a system with this generator")
@@ -553,6 +569,14 @@ print.dust_system_generator <- function(x, ...) {
   }
   cli::cli_bullets(
     c(i = describe_time(properties$time_type, default_dt)))
+  n_pars <- length(parameters)
+  cli::cli_alert_info("This system has {cli::no(n_pars)} parameter{?s}")
+  if (n_pars > 0) {
+    cli::cli_bullets(c(">" = "{squote(parameters)}"))
+  }
+  cli::cli_alert_info(
+    "Use 'coef()' to get more information on parameters")
+
   invisible(x)
 }
 
@@ -585,12 +609,22 @@ describe_time <- function(time_type, default_dt, dt) {
   }
 }
 
+##' @export
+coef.dust_system_generator <- function(object, ...) {
+  attr(object, "parameters")
+}
+
 
 ##' @export
 dim.dust_system <- function(x, ...) {
   c(x$n_state,
     if (x$preserve_particle_dimension) x$n_particles,
     if (x$preserve_group_dimension) x$n_groups)
+}
+
+##' @export
+coef.dust_system <- function(x, ...) {
+  x$parameters
 }
 
 
