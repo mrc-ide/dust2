@@ -89,3 +89,14 @@ test_that("describe ranks", {
   expect_equal(rank_description(3), "3-dimensional array")
   expect_equal(rank_description(300), "300-dimensional array")
 })
+
+
+test_that("nicely deparse a df", {
+  expect_equal(deparse_df(NULL, 2), "NULL")
+  expect_equal(deparse_df(data.frame(a = 1), 2),
+               'data.frame(\n  a = 1)')
+  expect_equal(deparse_df(data.frame(a = 1, b = "2"), 2),
+               'data.frame(\n  a = 1,\n  b = "2")')
+  expect_equal(deparse_df(data.frame(a = c(1, 2), b = c("3", "4")), 4),
+               'data.frame(\n    a = c(1, 2),\n    b = c("3", "4"))')
+})

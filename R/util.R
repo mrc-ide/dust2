@@ -148,3 +148,19 @@ rank_description <- function(rank) {
     sprintf("%d-dimensional array", rank)
   }
 }
+
+
+deparse_df <- function(df, indent) {
+  if (is.null(df)) {
+    return("NULL")
+  }
+  values <- vcapply(df, function(x) {
+    str <- paste(vcapply(x, deparse), collapse = ", ")
+    if (length(x) == 1) str else sprintf("c(%s)", str)
+  })
+  indent <- strrep(" ", indent)
+  ret <- c("data.frame(",
+           sprintf("%s%s = %s", indent, names(df), values))
+  suffix <- rep(c("\n", ",\n", ")"), c(1, ncol(df) - 1, 1))
+  paste0(ret, suffix, collapse = "")
+}
