@@ -32,8 +32,10 @@
 ##'   debugging.  Step times can be retrieved via
 ##'   [dust_system_internals()].
 ##'
-##' @param save_history Optional vector of states for which we should
-##'   save index.  This is intended only for debugging.
+##' @param save_history Logical, indicating if we should save history
+##'   during running.  This should only be enabled for debugging.
+##'   Data can be retrieved via [dust_system_internals()], but the
+##'   format is undocumented.
 ##'
 ##' @export
 ##'
@@ -42,7 +44,7 @@
 dust_ode_control <- function(max_steps = 10000, atol = 1e-6, rtol = 1e-6,
                              step_size_min = 0, step_size_max = Inf,
                              debug_record_step_times = FALSE,
-                             save_history = NULL) {
+                             save_history = FALSE) {
   ctl <- list(
     max_steps = assert_scalar_size(
       max_steps, allow_zero = FALSE),
