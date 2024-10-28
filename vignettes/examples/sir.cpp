@@ -3,11 +3,11 @@
 // [[dust2::class(sir)]]
 // [[dust2::time_type(discrete)]]
 // [[dust2::has_compare()]]
-// [[dust2::parameter(I0)]]
-// [[dust2::parameter(N)]]
-// [[dust2::parameter(beta)]]
-// [[dust2::parameter(gamma)]]
-// [[dust2::parameter(exp_noise)]]
+// [[dust2::parameter(I0, constant = FALSE)]]
+// [[dust2::parameter(N, constant = TRUE)]]
+// [[dust2::parameter(beta, constant = FALSE)]]
+// [[dust2::parameter(gamma, constant = FALSE)]]
+// [[dust2::parameter(exp_noise, constant = TRUE)]]
 class sir {
 public:
   sir() = delete;

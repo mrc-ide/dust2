@@ -68,7 +68,7 @@ dust_package <- function(path, quiet = NULL) {
 
   package_validate_destination(path, files, call)
 
-  data <- lapply(file.path(path_dust, files), package_generate)
+  data <- lapply(file.path(path_dust, files), package_generate, pkg, call)
 
   dir_create(file.path(path, c("src", "R")))
   for (i in seq_along(files)) {
@@ -218,13 +218,16 @@ package_validate_makevars_openmp <- function(text, call) {
 }
 
 
-package_generate <- function(filename, call) {
+package_generate <- function(filename, package, call) {
   config <- parse_metadata(filename, call = call)
   system <- read_lines(filename)
   data <- dust_template_data(config$name, config$class, config$time_type,
                              config$has_compare, config$has_adjoint,
-                             config$default_dt)
-  list(r = substitute_dust_template(data, "package.R"),
+                             config$parameters, config$default_dt)
+  data$package <- package
+  r <- substitute_dust_template(data, "dust.R")
+  r <- glue_whisker(r, list(path_pkg = "NULL"))
+  list(r = r,
        cpp = dust_generate_cpp(system, config, data))
 }
 

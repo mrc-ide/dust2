@@ -69,7 +69,7 @@ If we had wanted a continuous time system of ODEs we would have instead written:
 
 and then later some of the rest of the code would be different; we will discuss this later.
 
-The remaining annotations tell `dust2` about the parameters.  It does not actually need to know about them, but this will be information that eventually we will surface in R so that you know what you can initialise the system with.
+The remaining annotations tell `dust2` about the parameters.  We use these to help communicate with the users of the system the inputs that generator accepts.  These are really *documentation* rather than controlling how parameters are processed in the `build_shared` and `update_shared` methods described below, and it is up to you to keep them in sync.  If you prefer, these could go directly above the code that handles each parameter.  This information is surfaced to R via the `print` and `coef` methods of the generator and system objects.
 
 ```{r, echo = FALSE, results = "asis"}
 i <- grep("dust2::parameter", annotations)

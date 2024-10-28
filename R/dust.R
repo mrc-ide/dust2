@@ -3,6 +3,14 @@ logistic <- structure(
   function() get("logistic"),
   class = "dust_system_generator",
   name = "logistic",
+  package = "dust2",
+  path = NULL,
+  parameters = data.frame(
+    name = c("n", "r", "K"),
+    type = c("int", "real_type", "real_type"),
+    constant = c(TRUE, FALSE, FALSE),
+    required = c(FALSE, TRUE, TRUE),
+    rank = c(0L, 1L, 1L)),
   properties = list(
     time_type = "continuous",
     has_compare = FALSE,
@@ -12,6 +20,13 @@ malaria <- structure(
   function() get("malaria"),
   class = "dust_system_generator",
   name = "malaria",
+  package = "dust2",
+  path = NULL,
+  parameters = data.frame(
+    name = c("a", "n_rates", "r", "tau", "initial_Ih", "initial_Iv", "initial_Sv"),
+    type = c("real_type", "int", "real_type", "real_type", "real_type", "real_type", "real_type"),
+    constant = c(FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE),
+    required = c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE)),
   properties = list(
     time_type = "mixed",
     has_compare = TRUE,
@@ -21,6 +36,14 @@ sir <- structure(
   function() get("sir"),
   class = "dust_system_generator",
   name = "sir",
+  package = "dust2",
+  path = NULL,
+  parameters = data.frame(
+    name = c("I0", "N", "beta", "gamma", "exp_noise"),
+    type = c("real_type", "real_type", "real_type", "real_type", "real_type"),
+    constant = c(FALSE, TRUE, FALSE, FALSE, TRUE),
+    required = c(FALSE, FALSE, FALSE, FALSE, FALSE),
+    rank = c(0L, 0L, 0L, 0L, 0L)),
   properties = list(
     time_type = "discrete",
     has_compare = TRUE,
@@ -30,6 +53,14 @@ sirode <- structure(
   function() get("sirode"),
   class = "dust_system_generator",
   name = "sirode",
+  package = "dust2",
+  path = NULL,
+  parameters = data.frame(
+    name = c("I0", "N", "beta", "gamma", "exp_noise"),
+    type = c("real_type", "real_type", "real_type", "real_type", "real_type"),
+    constant = c(FALSE, TRUE, FALSE, FALSE, TRUE),
+    required = c(FALSE, FALSE, FALSE, FALSE, FALSE),
+    rank = c(0L, 0L, 0L, 0L, 0L)),
   properties = list(
     time_type = "continuous",
     has_compare = TRUE,
@@ -39,6 +70,13 @@ walk <- structure(
   function() get("walk"),
   class = "dust_system_generator",
   name = "walk",
+  package = "dust2",
+  path = NULL,
+  parameters = data.frame(
+    name = c("sd", "len", "random_initial"),
+    type = c("real_type", "int", "bool"),
+    constant = c(FALSE, TRUE, TRUE),
+    required = c(TRUE, FALSE, FALSE)),
   properties = list(
     time_type = "discrete",
     has_compare = FALSE,
