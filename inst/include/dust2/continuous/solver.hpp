@@ -53,6 +53,7 @@ struct internals {
   size_t n_steps;
   size_t n_steps_accepted;
   size_t n_steps_rejected;
+  std::vector<size_t> history_index;
 
   internals(size_t n_variables) :
     dydt(n_variables),
@@ -65,8 +66,25 @@ struct internals {
     reset();
   }
 
+  void set_history_index(const std::vector<size_t>& index) {
+    if (tools::is_trivial_index(index, dydt.size())) {
+      history_index.clear();
+    } else {
+      history_index = index;
+    }
+  }
+
   void save_history(real_type t, real_type h) {
-    history_values.push_back({t, h, c1, c2, c3, c4, c5});
+    if (history_index.empty()) {
+      history_values.push_back({t, h, c1, c2, c3, c4, c5});
+    } else {
+      history_values.push_back({t, h,
+                                tools::subset(c1, history_index),
+                                tools::subset(c2, history_index),
+                                tools::subset(c3, history_index),
+                                tools::subset(c4, history_index),
+                                tools::subset(c5, history_index)});
+    }
   }
 
   void reset() {

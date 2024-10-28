@@ -18,8 +18,7 @@ dust2::ode::control<real_type> validate_ode_control(cpp11::list r_time_control) 
   const auto step_size_max = dust2::r::read_real(ode_control, "step_size_max");
   const bool debug_record_step_times =
     dust2::r::read_bool(ode_control, "debug_record_step_times");
-  const bool save_history =
-    dust2::r::read_bool(ode_control, "save_history");
+  const auto save_history = dust2::r::read_bool(ode_control, "save_history");
   return dust2::ode::control<real_type>(max_steps, atol, rtol, step_size_min,
                                         step_size_max, save_history,
                                         debug_record_step_times);

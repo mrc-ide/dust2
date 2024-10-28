@@ -45,7 +45,7 @@ public:
     state_next_(n_state_ * n_particles_total_),
     shared_(shared),
     internal_(internal),
-    all_groups_(n_groups_),
+    all_groups_(tools::integer_sequence(n_groups_)),
     time_(time),
     dt_(dt),
     zero_every_(zero_every_vec<T>(shared_)),
@@ -55,9 +55,6 @@ public:
     // We don't check that the size is the same across all states;
     // this should be done by the caller (similarly, we don't check
     // that shared and internal have the same size).
-    for (size_t i = 0; i < n_groups_; ++i) {
-      all_groups_[i] = i;
-    }
   }
 
   auto run_to_time(real_type time, const std::vector<size_t>& index_group) {

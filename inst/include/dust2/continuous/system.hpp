@@ -61,7 +61,7 @@ public:
 
     shared_(shared),
     internal_(internal),
-    all_groups_(n_groups_),
+    all_groups_(tools::integer_sequence(n_groups_)),
 
     time_(time),
     zero_every_(zero_every_vec<T>(shared_)),
@@ -77,9 +77,6 @@ public:
     // We don't check that the size is the same across all states;
     // this should be done by the caller (similarly, we don't check
     // that shared and internal have the same size).
-    for (size_t i = 0; i < n_groups_; ++i) {
-      all_groups_[i] = i;
-    }
   }
 
   template <typename mixed_time = typename dust2::properties<T>::is_mixed_time>
@@ -178,14 +175,13 @@ public:
         try {
           T::initial(time_, shared_[i], internal_i,
                      rng_.state(k), y);
-          solver_.initialise(time_, y, ode_internals_[k],
-                             rhs_(shared_[i], internal_i));
         } catch (std::exception const& e) {
           errors_.capture(e, k);
         }
       }
     }
     errors_.report();
+    initialise_solver_(index_group);
     // Assume not current, because most models would want to call output here()
     update_output_is_current(index_group, false);
   }
