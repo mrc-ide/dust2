@@ -72,3 +72,24 @@ test_that("set browser sentinal if requested", {
   mockery::expect_called(mock_find_env, 1)
   expect_true(e$.dust_browser_continue)
 })
+
+
+test_that("can browse environment", {
+  skip_if_not_installed("mockery")
+  mock_browse_env <- mockery::mock()
+  mockery::stub(browser_env, "browse_env", mock_browse_env)
+  env <- new.env()
+  env$a <- 1
+  withr::with_options(list(dust.browser_enabled = FALSE),
+                      browser_env(env, "phase", 1))
+  mockery::expect_called(mock_browse_env, 0)
+
+  withr::with_options(
+    list(dust.browser_enabled = NULL),
+    expect_message(browser_env(env, "phase", 1),
+                   "dust debug ('phase'; time = 1):",
+                   fixed = TRUE))
+
+  mockery::expect_called(mock_browse_env, 1)
+  expect_equal(mockery::mock_args(mock_browse_env)[[1]], list(env))
+})

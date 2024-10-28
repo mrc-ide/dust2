@@ -80,3 +80,12 @@ test_that("fmod works", {
   expect_equal(fmod(10, 0.1), 0)
   expect_equal(fmod(10, 0.01), 0)
 })
+
+
+test_that("describe ranks", {
+  expect_equal(rank_description(0), "scalar")
+  expect_equal(rank_description(1), "vector")
+  expect_equal(rank_description(2), "matrix")
+  expect_equal(rank_description(3), "3-dimensional array")
+  expect_equal(rank_description(300), "300-dimensional array")
+})

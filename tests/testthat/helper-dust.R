@@ -2,12 +2,12 @@
 ## system; once we have a generic system interface we can make this more
 ## generic.  It just redoes the same logic as in the C++ code but is
 ## easier to read (and quite a lot slower due to churn in state).
-sir_filter_manual <- function(pars, time_start, data, dt, n_particles,
-                              seed) {
+filter_manual <- function(generator, pars, time_start, data, dt, n_particles,
+                          seed) {
   r <- monty::monty_rng$new(n_streams = 1, seed = seed)
   seed <- monty::monty_rng$new(n_streams = 1, seed = seed)$jump()$state()
 
-  obj <- dust_system_create(sir(), pars, n_particles,
+  obj <- dust_system_create(generator, pars, n_particles,
                             time = time_start, dt = dt, seed = seed)
   n_state <- nrow(dust_system_state(obj))
   n_time <- nrow(data)
@@ -42,6 +42,15 @@ sir_filter_manual <- function(pars, time_start, data, dt, n_particles,
     list(log_likelihood = ll,
          trajectories = if (save_trajectories) trajectories)
   }
+}
+
+sir_filter_manual <- function(...) {
+  filter_manual(sir, ...)
+}
+
+
+malaria_filter_manual <- function(...) {
+  filter_manual(malaria, ...)
 }
 
 

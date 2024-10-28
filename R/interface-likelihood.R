@@ -292,12 +292,8 @@ print.dust_likelihood <- function(x, ...) {
   ## TODO:
   ## * has gradient
   ## Link to docs
-  if (attr(x$generator, "properties")$time_type == "discrete") {
-    cli::cli_bullets(c(
-      i = "The system runs in discrete time with dt = {x$time_control$dt}"))
-  } else {
-    cli::cli_bullets(c(
-      i = "The system runs in continuous time"))
-  }
+  time_type <- attr(x$generator, "properties")$time_type
+  cli::cli_bullets(
+    c(i = describe_time(time_type, NULL, x$time_control$dt)))
   invisible(x)
 }

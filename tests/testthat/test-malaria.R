@@ -26,3 +26,26 @@ test_that("can apply stochastic updates by setting dt", {
     expect_equal(y0[-i_beta, ], y[-i_beta, , i + 1])
   }
 })
+
+
+test_that("can print a mixed generator", {
+  res <- evaluate_promise(withVisible(print(malaria)))
+  expect_mapequal(res$result, list(value = malaria, visible = FALSE))
+  expect_match(res$messages, "<dust_system_generator: malaria>",
+               fixed = TRUE, all = FALSE)
+  expect_match(
+    res$messages,
+    "This system runs in both continuous time and discrete time",
+    all = FALSE)
+})
+
+
+test_that("Can compare to data", {
+  sys <- dust_system_create(malaria(), list(), n_particles = 10, dt = 1)
+  dust_system_set_state_initial(sys)
+  dust_system_run_to_time(sys, 10)
+  s <- dust_unpack_state(sys, dust_system_state(sys))
+  d <- list(tested = 4, positive = 2)
+  expect_equal(dust_system_compare_data(sys, d),
+               dbinom(d$positive, d$tested, s$Ih, log = TRUE))
+})

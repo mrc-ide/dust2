@@ -460,6 +460,12 @@ test_that("can validate times", {
     dust_system_simulate(obj, c(1, 2, 1)),
     "Values in 'times' must be increasing",
     fixed = TRUE)
+  err <- expect_error(
+    dust_system_simulate(obj, c(10:1)),
+    "Values in 'times' must be increasing",
+    fixed = TRUE)
+  expect_match(conditionMessage(err),
+               "...and 5 other errors", fixed = TRUE)
   expect_error(
     dust_system_simulate(obj, NULL),
     "Expected 'times' to be numeric")

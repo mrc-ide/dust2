@@ -155,3 +155,35 @@ test_that("can validate default dt in discrete time models", {
     "Expected '[[dust2::default_dt()]]' to be the inverse of an integer",
     fixed = TRUE)
 })
+
+
+test_that("validate default dt", {
+  d <- data.frame(decoration = "dust2::default_dt",
+                  params = I(list(alist(0.5))))
+
+  expect_equal(parse_metadata_default_dt(d[-1, ], "discrete"), 1)
+  expect_equal(parse_metadata_default_dt(d, "discrete"), 0.5)
+
+  expect_error(
+    parse_metadata_default_dt(d, "continuous"),
+    "Can't use '[[dust::default_dt()]]' with continuous-time systems",
+    fixed = TRUE)
+
+  d$params[[1]] <- list(quote(a))
+  expect_error(
+    parse_metadata_default_dt(d, "discrete"),
+    "Expected a numerical argument to '[[dust2::default_dt()]]'",
+    fixed = TRUE)
+
+  d$params[[1]] <- list(dt = 1)
+  expect_error(
+    parse_metadata_default_dt(d, "discrete"),
+    "Expected a single unnamed argument to '[[dust2::default_dt()]]'",
+    fixed = TRUE)
+
+  d$params[[1]] <- list(0.37)
+  expect_error(
+    parse_metadata_default_dt(d, "discrete"),
+    "Expected '[[dust2::default_dt()]]' to be the inverse of an integer",
+    fixed = TRUE)
+})

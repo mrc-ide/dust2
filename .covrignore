@@ -1,1 +1,9 @@
 R/import-*.R
+R/cpp11.R
+R/dust.R
+src/cpp11.cpp
+src/logistic.cpp
+src/malaria.cpp
+src/sir.cpp
+src/sirode.cpp
+src/walk.cpp
