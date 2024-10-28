@@ -4,6 +4,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <vector>
+#include <dust2/tools.hpp>
 #include <dust2/zero.hpp>
 #include <dust2/continuous/control.hpp>
 
