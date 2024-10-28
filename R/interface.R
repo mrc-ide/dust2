@@ -533,22 +533,8 @@ print.dust_system <- function(x, ...) {
     cli::cli_bullets(c(
       i = "This system has 'adjoint' support, and can compute gradients"))
   }
-  if (x$properties$time_type == "discrete") {
-    cli::cli_bullets(c(
-      i = "This system runs in discrete time with dt = {x$time_control$dt}"))
-  } else if (x$properties$time_type == "mixed") {
-    if (is.null(x$time_control$dt)) {
-      cli::cli_bullets(c(
-        i = "This system runs in continuous time (discrete time disabled)"))
-    } else {
-      cli::cli_bullets(c(
-        i = paste("This system runs in both continuous time and",
-                  "discrete time with dt = {x$time_control$dt}")))
-    }
-  } else {
-    cli::cli_bullets(c(
-      i = "This system runs in continuous time"))
-  }
+  cli::cli_bullets(
+    c(i = describe_time(x$properties$time_type, NULL, x$time_control$dt)))
   invisible(x)
 }
 
@@ -565,25 +551,38 @@ print.dust_system_generator <- function(x, ...) {
     cli::cli_bullets(c(
       i = "This system has 'compare_data' support"))
   }
-  if (properties$time_type == "discrete") {
-    cli::cli_bullets(c(
-      i = paste("This system runs in discrete time",
-                "with a default dt of {default_dt}")))
-  } else if (properties$time_type == "mixed") {
-    if (is.null(default_dt)) {
-      cli::cli_bullets(c(
-        i = paste("This system runs in both continuous time",
-                  "and discrete time with discrete time disabled by default")))
-    } else {
-      cli::cli_bullets(c(
-        i = paste("This system runs in both continuous time",
-                  "and discrete time with a default dt of {default_dt}")))
-    }
-  } else {
-    cli::cli_bullets(c(
-      i = "This system runs in continuous time"))
-  }
+  cli::cli_bullets(
+    c(i = describe_time(properties$time_type, default_dt)))
   invisible(x)
+}
+
+
+describe_time <- function(time_type, default_dt, dt) {
+  if (time_type == "continuous") {
+    "This system runs in continuous time"
+  } else if (time_type == "discrete") {
+    prefix <- "This system runs in discrete time"
+    if (rlang::is_missing(dt)) {
+      cli::format_inline("{prefix} with a default dt of {default_dt}")
+    } else {
+      cli::format_inline("{prefix} with dt = {dt}")
+    }
+  } else if (time_type == "mixed") {
+    prefix <- "This system runs in both continuous time and discrete time"
+    if (rlang::is_missing(dt)) {
+      if (is.null(default_dt)) {
+        cli::format_inline("{prefix} with discrete time disabled by default")
+      } else {
+        cli::format_inline("{prefix} with a default dt of {default_dt}")
+      }
+    } else {
+      if (is.null(dt)) {
+        cli::format_inline("{prefix} with discrete time disabled")
+      } else {
+        cli::format_inline("{prefix} with dt = {dt}")
+      }
+    }
+  }
 }
 
 

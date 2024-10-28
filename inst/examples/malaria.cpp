@@ -131,7 +131,7 @@ public:
     if (std::isnan(data.positive) || std::isnan(data.tested)) {
       return 0;
     }
-    const real_type Ih = state[1]; // Ih
+    const real_type Ih = state[1];
     return monty::density::binomial(data.positive, data.tested, Ih, true);
   }
 };

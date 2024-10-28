@@ -184,3 +184,36 @@ test_that("format dimensions as a string", {
                            n_groups = 1)),
     "single particle")
 })
+
+
+test_that("can describe time", {
+  expect_equal(
+    describe_time("continuous", NULL),
+    "This system runs in continuous time")
+  expect_equal(
+    describe_time("discrete", 1),
+    "This system runs in discrete time with a default dt of 1")
+  expect_equal(
+    describe_time("mixed", NULL),
+    paste("This system runs in both continuous time and discrete time",
+          "with discrete time disabled by default"))
+  expect_equal(
+    describe_time("mixed", 1),
+    paste("This system runs in both continuous time and discrete time",
+          "with a default dt of 1"))
+
+  expect_equal(
+    describe_time("continuous", NULL, NULL),
+    "This system runs in continuous time")
+  expect_equal(
+    describe_time("discrete", 1, 0.5),
+    "This system runs in discrete time with dt = 0.5")
+  expect_equal(
+    describe_time("mixed", NULL, NULL),
+    paste("This system runs in both continuous time and discrete time",
+          "with discrete time disabled"))
+  expect_equal(
+    describe_time("mixed", NULL, 0.5),
+    paste("This system runs in both continuous time and discrete time",
+          "with dt = 0.5"))
+})

@@ -36,6 +36,21 @@ test_that("can only use pars = NULL on initialised filter", {
 })
 
 
+test_that("can only use index_group on initialised filter", {
+  pars <- list(
+    list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6),
+    list(beta = 0.2, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6))
+  time_start <- 0
+  data <- data.frame(time = rep(c(4, 8, 12, 16), 2),
+                     group = rep(1:2, each = 4),
+                     incidence = c(1:4, 2:5))
+  obj <- dust_filter_create(sir(), time_start, data,
+                            n_particles = 10, n_groups = 2)
+  expect_error(dust_likelihood_run(obj, pars[1], index_group = 1),
+               "'index_group' must be NULL, as 'obj' is not initialised")
+})
+
+
 test_that("can run particle filter and save trajectories", {
   pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
 
@@ -49,6 +64,8 @@ test_that("can run particle filter and save trajectories", {
                             n_particles = n_particles, seed = seed)
   expect_error(dust_likelihood_last_trajectories(obj),
                "Trajectories are not current")
+  expect_error(dust_likelihood_last_state(obj),
+               "State is not current")
   res1 <- dust_likelihood_run(obj, pars)
   expect_error(dust_likelihood_last_trajectories(obj),
                "Trajectories are not current")
@@ -647,4 +664,25 @@ test_that("can run continuous-time filter", {
     dust_filter_create(sirode(), time_start, data, n_particles = n_particles),
     "Can't use 'dust_filter_create()' with continuous-time models",
     fixed = TRUE)
+})
+
+
+test_that("can run filter on mixed time models", {
+  pars <- list()
+
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16),
+                     tested = c(2, 4, 6, 8),
+                     positive = c(1, 2, 3, 3))
+  dt <- 1
+  n_particles <- 100
+  seed <- 42
+
+  obj <- dust_filter_create(malaria(), time_start, data, dt = dt,
+                            n_particles = n_particles, seed = seed)
+  res <- replicate(5, dust_likelihood_run(obj, pars))
+
+  cmp_filter <- filter_manual(
+    malaria, pars, time_start, data, dt, n_particles, seed)
+  expect_equal(res, replicate(5, cmp_filter(NULL)$log_likelihood))
 })

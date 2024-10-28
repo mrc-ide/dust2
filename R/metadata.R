@@ -109,7 +109,7 @@ parse_metadata_default_dt <- function(data, time_type, call = NULL) {
       "Can't use '[[dust::default_dt()]]' with continuous-time systems",
       call = call)
   }
-  if (length(data) != 1 || nzchar(names(data))) {
+  if (length(data) != 1 || nzchar(rlang::names2(data))) {
     cli::cli_abort(
       "Expected a single unnamed argument to '[[dust2::default_dt()]]'",
       call = call)

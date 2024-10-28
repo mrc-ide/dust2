@@ -105,10 +105,19 @@ browser_env <- function(env, phase, time) {
     parent <- browser_find_parent_env(sys.frames())
     if (is.null(parent) || !isTRUE(parent$.dust_browser_continue)) {
       browser_welcome_message(env, phase, time)
-      with(env, browser())
+      browse_env(env)
     }
   }
 }
+
+
+browse_env <- function(env) {
+  ## This can't be mocked out due to how R handles browser, and we
+  ## might need something a bit better before final submission to
+  ## CRAN.
+  with(env, browser()) # nocov
+}
+
 
 
 browser_find_parent_env <- function(frames, drop = 1) {

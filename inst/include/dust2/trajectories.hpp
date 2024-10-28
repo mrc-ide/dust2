@@ -142,16 +142,10 @@ public:
         const auto iter_state = state_.begin() + i * len_state_;
         for (size_t j = 0; j < n_groups_; ++j) {
           const auto offset_state = j * n_state_ * n_particles_;
-          if (use_select_particle) {
-            const auto offset_j = select_particle[j] * n_state_;
-            iter = std::copy_n(iter_state + offset_state + offset_j,
-                               n_state_,
-                               iter);
-          } else {
-            iter = std::copy_n(iter_state + offset_state,
-                               n_state_ * n_particles_,
-                               iter);
-          }
+          const auto offset_j = select_particle[j] * n_state_;
+          iter = std::copy_n(iter_state + offset_state + offset_j,
+                             n_state_,
+                             iter);
         }
       }
     }
