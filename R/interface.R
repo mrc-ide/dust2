@@ -448,6 +448,8 @@ dust_system_reorder <- function(sys, index) {
 ##'   coefficients should be included in the output.  These are
 ##'   intentionally undocumented for now.
 ##'
+##' @param include_history Boolean, also undocumented.
+##'
 ##' @return If `sys` is a discrete-time system, this function returns
 ##'   `NULL`, as no internal data is stored.  Otherwise, for a
 ##'   continuous-time system we return a `data.frame` of statistics
@@ -462,13 +464,14 @@ dust_system_reorder <- function(sys, index) {
 ##'   (the structure of these may change over time, too).
 ##'
 ##' @export
-dust_system_internals <- function(sys, include_coefficients = FALSE) {
+dust_system_internals <- function(sys, include_coefficients = FALSE,
+                                  include_history = FALSE) {
   check_is_dust_system(sys)
   if (sys$properties$time_type == "discrete") {
     ## No internals for now, perhaps never?
     return(NULL)
   }
-  dat <- sys$methods$internals(sys$ptr, include_coefficients)
+  dat <- sys$methods$internals(sys$ptr, include_coefficients, include_history)
   ret <- data_frame(
     particle = seq_along(dat),
     dydt = I(lapply(dat, "[[", "dydt")),
@@ -480,6 +483,9 @@ dust_system_internals <- function(sys, include_coefficients = FALSE) {
     n_steps_rejected = viapply(dat, "[[", "n_steps_rejected"))
   if (include_coefficients) {
     ret$coefficients <- I(lapply(dat, "[[", "coefficients"))
+  }
+  if (include_history) {
+    ret$history <- I(lapply(dat, "[[", "history"))
   }
   ret
 }

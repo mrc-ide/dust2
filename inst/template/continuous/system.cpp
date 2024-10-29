@@ -4,6 +4,6 @@ SEXP dust2_system_{{name}}_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::
 }
 
 [[cpp11::register]]
-SEXP dust2_system_{{name}}_internals(cpp11::sexp ptr, bool include_coefficients) {
-  return dust2::r::dust2_system_internals<dust2::dust_{{time_type}}<{{class}}>>(ptr, include_coefficients);
+SEXP dust2_system_{{name}}_internals(cpp11::sexp ptr, bool include_coefficients, bool include_history) {
+  return dust2::r::dust2_system_internals<dust2::dust_{{time_type}}<{{class}}>>(ptr, include_coefficients, include_history);
 }

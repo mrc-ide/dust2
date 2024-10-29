@@ -156,8 +156,8 @@ SEXP dust2_system_malaria_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::l
 }
 
 [[cpp11::register]]
-SEXP dust2_system_malaria_internals(cpp11::sexp ptr, bool include_coefficients) {
-  return dust2::r::dust2_system_internals<dust2::dust_continuous<malaria>>(ptr, include_coefficients);
+SEXP dust2_system_malaria_internals(cpp11::sexp ptr, bool include_coefficients, bool include_history) {
+  return dust2::r::dust2_system_internals<dust2::dust_continuous<malaria>>(ptr, include_coefficients, include_history);
 }
 [[cpp11::register]]
 SEXP dust2_system_malaria_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {

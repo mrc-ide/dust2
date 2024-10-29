@@ -32,27 +32,34 @@
 ##'   debugging.  Step times can be retrieved via
 ##'   [dust_system_internals()].
 ##'
+##' @param save_history Logical, indicating if we should save history
+##'   during running.  This should only be enabled for debugging.
+##'   Data can be retrieved via [dust_system_internals()], but the
+##'   format is undocumented.
+##'
 ##' @export
 ##'
 ##' @return A named list of class "dust_ode_control".  Do not modify
 ##'   this after creation.
 dust_ode_control <- function(max_steps = 10000, atol = 1e-6, rtol = 1e-6,
                              step_size_min = 0, step_size_max = Inf,
-                             debug_record_step_times = FALSE) {
-  call <- environment()
+                             debug_record_step_times = FALSE,
+                             save_history = FALSE) {
   ctl <- list(
     max_steps = assert_scalar_size(
-      max_steps, allow_zero = FALSE, call = call),
+      max_steps, allow_zero = FALSE),
     atol = assert_scalar_positive_numeric(
-      atol, allow_zero = FALSE, call = call),
+      atol, allow_zero = FALSE),
     rtol = assert_scalar_positive_numeric(
-      rtol, allow_zero = FALSE, call = call),
+      rtol, allow_zero = FALSE),
     step_size_min = assert_scalar_positive_numeric(
-      step_size_min, allow_zero = TRUE, call = call),
+      step_size_min, allow_zero = TRUE),
     step_size_max = assert_scalar_positive_numeric(
-      step_size_max, allow_zero = TRUE, call = call),
+      step_size_max, allow_zero = TRUE),
+    save_history = assert_scalar_logical(
+      save_history),
     debug_record_step_times = assert_scalar_logical(
-      debug_record_step_times, call = call))
+      debug_record_step_times))
   class(ctl) <- "dust_ode_control"
   ctl
 }

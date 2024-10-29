@@ -52,6 +52,25 @@ T prod(const std::vector<T>& x) {
   return std::accumulate(x.begin(), x.end(), 1, std::multiplies<>{});
 }
 
+inline std::vector<size_t> integer_sequence(size_t n) {
+  std::vector<size_t> ret;
+  ret.reserve(n);
+  for (size_t i = 0; i < n; ++i) {
+    ret.push_back(i);
+  }
+  return ret;
+}
+
+template <typename T>
+std::vector<T> subset(const std::vector<T>& x, const std::vector<size_t> index) {
+  std::vector<T> ret;
+  ret.reserve(index.size());
+  for (auto i : index) {
+    ret.push_back(x[i]);
+  }
+  return ret;
+}
+
 inline bool is_trivial_index(const std::vector<size_t>& index, size_t n) {
   if (index.empty()) {
     return true;

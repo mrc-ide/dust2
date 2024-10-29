@@ -55,7 +55,8 @@ SEXP dust2_continuous_alloc(cpp11::list r_pars,
 
 template <typename real_type>
 cpp11::sexp ode_internals_to_sexp(const ode::internals<real_type>& internals,
-                                  bool include_coefficients) {
+                                  bool include_coefficients,
+                                  bool include_history) {
   using namespace cpp11::literals;
   auto ret = cpp11::writable::list{
     "dydt"_nm = cpp11::as_sexp(internals.dydt),
@@ -65,7 +66,8 @@ cpp11::sexp ode_internals_to_sexp(const ode::internals<real_type>& internals,
     "n_steps"_nm = cpp11::as_sexp(internals.n_steps),
     "n_steps_accepted"_nm = cpp11::as_sexp(internals.n_steps_accepted),
     "n_steps_rejected"_nm = cpp11::as_sexp(internals.n_steps_rejected),
-    "coefficients"_nm = R_NilValue};
+    "coefficients"_nm = R_NilValue,
+    "history"_nm = R_NilValue};
   if (include_coefficients) {
     auto r_coef = cpp11::writable::doubles_matrix<>(internals.c1.size(), 5);
     auto coef = REAL(r_coef);
@@ -76,18 +78,46 @@ cpp11::sexp ode_internals_to_sexp(const ode::internals<real_type>& internals,
     coef = std::copy(internals.c5.begin(), internals.c5.end(), coef);
     ret["coefficients"] = r_coef;
   }
+  if (include_history && !internals.history_values.empty()) {
+    const auto n_history_entries = internals.history_values.size();
+    const auto n_history_state = internals.history_values[0].c1.size();
+    auto r_history_coef =
+      cpp11::writable::doubles(n_history_state * 5 * n_history_entries);
+    auto r_history_time = cpp11::writable::doubles(n_history_entries);
+    auto r_history_size = cpp11::writable::doubles(n_history_entries);
+    auto history_coef = REAL(r_history_coef);
+    auto history_time = REAL(r_history_time);
+    auto history_size = REAL(r_history_size);
+    for (auto& h: internals.history_values) {
+      *history_time++ = h.t;
+      *history_size++ = h.h;
+      history_coef = std::copy(h.c1.begin(), h.c1.end(), history_coef);
+      history_coef = std::copy(h.c2.begin(), h.c2.end(), history_coef);
+      history_coef = std::copy(h.c3.begin(), h.c3.end(), history_coef);
+      history_coef = std::copy(h.c4.begin(), h.c4.end(), history_coef);
+      history_coef = std::copy(h.c5.begin(), h.c5.end(), history_coef);
+    }
+    set_array_dims(r_history_coef, {n_history_state, 5, n_history_entries});
+    auto r_history = cpp11::writable::list{"time"_nm = r_history_time,
+                                           "size"_nm = r_history_size,
+                                           "coefficients"_nm = r_history_coef};
+    ret["history"] = cpp11::as_sexp(r_history);
+  }
   return ret;
 }
 
 template <typename T>
-SEXP dust2_system_internals(cpp11::sexp ptr, bool include_coefficients) {
+SEXP dust2_system_internals(cpp11::sexp ptr, bool include_coefficients, bool include_history) {
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
   const auto& internals = obj->ode_internals();
   cpp11::writable::list ret(internals.size());
   for (size_t i = 0; i < internals.size(); ++i) {
-    ret[i] = ode_internals_to_sexp(internals[i], include_coefficients);
+    ret[i] = ode_internals_to_sexp(internals[i],
+                                   include_coefficients,
+                                   include_history);
   }
   return cpp11::as_sexp(ret);
+
 }
 
 }

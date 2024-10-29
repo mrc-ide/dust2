@@ -10,7 +10,8 @@ dust_ode_control(
   rtol = 1e-06,
   step_size_min = 0,
   step_size_max = Inf,
-  debug_record_step_times = FALSE
+  debug_record_step_times = FALSE,
+  save_history = FALSE
 )
 }
 \arguments{
@@ -40,6 +41,11 @@ a smaller maximum step size here.}
 times should be recorded.  This should only be enabled for
 debugging.  Step times can be retrieved via
 \code{\link[=dust_system_internals]{dust_system_internals()}}.}
+
+\item{save_history}{Logical, indicating if we should save history
+during running.  This should only be enabled for debugging.
+Data can be retrieved via \code{\link[=dust_system_internals]{dust_system_internals()}}, but the
+format is undocumented.}
 }
 \value{
 A named list of class "dust_ode_control".  Do not modify

@@ -4,6 +4,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <vector>
+#include <dust2/tools.hpp>
 #include <dust2/zero.hpp>
 #include <dust2/continuous/control.hpp>
 
@@ -20,6 +21,17 @@ T clamp(T x, T min, T max) {
   return std::max(std::min(x, max), min);
 }
 
+template <typename real_type>
+struct history {
+  real_type t;
+  real_type h;
+  std::vector<real_type> c1;
+  std::vector<real_type> c2;
+  std::vector<real_type> c3;
+  std::vector<real_type> c4;
+  std::vector<real_type> c5;
+};
+
 // This is the internal state separate from 'y' that defines the
 // system.  This includes the derivatives.
 //
@@ -29,6 +41,7 @@ template <typename real_type>
 struct internals {
   std::vector<real_type> dydt;
   std::vector<real_type> step_times;
+  std::vector<history<real_type>> history_values;
   // Interpolation coefficients
   std::vector<real_type> c1;
   std::vector<real_type> c2;
@@ -41,6 +54,7 @@ struct internals {
   size_t n_steps;
   size_t n_steps_accepted;
   size_t n_steps_rejected;
+  std::vector<size_t> history_index;
 
   internals(size_t n_variables) :
     dydt(n_variables),
@@ -53,6 +67,27 @@ struct internals {
     reset();
   }
 
+  void set_history_index(const std::vector<size_t>& index) {
+    if (tools::is_trivial_index(index, dydt.size())) {
+      history_index.clear();
+    } else {
+      history_index = index;
+    }
+  }
+
+  void save_history(real_type t, real_type h) {
+    if (history_index.empty()) {
+      history_values.push_back({t, h, c1, c2, c3, c4, c5});
+    } else {
+      history_values.push_back({t, h,
+                                tools::subset(c1, history_index),
+                                tools::subset(c2, history_index),
+                                tools::subset(c3, history_index),
+                                tools::subset(c4, history_index),
+                                tools::subset(c5, history_index)});
+    }
+  }
+
   void reset() {
     last_step_size = 0;
     step_size = 0;
@@ -60,7 +95,8 @@ struct internals {
     n_steps = 0;
     n_steps_accepted = 0;
     n_steps_rejected = 0;
-    step_times.resize(0);
+    step_times.clear();
+    history_values.clear();
   }
 };
 
@@ -174,6 +210,9 @@ public:
         internals.n_steps_accepted++;
         if (control_.debug_record_step_times) {
           internals.step_times.push_back(truncated ? t_end : t + h);
+        }
+        if (control_.save_history) {
+          internals.save_history(t, h);
         }
         if (!truncated) {
           const auto fac_old =

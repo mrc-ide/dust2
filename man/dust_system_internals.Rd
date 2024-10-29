@@ -4,7 +4,11 @@
 \alias{dust_system_internals}
 \title{Fetch system internals}
 \usage{
-dust_system_internals(sys, include_coefficients = FALSE)
+dust_system_internals(
+  sys,
+  include_coefficients = FALSE,
+  include_history = FALSE
+)
 }
 \arguments{
 \item{sys}{A \code{dust_system} object}
@@ -12,6 +16,8 @@ dust_system_internals(sys, include_coefficients = FALSE)
 \item{include_coefficients}{Boolean, indicating if interpolation
 coefficients should be included in the output.  These are
 intentionally undocumented for now.}
+
+\item{include_history}{Boolean, also undocumented.}
 }
 \value{
 If \code{sys} is a discrete-time system, this function returns
