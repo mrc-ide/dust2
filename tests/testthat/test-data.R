@@ -73,7 +73,7 @@ test_that("require group if times duplicate", {
 
 test_that("validate that group is usable", {
   d <- data.frame(time = c(1, 1, 2, 2),
-                  nm = c("a", "a", "b", "b"),
+                  nm = c(TRUE, TRUE, FALSE, FALSE),
                   skip = c(1, 3, 1, 3),
                   imbalanced = c(1, 2, 1, 1))
   expect_error(
@@ -103,4 +103,18 @@ test_that("can convert a data.frame with list columns", {
   d2 <- prepare_data(d, 1)
   expect_equal(d2$data[[1]], list(list(x = 1, y = y[[1]])))
   expect_equal(d2$data[[3]], list(list(x = 3, y = y[[3]])))
+})
+
+
+test_that("can use named groups", {
+  data <- cbind(
+    expand.grid(time = 1:4, group = letters[1:3], KEEP.OUT.ATTRS = FALSE,
+                stringsAsFactors = FALSE),
+    data = runif(12))
+  d <- dust_filter_data(data)
+  expect_s3_class(d, c("dust_fulter_data", "data.frame"))
+  expect_equal(attr(d, "time"), "time")
+  expect_equal(attr(d, "group"), "group")
+  expect_equal(attr(d, "n_groups"), 3)
+  expect_equal(attr(d, "groups"), c("a", "b", "c"))
 })

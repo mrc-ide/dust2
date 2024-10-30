@@ -66,17 +66,21 @@ dust_filter_data <- function(data, time = NULL, group = NULL) {
   if (is.null(group)) {
     n_groups <- 1
     data <- data[order(data[[time]]), ]
+    groups <- NULL
   } else {
-    assert_integer(data[[group]], name = sprintf('data[["%s"]]', group),
-                   arg = "data")
     groups <- unique(data[[group]])
     n_groups <- length(groups)
-    if (!setequal(groups, seq_len(n_groups))) {
-      cli::cli_abort(
-        paste("Expected 'data[[\"{group}\"]]' to contain integer values in",
-              "[1, {n_groups}], and contain all those values"))
+    if (is.numeric(data[[group]])) {
+      assert_integer(data[[group]], name = sprintf('data[["%s"]]', group),
+                     arg = "data")
+      if (!setequal(groups, seq_len(n_groups))) {
+        cli::cli_abort(
+          paste("Expected 'data[[\"{group}\"]]' to contain integer values in",
+                "[1, {n_groups}], and contain all those values"))
+      }
+    } else if (!is.character(groups)) {
+      cli::cli_abort("Expected 'data[[\"{group}\"]]' to be integer or character")
     }
-
     ## Detect balance here; this is not super easy, and in particular
     ## not easy to report back errors about. Let's refine the error
     ## reporting later.
@@ -100,6 +104,7 @@ dust_filter_data <- function(data, time = NULL, group = NULL) {
   rownames(data) <- NULL
   attr(data, "time") <- time
   attr(data, "group") <- group
+  attr(data, "groups") <- groups
   attr(data, "n_groups") <- n_groups
   class(data) <- c("dust_filter_data", class(data))
   data
@@ -114,6 +119,7 @@ prepare_data <- function(data, n_groups, call = NULL) {
 
   name_time <- attr(data, "time")
   name_group <- attr(data, "group")
+  groups <- attr(data, "groups")
   n_groups_data <- attr(data, "n_groups")
 
   if (is.null(n_groups)) {
@@ -126,7 +132,7 @@ prepare_data <- function(data, n_groups, call = NULL) {
 
   time <- data[[name_time]]
   if (!is.null(name_group)) {
-    time <- time[data[[name_group]] == 1]
+    time <- time[data[[name_group]] == groups[[1]]]
   }
 
   cols <- names(data) != name_time
@@ -153,5 +159,6 @@ prepare_data <- function(data, n_groups, call = NULL) {
 
   list(time = time,
        n_groups = n_groups_data,
+       groups = groups,
        data = data_by_time)
 }
