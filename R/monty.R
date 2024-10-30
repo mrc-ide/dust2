@@ -118,7 +118,7 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
     is_stochastic = !obj$deterministic,
     has_direct_sample = FALSE,
     has_gradient = obj$deterministic && obj$has_adjoint,
-    allow_multiple_parameters = obj$preserve_group_dimension,
+    allow_multiple_parameters = FALSE,
     has_observer = !is.null(observer),
     has_parameter_groups = FALSE)
 
