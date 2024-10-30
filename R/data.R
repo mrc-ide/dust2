@@ -66,6 +66,7 @@ dust_filter_data <- function(data, time = NULL, group = NULL) {
   if (is.null(group)) {
     n_groups <- 1
     data <- data[order(data[[time]]), ]
+    groups <- NULL
   } else {
     groups <- unique(data[[group]])
     n_groups <- length(groups)
@@ -77,6 +78,8 @@ dust_filter_data <- function(data, time = NULL, group = NULL) {
           paste("Expected 'data[[\"{group}\"]]' to contain integer values in",
                 "[1, {n_groups}], and contain all those values"))
       }
+    } else if (!is.character(groups)) {
+      cli::cli_abort("Expected 'data[[\"{group}\"]]' to be integer or character")
     }
     ## Detect balance here; this is not super easy, and in particular
     ## not easy to report back errors about. Let's refine the error

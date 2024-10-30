@@ -73,7 +73,7 @@ test_that("require group if times duplicate", {
 
 test_that("validate that group is usable", {
   d <- data.frame(time = c(1, 1, 2, 2),
-                  nm = c("a", "a", "b", "b"),
+                  nm = c(TRUE, TRUE, FALSE, FALSE),
                   skip = c(1, 3, 1, 3),
                   imbalanced = c(1, 2, 1, 1))
   expect_error(
