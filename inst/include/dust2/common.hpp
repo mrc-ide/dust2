@@ -46,6 +46,9 @@ template <typename real_type, size_t rank>
 void read_real_array(cpp11::list args, const dust2::array::dimensions<rank>& dim,
                      real_type * dest, const char *name, bool required);
 template <size_t rank>
+void read_int_array(cpp11::list args, const dust2::array::dimensions<rank>& dim,
+                    int * dest, const char *name, bool required);
+template <size_t rank>
 dust2::array::dimensions<rank> read_dimensions(cpp11::list args, const char * name);
 template <size_t rank>
 void read_dimensions(cpp11::list args, const char * name, dust2::array::dimensions<rank>& dest);

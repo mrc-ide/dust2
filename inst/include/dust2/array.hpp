@@ -153,6 +153,49 @@ T reduce(Container x, const dimensions<3>& dim, T init, BinaryOp op,
   return tot;
 }
 
+// 4 dimensions:
+template <typename T, typename Container, typename BinaryOp>
+T reduce(Container x, const dimensions<4>& dim, T init, BinaryOp op,
+         const idx& i, const idx& j, const idx& k, const idx& l) {
+  T tot = init;
+  for (size_t ll = l.first; ll <= l.second; ++ll) {
+    for (size_t kk = k.first; kk <= k.second; ++kk) {
+      for (size_t jj = j.first; jj <= j.second; ++jj) {
+        for (size_t ii = i.first; ii <= i.second; ++ii) {
+          const auto at = ii + jj * dim.mult[1] + kk * dim.mult[2] + ll * dim.mult[3];
+          tot = op(tot, x[at]);
+        }
+      }
+    }
+  }
+  return tot;
+}
+
+template <typename T, typename Container, typename BinaryOp>
+T reduce(Container x, const dimensions<5>& dim, T init, BinaryOp op,
+         const idx& i, const idx& j, const idx& k, const idx& l, const idx& i5) {
+  static_assert("reduction over 5d arrays not yet implemented");
+}
+
+template <typename T, typename Container, typename BinaryOp>
+T reduce(Container x, const dimensions<6>& dim, T init, BinaryOp op,
+         const idx& i, const idx& j, const idx& k, const idx& l, const idx& i5, const idx& i6) {
+  static_assert("reduction over 6d arrays not yet implemented");
+}
+
+template <typename T, typename Container, typename BinaryOp>
+T reduce(Container x, const dimensions<7>& dim, T init, BinaryOp op,
+         const idx& i, const idx& j, const idx& k, const idx& l, const idx& i5, const idx& i6, const idx& i7) {
+  static_assert("reduction over 7d arrays not yet implemented");
+}
+
+template <typename T, typename Container, typename BinaryOp>
+T reduce(Container x, const dimensions<8>& dim, T init, BinaryOp op,
+         const idx& i, const idx& j, const idx& k, const idx& l, const idx& i5, const idx& i6, const idx& i7, const idx& i8) {
+  static_assert("reduction over 8d arrays not yet implemented");
+}
+
+
 // Special case, sum over everything:
 template <typename T, typename Container, typename BinaryOp, size_t rank>
 T reduce(Container x, const dimensions<rank>& dim, T init, BinaryOp op) {
@@ -180,6 +223,11 @@ T sum(Container x, const dimensions<3>& dim, const idx& i, const idx& j, const i
   return reduce(x, dim, static_cast<T>(0), std::plus<T>(), i, j, k);
 }
 
+template <typename T, typename Container>
+T sum(Container x, const dimensions<4>& dim, const idx& i, const idx& j, const idx& k, const idx& l) {
+  return reduce(x, dim, static_cast<T>(0), std::plus<T>(), i, j, k, l);
+}
+
 // And products:
 template <typename T, typename Container, size_t rank>
 T prod(Container x, const dimensions<rank>& dim) {
@@ -199,6 +247,11 @@ T prod(Container x, const dimensions<2>& dim, const idx& i, const idx& j) {
 template <typename T, typename Container>
 T prod(Container x, const dimensions<3>& dim, const idx& i, const idx& j, const idx& k) {
   return reduce(x, dim, static_cast<T>(1), std::multiplies<T>(), i, j, k);
+}
+
+template <typename T, typename Container>
+T prod(Container x, const dimensions<4>& dim, const idx& i, const idx& j, const idx& k, const idx& l) {
+  return reduce(x, dim, static_cast<T>(0), std::multiplies<T>(), i, j, k, l);
 }
 
 // And min:
@@ -225,6 +278,11 @@ T min(Container x, const dimensions<3>& dim, const idx& i, const idx& j, const i
   return reduce(x, dim, std::numeric_limits<T>::infinity(), min2, i, j, k);
 }
 
+template <typename T, typename Container>
+T min(Container x, const dimensions<4>& dim, const idx& i, const idx& j, const idx& k, const idx& l) {
+  return reduce(x, dim, std::numeric_limits<T>::infinity(), min2, i, j, k, l);
+}
+
 // And max
 template <typename T, typename Container, size_t rank>
 T max(Container x, const dimensions<rank>& dim) {
@@ -244,6 +302,11 @@ T max(Container x, const dimensions<2>& dim, const idx& i, const idx& j) {
 template <typename T, typename Container>
 T max(Container x, const dimensions<3>& dim, const idx& i, const idx& j, const idx& k) {
   return reduce(x, dim, -std::numeric_limits<T>::infinity(), max2, i, j, k);
+}
+
+template <typename T, typename Container>
+T max(Container x, const dimensions<4>& dim, const idx& i, const idx& j, const idx& k, const idx& l) {
+  return reduce(x, dim, std::numeric_limits<T>::infinity(), max2, i, j, k, l);
 }
 
 }
