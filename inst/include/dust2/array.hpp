@@ -25,8 +25,20 @@ struct dimensions {
   std::array<size_t, rank_> dim;
   std::array<size_t, rank_> mult;
 
+  dimensions() : rank(rank_) {
+  }
+
   template <typename Iterator>
-  dimensions(Iterator iter) : rank(rank_), size(1) {
+  dimensions(Iterator iter) : rank(rank_) {
+    set(iter);
+  }
+
+  dimensions(std::initializer_list<size_t> dim_) : dimensions(dim_.begin()) {
+  }
+
+  template <typename Iterator>
+  void set(Iterator iter) {
+    size = 1;
     for (size_t i = 0; i < rank; ++i, ++iter) {
       dim[i] = *iter;
       mult[i] = size;
@@ -34,7 +46,8 @@ struct dimensions {
     }
   }
 
-  dimensions(std::initializer_list<size_t> dim_) : dimensions(dim_.begin()) {
+  void set(std::initializer_list<size_t> dim_) {
+    set(dim_.begin());
   }
 };
 

@@ -47,8 +47,10 @@ void read_real_array(cpp11::list args, const dust2::array::dimensions<rank>& dim
                      real_type * dest, const char *name, bool required);
 template <size_t rank>
 dust2::array::dimensions<rank> read_dimensions(cpp11::list args, const char * name);
+template <size_t rank>
+void read_dimensions(cpp11::list args, const char * name, dust2::array::dimensions<rank>& dest);
 template <>
-dust2::array::dimensions<1> read_dimensions(cpp11::list args, const char * name);
+void read_dimensions(cpp11::list args, const char * name, dust2::array::dimensions<1>& dest);
 
 }
 
