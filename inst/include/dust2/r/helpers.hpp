@@ -560,6 +560,28 @@ void read_real_array(cpp11::list args, const dust2::array::dimensions<rank>& dim
   }
 }
 
+template <size_t rank>
+void read_int_array(cpp11::list args, const dust2::array::dimensions<rank>& dim,
+                    int * dest, const char *name, bool required) {
+  cpp11::sexp value = args[name];
+  if (value == R_NilValue) {
+    if (required) {
+      cpp11::stop("A value is expected for '%s'", name);
+    }
+  } else {
+    check_dimensions<rank>(value, dim, name);
+    if (TYPEOF(value) == REALSXP) {
+      auto value_dbl = cpp11::as_cpp<cpp11::doubles>(value);
+      std::copy(value_dbl.begin(), value_dbl.end(), dest);
+    } else if (TYPEOF(value) == INTSXP) {
+      auto value_int = cpp11::as_cpp<cpp11::integers>(value);
+      std::copy(value_int.begin(), value_int.end(), dest);
+    } else {
+      cpp11::stop("'%s' must be numeric", name);
+    }
+  }
+}
+
 inline cpp11::sexp packing_to_r(const dust2::packing& packing_info) {
   if (packing_info.size() == 0) {
     return R_NilValue;
