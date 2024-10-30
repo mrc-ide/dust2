@@ -69,12 +69,14 @@ dust_filter_create <- function(generator, time_start, data,
                  n_threads = n_threads,
                  preserve_group_dimension = preserve_group_dimension)
 
+  groups <- if (preserve_group_dimension) data$groups else NULL
   res <- list2env(
     list(inputs = inputs,
          initialise = filter_create,
          initial_rng_state = filter_rng_state(n_particles, n_groups, seed),
          n_particles = n_particles,
          n_groups = n_groups,
+         groups = groups,
          deterministic = FALSE,
          has_adjoint = FALSE,
          generator = generator,

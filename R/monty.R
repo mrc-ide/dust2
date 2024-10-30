@@ -87,7 +87,20 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
                                   save_state = FALSE,
                                   save_trajectories = FALSE) {
   assert_is(obj, "dust_likelihood")
-  assert_is(packer, "monty_packer")
+
+  is_grouped <- !is.null(obj$groups)
+  if (is_grouped) {
+    assert_is(packer, "monty_packer_grouped")
+    if (!identical(packer$groups(), obj$groups)) {
+      cli::cli_abort(
+        c("Groups for 'packer' do not match those of 'obj'",
+          i = "'obj' has: {squote(obj$groups)}",
+          x = "'packer' has: {squote(packer$groups())}"),
+        arg = "packer")
+    }
+  } else {
+    assert_is(packer, "monty_packer")
+  }
 
   domain <- monty::monty_domain_expand(domain, packer)
   save_trajectories <- validate_save_trajectories(save_trajectories)
@@ -105,7 +118,7 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
     is_stochastic = !obj$deterministic,
     has_direct_sample = FALSE,
     has_gradient = obj$deterministic && obj$has_adjoint,
-    allow_multiple_parameters = obj$preserve_group_dimension,
+    allow_multiple_parameters = FALSE,
     has_observer = !is.null(observer),
     has_parameter_groups = FALSE)
 
@@ -144,7 +157,7 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
           initial = if (is.null(initial)) NULL else initial(pars),
           save_trajectories = save_trajectories$enabled,
           index_state = save_trajectories$index)
-        attr(obj$ptr, "last_density") <- ret
+        attr(obj$ptr, "last_density") <- if (is_grouped) sum(ret) else ret
         attr(obj$ptr, "last_gradient") <- NULL
       }
       attr(obj$ptr, "last_density")
@@ -170,12 +183,13 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
         env$save_trajectories$index <-
           obj$packer_state$subset(save_trajectories$subset)$index
       }
-      dust_likelihood_run(
+      ll <- dust_likelihood_run(
         obj,
         pars,
         initial = if (is.null(initial)) NULL else initial(pars),
         save_trajectories = save_trajectories$enabled,
         index_state = save_trajectories$index)
+      if (is_grouped) sum(ll) else ll
     }
   }
 
