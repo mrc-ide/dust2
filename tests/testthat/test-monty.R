@@ -292,18 +292,17 @@ test_that("can use names for groups", {
   obj1 <- dust_filter_create(sir(), time_start, data1, n_particles = 100,
                              seed = 42)
   obj2 <- dust_filter_create(sir(), time_start, data2, n_particles = 100,
-                             seed = 42)
+                             seed = 42, n_groups = 2)
 
-  packer <- monty::monty_packer(
+  packer <- monty::monty_packer_grouped(
+    c("a", "b"),
     c("beta", "gamma"),
     fixed = list(N = 1000, I0 = 10, exp_noise = 1e6))
 
-  m1 <- dust_likelihood_monty(obj1, packer)
   m2 <- dust_likelihood_monty(obj2, packer)
+  p2 <- c(0.2, 0.1, 0.25, 0.1)
 
-  p <- cbind(c(0.2, 0.1), c(0.25, 0.1))
-
-  ll1 <- monty::monty_model_density(m1, p)
-  ll2 <- monty::monty_model_density(m2, p)
-  expect_equal(ll1, ll2)
+  ll1 <- dust_likelihood_run(obj1, unname(packer$unpack(p2)))
+  ll2 <- monty::monty_model_density(m2, p2)
+  expect_equal(ll2, sum(ll1))
 })
