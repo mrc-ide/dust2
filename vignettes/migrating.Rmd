@@ -106,3 +106,7 @@ Some less used methods were removed entirely:
 * `$real_size()`: we no longer encourage running in single precision (this was needed for running on GPUs)
 * `$rng_algorithm()`: while you can change the random number generation algorithm, typically no-one did
 * `$set_data()`, `$filter()`: these methods existed to support the previous version of the particle filter.  Data is no longer set into a system and one would now use `dust_filter_create()` or `dust_unfilter_create()`
+
+# See also
+
+* The [`odin2` migration guide](https://mrc-ide.github.io/odin2/articles/migrating.html)
