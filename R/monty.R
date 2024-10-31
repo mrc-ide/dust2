@@ -150,27 +150,29 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
         env$save_trajectories$index <-
           obj$packer_state$subset(save_trajectories$subset)$index
       }
-      if (!identical(x, attr(obj$ptr, "last_pars"))) {
+      ptr <- obj$ptr
+      if (!identical(x, attr(ptr, "last_pars"))) {
         ret <- dust_likelihood_run(
           obj,
           pars,
           initial = if (is.null(initial)) NULL else initial(pars),
           save_trajectories = save_trajectories$enabled,
           index_state = save_trajectories$index)
-        attr(obj$ptr, "last_density") <- if (is_grouped) sum(ret) else ret
-        attr(obj$ptr, "last_gradient") <- NULL
+        attr(ptr, "last_density") <- if (is_grouped) sum(ret) else ret
+        attr(ptr, "last_gradient") <- NULL
       }
-      attr(obj$ptr, "last_density")
+      attr(ptr, "last_density")
     }
 
     if (properties$has_gradient) {
       gradient <- function(x) {
         density(x)
-        if (is.null(attr(obj$ptr, "last_gradient"))) {
-          attr(obj$ptr, "last_gradient") <-
+        ptr <- obj$ptr
+        if (is.null(attr(ptr, "last_gradient"))) {
+          attr(ptr, "last_gradient") <-
             dust_likelihood_last_gradient(obj)
         }
-        attr(obj$ptr, "last_gradient")
+        attr(ptr, "last_gradient")
       }
     }
   } else {

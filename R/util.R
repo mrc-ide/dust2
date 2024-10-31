@@ -177,3 +177,13 @@ disable_write <- function(cls, name, call = parent.frame()) {
       detail),
     call = NULL)
 }
+
+
+## To circumvent the above internally in filters.
+assign_readonly <- function(x, name, value) {
+  cls <- class(x)
+  x <- unclass(x)
+  x[[name]] <- value
+  class(x) <- cls
+  x
+}

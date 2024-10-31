@@ -103,8 +103,8 @@ filter_create <- function(obj, pars) {
                       inputs$n_threads,
                       obj$initial_rng_state),
     obj)
-  obj$initial_rng_state <- NULL
-  obj$packer_state <- monty::monty_packer(array = obj$packing_state)
+  assign("initial_rng_state", NULL, obj)
+  assign("packer_state", monty::monty_packer(array = obj$packing_state), obj)
 }
 
 
@@ -113,4 +113,20 @@ filter_create <- function(obj, pars) {
 filter_rng_state <- function(n_particles, n_groups, seed) {
   n_streams <- max(n_groups, 1) * (1 + n_particles)
   monty::monty_rng$new(n_streams = n_streams, seed = seed)$state()
+}
+
+
+##' @export
+"$<-.dust_likelihood" <- function(x, name, value) {
+  disable_write(class(x)[[1]], name)
+}
+
+##' @export
+"[[<-.dust_likelihood" <- function(x, i, value) {
+  disable_write(class(x)[[1]], i)
+}
+
+##' @export
+"[<-.dust_likelihood" <- function(x, i, ..., value) {
+  disable_write(class(x)[[1]], i)
 }
