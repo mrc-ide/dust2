@@ -111,6 +111,7 @@ dust_system_create <- function(generator, pars, n_particles = 1, n_groups = 1,
   res$preserve_group_dimension <- preserve_group_dimension
   res$time_control <- time_control
   class(res) <- "dust_system"
+
   res
 }
 
@@ -890,4 +891,35 @@ dust_system_generator_methods <- function(generator) {
   }
 
   methods
+}
+
+
+##' @export
+"$<-.dust_system" <- function(x, name, value) {
+  disable_write("dust_system", name)
+}
+
+##' @export
+"[[<-.dust_system" <- function(x, i, value) {
+  disable_write("dust_system", i)
+}
+
+##' @export
+"[<-.dust_system" <- function(x, i, ..., value) {
+  disable_write("dust_system", i)
+}
+
+##' @export
+"$<-.dust_system_generator" <- function(x, name, value) {
+  disable_write("dust_system_generator", name)
+}
+
+##' @export
+"[[<-.dust_system_generator" <- function(x, i, value) {
+  disable_write("dust_system_generator", i)
+}
+
+##' @export
+"[<-.dust_system_generator" <- function(x, i, ..., value) {
+  disable_write("dust_system_generator", i)
 }

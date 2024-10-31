@@ -217,3 +217,36 @@ test_that("can describe time", {
     paste("This system runs in both continuous time and discrete time",
           "with dt = 0.5"))
 })
+
+
+test_that("system objects are immutable", {
+  obj <- dust_system_create(walk, list(sd = 1))
+  expect_error(
+    obj$n_threads <- 1,
+    "Cannot write to 'dust_system' objects, they are read-only")
+  expect_error(
+    obj[["n_threads"]] <- 1,
+    "Cannot write to 'dust_system' objects, they are read-only")
+  expect_error(
+    obj[[1]] <- 1,
+    "Cannot write to 'dust_system' objects, they are read-only")
+  expect_error(
+    obj[1] <- 1,
+    "Cannot write to 'dust_system' objects, they are read-only")
+})
+
+
+test_that("system generator objects are immutable", {
+  expect_error(
+    sir$n_threads <- 1,
+    "Cannot write to 'dust_system_generator' objects, they are read-only")
+  expect_error(
+    sir[["n_threads"]] <- 1,
+    "Cannot write to 'dust_system_generator' objects, they are read-only")
+  expect_error(
+    sir[[1]] <- 1,
+    "Cannot write to 'dust_system_generator' objects, they are read-only")
+  expect_error(
+    sir[1] <- 1,
+    "Cannot write to 'dust_system_generator' objects, they are read-only")
+})
