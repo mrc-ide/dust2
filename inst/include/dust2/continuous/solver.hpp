@@ -240,9 +240,26 @@ public:
   void run(real_type t, real_type t_end, real_type* y,
            zero_every_type<real_type>& zero_every,
            ode::internals<real_type>& internals, Rhs rhs) {
-    while (t < t_end) {
-      apply_zero_every(t, y, zero_every, internals);
-      t = step(t, t_end, y, internals, rhs);
+    if (control_.critical_times.empty()) {
+      while (t < t_end) {
+        apply_zero_every(t, y, zero_every, internals);
+        t = step(t, t_end, y, internals, rhs);
+      }
+    } else {
+      // Slightly more complex loop which ensures we never integrate
+      // over the times within our critical times.  The upper loop is
+      // a special case of this but is kept simple.
+      auto tc_end = control_.critical_times.end();
+      auto tc = std::upper_bound(control_.critical_times.begin(), tc_end, t);
+      auto t_end_i = (tc == tc_end || *tc >= t_end) ? t_end : *tc;
+      while (t < t_end) {
+        apply_zero_every(t, y, zero_every, internals);
+        t = step(t, t_end_i, y, internals, rhs);
+        if (t >= t_end_i && t < t_end) {
+          ++tc;
+          t_end_i = (tc == tc_end || *tc >= t_end) ? t_end : *tc;
+        }
+      }
     }
     apply_zero_every_final(t, y, zero_every, internals);
   }

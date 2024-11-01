@@ -27,6 +27,13 @@
 ##'   your rhs that the solver may skip over by accident, then specify
 ##'   a smaller maximum step size here.
 ##'
+##' @param critical_times Vector of critical times.  These are times
+##'   where we guarntee that the integration will stop, and which you
+##'   can use for changes parameters.  This can avoid the solver
+##'   jumping over short-lived departures from a smooth solution, and
+##'   prevent the solver having to learn where a sharp change in your
+##'   target function is.
+##'
 ##' @param debug_record_step_times Logical, indicating if the step
 ##'   times should be recorded.  This should only be enabled for
 ##'   debugging.  Step times can be retrieved via
@@ -43,8 +50,14 @@
 ##'   this after creation.
 dust_ode_control <- function(max_steps = 10000, atol = 1e-6, rtol = 1e-6,
                              step_size_min = 0, step_size_max = Inf,
+                             critical_times = NULL,
                              debug_record_step_times = FALSE,
                              save_history = FALSE) {
+  if (is.null(critical_times)) {
+    critical_times <- numeric()
+  } else {
+    check_time_sequence(critical_times, NULL)
+  }
   ctl <- list(
     max_steps = assert_scalar_size(
       max_steps, allow_zero = FALSE),
@@ -56,6 +69,7 @@ dust_ode_control <- function(max_steps = 10000, atol = 1e-6, rtol = 1e-6,
       step_size_min, allow_zero = TRUE),
     step_size_max = assert_scalar_positive_numeric(
       step_size_max, allow_zero = TRUE),
+    critical_times = critical_times,
     save_history = assert_scalar_logical(
       save_history),
     debug_record_step_times = assert_scalar_logical(

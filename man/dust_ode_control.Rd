@@ -10,6 +10,7 @@ dust_ode_control(
   rtol = 1e-06,
   step_size_min = 0,
   step_size_max = Inf,
+  critical_times = NULL,
   debug_record_step_times = FALSE,
   save_history = FALSE
 )
@@ -36,6 +37,13 @@ no maximum step size (\code{Inf}) so the solver can take as large a
 step as it wants to.  If you have short-lived fluctuations in
 your rhs that the solver may skip over by accident, then specify
 a smaller maximum step size here.}
+
+\item{critical_times}{Vector of critical times.  These are times
+where we guarntee that the integration will stop, and which you
+can use for changes parameters.  This can avoid the solver
+jumping over short-lived departures from a smooth solution, and
+prevent the solver having to learn where a sharp change in your
+target function is.}
 
 \item{debug_record_step_times}{Logical, indicating if the step
 times should be recorded.  This should only be enabled for
