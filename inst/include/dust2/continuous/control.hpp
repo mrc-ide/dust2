@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <limits>
+#include <vector>
 
 namespace dust2 {
 namespace ode {
