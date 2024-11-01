@@ -323,7 +323,8 @@ test_that("can error if initial step size calculation fails", {
                             preserve_particle_dimension = TRUE,
                             deterministic = TRUE)
   y0 <- matrix(NA_real_, 4, 1)
-  expect_error(dust_system_set_state(obj, y0),
+  dust_system_set_state(obj, y0)
+  expect_error(dust_system_run_to_time(obj, 1),
                "Initial step size was not finite")
 })
 
@@ -367,4 +368,11 @@ test_that("can save history", {
   expect_equal(history$time, d$step_times[[1]][-(n_steps + 1)])
   expect_equal(history$size, diff(d$step_times[[1]]))
   expect_equal(history$coefficients[, , n_steps], d$coefficients[[1]])
+})
+
+
+test_that("can run system with no initialisation", {
+  sys <- dust_system_create(logistic, list(n = 1, r = 0.1, K = 100))
+  dust_system_run_to_time(sys, 10)
+  expect_equal(dust_system_state(sys), c(0, 0))
 })
