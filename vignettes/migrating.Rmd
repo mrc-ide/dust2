@@ -37,7 +37,7 @@ The new interface is completely different, following feedback about the discover
 
 Previously, dust generators were "[R6 classes](https://r6.r-lib.org/)", which were created using `$new()` and then interacted with using methods (e.g., `sys$run()`.  In contrast, `dust2` uses free functions to create systems and to interact with these systems once created.
 
-In this table, consider the dust system `sir`, which is available via `dust_example()` in both versions of the package.  In dust 1.0.0 could allocate a system with 10 particles, set the initial conditions, run it forward for 20 time units and return the state matrix by writing:
+In this table, consider the dust system `sir`, which is available via `dust_example()` in both versions of the package.  In dust 1.0.0 we could allocate a system with 10 particles, set the initial conditions, run it forward for 20 time units and return the state matrix by writing:
 
 ```r
 sir <- dust_example("sir")
@@ -99,7 +99,7 @@ Some less used methods were removed entirely:
 * `$shape()`: previously returned the dimension structure among groups.  We do not currently support this concept and we do not believe anyone used it.
 * `$run_adjoint()`: this was to support proof-of-concept calculation of derivatives, which has moved into `dust_likelihood_last_gradient()`
 * `$set_index()`, `$index()`: the concept of an "index" was to support efficient running of the particle filter when that was implemented in R in the `mcstate` package.  We had two "indexes" to consider - one for saving trajectories and the other for the comparison to data.  With the particle filter now entirely written in C++ this is no longer needed.
-* `$set_stochastic_schedule()`: we had the concept a "stochastic schedule" to support mixed time models.  This schedule is now set via `dt` on construction.
+* `$set_stochastic_schedule()`: we had the concept of a "stochastic schedule" to support mixed time models.  This schedule is now set via `dt` on construction.
 * `$resample()`: this existed to debug the particle filter and is no longer needed.
 * `$info()`: was mostly used to return information about packing of variables within model state.  This is now done with "packers"; see `dust_unpack_state()` and `dust_unpack_index()`
 * `$has_gpu_support()`, `$uses_gpu()`, `$get_gpu_info()`: we no longer support any GPU models
