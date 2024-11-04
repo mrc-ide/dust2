@@ -29,7 +29,13 @@ Not yet implemented:
 
 * GPU compilation (a rewrite is planned for 2025)
 * "Restart" a particle filter
-* Multi-phase systems (not believed used except [sircovid](https://mrc-ide.github.io/sircovid))
+* Multi-phase systems (not believed used except [`sircovid`](https://mrc-ide.github.io/sircovid))
+
+# Change in meaning of time in discrete-time models
+
+Previously, discrete time models used `step` to count steps forward as unsigned integers, usually from zero. Many systems added a parameter (or constant) `dt` representing the timestep and then a variable `time` which represented the time as a real-valued number. For example you might have `dt` of 0.25 and then your system stops at times `[0, 0.25, 0.5, 0.75, 1]` for steps `[0, 1, 2, 3, 4]`.  This created a point of difference with continuous time models, which were (and still are) based on real-valued time, and was particularly confusing for "mixed time" systems with a mix of both discrete-time and continuous-time components.
+
+In `dust2`, time in all systems is real valued, and starts at 0 by default, though this can be set on initialisation.  For discrete time models, the default `dt` is 1 (though this default can be changed in the system generator, see `vignette("writing")`), which means that if you never thought about `dt` before you can use `dust2` without thinking any more about this.
 
 # New interface
 
