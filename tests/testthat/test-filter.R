@@ -686,3 +686,24 @@ test_that("can run filter on mixed time models", {
     malaria, pars, time_start, data, dt, n_particles, seed)
   expect_equal(res, replicate(5, cmp_filter(NULL)$log_likelihood))
 })
+
+
+test_that("filter objects are immutable", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  obj <- dust_filter_create(sir(), time_start, data, n_particles = 100,
+                             seed = 42)
+  expect_error(
+    obj$n_threads <- 1,
+    "Cannot write to 'dust_filter' objects, they are read-only")
+  expect_error(
+    obj[["n_threads"]] <- 1,
+    "Cannot write to 'dust_filter' objects, they are read-only")
+  expect_error(
+    obj[[1]] <- 1,
+    "Cannot write to 'dust_filter' objects, they are read-only")
+  expect_error(
+    obj[1] <- 1,
+    "Cannot write to 'dust_filter' objects, they are read-only")
+})

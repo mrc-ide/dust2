@@ -164,3 +164,16 @@ deparse_df <- function(df, indent) {
   suffix <- rep(c("\n", ",\n", ")"), c(1, ncol(df) - 1, 1))
   paste0(ret, suffix, collapse = "")
 }
+
+
+disable_write <- function(cls, name, call = parent.frame()) {
+  if (is.character(name)) {
+    detail <- c(x = "Was trying to modify {squote(name)}")
+  } else {
+    detail <- NULL
+  }
+  cli::cli_abort(
+    c("Cannot write to '{cls}' objects, they are read-only",
+      detail),
+    call = NULL)
+}
