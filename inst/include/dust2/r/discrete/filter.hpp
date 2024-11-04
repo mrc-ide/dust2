@@ -64,7 +64,6 @@ cpp11::sexp dust2_discrete_filter_alloc(cpp11::list r_pars,
   const auto rng_state = monty::random::prng<rng_state_type>(n_streams, seed, deterministic).export_state();
   const auto rng_len = rng_state_type::size();
   rng_seed_type seed_filter;
-  rng_seed_type seed_observer;
   rng_seed_type seed_system;
   for (size_t i = 0; i < n_groups; ++i) {
     const auto it = rng_state.begin() + i * rng_len * (n_particles + 2);
