@@ -50,11 +50,13 @@ dust_unfilter_create <- function(generator, time_start, data,
                  preserve_particle_dimension = preserve_particle_dimension,
                  preserve_group_dimension = preserve_group_dimension)
 
+  groups <- if (preserve_group_dimension) data$groups else NULL
   res <- list2env(
     list(inputs = inputs,
          initialise = unfilter_create,
          n_particles = as.integer(n_particles),
          n_groups = as.integer(n_groups),
+         groups = groups,
          deterministic = TRUE,
          has_adjoint = attr(generator, "properties")$has_adjoint,
          generator = generator,
