@@ -19,7 +19,7 @@ struct control {
   real_type factor_max = 10.0; // from dopri5.f:281, retard.f:333
   real_type beta = 0.04;
   real_type constant = 0.2 - 0.04 * 0.75; // 0.04 is beta
-  std::vector<double> critical_times;
+  std::vector<real_type> critical_times;
   bool save_history = false;
   bool debug_record_step_times = false;
 
