@@ -14,7 +14,7 @@ test_that("can run sirode model", {
 })
 
 
-## Rather than the existing loop and double checking 
+## Rather than the existing loop and double checking
 test_that("can cope with multiple resets within a step", {
   ctl <- dust_ode_control(debug_record_step_times = TRUE)
   pars <- list(beta = 0.2, gamma = 0.1, N = 1000, I0 = 10, exp_noise = 1e6)
@@ -113,4 +113,30 @@ test_that("can compare to data", {
   expect_equal(
     dust_system_compare_data(obj, d),
     dpois(30, s[5, ], log = TRUE))
+})
+
+
+test_that("can force solver to stop at times", {
+  pars <- list(beta = 0.2, gamma = 0.1, N = 1000, I0 = 10, exp_noise = 1e6)
+  ctl1 <- dust_ode_control(critical_times = c(10, 20, 30),
+                           debug_record_step_times = TRUE)
+  ctl2 <- dust_ode_control(debug_record_step_times = TRUE)
+
+  obj1 <- dust_system_create(sirode, pars, n_particles = 1,
+                             ode_control = ctl1, deterministic = TRUE)
+  obj2 <- dust_system_create(sirode, pars, n_particles = 1,
+                             ode_control = ctl2, deterministic = TRUE)
+
+  dust_system_set_state_initial(obj1)
+  dust_system_set_state_initial(obj2)
+  dust_system_run_to_time(obj1, 50)
+  dust_system_run_to_time(obj2, 50)
+
+  t1 <- dust_system_internals(obj1)$step_times[[1]]
+  t2 <- dust_system_internals(obj2)$step_times[[1]]
+  expect_true(all(c(10, 20, 30) %in% t1))
+  expect_false(all(c(10, 20, 30) %in% t2))
+
+  expect_equal(dust_system_state(obj1),
+               dust_system_state(obj2), tolerance = 1e-6)
 })
