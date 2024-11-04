@@ -111,7 +111,7 @@ filter_create <- function(obj, pars) {
 ## This is something that we should tidy up within monty itself,
 ## there are lots of little utilities we could benefit from.
 filter_rng_state <- function(n_particles, n_groups, seed) {
-  n_streams <- max(n_groups, 1) * (1 + n_particles)
+  n_streams <- max(n_groups, 1) * (2 + n_particles)
   monty::monty_rng$new(n_streams = n_streams, seed = seed)$state()
 }
 

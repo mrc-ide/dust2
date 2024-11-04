@@ -136,6 +136,7 @@ test_that("can subset trajectories from model", {
   res2 <- monty::monty_sample(p2, sampler, 13, initial = c(.2, .1),
                               n_chains = 3)
 
+  expect_equal(res1$pars, res2$pars)
   expect_equal(dim(res1$observations$trajectories), c(2, 4, 13, 3))
   expect_equal(res1$observations$trajectories,
                res2$observations$trajectories[c(2, 5), , , ])
@@ -300,4 +301,37 @@ test_that("can run simple grouped unfilter", {
   ll1 <- dust_likelihood_run(obj1, unname(packer$unpack(p2)))
   ll2 <- monty::monty_model_density(m2, p2)
   expect_equal(ll2, sum(ll1))
+})
+
+
+test_that("observers do not change the steps", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  obj1 <- dust_filter_create(sir(), time_start, data, n_particles = 100)
+  obj2 <- dust_filter_create(sir(), time_start, data, n_particles = 100)
+  packer <- monty::monty_packer(
+    c("beta", "gamma"),
+    fixed = list(N = 1000, I0 = 10, exp_noise = 1e6))
+  m1 <- dust_likelihood_monty(obj1, packer, save_trajectories = TRUE)
+  m2 <- dust_likelihood_monty(obj2, packer, save_trajectories = FALSE)
+
+  prior <- monty::monty_dsl({
+    beta ~ Exponential(mean = 0.5)
+    gamma ~ Exponential(mean = 0.5)
+  })
+
+  posterior1 <- m1 + prior
+  posterior2 <- m2 + prior
+
+  sampler <- monty::monty_sampler_random_walk(diag(2) * c(0.02, 0.02))
+  set.seed(1)
+  res1 <- monty::monty_sample(posterior1, sampler, 27, initial = c(.2, .1),
+                              n_chains = 3)
+  set.seed(1)
+  res2 <- monty::monty_sample(posterior2, sampler, 27, initial = c(.2, .1),
+                              n_chains = 3)
+  expect_equal(res1$pars, res2$pars)
+  expect_equal(dim(res1$observations$trajectories), c(5, 4, 27, 3))
+  expect_null(res2$observations$trajectories)
 })

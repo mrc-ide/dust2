@@ -5,7 +5,7 @@
 filter_manual <- function(generator, pars, time_start, data, dt, n_particles,
                           seed) {
   r <- monty::monty_rng$new(n_streams = 1, seed = seed)
-  seed <- monty::monty_rng$new(n_streams = 1, seed = seed)$jump()$state()
+  seed <- monty::monty_rng$new(n_streams = 1, seed = seed)$jump()$jump()$state()
 
   obj <- dust_system_create(generator, pars, n_particles,
                             time = time_start, dt = dt, seed = seed)
