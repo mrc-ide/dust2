@@ -69,7 +69,8 @@ public:
     rng_(n_particles_total_, seed, deterministic),
     solver_(n_state_ode_, control_),
     n_threads_(n_threads),
-    output_is_current_(n_groups_) {
+    output_is_current_(n_groups_),
+    requires_initialise_(n_groups_, true) {
     // TODO: above, filter rng states need adding here too, or
     // somewhere at least (we might move the filter elsewhere though,
     // in which case that particular bit of weirdness goes away).
@@ -82,6 +83,7 @@ public:
   template <typename mixed_time = typename dust2::properties<T>::is_mixed_time>
   typename std::enable_if<!mixed_time::value, void>::type
   run_to_time(real_type time, const std::vector<size_t>& index_group) {
+    initialise_solver_(index_group);
     real_type * state_data = state_.data();
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
@@ -109,6 +111,7 @@ public:
   template <typename mixed_time = typename dust2::properties<T>::is_mixed_time>
   typename std::enable_if<mixed_time::value, void>::type
   run_to_time(real_type time, const std::vector<size_t>& index_group) {
+    initialise_solver_(index_group);
     if (dt_ == 0) {
       run_to_time<std::false_type>(time, index_group);
       return;
@@ -181,7 +184,7 @@ public:
       }
     }
     errors_.report();
-    initialise_solver_(index_group);
+    mark_requires_initialise(index_group);
     // Assume not current, because most models would want to call output here()
     update_output_is_current(index_group, false);
   }
@@ -199,7 +202,7 @@ public:
                                 index_state, index_particle, index_group,
                                 recycle_particle, recycle_group,
                                 n_threads_);
-    initialise_solver_(index_group.empty() ? all_groups_ : index_group);
+    mark_requires_initialise(index_group);
     // I'm not sure what is best here; this (and to a degree
     // T::initial) are the two places where we might end up with
     // inconsistent output (e.g., the user has set a state that
@@ -289,6 +292,7 @@ public:
 
   void set_time(real_type time) {
     time_ = time;
+    mark_requires_initialise(all_groups_);
     // We should set output_is_current here but I will wait until
     // updating time_ to make it vary by group. Practically the next
     // thing anyone does after this is to update initial conditions so
@@ -308,6 +312,7 @@ public:
     // TODO: check that size was not modified, error if so (quite a
     // bit later).
     fn(shared_[i]);
+    requires_initialise_[i] = true;
   }
 
   template <typename IterData, typename IterOutput>
@@ -381,6 +386,7 @@ private:
   ode::solver<real_type> solver_;
   size_t n_threads_;
   std::vector<bool> output_is_current_;
+  std::vector<bool> requires_initialise_;
 
   static auto rhs_(const shared_state& shared, internal_state& internal) {
     return [&](real_type t, const real_type* y, real_type* dydt) {
@@ -389,6 +395,16 @@ private:
   }
 
   void initialise_solver_(std::vector<size_t> index_group) {
+    bool requires_initialisation = false;
+    for (auto i : index_group) {
+      if (requires_initialise_[i]) {
+        requires_initialisation = true;
+        break;
+      }
+    }
+    if (!requires_initialisation) {
+      return;
+    }
     errors_.reset();
     real_type * state_data = state_.data();
 #ifdef _OPENMP
@@ -396,19 +412,24 @@ private:
 #endif
     for (auto i : index_group) {
       for (size_t j = 0; j < n_particles_; ++j) {
-        const auto k = n_particles_ * i + j;
-        const auto offset = k * n_state_;
-        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
-        real_type * y = state_data + offset;
-        try {
-          solver_.initialise(time_, y, ode_internals_[k],
-                             rhs_(shared_[i], internal_i));
-        } catch (std::exception const& e) {
-          errors_.capture(e, k);
+        if (requires_initialise_[i]) {
+          const auto k = n_particles_ * i + j;
+          const auto offset = k * n_state_;
+          auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
+          real_type * y = state_data + offset;
+          try {
+            solver_.initialise(time_, y, ode_internals_[k],
+                               rhs_(shared_[i], internal_i));
+          } catch (std::exception const& e) {
+            errors_.capture(e, k);
+          }
         }
       }
     }
     errors_.report();
+    for (auto i : index_group) {
+      requires_initialise_[i] = false;
+    }
   }
 
   // Default implementation does nothing
@@ -444,6 +465,16 @@ private:
     } else {
       for (auto i : index_group) {
         output_is_current_[i] = value;
+      }
+    }
+  }
+
+  void mark_requires_initialise(std::vector<size_t> index_group) {
+    if (index_group.empty()) {
+      std::fill(requires_initialise_.begin(), requires_initialise_.end(), true);
+    } else {
+      for (auto i : index_group) {
+        requires_initialise_[i] = true;
       }
     }
   }
