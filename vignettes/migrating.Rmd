@@ -1,0 +1,118 @@
+---
+title: "Migrating from dust 1.x.x"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Migrating from dust 1.x.x}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This vignette discusses key differences with dust version 1.  Version 2 of dust is a full rewrite, and some features have moved out of the package, some have moved in from `mcstate` and others have not yet been implemented.
+
+If you have not used previous versions of `dust` and `mcstate` (e.g., via `odin.dust`), you do not need to read this vignette.
+
+```{r}
+library(dust2)
+```
+
+# Dude, where's my feature?
+
+Features now found elsewhere:
+
+* The random number generation support is now found in [`monty`](https://mrc-ide.github.io/monty); this affects very few users.
+
+Features now included:
+
+* The particle filter is now fully implemented in dust, and no longer part of `mcstate` (now `monty`)
+
+Not yet implemented:
+
+* GPU compilation (a rewrite is planned for 2025)
+* "Restart" a particle filter
+* Multi-phase systems (not believed used except [`sircovid`](https://mrc-ide.github.io/sircovid))
+
+# Change in meaning of time in discrete-time models
+
+Previously, discrete time models used `step` to count steps forward as unsigned integers, usually from zero. Many systems added a parameter (or constant) `dt` representing the timestep and then a variable `time` which represented the time as a real-valued number. For example you might have `dt` of 0.25 and then your system stops at times `[0, 0.25, 0.5, 0.75, 1]` for steps `[0, 1, 2, 3, 4]`.  This created a point of difference with continuous time models, which were (and still are) based on real-valued time, and was particularly confusing for "mixed time" systems with a mix of both discrete-time and continuous-time components.
+
+In `dust2`, time in all systems is real valued, and starts at 0 by default, though this can be set on initialisation.  For discrete time models, the default `dt` is 1 (though this default can be changed in the system generator, see `vignette("writing")`), which means that if you never thought about `dt` before you can use `dust2` without thinking any more about this.
+
+# New interface
+
+The new interface is completely different, following feedback about the discoverability and documentation of features within the package.  We've also generally tried to make the functions more self-contained, less magic, and easier to understand.  Some lesser-used functions have been removed entirely.  We apologise for the inconvenience that this will cause in migrating old code, but unfortunately this cannot be done automatically.
+
+Previously, dust generators were "[R6 classes](https://r6.r-lib.org/)", which were created using `$new()` and then interacted with using methods (e.g., `sys$run()`.  In contrast, `dust2` uses free functions to create systems and to interact with these systems once created.
+
+In this table, consider the dust system `sir`, which is available via `dust_example()` in both versions of the package.  In dust 1.0.0 we could allocate a system with 10 particles, set the initial conditions, run it forward for 20 time units and return the state matrix by writing:
+
+```r
+sir <- dust_example("sir")
+sys <- sir$new(pars = list(dt = 1), time = 0, n_particles = 10)
+sys$run(10)
+```
+
+And in dust2 we could write
+
+```{r}
+sir <- dust_example("sir")
+sys <- dust_system_create(sir, pars = list(), time = 0, n_particles = 10)
+dust_system_set_state_initial(sys)
+dust_system_run_to_time(sys, 10)
+dust_system_state(sys)
+```
+
+There are more lines here in version 2, but each is more predictable and it is easier to find documentation.
+
+First the core methods that represent most usage:
+
+Action        | dust 1.x.x         | dust2
+--------------+--------------------+---------------------------------
+Allocate      | `$new()`           | `dust_system_create()` (1)
+Run to time   | `$run()`           | `dust_system_create()` (2)
+Simulate      | `$simulate()`      | `dust_system_simulate()`
+Update state  | `$update_state()`  | `dust_system_set_state()` (3)
+              |                    | `dust_system_set_state_initial()`
+              |                    | `dust_system_set_time()`
+              |                    | `dust_system_set_pars()`
+Get state     | `$state()`         | `dust_system_state()`
+Get time      | `$time()`          | `dust_system_time()`
+Reorder       | `$reorder()`       | `dust_system_reorder()`
+Get RNG state | `$rng_state()`     | `dust_system_rng_state()`
+Set RNG state | `$set_rng_state()` | `dust_system_set_rng_state()`
+Get last pars | `$pars()`          | (not yet implemented)
+
+1. No longer set initial conditions into the model
+2. No longer returns state at the end
+3. The `$update_state()` method was always too complex
+
+Access to some read-only properties has changed slightly, typically just dropping the function call.
+
+Action              | dust 1.x.x            | dust2
+--------------------+-----------------------+---------------------------------
+Get name            | `$name()`             | `$name`
+State size          | `$n_state()`          | `$n_state`
+Number of particles | `$n_particles()`      | `$n_particles` (1)
+                    | `$n_particles_each()` |
+Number of groups    | `$n_pars()`           | `$n_groups`
+Number of threads   | `$n_threads()`        | `$n_threads`
+Supports compare    | `$has_compare()`      | `$properties$has_compare`
+Supports OpenMP     | `$has_openmp()`       | (not yet implemented)
+
+1. Previously, the number of particles was much less well defined (running multiple groups was always implemented after support for running a single group).  `n_particles` now represents the number of particles *per group*.
+
+Some less used methods were removed entirely:
+
+* `$shape()`: previously returned the dimension structure among groups.  We do not currently support this concept and we do not believe anyone used it.
+* `$run_adjoint()`: this was to support proof-of-concept calculation of derivatives, which has moved into `dust_likelihood_last_gradient()`
+* `$set_index()`, `$index()`: the concept of an "index" was to support efficient running of the particle filter when that was implemented in R in the `mcstate` package.  We had two "indexes" to consider - one for saving trajectories and the other for the comparison to data.  With the particle filter now entirely written in C++ this is no longer needed.
+* `$set_stochastic_schedule()`: we had the concept of a "stochastic schedule" to support mixed time models.  This schedule is now set via `dt` on construction.
+* `$resample()`: this existed to debug the particle filter and is no longer needed.
+* `$info()`: was mostly used to return information about packing of variables within model state.  This is now done with "packers"; see `dust_unpack_state()` and `dust_unpack_index()`
+* `$has_gpu_support()`, `$uses_gpu()`, `$get_gpu_info()`: we no longer support any GPU models
+* `$real_size()`: we no longer encourage running in single precision (this was needed for running on GPUs)
+* `$rng_algorithm()`: while you can change the random number generation algorithm, typically no-one did
+* `$set_data()`, `$filter()`: these methods existed to support the previous version of the particle filter.  Data is no longer set into a system and one would now use `dust_filter_create()` or `dust_unfilter_create()`
+
+# See also
+
+* The [`odin2` migration guide](https://mrc-ide.github.io/odin2/articles/migrating.html)
