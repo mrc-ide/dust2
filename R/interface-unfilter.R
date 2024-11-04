@@ -20,7 +20,7 @@
 dust_unfilter_create <- function(generator, time_start, data,
                                  n_particles = 1, n_groups = NULL,
                                  dt = NULL, ode_control = NULL,
-                                 n_threads = 1,
+                                 shared_data = FALSE, n_threads = 1,
                                  preserve_particle_dimension = FALSE,
                                  preserve_group_dimension = FALSE) {
   call <- environment()
@@ -30,7 +30,7 @@ dust_unfilter_create <- function(generator, time_start, data,
   assert_scalar_size(n_particles, allow_zero = FALSE, call = call)
   assert_scalar_logical(preserve_particle_dimension, call = call)
 
-  data <- prepare_data(data, n_groups, call = call)
+  data <- prepare_data(data, n_groups, shared_data, call = call)
   time_start <- check_time_start(time_start, data$time, call = call)
   time_control <- check_time_control(generator, dt, ode_control, call = call)
 

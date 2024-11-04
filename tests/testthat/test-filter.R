@@ -740,3 +740,31 @@ test_that("filter objects are immutable", {
     obj[1] <- 1,
     "Cannot write to 'dust_filter' objects, they are read-only")
 })
+
+
+test_that("can share data in filter", {
+  pars <- list(
+    list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6),
+    list(beta = 0.2, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6))
+
+  time_start <- 0
+
+  data1 <- data.frame(time = c(4, 8, 12, 16),
+                      incidence = 1:4)
+  data2 <- rbind(data1, data1)
+  data2$group <- rep(1:2, each = 4)
+  n_particles <- 100
+  seed <- 42
+
+  obj1 <- dust_filter_create(sir(), time_start, data1, shared_data = TRUE,
+                             n_particles = n_particles, n_groups = 2,
+                             seed = seed)
+  obj2 <- dust_filter_create(sir(), time_start, data2,
+                             n_particles = n_particles, n_groups = 2,
+                             seed = seed)
+
+  ll1 <- dust_likelihood_run(obj1, pars)
+  ll2 <- dust_likelihood_run(obj2, pars)
+
+  expect_identical(ll1, ll2)
+})

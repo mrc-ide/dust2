@@ -39,8 +39,8 @@ your rhs that the solver may skip over by accident, then specify
 a smaller maximum step size here.}
 
 \item{critical_times}{Vector of critical times.  These are times
-where we guarntee that the integration will stop, and which you
-can use for changes parameters.  This can avoid the solver
+where we guarantee that the integration will stop, and which you
+can use for changes to parameters.  This can avoid the solver
 jumping over short-lived departures from a smooth solution, and
 prevent the solver having to learn where a sharp change in your
 target function is.}

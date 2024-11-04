@@ -111,10 +111,12 @@ dust_filter_data <- function(data, time = NULL, group = NULL) {
 }
 
 
-prepare_data <- function(data, n_groups, call = NULL) {
+prepare_data <- function(data, n_groups, shared_data, call = NULL) {
   if (!is.null(n_groups)) {
     assert_scalar_integer(n_groups, call = call)
   }
+  assert_scalar_logical(shared_data, call = call)
+
   data <- dust_filter_data(data)
 
   name_time <- attr(data, "time")
@@ -123,11 +125,19 @@ prepare_data <- function(data, n_groups, call = NULL) {
   n_groups_data <- attr(data, "n_groups")
 
   if (is.null(n_groups)) {
+    if (shared_data) {
+      cli::cli_abort("Can't use 'shared_data = TRUE' with 'n_groups = NULL'",
+                     call = call)
+    }
     n_groups <- n_groups_data
-  } else if (n_groups != n_groups_data) {
-    cli::cli_abort(
-      "Expected 'data' to have {n_groups} groups, but it had {n_groups_data}",
-      call = call)
+  } else {
+    n_groups_data_expected <- if (shared_data) 1 else n_groups
+    if (n_groups_data != n_groups_data_expected) {
+      cli::cli_abort(
+        paste("Expected 'data' to have {n_groups_data_expected} groups, but",
+              "it had {n_groups_data}"),
+        call = call)
+    }
   }
 
   time <- data[[name_time]]
@@ -158,7 +168,8 @@ prepare_data <- function(data, n_groups, call = NULL) {
   }
 
   list(time = time,
-       n_groups = n_groups_data,
+       n_groups = n_groups,
+       n_groups_data = n_groups_data,
        groups = groups,
        data = data_by_time)
 }

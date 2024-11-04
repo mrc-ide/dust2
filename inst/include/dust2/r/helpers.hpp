@@ -384,7 +384,7 @@ std::vector<typename T::data_type> check_data(cpp11::list r_data,
                                               const std::vector<typename T::shared_state>& shared,
                                               size_t n_time,
                                               const char * name) {
-  const size_t n_groups = shared.size();
+  const size_t n_groups = LENGTH(r_data[0]);
   std::vector<typename T::data_type> data;
   data.reserve(n_time * n_groups);
 

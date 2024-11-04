@@ -317,21 +317,25 @@ public:
 
   template <typename IterData, typename IterOutput>
   void compare_data(IterData data,
+                    const size_t n_groups_data,
                     const std::vector<size_t>& index_group,
                     IterOutput output) {
-    compare_data(data, state_.data(), index_group, output);
+    compare_data(data, n_groups_data, state_.data(), index_group, output);
   }
 
   template <typename IterData, typename IterOutput>
-  void compare_data(IterData data, const real_type * state,
+  void compare_data(IterData data,
+                    const size_t n_groups_data,
+                    const real_type * state,
                     const std::vector<size_t>& index_group,
                     IterOutput output) {
+    bool data_is_shared = n_groups_data == 1; // see discrete/system.hpp
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
 #endif
     for (auto i : index_group) {
       for (size_t j = 0; j < n_particles_; ++j) {
-        auto data_i = data + i;
+        const auto data_i = data + (data_is_shared ? 0 : i);
         const auto k = n_particles_ * i + j;
         const auto offset = k * n_state_;
         auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
