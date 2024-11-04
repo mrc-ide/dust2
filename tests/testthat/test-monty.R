@@ -274,3 +274,30 @@ test_that("can use names for groups", {
   ll2 <- monty::monty_model_density(m2, p2)
   expect_equal(ll2, sum(ll1))
 })
+
+
+test_that("can run simple grouped unfilter", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  
+  time_start <- 0
+  data1 <- data.frame(group = rep(1:2, each = 4),
+                      time = rep(c(4, 8, 12, 16), 2),
+                      incidence = c(1:4, 2:5))
+  data2 <- data1
+  data2$group <- letters[data2$group]
+  
+  obj1 <- dust_unfilter_create(sir(), time_start, data1)
+  obj2 <- dust_unfilter_create(sir(), time_start, data2, n_groups = 2)
+  
+  packer <- monty::monty_packer_grouped(
+    c("a", "b"),
+    c("beta", "gamma"),
+    fixed = list(N = 1000, I0 = 10, exp_noise = 1e6))
+  
+  m2 <- dust_likelihood_monty(obj2, packer)
+  p2 <- c(0.2, 0.1, 0.25, 0.1)
+  
+  ll1 <- dust_likelihood_run(obj1, unname(packer$unpack(p2)))
+  ll2 <- monty::monty_model_density(m2, p2)
+  expect_equal(ll2, sum(ll1))
+})
