@@ -152,10 +152,10 @@ cpp11::sexp dust2_filter_rng_state(cpp11::sexp ptr) {
   const auto n_bytes_state = n_bytes * n_state;
   cpp11::writable::raws ret(n_bytes * (state_filter.size() + state_system.size()));
   for (size_t i = 0; i < n_groups; ++i) {
-    std::memcpy(RAW(ret) + i * n_bytes_state * (n_particles + 1),
-                state_filter.data() + i * n_state,
-                n_bytes_state);
-    std::memcpy(RAW(ret) + i * n_bytes_state * (n_particles + 1) + n_bytes_state,
+    std::memcpy(RAW(ret) + i * n_bytes_state * (n_particles + 2),
+                state_filter.data() + i * n_state * 2,
+                n_bytes_state * 2);
+    std::memcpy(RAW(ret) + i * n_bytes_state * (n_particles + 2) + 2 * n_bytes_state,
                 state_system.data() + i * n_state * n_particles,
                 n_bytes_state * n_particles);
   }
@@ -171,19 +171,19 @@ cpp11::sexp dust2_filter_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state)
 
   const auto n_particles = obj->sys.n_particles();
   const auto n_groups = obj->sys.n_groups();
-  const auto n_streams = n_groups * (1 + n_particles);
+  const auto n_streams = n_groups * (2 + n_particles);
   const auto n_state = rng_state_type::size();
   const auto rng_state =
     check_rng_state<rng_state_type>(r_rng_state, n_streams, "rng_state");
 
-  std::vector<rng_int_type> state_filter(n_groups * n_state);
+  std::vector<rng_int_type> state_filter(n_groups * n_state * 2);
   std::vector<rng_int_type> state_system(n_groups * n_particles * n_state);
   for (size_t i = 0; i < n_groups; ++i) {
-    const auto src = rng_state.begin() + i * (1 + n_particles) * n_state;
+    const auto src = rng_state.begin() + i * (2 + n_particles) * n_state;
     std::copy_n(src,
-                n_state,
-                state_filter.begin() + i * n_state);
-    std::copy_n(src + n_state,
+                n_state * 2,
+                state_filter.begin() + i * n_state * 2);
+    std::copy_n(src + 2 * n_state,
                 n_state * n_particles,
                 state_system.begin() + i * n_state * n_particles);
   }

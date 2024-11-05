@@ -30,7 +30,7 @@ public:
     n_state_(sys.n_state()),
     n_particles_(sys.n_particles()),
     n_groups_(sys.n_groups()),
-    rng_(n_groups_, seed, false),
+    rng_(n_groups_ * 2, seed, false),
     ll_(n_groups_, 0),
     ll_step_(n_groups_ * n_particles_, 0),
     trajectories_(n_state_, n_particles_, n_groups_, time_.size()),
@@ -69,7 +69,7 @@ public:
           std::any_of(w, w + n_particles_, [](auto v) { return v != 0; });
         if (reorder_this_group) {
           ll_[i] += details::scale_log_weights<real_type>(n_particles_, w);
-          const auto u = monty::random::random_real<real_type>(rng_.state(i));
+          const auto u = monty::random::random_real<real_type>(rng_.state(2 * i));
           details::resample_weight(n_particles_, w, u, idx);
         } else {
           for (size_t j = 0; j < n_particles_; ++j) {
@@ -124,7 +124,7 @@ public:
   const auto& select_random_particle(std::vector<size_t> index_group) {
     for (auto i : index_group) {
       if (random_particle_[i] == n_particles_) {
-        const auto u = monty::random::random_real<real_type>(rng_.state(i));
+        const auto u = monty::random::random_real<real_type>(rng_.state(2 * i + 1));
         random_particle_[i] = static_cast<size_t>(std::floor(u * n_particles_));
       }
     }

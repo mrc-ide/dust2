@@ -40,9 +40,9 @@ cpp11::sexp dust2_discrete_filter_alloc(cpp11::list r_pars,
   const auto deterministic = false;
 
   // Create all the required rng states across the filter and the
-  // system, in a reasonable way.  We need to make this slightly easier
-  // to do from monty really.  Expand the state to give all the
-  // state required by the filter (n_groups streams worth) and the
+  // system, in a reasonable way.  We need to make this slightly
+  // easier to do from monty really.  Expand the state to give all the
+  // state required by the filter (2 * n_groups streams worth) and the
   // system (n_groups * n_particles worth, though the last bit of
   // expansion could be done by the system itself instead?)
   //
@@ -55,22 +55,22 @@ cpp11::sexp dust2_discrete_filter_alloc(cpp11::list r_pars,
   // filter with multiple groups will stream differently to a filter
   // containing a the first group only.
   //
-  // 2. we take each block of (1+n_particles) states for each group,
-  // giving the first to the filter and the rest to the system.  This
-  // means that we can change the number of groups without affecting
-  // the results, though we can't change the number of particles as
-  // easily.
-  const auto n_streams = n_groups * (n_particles + 1);
+  // 2. we take each block of (2+n_particles) states for each group,
+  // giving the first two to the filter and the rest to the system.
+  // This means that we can change the number of groups without
+  // affecting the results, though we can't change the number of
+  // particles as easily.
+  const auto n_streams = n_groups * (n_particles + 2);
   const auto rng_state = monty::random::prng<rng_state_type>(n_streams, seed, deterministic).export_state();
   const auto rng_len = rng_state_type::size();
   rng_seed_type seed_filter;
   rng_seed_type seed_system;
   for (size_t i = 0; i < n_groups; ++i) {
-    const auto it = rng_state.begin() + i * rng_len * (n_particles + 1);
+    const auto it = rng_state.begin() + i * rng_len * (n_particles + 2);
     seed_filter.insert(seed_filter.end(),
-                       it, it + rng_len);
+                       it, it + 2 * rng_len);
     seed_system.insert(seed_system.end(),
-                      it + rng_len, it + rng_len * (n_particles + 1));
+                      it + 2 * rng_len, it + rng_len * (n_particles + 2));
   }
 
   const auto system = dust2::dust_discrete<T>(shared, internal, time_start, dt, n_particles,
