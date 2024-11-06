@@ -121,7 +121,6 @@ test_that("can use named groups", {
 
 
 test_that("Can declare data to be shared", {
-  y <- lapply(1:5, function(i) runif(2))
   d <- data.frame(time = 1:5, x = 1, stringsAsFactors = FALSE)
 
   r1 <- prepare_data(d, 5, TRUE)
@@ -134,7 +133,6 @@ test_that("Can declare data to be shared", {
 
 
 test_that("shared_data requires a number of groups", {
-  y <- lapply(1:5, function(i) runif(2))
   d <- data.frame(time = 1:5, x = 1, stringsAsFactors = FALSE)
   expect_error(
     prepare_data(d, NULL, TRUE),
