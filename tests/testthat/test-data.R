@@ -100,7 +100,7 @@ test_that("can convert a data.frame with list columns", {
   y <- lapply(1:5, function(i) runif(2))
   d <- data.frame(time = 1:5, x = 1:5, y = I(y),
                   stringsAsFactors = FALSE)
-  d2 <- prepare_data(d, 1)
+  d2 <- prepare_data(d, 1, FALSE)
   expect_equal(d2$data[[1]], list(list(x = 1, y = y[[1]])))
   expect_equal(d2$data[[3]], list(list(x = 3, y = y[[3]])))
 })
@@ -117,4 +117,24 @@ test_that("can use named groups", {
   expect_equal(attr(d, "group"), "group")
   expect_equal(attr(d, "n_groups"), 3)
   expect_equal(attr(d, "groups"), c("a", "b", "c"))
+})
+
+
+test_that("Can declare data to be shared", {
+  d <- data.frame(time = 1:5, x = 1, stringsAsFactors = FALSE)
+
+  r1 <- prepare_data(d, 5, TRUE)
+  r2 <- prepare_data(d, 1, FALSE)
+  v <- setdiff(names(r1), "n_groups")
+  expect_equal(r1[v], r2[v])
+  expect_equal(r1$n_groups, 5)
+  expect_equal(r2$n_groups, 1)
+})
+
+
+test_that("shared_data requires a number of groups", {
+  d <- data.frame(time = 1:5, x = 1, stringsAsFactors = FALSE)
+  expect_error(
+    prepare_data(d, NULL, TRUE),
+    "Can't use 'shared_data = TRUE' with 'n_groups = NULL'")
 })

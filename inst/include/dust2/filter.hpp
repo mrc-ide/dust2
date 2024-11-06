@@ -30,6 +30,7 @@ public:
     n_state_(sys.n_state()),
     n_particles_(sys.n_particles()),
     n_groups_(sys.n_groups()),
+    n_groups_data_(data_.size() / time.size()),
     rng_(n_groups_ * 2, seed, false),
     ll_(n_groups_, 0),
     ll_step_(n_groups_ * n_particles_, 0),
@@ -50,13 +51,9 @@ public:
     auto it_data = data_.begin();
     for (auto time : time_) {
       sys.run_to_time(time, index_group);
-      sys.compare_data(it_data, index_group, ll_step_.begin());
-      it_data += n_groups_;
+      sys.compare_data(it_data, n_groups_data_, index_group, ll_step_.begin());
+      it_data += n_groups_data_;
 
-      // This looks like it's just not capturing the jump properly
-      // perhaps?  Better would be to return nan from the comparison
-      // and cope with that accordingly - all nan is missing, some nan
-      // is failure?
       for (auto i : index_group) {
         const auto offset = i * n_particles_;
         const auto w = ll_step_.begin() + offset;
@@ -138,6 +135,7 @@ private:
   size_t n_state_;
   size_t n_particles_;
   size_t n_groups_;
+  size_t n_groups_data_;
   monty::random::prng<rng_state_type> rng_;
   std::vector<real_type> ll_;
   std::vector<real_type> ll_step_;

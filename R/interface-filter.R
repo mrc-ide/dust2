@@ -24,6 +24,9 @@
 ##'   will be taken from `data`.  If given, then the number of groups
 ##'   in `data` will be checked against this number.
 ##'
+##' @param shared_data Logical, indicating if `data` is shared among
+##'   all groups.
+##'
 ##' @inheritParams dust_system_create
 ##' @inheritParams dust_system_simulate
 ##'
@@ -34,7 +37,8 @@
 dust_filter_create <- function(generator, time_start, data,
                                n_particles, n_groups = NULL, dt = NULL,
                                ode_control = NULL,
-                               n_threads = 1, preserve_group_dimension = FALSE,
+                               shared_data = FALSE, n_threads = 1,
+                               preserve_group_dimension = FALSE,
                                seed = NULL) {
   call <- environment()
   check_generator_for_filter(generator, "filter", call = call)
@@ -43,7 +47,7 @@ dust_filter_create <- function(generator, time_start, data,
   assert_scalar_size(n_particles, allow_zero = FALSE, call = call)
   assert_scalar_logical(preserve_group_dimension, call = call)
 
-  data <- prepare_data(data, n_groups, call = call)
+  data <- prepare_data(data, n_groups, shared_data, call = call)
   time_start <- check_time_start(time_start, data$time, call = call)
   time_control <- check_time_control(generator, dt, ode_control, call = call)
 
@@ -76,6 +80,7 @@ dust_filter_create <- function(generator, time_start, data,
          initial_rng_state = filter_rng_state(n_particles, n_groups, seed),
          n_particles = n_particles,
          n_groups = n_groups,
+         shared_data = shared_data,
          groups = groups,
          deterministic = FALSE,
          has_adjoint = FALSE,

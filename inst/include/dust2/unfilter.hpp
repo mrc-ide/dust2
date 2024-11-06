@@ -29,6 +29,7 @@ public:
     n_state_(sys.n_state()),
     n_particles_(sys.n_particles()),
     n_groups_(sys.n_groups()),
+    n_groups_data_(data_.size() / time.size()),
     ll_(n_particles_ * n_groups_, 0),
     ll_step_(n_particles_ * n_groups_, 0),
     trajectories_(n_state_, n_particles_, n_groups_, time_.size()),
@@ -48,7 +49,7 @@ public:
     auto it_data = data_.begin();
     for (size_t i = 0; i < n_times; ++i, it_data += n_groups_) {
       sys.run_to_time(time_[i], index_group);
-      sys.compare_data(it_data, index_group, ll_step_.begin());
+      sys.compare_data(it_data, n_groups_data_, index_group, ll_step_.begin());
       for (size_t j = 0; j < ll_.size(); ++j) {
         ll_[j] += ll_step_[j];
       }
@@ -87,7 +88,7 @@ public:
     for (size_t i = 0; i < n_times; ++i) {
       const auto state_i = adjoint_.state(i + 1);
       const auto data_i = data_.begin() + n_groups_ * i;
-      sys.compare_data(data_i, state_i, index_group, ll_step_.begin());
+      sys.compare_data(data_i, n_groups_data_, state_i, index_group, ll_step_.begin());
       for (size_t j = 0; j < ll_.size(); ++j) {
         ll_[j] += ll_step_[j];
       }
@@ -142,6 +143,7 @@ private:
   size_t n_state_;
   size_t n_particles_;
   size_t n_groups_;
+  size_t n_groups_data_;
   std::vector<real_type> ll_;
   std::vector<real_type> ll_step_;
   trajectories<real_type> trajectories_;
