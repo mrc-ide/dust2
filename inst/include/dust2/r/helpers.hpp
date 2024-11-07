@@ -582,6 +582,46 @@ void read_int_array(cpp11::list args, const dust2::array::dimensions<rank>& dim,
   }
 }
 
+template <typename T>
+void check_min_array(const std::vector<T>& x, const T min, const char * name) {
+  for (size_t i = 0; i < x.size(); ++i) {
+    if (x[i] < min) {
+      const auto min_str = std::to_string(min);
+      cpp11::stop("All values of '%s' must be at least %s",
+                  name, min_str.c_str());
+    }
+  }
+}
+
+template <typename T>
+void check_max_array(const std::vector<T>& x, const T max, const char * name) {
+  for (size_t i = 0; i < x.size(); ++i) {
+    if (x[i] > max) {
+      const auto max_str = std::to_string(max);
+      cpp11::stop("All values of '%s' must be at most %s",
+                  name, max_str.c_str());
+    }
+  }
+}
+
+template <typename T>
+void check_min_scalar(const T x, const T min, const char * name) {
+  if (x < min) {
+    const auto min_str = std::to_string(min);
+    cpp11::stop("'%s' must be at least %s",
+                name, min_str.c_str());
+  }
+}
+
+template <typename T>
+void check_max_scalar(const T x, const T max, const char * name) {
+  if (x > max) {
+    const auto max_str = std::to_string(max);
+    cpp11::stop("'%s' must be at most %s",
+                name, max_str.c_str());
+  }
+}
+
 inline cpp11::sexp packing_to_r(const dust2::packing& packing_info) {
   if (packing_info.size() == 0) {
     return R_NilValue;

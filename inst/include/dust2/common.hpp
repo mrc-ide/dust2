@@ -55,6 +55,15 @@ void read_dimensions(cpp11::list args, const char * name, dust2::array::dimensio
 template <>
 void read_dimensions(cpp11::list args, const char * name, dust2::array::dimensions<1>& dest);
 
+template <typename T>
+void check_min_array(const std::vector<T>& x, const T min, const char * name);
+template <typename T>
+void check_max_array(const std::vector<T>& x, const T min, const char * name);
+template <typename T>
+void check_min_scalar(const T x, const T min, const char * name);
+template <typename T>
+void check_max_scalar(const T x, const T min, const char * name);
+
 }
 
 }
