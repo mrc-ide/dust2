@@ -606,7 +606,7 @@ void check_max_array(const std::vector<T>& x, const T max, const char * name) {
 
 template <typename T>
 void check_min_scalar(const T x, const T min, const char * name) {
-  if (x[i] < min) {
+  if (x < min) {
     const auto min_str = std::to_string(min);
     cpp11::stop("'%s' must be at least %s",
                 name, min_str.c_str());
@@ -615,7 +615,7 @@ void check_min_scalar(const T x, const T min, const char * name) {
 
 template <typename T>
 void check_max_scalar(const T x, const T max, const char * name) {
-  if (x[i] > max) {
+  if (x > max) {
     const auto max_str = std::to_string(max);
     cpp11::stop("'%s' must be at most %s",
                 name, max_str.c_str());
