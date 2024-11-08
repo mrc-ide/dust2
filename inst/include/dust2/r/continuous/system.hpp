@@ -80,7 +80,7 @@ cpp11::sexp ode_internals_to_sexp(const ode::internals<real_type>& internals,
   }
   if (include_history && !internals.history_values.empty()) {
     const auto n_history_entries = internals.history_values.size();
-    const auto n_history_state = internals.history_values[0].c1.size();
+    const auto n_history_state = internals.history_values.n_state();
     auto r_history_coef =
       cpp11::writable::doubles(n_history_state * 5 * n_history_entries);
     auto r_history_time = cpp11::writable::doubles(n_history_entries);
@@ -88,7 +88,7 @@ cpp11::sexp ode_internals_to_sexp(const ode::internals<real_type>& internals,
     auto history_coef = REAL(r_history_coef);
     auto history_time = REAL(r_history_time);
     auto history_size = REAL(r_history_size);
-    for (auto& h: internals.history_values) {
+    for (auto& h: internals.history_values.data()) {
       *history_time++ = h.t;
       *history_size++ = h.h;
       history_coef = std::copy(h.c1.begin(), h.c1.end(), history_coef);

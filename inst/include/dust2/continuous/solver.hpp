@@ -29,38 +29,26 @@ T clamp(T x, T min, T max) {
 // from one particle to another fairly efficiently
 template <typename real_type>
 struct internals {
-  history<real_type> last;
+  history_step<real_type> last;
+  history<real_type> history_values;
 
   std::vector<real_type> dydt;
   std::vector<real_type> step_times;
-  std::vector<history<real_type>> history_values;
   real_type step_size;
   real_type error;
   size_t n_steps;
   size_t n_steps_accepted;
   size_t n_steps_rejected;
-  std::vector<size_t> history_index;
 
   internals(size_t n_variables) :
     last(n_variables),
+    history_values(n_variables),
     dydt(n_variables) {
     reset();
   }
 
-  void set_history_index(const std::vector<size_t>& index) {
-    if (tools::is_trivial_index(index, dydt.size())) {
-      history_index.clear();
-    } else {
-      history_index = index;
-    }
-  }
-
-  void save_history(real_type t, real_type h) {
-    if (history_index.empty()) {
-      history_values.push_back(last);
-    } else {
-      history_values.push_back(last.subset(history_index));
-    }
+  void save_history() {
+    history_values.add(last);
   }
 
   void reset() {
@@ -186,7 +174,7 @@ public:
           internals.step_times.push_back(truncated ? t_end : t + h);
         }
         if (control_.save_history) {
-          internals.save_history(t, h);
+          internals.save_history();
         }
         if (!truncated) {
           const auto fac_old =
