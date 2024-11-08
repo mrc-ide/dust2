@@ -39,6 +39,27 @@ struct history_step {
     c5(c5) {
   }
 
+  template <typename Iter>
+  void interpolate(real_type time, const std::vector<size_t>& index,
+                   Iter result) const {
+    const auto u = (time - t) / h;
+    const auto v = 1 - u;
+    for (auto i : index) {
+      *result = c1[i] + u * (c2[i] + v * (c3[i] + u * (c4[i] + v * c5[i])));
+      ++result;
+    }
+  }
+
+  template <typename Iter>
+  void interpolate(real_type time, Iter result) const {
+    const auto u = (time - t) / h;
+    const auto v = 1 - u;
+    for (size_t i = 0; i < c1.size(); ++i) {
+      *result = c1[i] + u * (c2[i] + v * (c3[i] + u * (c4[i] + v * c5[i])));
+      ++result;
+    }
+  }
+
   history_step subset(std::vector<size_t> index) const {
     return history_step(t,
                         h,
@@ -71,6 +92,9 @@ public:
     return n_state_;
   }
 
+  // We will enable this once everything is working, but most likely
+  // it's just coming in via the constructor.  Here so I remember it.
+  //
   // void set_index(const std::vector<size_t>& index) {
   //   if (tools::is_trivial_index(index, n_state_total_)) {
   //     index_.clear();
@@ -111,18 +135,12 @@ public:
         ++result;
       }
       return false;
+    } else {
+      const auto it = std::lower_bound(data_.begin(), data_.end(), time,
+                                       [](auto value, auto& h) { value < h.t; });
+      it->interpolate(time, index, result);
+      return true;
     }
-
-    const auto it = std::lower_bound(data_.begin(), data_.end(), time,
-                                     [](auto value, auto& h) { value < h.t; });
-    const auto u = (time - it->t) / it->h;
-    const auto v = 1 - u;
-    for (size_t i = 0; i < index.size(); ++i) {
-      *result =
-        it->c1[i] + u * (it->c2[i] + v * (it->c3[i] + u * (it->c4[i] + v * it->c5[i])));
-      ++result;
-    }
-    return true;
   }
 
   auto& data() const {

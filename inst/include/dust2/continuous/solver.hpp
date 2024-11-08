@@ -304,20 +304,9 @@ private:
     std::copy_n(y_next_.begin(), n_variables_, y);
   }
 
-  real_type interpolate(size_t idx,
-                        const real_type theta,
-                        const real_type theta1,
-                        const ode::internals<real_type>& internals) {
-    return internals.last.c1[idx] + theta *
-      (internals.last.c2[idx] + theta1 *
-       (internals.last.c3[idx] + theta *
-        (internals.last.c4[idx] + theta1 *
-         internals.last.c5[idx])));
-  }
-
   void apply_zero_every(real_type t, real_type* y,
                         const zero_every_type<real_type>& zero_every,
-                        const ode::internals<real_type>& internals) {
+                        ode::internals<real_type>& internals) {
     if (zero_every.empty() || internals.last.h == 0) {
       return;
     }
@@ -333,10 +322,11 @@ private:
             y[j] = 0;
           }
         } else {
-          const auto theta = (t_reset - t_last_step) / internals.last.h;
-          const auto theta1 = 1 - theta;
-          for (const auto j : el.second) {
-            y[j] -= interpolate(j, theta, theta1, internals);
+          auto tmp = internals.last.c4.begin();
+          const auto& index = el.second;
+          internals.last.interpolate(t_reset, index, tmp);
+          for (size_t i = 0; i < el.second.size(); ++i) {
+            y[index[i]] -= tmp[i];
           }
         }
       }
@@ -346,7 +336,7 @@ private:
   // action at the final step is slightly different:
   void apply_zero_every_final(real_type t, real_type* y,
                               const zero_every_type<real_type>& zero_every,
-                              const ode::internals<real_type>& internals) {
+                              ode::internals<real_type>& internals) {
     if (zero_every.empty() || internals.last.h == 0) {
       return;
     }
@@ -358,10 +348,12 @@ private:
         const int m = std::ceil(t_last_step / period);
         if (n > m) {
           const auto t_reset = (n - 1) * period;
-          const auto theta = (t_reset - t_last_step) / internals.last.h;
-          const auto theta1 = 1 - theta;
-          for (const auto j : el.second) {
-            y[j] -= interpolate(j, theta, theta1, internals);
+
+          auto tmp = internals.last.c4.begin();
+          const auto& index = el.second;
+          internals.last.interpolate(t_reset, index, tmp);
+          for (size_t i = 0; i < el.second.size(); ++i) {
+            y[index[i]] -= tmp[i];
           }
         }
       }
