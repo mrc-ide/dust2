@@ -128,7 +128,7 @@ public:
 
   template <typename Iter>
   bool interpolate(real_type time, const std::vector<size_t>& index,
-                   Iter result) {
+                   Iter result) const {
     if (data_.empty() || time < data_[0].t) {
       for (size_t i = 0; i < index.size(); ++i) {
         *result = initial_state_[i];
