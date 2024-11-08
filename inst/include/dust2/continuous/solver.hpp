@@ -7,6 +7,7 @@
 #include <dust2/tools.hpp>
 #include <dust2/zero.hpp>
 #include <dust2/continuous/control.hpp>
+#include <dust2/continuous/history.hpp>
 
 namespace dust2 {
 namespace ode {
@@ -21,17 +22,6 @@ T clamp(T x, T min, T max) {
   return std::max(std::min(x, max), min);
 }
 
-template <typename real_type>
-struct history {
-  real_type t;
-  real_type h;
-  std::vector<real_type> c1;
-  std::vector<real_type> c2;
-  std::vector<real_type> c3;
-  std::vector<real_type> c4;
-  std::vector<real_type> c5;
-};
-
 // This is the internal state separate from 'y' that defines the
 // system.  This includes the derivatives.
 //
@@ -39,16 +29,11 @@ struct history {
 // from one particle to another fairly efficiently
 template <typename real_type>
 struct internals {
+  history<real_type> last;
+
   std::vector<real_type> dydt;
   std::vector<real_type> step_times;
   std::vector<history<real_type>> history_values;
-  // Interpolation coefficients
-  std::vector<real_type> c1;
-  std::vector<real_type> c2;
-  std::vector<real_type> c3;
-  std::vector<real_type> c4;
-  std::vector<real_type> c5;
-  real_type last_step_size;
   real_type step_size;
   real_type error;
   size_t n_steps;
@@ -57,13 +42,8 @@ struct internals {
   std::vector<size_t> history_index;
 
   internals(size_t n_variables) :
-    dydt(n_variables),
-    c1(n_variables),
-    c2(n_variables),
-    c3(n_variables),
-    c4(n_variables),
-    c5(n_variables),
-    last_step_size(0) {
+    last(n_variables),
+    dydt(n_variables) {
     reset();
   }
 
@@ -77,19 +57,13 @@ struct internals {
 
   void save_history(real_type t, real_type h) {
     if (history_index.empty()) {
-      history_values.push_back({t, h, c1, c2, c3, c4, c5});
+      history_values.push_back(last);
     } else {
-      history_values.push_back({t, h,
-                                tools::subset(c1, history_index),
-                                tools::subset(c2, history_index),
-                                tools::subset(c3, history_index),
-                                tools::subset(c4, history_index),
-                                tools::subset(c5, history_index)});
+      history_values.push_back(last.subset(history_index));
     }
   }
 
   void reset() {
-    last_step_size = 0;
     step_size = 0;
     error = 0;
     n_steps = 0;
@@ -200,13 +174,13 @@ public:
       }
 
       const auto err = try_step(t, h, y, internals.dydt.data(),
-                                internals.c5.data(), rhs);
+                                internals.last.c5.data(), rhs);
       internals.n_steps++;
       const auto fac11 = std::pow(err, control_.constant);
 
       if (err <= 1) {
         success = true;
-        accept(y, h, internals);
+        accept(t, h, y, internals);
         internals.n_steps_accepted++;
         if (control_.debug_record_step_times) {
           internals.step_times.push_back(truncated ? t_end : t + h);
@@ -324,43 +298,44 @@ public:
   }
 
 private:
-  void accept(real_type* y, real_type h, ode::internals<real_type>& internals) {
+  void accept(real_type t, real_type h, real_type* y, ode::internals<real_type>& internals) {
     // We might want to only do this bit if we'll actually use the
     // history, but it's pretty cheap really.
+    internals.last.t = t;
+    internals.last.h = h;
     for (size_t i = 0; i < n_variables_; ++i) {
       const auto ydiff = y_next_[i] - y[i];
       const auto bspl = h * internals.dydt[i] - ydiff;
-      internals.c1[i] = y[i];
-      internals.c2[i] = ydiff;
-      internals.c3[i] = bspl;
-      internals.c4[i] = -h * k2_[i] + ydiff - bspl;
+      internals.last.c1[i] = y[i];
+      internals.last.c2[i] = ydiff;
+      internals.last.c3[i] = bspl;
+      internals.last.c4[i] = -h * k2_[i] + ydiff - bspl;
     }
 
     std::copy_n(k2_.begin(), n_variables_, internals.dydt.begin());
     std::copy_n(y_next_.begin(), n_variables_, y);
-    internals.last_step_size = h;
   }
 
   real_type interpolate(size_t idx,
                         const real_type theta,
                         const real_type theta1,
                         const ode::internals<real_type>& internals) {
-    return internals.c1[idx] + theta *
-      (internals.c2[idx] + theta1 *
-       (internals.c3[idx] + theta *
-        (internals.c4[idx] + theta1 *
-         internals.c5[idx])));
+    return internals.last.c1[idx] + theta *
+      (internals.last.c2[idx] + theta1 *
+       (internals.last.c3[idx] + theta *
+        (internals.last.c4[idx] + theta1 *
+         internals.last.c5[idx])));
   }
 
   void apply_zero_every(real_type t, real_type* y,
                         const zero_every_type<real_type>& zero_every,
                         const ode::internals<real_type>& internals) {
-    if (zero_every.empty() || internals.last_step_size == 0) {
+    if (zero_every.empty() || internals.last.h == 0) {
       return;
     }
     for (const auto& el : zero_every) {
       const auto period = el.first;
-      const auto t_last_step = t - internals.last_step_size;
+      const auto t_last_step = t - internals.last.h;
       const int n = std::floor(t / period);
       const int m = std::floor(t_last_step / period);
       if (n > m) {
@@ -370,7 +345,7 @@ private:
             y[j] = 0;
           }
         } else {
-          const auto theta = (t_reset - t_last_step) / internals.last_step_size;
+          const auto theta = (t_reset - t_last_step) / internals.last.h;
           const auto theta1 = 1 - theta;
           for (const auto j : el.second) {
             y[j] -= interpolate(j, theta, theta1, internals);
@@ -384,18 +359,18 @@ private:
   void apply_zero_every_final(real_type t, real_type* y,
                               const zero_every_type<real_type>& zero_every,
                               const ode::internals<real_type>& internals) {
-    if (zero_every.empty() || internals.last_step_size == 0) {
+    if (zero_every.empty() || internals.last.h == 0) {
       return;
     }
     for (const auto& el : zero_every) {
       const auto period = el.first;
-      if (internals.last_step_size > period) {
-        const auto t_last_step = t - internals.last_step_size;
+      if (internals.last.h > period) {
+        const auto t_last_step = t - internals.last.h;
         const int n = std::ceil(t / period);
         const int m = std::ceil(t_last_step / period);
         if (n > m) {
           const auto t_reset = (n - 1) * period;
-          const auto theta = (t_reset - t_last_step) / internals.last_step_size;
+          const auto theta = (t_reset - t_last_step) / internals.last.h;
           const auto theta1 = 1 - theta;
           for (const auto j : el.second) {
             y[j] -= interpolate(j, theta, theta1, internals);

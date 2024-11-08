@@ -69,13 +69,13 @@ cpp11::sexp ode_internals_to_sexp(const ode::internals<real_type>& internals,
     "coefficients"_nm = R_NilValue,
     "history"_nm = R_NilValue};
   if (include_coefficients) {
-    auto r_coef = cpp11::writable::doubles_matrix<>(internals.c1.size(), 5);
+    auto r_coef = cpp11::writable::doubles_matrix<>(internals.last.c1.size(), 5);
     auto coef = REAL(r_coef);
-    coef = std::copy(internals.c1.begin(), internals.c1.end(), coef);
-    coef = std::copy(internals.c2.begin(), internals.c2.end(), coef);
-    coef = std::copy(internals.c3.begin(), internals.c3.end(), coef);
-    coef = std::copy(internals.c4.begin(), internals.c4.end(), coef);
-    coef = std::copy(internals.c5.begin(), internals.c5.end(), coef);
+    coef = std::copy(internals.last.c1.begin(), internals.last.c1.end(), coef);
+    coef = std::copy(internals.last.c2.begin(), internals.last.c2.end(), coef);
+    coef = std::copy(internals.last.c3.begin(), internals.last.c3.end(), coef);
+    coef = std::copy(internals.last.c4.begin(), internals.last.c4.end(), coef);
+    coef = std::copy(internals.last.c5.begin(), internals.last.c5.end(), coef);
     ret["coefficients"] = r_coef;
   }
   if (include_history && !internals.history_values.empty()) {
