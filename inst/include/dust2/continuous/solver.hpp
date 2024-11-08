@@ -323,7 +323,7 @@ private:
     }
     for (const auto& el : zero_every) {
       const auto period = el.first;
-      const auto t_last_step = t - internals.last.h;
+      const auto t_last_step = internals.last.t;
       const int n = std::floor(t / period);
       const int m = std::floor(t_last_step / period);
       if (n > m) {
@@ -353,7 +353,7 @@ private:
     for (const auto& el : zero_every) {
       const auto period = el.first;
       if (internals.last.h > period) {
-        const auto t_last_step = t - internals.last.h;
+        const auto t_last_step = internals.last.t;
         const int n = std::ceil(t / period);
         const int m = std::ceil(t_last_step / period);
         if (n > m) {
