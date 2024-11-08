@@ -44,21 +44,21 @@ struct internals {
     last(n_variables),
     history_values(n_variables),
     dydt(n_variables) {
-    reset();
+    reset(last.c1.data());
   }
 
   void save_history() {
     history_values.add(last);
   }
 
-  void reset() {
+  void reset(const real_type * y) {
     step_size = 0;
     error = 0;
     n_steps = 0;
     n_steps_accepted = 0;
     n_steps_rejected = 0;
     step_times.clear();
-    history_values.clear();
+    history_values.reset(y);
   }
 };
 
@@ -229,7 +229,7 @@ public:
   template <typename Rhs>
   void initialise(const real_type t, const real_type* y,
                   ode::internals<real_type>& internals, Rhs rhs) {
-    internals.reset();
+    internals.reset(y);
     if (control_.debug_record_step_times) {
       internals.step_times.push_back(t);
     }

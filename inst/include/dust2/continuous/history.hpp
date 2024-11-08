@@ -53,7 +53,10 @@ struct history_step {
 template <typename real_type>
 class history {
 public:
-  history(size_t n_state) : n_state_(n_state), n_state_total_(n_state_) {
+  history(size_t n_state) :
+    n_state_(n_state),
+    n_state_total_(n_state_),
+    initial_state_(n_state_) {
   }
 
   bool empty() const {
@@ -76,7 +79,20 @@ public:
   //     index_ = index;
   //     n_state_ = index.size();
   //   }
+  //   initial_state_.resize(n_state_);
   // }
+
+  template <typename Iter>
+  void reset(Iter state) {
+    if (index_.empty()) {
+      std::copy_n(state, n_state_, initial_state_.begin());
+    } else {
+      for (size_t i = 0; i < index_.size(); ++i) {
+        initial_state_[i] = state[index_[i]];
+      }
+    }
+    data_.clear();
+  }
 
   void add(const history_step<real_type>& h) {
     if (index_.empty()) {
@@ -86,8 +102,27 @@ public:
     }
   }
 
-  void clear() {
-    data_.clear();
+  template <typename Iter>
+  bool interpolate(real_type time, const std::vector<size_t>& index,
+                   Iter result) {
+    if (data_.empty() || time < data_[0].t) {
+      for (size_t i = 0; i < index.size(); ++i) {
+        *result = initial_state_[i];
+        ++result;
+      }
+      return false;
+    }
+
+    const auto it = std::lower_bound(data_.begin(), data_.end(), time,
+                                     [](auto value, auto& h) { value < h.t; });
+    const auto u = (time - it->t) / it->h;
+    const auto v = 1 - u;
+    for (size_t i = 0; i < index.size(); ++i) {
+      *result =
+        it->c1[i] + u * (it->c2[i] + v * (it->c3[i] + u * (it->c4[i] + v * it->c5[i])));
+      ++result;
+    }
+    return true;
   }
 
   auto& data() const {
@@ -98,6 +133,7 @@ private:
   size_t n_state_;
   size_t n_state_total_;
   std::vector<size_t> index_;
+  std::vector<real_type> initial_state_;
   std::deque<history_step<real_type>> data_;
 };
 
