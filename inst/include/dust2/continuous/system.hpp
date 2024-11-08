@@ -88,16 +88,16 @@ public:
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
 #endif
-    for (auto i : index_group) {
-      for (size_t j = 0; j < n_particles_; ++j) {
-        const auto k = n_particles_ * i + j;
+    for (auto group : index_group) {
+      for (size_t particle = 0; particle < n_particles_; ++particle) {
+        const auto thread = tools::thread_index();
+        const auto k = n_particles_ * group + particle;
         const auto offset = k * n_state_;
-        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
         real_type * y = state_data + offset;
         try {
-          solver_.run(time_, time, y, zero_every_[i],
+          solver_.run(time_, time, y, zero_every_[group],
                       ode_internals_[k],
-                      rhs_(shared_[i], internal_i));
+                      rhs_(particle, group, thread));
         } catch (std::exception const& e) {
           errors_.capture(e, k);
         }
@@ -122,11 +122,11 @@ public:
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
 #endif
-    for (auto i : index_group) {
-      for (size_t j = 0; j < n_particles_; ++j) {
-        const auto k = n_particles_ * i + j;
+    for (auto group : index_group) {
+      for (size_t particle = 0; particle < n_particles_; ++particle) {
+        const auto thread = tools::thread_index();
+        const auto k = n_particles_ * group + particle;
         const auto offset = k * n_state_;
-        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
         auto& rng_state = rng_.state(k);
         real_type * y = state_data + offset;
         real_type * y_other = state_other_data + offset;
@@ -135,14 +135,15 @@ public:
           for (size_t step = 0; step < n_steps; ++step) {
             const real_type t0 = t1;
             t1 = (step == n_steps - 1) ? time : time_ + step * dt_;
-            solver_.run(t0, t1, y, zero_every_[i],
+            solver_.run(t0, t1, y, zero_every_[group],
                         ode_internals_[k],
-                        rhs_(shared_[i], internal_i));
+                        rhs_(particle, group, thread));
             std::copy_n(y, n_state_ode_, y_other);
-            T::update(t1, dt_, y, shared_[i], internal_i, rng_state, y_other);
+            update_(particle, group, thread,
+                    time, y, rng_state, y_other);
             std::swap(y, y_other);
             solver_.initialise(time_, y, ode_internals_[k],
-                               rhs_(shared_[i], internal_i));
+                               rhs_(particle, group, thread));
           }
           } catch (std::exception const& e) {
           errors_.capture(e, k);
@@ -392,10 +393,37 @@ private:
   std::vector<bool> output_is_current_;
   std::vector<bool> requires_initialise_;
 
-  static auto rhs_(const shared_state& shared, internal_state& internal) {
+  auto rhs_(size_t particle, size_t group, size_t thread) {
+    const size_t i = thread * n_groups_ + group;
+    const auto& shared = shared_[group];
+    auto& internal = internal_[i];
     return [&](real_type t, const real_type* y, real_type* dydt) {
-             T::rhs(t, y, shared, internal, dydt);
-           };
+      T::rhs(t, y, shared, internal, dydt);
+    };
+  }
+
+  void output_(size_t particle, size_t group, size_t thread) {
+    if (!output_is_current_[group]) {
+      const size_t i = thread * n_groups_ + group;
+      const auto& shared = shared_[group];
+      auto& internal = internal_[i];
+
+      const auto k = n_particles_ * group + particle;
+      const auto offset = k * n_state_;
+
+      real_type * y = state_.data() + offset;
+      T::output(time_, y, shared, internal);
+    }
+  }
+
+  void update_(size_t particle, size_t group, size_t thread,
+               real_type time, const double * y, rng_state_type rng_state,
+               double * y_other) {
+    const size_t i = thread * n_groups_ + group;
+    const auto& shared = shared_[group];
+    auto& internal = internal_[i];
+
+    T::update(time, dt_, y, shared, internal, rng_state, y_other);
   }
 
   void initialise_solver_(std::vector<size_t> index_group) {
@@ -414,16 +442,16 @@ private:
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
 #endif
-    for (auto i : index_group) {
-      for (size_t j = 0; j < n_particles_; ++j) {
-        if (requires_initialise_[i]) {
-          const auto k = n_particles_ * i + j;
+    for (auto group : index_group) {
+      for (size_t particle = 0; particle < n_particles_; ++particle) {
+        if (requires_initialise_[group]) {
+          const auto thread = tools::thread_index();
+          const auto k = n_particles_ * group + particle;
           const auto offset = k * n_state_;
-          auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
           real_type * y = state_data + offset;
           try {
             solver_.initialise(time_, y, ode_internals_[k],
-                               rhs_(shared_[i], internal_i));
+                               rhs_(particle, group, thread));
           } catch (std::exception const& e) {
             errors_.capture(e, k);
           }
@@ -445,19 +473,13 @@ private:
   template <typename has_output = typename dust2::properties<T>::has_output>
   typename std::enable_if<has_output::value, void>::type
   update_output() {
-    real_type * state_data = state_.data();
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
 #endif
-    for (size_t i = 0; i < n_groups_; ++i) {
-      for (size_t j = 0; j < n_particles_; ++j) {
-        const auto k = n_particles_ * i + j;
-        const auto offset = k * n_state_;
-        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
-        real_type * y = state_data + offset;
-        if (!output_is_current_[i]) {
-          T::output(time_, y, shared_[i], internal_i);
-        }
+    for (size_t group = 0; group < n_groups_; ++group) {
+      for (size_t particle = 0; particle < n_particles_; ++particle) {
+        const auto thread = tools::thread_index();
+        output_(particle, group, thread);
       }
     }
     update_output_is_current({}, true);
