@@ -2,6 +2,7 @@
 
 #include <deque>
 #include <vector>
+#include <dust2/tools.hpp>
 
 namespace dust2 {
 namespace ode {
