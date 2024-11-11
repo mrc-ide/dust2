@@ -8,6 +8,7 @@
 #include <dust2/packing.hpp>
 #include <dust2/tools.hpp>
 #include <dust2/zero.hpp>
+#include <dust2/continuous/delays.hpp>
 #include <cpp11/list.hpp>
 
 // In an odd place, we might update that later too

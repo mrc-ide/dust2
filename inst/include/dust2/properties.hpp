@@ -111,7 +111,7 @@ auto zero_every_vec(const std::vector<typename T::shared_state>& shared) {
 template <typename T, typename std::enable_if<properties<T>::has_delays::value, T>::type* = nullptr>
 auto do_delays(const std::vector<typename T::shared_state>& shared) {
   using real_type = typename T::real_type;
-  std::vector<std::vector<ode::delays<real_type>>> ret;
+  std::vector<ode::delays<real_type>> ret;
   ret.reserve(shared.size());
   for (size_t i = 0; i < shared.size(); ++i) {
     ret.push_back(T::delays(shared[i]));
