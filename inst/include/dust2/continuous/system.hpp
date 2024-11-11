@@ -408,10 +408,11 @@ private:
     const auto& shared = shared_[group];
     auto& internal = internal_[i];
     const auto& history = ode_internals_[j].history_values;
+    auto& delay_result = delay_result_[i];
     return [&](real_type t, const real_type* y, real_type* dydt) {
       if constexpr (has_delays) {
-        delays_[group].eval(t, history, delay_result_[i]);
-        T::rhs(t, y, shared, internal, delay_result_[i], dydt);
+        delays_[group].eval(t, history, delay_result);
+        T::rhs(t, y, shared, internal, delay_result, dydt);
       } else {
         T::rhs(t, y, shared, internal, dydt);
       }
@@ -460,9 +461,9 @@ private:
     }
     errors_.reset();
     real_type * state_data = state_.data();
-#ifdef _OPENMP
-#pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
-#endif
+// #ifdef _OPENMP
+// #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
+// #endif
     for (auto group : index_group) {
       for (size_t particle = 0; particle < n_particles_; ++particle) {
         if (requires_initialise_[group]) {

@@ -96,3 +96,22 @@ test_that("can run system with more variables than output", {
   expect_equal(y[1:4, ], y_cmp[1:4, ], tolerance = 1e-6)
   expect_equal(y[5, ], rep(0, length(t)))
 })
+
+
+test_that("can compile a model with delays", {
+  gen <- dust_compile(dust2_file("examples/delay.cpp"),
+                      quiet = FALSE, debug = TRUE)
+
+  cmp <- dust_system_create(sirode, list())
+  t <- seq(0, 100, 4)
+  dust_system_set_state_initial(cmp)
+  y_cmp <- dust_system_simulate(cmp, t)
+
+  ## For some reason this is just not working as expected!  I see 'y'
+  sys <- dust_system_create(gen, list())
+  dust_system_set_state_initial(sys)
+  y <- dust_system_simulate(sys, t)
+
+  ## Check that we have the same system:
+  expect_equal(y[1:4, ], y_cmp[1:4, ], tolerance = 1e-5)
+})

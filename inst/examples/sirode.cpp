@@ -11,7 +11,6 @@ class sirode {
 public:
   sirode() = delete;
 
-  using mixed_time = std::false_type;
   using real_type = double;
 
   struct shared_state {

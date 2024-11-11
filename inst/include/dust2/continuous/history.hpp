@@ -98,16 +98,16 @@ public:
   // We may enable this once everything is working, but most likely
   // it's just coming in via the constructor.  Here so I remember it.
   //
-  // void set_index(const std::vector<size_t>& index) {
-  //   if (tools::is_trivial_index(index, n_state_total_)) {
-  //     index_.clear();
-  //     n_state_ = n_state_total_;
-  //   } else {
-  //     index_ = index;
-  //     n_state_ = index.size();
-  //   }
-  //   initial_state_.resize(n_state_);
-  // }
+  void set_index(const std::vector<size_t>& index) {
+    if (tools::is_trivial_index(index, n_state_total_)) {
+      index_.clear();
+      n_state_ = n_state_total_;
+    } else {
+      index_ = index;
+      n_state_ = index.size();
+    }
+    initial_state_.resize(n_state_);
+  }
 
   template <typename Iter>
   void reset(Iter state) {

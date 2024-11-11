@@ -2,10 +2,10 @@
 
 // [[dust2::class(sirdelay)]]
 // [[dust2::time_type(continuous)]]
-// [[dust2::parameter(I0)]]
-// [[dust2::parameter(N)]]
-// [[dust2::parameter(beta)]]
-// [[dust2::parameter(gamma)]]
+// [[dust2::parameter(I0, rank = 0, constant = FALSE, required = FALSE)]]
+// [[dust2::parameter(N, rank = 0, constant = TRUE, required = FALSE)]]
+// [[dust2::parameter(beta, rank = 0, constant = FALSE, required = FALSE)]]
+// [[dust2::parameter(gamma, rank = 0, constant = FALSE, required = FALSE)]]
 class sirdelay {
 public:
   sirdelay() = delete;
@@ -19,8 +19,7 @@ public:
     real_type gamma;
   };
 
-  struct internal_state {
-  };
+  struct internal_state {};
 
   struct data_type {
     real_type incidence;
@@ -36,9 +35,9 @@ public:
     return 1;
   }
 
-  static auto delays(const shared_state& shared) {
-    return dust2::ode::delays<real_type>{{1, {3}}};
-  }
+  // static auto delays(const shared_state& shared) {
+  //   return dust2::ode::delays<real_type>{{1, {3}}};
+  // }
 
   static void initial(real_type time,
                       const shared_state& shared,
@@ -56,7 +55,7 @@ public:
                   const real_type * state,
                   const shared_state& shared,
                   internal_state& internal,
-                  const dust2::ode::delay_result_type<real_type>& delays,
+                  // const dust2::ode::delay_result_type<real_type>& delays,
                   real_type * state_deriv) {
     const auto S = state[0];
     const auto I = state[1];
@@ -71,9 +70,10 @@ public:
   static void output(real_type time,
                      real_type * state,
                      const shared_state& shared,
-                     internal_state& internal,
-                     const dust2::ode::delay_result_type<real_type>& delays) {
-    state[4] = state[3] - delays[0][0];
+                     internal_state& internal) {
+    // const dust2::ode::delay_result_type<real_type>& delays) {
+    // state[4] = state[3] - delays[0][0];
+    // state[4] = state[3];
   }
 
   static shared_state build_shared(cpp11::list pars) {
