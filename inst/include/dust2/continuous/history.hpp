@@ -95,7 +95,7 @@ public:
     return n_state_;
   }
 
-  // We will enable this once everything is working, but most likely
+  // We may enable this once everything is working, but most likely
   // it's just coming in via the constructor.  Here so I remember it.
   //
   // void set_index(const std::vector<size_t>& index) {

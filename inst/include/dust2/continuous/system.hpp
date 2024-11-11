@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <vector>
 #include <dust2/continuous/control.hpp>
+#include <dust2/continuous/delays.hpp>
 #include <dust2/continuous/solver.hpp>
 #include <dust2/errors.hpp>
 #include <dust2/internals.hpp>
@@ -69,16 +70,20 @@ public:
     errors_(n_particles_total_),
     rng_(n_particles_total_, seed, deterministic),
     solver_(n_state_ode_, control_),
+    delays_(do_delays<T>(shared_)),
     n_threads_(n_threads),
     output_is_current_(n_groups_),
     requires_initialise_(n_groups_, true) {
-    // TODO: above, filter rng states need adding here too, or
-    // somewhere at least (we might move the filter elsewhere though,
-    // in which case that particular bit of weirdness goes away).
-
-    // We don't check that the size is the same across all states;
-    // this should be done by the caller (similarly, we don't check
-    // that shared and internal have the same size).
+    // Create the space we need to save results - like internal we do
+    // this once per thread as we discard rapidly.
+    if (delays_.size() > 0) { // if constexpr eventually
+      delay_result_.reserve(n_particles_ * n_groups_);
+      for (size_t i = 0; i < n_threads; ++i) {
+        for (size_t j = 0; j < n_groups_; ++j) {
+          delay_result_.push_back(delays_[j].result());
+        }
+      }
+    }
   }
 
   template <typename mixed_time = typename dust2::properties<T>::is_mixed_time>
@@ -384,36 +389,51 @@ private:
   std::vector<ode::internals<real_type>> ode_internals_other_;
   std::vector<shared_state> shared_;
   std::vector<internal_state> internal_;
+  std::vector<ode::delay_result_type<real_type>> delay_result_;
   std::vector<size_t> all_groups_;
   real_type time_;
   std::vector<zero_every_type<real_type>> zero_every_;
   dust2::utils::errors errors_;
   monty::random::prng<rng_state_type> rng_;
   ode::solver<real_type> solver_;
+  std::vector<ode::delays<real_type>> delays_;
   size_t n_threads_;
   std::vector<bool> output_is_current_;
   std::vector<bool> requires_initialise_;
 
   auto rhs_(size_t particle, size_t group, size_t thread) {
+    constexpr bool has_delays = dust2::properties<T>::has_delays::value;
     const size_t i = thread * n_groups_ + group;
+    const size_t j = group * n_particles_ + particle;
     const auto& shared = shared_[group];
     auto& internal = internal_[i];
+    const auto& history = ode_internals_[j].history_values;
     return [&](real_type t, const real_type* y, real_type* dydt) {
-      T::rhs(t, y, shared, internal, dydt);
+      if constexpr (has_delays) {
+        delays_[group].eval(t, history, delay_result_[i]);
+        T::rhs(t, y, shared, internal, delay_result_[i], dydt);
+      } else {
+        T::rhs(t, y, shared, internal, dydt);
+      }
     };
   }
 
   void output_(size_t particle, size_t group, size_t thread) {
+    constexpr bool has_delays = dust2::properties<T>::has_delays::value;
     if (!output_is_current_[group]) {
       const size_t i = thread * n_groups_ + group;
+      const size_t j = group * n_particles_ + particle;
       const auto& shared = shared_[group];
       auto& internal = internal_[i];
+      const auto& history = ode_internals_[j].history_values;
 
-      const auto k = n_particles_ * group + particle;
-      const auto offset = k * n_state_;
-
-      real_type * y = state_.data() + offset;
-      T::output(time_, y, shared, internal);
+      real_type * y = state_.data() + j * n_state_;
+      if constexpr (has_delays) {
+        delays_[group].eval(time_, history, delay_result_[i]);
+        T::output(time_, y, shared, internal, delay_result_[i]);
+      } else {
+        T::output(time_, y, shared, internal);
+      }
     }
   }
 
