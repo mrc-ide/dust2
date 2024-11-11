@@ -19,6 +19,8 @@ struct history_step {
   std::vector<real_type> c5;
 
   history_step(size_t n_variables) :
+    t(0),
+    h(0),
     c1(n_variables),
     c2(n_variables),
     c3(n_variables),
@@ -26,7 +28,7 @@ struct history_step {
     c5(n_variables) {
   }
 
-  history_step() {
+  history_step() : t(0), h(0) {
   }
 
   history_step(real_type t, real_type h, std::vector<real_type> c1, std::vector<real_type> c2, std::vector<real_type> c3, std::vector<real_type> c4, std::vector<real_type> c5) :
