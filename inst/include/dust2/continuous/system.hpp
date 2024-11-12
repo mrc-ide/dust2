@@ -308,7 +308,7 @@ public:
     fn(shared_[i]);
     // TODO: we might want to update the delays here, too.  Always
     // doing so would be the safest, but we might just forbid it and
-    // document that as such.
+    // document that as such (mrc-5993)
     requires_initialise_[i] = true;
   }
 
@@ -423,9 +423,8 @@ private:
 
       real_type * y = state_.data() + j * n_state_;
       if constexpr (has_delays_) {
-        // nicer here would be to respond to the arguments to output
-        // really; that must be possible with more metaprogramming
-        // mess.
+        // TODO: Consider responding to the type signature of
+        // T::output/T::rhs here? (mrc-5994)
         if (delays.output) {
           delays.eval(time_, history, delay_result_[i]);
         }
@@ -447,17 +446,16 @@ private:
   }
 
   void initialise_delays_() {
-    // could do a simpler impl here I think fopr the no-delay case.
-    //
-    // Create the space we need to save results - like internal we
-    // do this once per thread as we discard rapidly.
-    delay_result_.reserve(n_particles_ * n_groups_);
-    for (size_t i = 0; i < n_threads_; ++i) {
-      for (size_t j = 0; j < n_groups_; ++j) {
-        delay_result_.push_back(delays_[j].result());
-      }
-    }
     if constexpr (has_delays_) {
+      // Create the space we need to save results - like internal we
+      // do this once per thread as we don't retain contents across
+      // time steps.
+      delay_result_.reserve(n_particles_ * n_groups_);
+      for (size_t i = 0; i < n_threads_; ++i) {
+        for (size_t j = 0; j < n_groups_; ++j) {
+          delay_result_.push_back(delays_[j].result());
+        }
+      }
       for (size_t i = 0; i < n_groups_; ++i) {
         ode_internals_[i].history_values.set_index(delays_[i].index());
         ode_internals_other_[i].history_values.set_index(delays_[i].index());
@@ -465,9 +463,11 @@ private:
       control_.save_history = true;
       // TODO: we need to store solvers per thread and group as
       // otherwise they're writing to the same location.  Then this
-      // becomes a loop over groups, which is nicer.
+      // becomes a loop over groups, which is nicer (mrc-5995)
       solver_.control().step_size_max =
         delays_[0].step_size_max(control_.step_size_max);
+    } else {
+      delay_result_.resize(n_particles_ * n_groups_);
     }
   }
 
@@ -484,9 +484,9 @@ private:
     }
     errors_.reset();
     real_type * state_data = state_.data();
-// #ifdef _OPENMP
-// #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
-// #endif
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
+#endif
     for (auto group : index_group) {
       for (size_t particle = 0; particle < n_particles_; ++particle) {
         if (requires_initialise_[group]) {

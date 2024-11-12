@@ -83,7 +83,7 @@ public:
     facc2_(1 / control_.factor_max) {
   }
 
-  // TODO: probably better to make this a public field
+  // TODO: probably better to make this a public field (mrc-5992)
   auto& control() {
     return control_;
   }

@@ -95,9 +95,6 @@ public:
     return n_state_;
   }
 
-  // We may enable this once everything is working, but most likely
-  // it's just coming in via the constructor.  Here so I remember it.
-  //
   void set_index(const std::vector<size_t>& index) {
     if (tools::is_trivial_index(index, n_state_total_)) {
       index_.clear();

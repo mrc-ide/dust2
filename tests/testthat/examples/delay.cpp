@@ -83,8 +83,6 @@ public:
     return shared_state{N, I0, beta, gamma};
   }
 
-  // This is the bit that we'll use to do fast parameter updating, and
-  // we'll guarantee somewhere that the size does not change.
   static void update_shared(cpp11::list pars, shared_state& shared) {
     shared.I0 = dust2::r::read_real(pars, "I0", shared.I0);
     shared.beta = dust2::r::read_real(pars, "beta", shared.beta);
