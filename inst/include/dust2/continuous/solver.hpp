@@ -39,16 +39,20 @@ struct internals {
   size_t n_steps;
   size_t n_steps_accepted;
   size_t n_steps_rejected;
+  bool save_history_;
 
-  internals(size_t n_variables) :
+  internals(size_t n_variables, bool save_history) :
     last(n_variables),
     history_values(n_variables),
-    dydt(n_variables) {
+    dydt(n_variables),
+    save_history_(save_history) {
     reset(last.c1.data());
   }
 
   void save_history() {
-    history_values.add(last);
+    if (save_history_) {
+      history_values.add(last);
+    }
   }
 
   void reset(const real_type * y) {
@@ -173,9 +177,7 @@ public:
         if (control_.debug_record_step_times) {
           internals.step_times.push_back(truncated ? t_end : t + h);
         }
-        if (control_.save_history) {
-          internals.save_history();
-        }
+        internals.save_history();
         if (!truncated) {
           const auto fac_old =
             std::max(internals.error, static_cast<real_type>(1e-4));
