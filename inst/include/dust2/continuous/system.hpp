@@ -402,7 +402,9 @@ private:
     auto& delay_result = delay_result_[i];
     return [&](real_type t, const real_type* y, real_type* dydt) {
       if constexpr (has_delays_) {
-        delays.eval(t, history, delay_result);
+        if (delays.rhs) {
+          delays.eval(t, history, delay_result);
+        }
         T::rhs(t, y, shared, internal, delay_result, dydt);
       } else {
         T::rhs(t, y, shared, internal, dydt);
@@ -421,7 +423,12 @@ private:
 
       real_type * y = state_.data() + j * n_state_;
       if constexpr (has_delays_) {
-        delays.eval(time_, history, delay_result_[i]);
+        // nicer here would be to respond to the arguments to output
+        // really; that must be possible with more metaprogramming
+        // mess.
+        if (delays.output) {
+          delays.eval(time_, history, delay_result_[i]);
+        }
         T::output(time_, y, shared, internal, delay_result_[i]);
       } else {
         T::output(time_, y, shared, internal);
@@ -456,6 +463,11 @@ private:
         ode_internals_other_[i].history_values.set_index(delays_[i].index());
       }
       control_.save_history = true;
+      // TODO: we need to store solvers per thread and group as
+      // otherwise they're writing to the same location.  Then this
+      // becomes a loop over groups, which is nicer.
+      solver_.control().step_size_max =
+        delays_[0].step_size_max(control_.step_size_max);
     }
   }
 

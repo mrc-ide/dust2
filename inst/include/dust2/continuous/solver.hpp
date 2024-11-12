@@ -83,6 +83,11 @@ public:
     facc2_(1 / control_.factor_max) {
   }
 
+  // TODO: probably better to make this a public field
+  auto& control() {
+    return control_;
+  }
+
   template <typename Rhs>
   real_type try_step(const real_type t, const real_type h, const real_type* y,
                      const real_type* dydt, real_type* c5, Rhs rhs) {

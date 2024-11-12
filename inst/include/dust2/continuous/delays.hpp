@@ -21,7 +21,11 @@ using delay_result_type = std::vector<std::vector<real_type>>;
 template <typename real_type>
 class delays {
 public:
-  delays(std::initializer_list<delay<real_type>> data) :
+  const bool rhs;
+  const bool output;
+  delays(bool rhs, bool output, std::initializer_list<delay<real_type>> data) :
+    rhs(rhs),
+    output(output),
     delays_(data),
     index_out_(delays_.size()) {
     std::set<size_t> tmp;
@@ -49,6 +53,14 @@ public:
       ret.push_back(std::vector<real_type>(el.index.size()));
     }
     return ret;
+  }
+
+  real_type step_size_max(real_type h) const {
+    if (rhs) {
+      h = std::accumulate(delays_.begin(), delays_.end(), h,
+                          [](auto a, auto b) { return a < b.tau ? a : b.tau; });
+    }
+    return h;
   }
 
   void eval(real_type time, const history<real_type>& h,
