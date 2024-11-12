@@ -99,18 +99,19 @@ test_that("can run system with more variables than output", {
 
 
 test_that("can compile a model with delays", {
-  gen <- dust_compile("examples/delay.cpp", quiet = TRUE, debug = TRUE)
-
+  skip_for_compilation()
   cmp <- dust_system_create(sirode, list())
   t <- seq(0, 100, 4)
   dust_system_set_state_initial(cmp)
   y_cmp <- dust_system_simulate(cmp, t)
 
-  ## For some reason this is just not working as expected!  I see 'y'
+  gen <- dust_compile("examples/delay.cpp", quiet = TRUE, debug = TRUE)
   sys <- dust_system_create(gen, list())
   dust_system_set_state_initial(sys)
   y <- dust_system_simulate(sys, t)
 
   ## Check that we have the same system:
   expect_equal(y[1:4, ], y_cmp[1:4, ], tolerance = 1e-5)
+  ## And check that the incidence calculation is correct:
+  expect_equal(y[5, ], y_cmp[5, ], tolerance = 1e-5)
 })
