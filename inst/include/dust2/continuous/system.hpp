@@ -479,9 +479,15 @@ private:
     for (size_t group = 0; group < n_groups_; ++group) {
       for (size_t particle = 0; particle < n_particles_; ++particle) {
         const auto thread = tools::thread_index();
-        output_(particle, group, thread);
+        const auto k = n_particles_ * group + particle;
+        try {
+          output_(particle, group, thread);
+        } catch (std::exception const& e) {
+          errors_.capture(e, k);
+        }
       }
     }
+    errors_.report();
     update_output_is_current({}, true);
   }
 
