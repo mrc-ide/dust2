@@ -7,7 +7,6 @@
 // [[dust2::parameter(N, rank = 0, constant = TRUE, required = FALSE)]]
 // [[dust2::parameter(beta, rank = 0, constant = FALSE, required = FALSE)]]
 // [[dust2::parameter(gamma, rank = 0, constant = FALSE, required = FALSE)]]
-// [[dust2::parameter(exp_noise, rank = 0, constant = TRUE, required = FALSE)]]
 class sirode {
 public:
   sirode() = delete;
@@ -20,7 +19,6 @@ public:
     real_type I0;
     real_type beta;
     real_type gamma;
-    real_type exp_noise;
   };
 
   struct internal_state {};
@@ -68,8 +66,7 @@ public:
     const real_type N = dust2::r::read_real(pars, "N", 1000);
     const real_type beta = dust2::r::read_real(pars, "beta", 0.2);
     const real_type gamma = dust2::r::read_real(pars, "gamma", 0.1);
-    const real_type exp_noise = dust2::r::read_real(pars, "exp_noise", 1e6);
-    return shared_state{N, I0, beta, gamma, exp_noise};
+    return shared_state{N, I0, beta, gamma};
   }
 
   // This is the bit that we'll use to do fast parameter updating, and
