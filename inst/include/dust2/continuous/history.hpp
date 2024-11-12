@@ -1,6 +1,7 @@
 #pragma once
 
 #include <deque>
+#include <stdexcept>
 #include <vector>
 #include <dust2/tools.hpp>
 
