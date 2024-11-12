@@ -139,7 +139,12 @@ public:
       return false;
     } else {
       const auto it = std::lower_bound(data_.begin(), data_.end(), time,
-                                       [](auto value, auto& h) { value < h.t; });
+                                       [](const auto& h, const auto& value) {
+                                         return value > (h.t + h.h);
+                                       });
+      if (it == data_.end()) {
+        throw std::runtime_error("Failed to locate history element");
+      }
       it->interpolate(time, index, result);
       return true;
     }
