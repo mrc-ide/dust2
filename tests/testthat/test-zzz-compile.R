@@ -78,3 +78,21 @@ test_that("can compile a model with browser-based debugging", {
   expect_no_error(
     dust_compile("examples/debug.cpp", quiet = TRUE, debug = TRUE))
 })
+
+
+test_that("can run system with more variables than output", {
+  skip_for_compilation()
+  gen <- dust_compile("examples/output.cpp", quiet = TRUE, debug = TRUE)
+
+  sys <- dust_system_create(gen, list())
+  dust_system_set_state_initial(sys)
+  t <- seq(0, 100, by = 4)
+  y <- dust_system_simulate(sys, t)
+
+  sys_cmp <- dust_system_create(sirode, list())
+  dust_system_set_state_initial(sys_cmp)
+  y_cmp <- dust_system_simulate(sys_cmp, t)
+
+  expect_equal(y[1:4, ], y_cmp[1:4, ], tolerance = 1e-6)
+  expect_equal(y[5, ], rep(0, length(t)))
+})

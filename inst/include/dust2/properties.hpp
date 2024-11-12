@@ -74,7 +74,7 @@ dust2::packing do_packing_gradient(const typename T::shared_state &shared) {
 
 template <typename T, typename std::enable_if<properties<T>::has_output::value, T>::type* = nullptr>
 size_t do_n_state_output(const dust2::packing& packing) {
-  return std::accumulate(packing.len().begin() + T::size_output(),
+  return std::accumulate(packing.len().end() - T::size_output(),
                          packing.len().end(),
                          0);
 }
