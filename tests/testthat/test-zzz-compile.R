@@ -99,8 +99,7 @@ test_that("can run system with more variables than output", {
 
 
 test_that("can compile a model with delays", {
-  gen <- dust_compile(dust2_file("examples/delay.cpp"),
-                      quiet = FALSE, debug = TRUE)
+  gen <- dust_compile("examples/delay.cpp", quiet = TRUE, debug = TRUE)
 
   cmp <- dust_system_create(sirode, list())
   t <- seq(0, 100, 4)
