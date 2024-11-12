@@ -51,7 +51,7 @@ public:
 
     state_(n_state_ * n_particles_total_),
     ode_internals_(n_particles_total_,
-                   {n_state_ode_, control_.save_history}),
+                   {n_state_ode_, control_.save_history || has_delays_}),
 
     // For reordering to work:
     state_other_(n_state_ * n_particles_total_),
