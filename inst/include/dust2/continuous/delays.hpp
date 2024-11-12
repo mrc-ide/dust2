@@ -33,7 +33,7 @@ public:
     for (size_t i = 0; i < delays_.size(); ++i) {
       for (auto j : delays_[i].index) {
         const auto it = std::find(index_save_.begin(), index_save_.end(), j);
-        index_out_[i].push_back(*it);
+        index_out_[i].push_back(std::distance(index_save_.begin(), it));
       }
     }
   }
