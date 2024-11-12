@@ -398,10 +398,11 @@ private:
     const auto& shared = shared_[group];
     auto& internal = internal_[i];
     const auto& history = ode_internals_[j].history_values;
+    auto& delays = delays_[group];
     auto& delay_result = delay_result_[i];
     return [&](real_type t, const real_type* y, real_type* dydt) {
       if constexpr (has_delays_) {
-        delays_[group].eval(t, history, delay_result);
+        delays.eval(t, history, delay_result);
         T::rhs(t, y, shared, internal, delay_result, dydt);
       } else {
         T::rhs(t, y, shared, internal, dydt);
@@ -415,11 +416,12 @@ private:
       const size_t j = group * n_particles_ + particle;
       const auto& shared = shared_[group];
       auto& internal = internal_[i];
+      auto& delays = delays_[group];
       const auto& history = ode_internals_[j].history_values;
 
       real_type * y = state_.data() + j * n_state_;
       if constexpr (has_delays_) {
-        delays_[group].eval(time_, history, delay_result_[i]);
+        delays.eval(time_, history, delay_result_[i]);
         T::output(time_, y, shared, internal, delay_result_[i]);
       } else {
         T::output(time_, y, shared, internal);
@@ -439,6 +441,9 @@ private:
 
   void initialise_delays_() {
     // could do a simpler impl here I think fopr the no-delay case.
+    //
+    // Create the space we need to save results - like internal we
+    // do this once per thread as we discard rapidly.
     delay_result_.reserve(n_particles_ * n_groups_);
     for (size_t i = 0; i < n_threads_; ++i) {
       for (size_t j = 0; j < n_groups_; ++j) {
@@ -446,14 +451,6 @@ private:
       }
     }
     if constexpr (has_delays_) {
-      // Create the space we need to save results - like internal we
-      // do this once per thread as we discard rapidly.
-      delay_result_.reserve(n_particles_ * n_groups_);
-      for (size_t i = 0; i < n_threads_; ++i) {
-        for (size_t j = 0; j < n_groups_; ++j) {
-          delay_result_.push_back(delays_[j].result());
-        }
-      }
       for (size_t i = 0; i < n_groups_; ++i) {
         ode_internals_[i].history_values.set_index(delays_[i].index());
         ode_internals_other_[i].history_values.set_index(delays_[i].index());
