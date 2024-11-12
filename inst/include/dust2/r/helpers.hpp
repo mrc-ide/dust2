@@ -102,7 +102,12 @@ inline void read_dimensions(cpp11::list args,
   SEXP value = args[name];
   check_rank(value, 1, name);
   const size_t len = LENGTH(value);
-  dest.set({len});
+  // We should be able to do 'dest.set({len})' but I see a compiler
+  // warning that is (I think) incorrectly inferring we read or write
+  // outside our array extents.
+  dest.size = len;
+  dest.dim[0] = len;
+  dest.mult[0] = 1;
 }
 
 template <size_t rank>
