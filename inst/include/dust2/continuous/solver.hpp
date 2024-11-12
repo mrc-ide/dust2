@@ -309,6 +309,7 @@ private:
   void apply_zero_every(real_type t, real_type* y,
                         const zero_every_type<real_type>& zero_every,
                         ode::internals<real_type>& internals) {
+    // internals is not const because we write to .last.c4
     if (zero_every.empty() || internals.last.h == 0) {
       return;
     }
