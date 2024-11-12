@@ -21,19 +21,25 @@ using delay_result_type = std::vector<std::vector<real_type>>;
 template <typename real_type>
 class delays {
 public:
-  delays(std::initializer_list<delay<real_type>> data) : delays_(data) {
-    // std::set<size_t> tmp;
-    // for (auto& el : delays_) {
-    //   tmp.insert(el.index.begin(), el.index.end());
-    // }
-    // index_state_.insert(tmp.begin(), tmp.end());
-    // std::sort(index_state_.begin(), index_state_.end());
-    // for (size_t i = 0; i < delays_.size(); ++i) {
-    //   for (auto j : delays_[i].index) {
-    //     const auto k = *std::find(index_state_.begin(), index_state_.end(), j);
-    //     index_out_[i].push_back(k);
-    //   }
-    // }
+  delays(std::initializer_list<delay<real_type>> data) :
+    delays_(data),
+    index_out_(delays_.size()) {
+    std::set<size_t> tmp;
+    for (auto& el : delays_) {
+      tmp.insert(el.index.begin(), el.index.end());
+    }
+    std::copy(tmp.begin(), tmp.end(), std::back_inserter(index_save_));
+    std::sort(index_save_.begin(), index_save_.end());
+    for (size_t i = 0; i < delays_.size(); ++i) {
+      for (auto j : delays_[i].index) {
+        const auto it = std::find(index_save_.begin(), index_save_.end(), j);
+        index_out_[i].push_back(*it);
+      }
+    }
+  }
+
+  auto& index() const {
+    return index_save_;
   }
 
   delay_result_type<real_type> result() {
@@ -49,7 +55,7 @@ public:
             delay_result_type<real_type>& result) const {
     for (size_t i = 0; i < delays_.size(); ++i) {
       h.interpolate(time - delays_[i].tau,
-                    delays_[i].index,
+                    index_out_[i], // or save back into delays_[i].index above?
                     result[i].begin());
     }
   }
@@ -60,7 +66,7 @@ public:
 
 private:
   std::vector<delay<real_type>> delays_;
-  std::vector<size_t> index_state_;
+  std::vector<size_t> index_save_;
   std::vector<std::vector<size_t>> index_out_;
 };
 

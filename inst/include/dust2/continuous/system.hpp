@@ -19,10 +19,6 @@
 
 namespace dust2 {
 
-namespace {
-
-}
-
 template <typename T>
 class dust_continuous {
 public:
@@ -69,21 +65,12 @@ public:
     zero_every_(zero_every_vec<T>(shared_)),
     errors_(n_particles_total_),
     rng_(n_particles_total_, seed, deterministic),
-    solver_(n_state_ode_, control_),
     delays_(do_delays<T>(shared_)),
+    solver_(n_state_ode_, control_),
     n_threads_(n_threads),
     output_is_current_(n_groups_),
     requires_initialise_(n_groups_, true) {
-    // Create the space we need to save results - like internal we do
-    // this once per thread as we discard rapidly.
-    if (delays_.size() > 0) { // if constexpr eventually
-      delay_result_.reserve(n_particles_ * n_groups_);
-      for (size_t i = 0; i < n_threads; ++i) {
-        for (size_t j = 0; j < n_groups_; ++j) {
-          delay_result_.push_back(delays_[j].result());
-        }
-      }
-    }
+    initialise_delays_();
   }
 
   template <typename mixed_time = typename dust2::properties<T>::is_mixed_time>
@@ -319,6 +306,9 @@ public:
     // TODO: check that size was not modified, error if so (quite a
     // bit later).
     fn(shared_[i]);
+    // TODO: we might want to update the delays here, too.  Always
+    // doing so would be the safest, but we might just forbid it and
+    // document that as such.
     requires_initialise_[i] = true;
   }
 
@@ -395,14 +385,14 @@ private:
   std::vector<zero_every_type<real_type>> zero_every_;
   dust2::utils::errors errors_;
   monty::random::prng<rng_state_type> rng_;
-  ode::solver<real_type> solver_;
   std::vector<ode::delays<real_type>> delays_;
+  ode::solver<real_type> solver_;
   size_t n_threads_;
   std::vector<bool> output_is_current_;
   std::vector<bool> requires_initialise_;
+  static constexpr bool has_delays_ = properties<T>::has_delays::value;
 
   auto rhs_(size_t particle, size_t group, size_t thread) {
-    constexpr bool has_delays = dust2::properties<T>::has_delays::value;
     const size_t i = thread * n_groups_ + group;
     const size_t j = group * n_particles_ + particle;
     const auto& shared = shared_[group];
@@ -410,7 +400,7 @@ private:
     const auto& history = ode_internals_[j].history_values;
     auto& delay_result = delay_result_[i];
     return [&](real_type t, const real_type* y, real_type* dydt) {
-      if constexpr (has_delays) {
+      if constexpr (has_delays_) {
         delays_[group].eval(t, history, delay_result);
         T::rhs(t, y, shared, internal, delay_result, dydt);
       } else {
@@ -420,7 +410,6 @@ private:
   }
 
   void output_(size_t particle, size_t group, size_t thread) {
-    constexpr bool has_delays = dust2::properties<T>::has_delays::value;
     if (!output_is_current_[group]) {
       const size_t i = thread * n_groups_ + group;
       const size_t j = group * n_particles_ + particle;
@@ -429,7 +418,7 @@ private:
       const auto& history = ode_internals_[j].history_values;
 
       real_type * y = state_.data() + j * n_state_;
-      if constexpr (has_delays) {
+      if constexpr (has_delays_) {
         delays_[group].eval(time_, history, delay_result_[i]);
         T::output(time_, y, shared, internal, delay_result_[i]);
       } else {
@@ -446,6 +435,31 @@ private:
     auto& internal = internal_[i];
 
     T::update(time, dt_, y, shared, internal, rng_state, y_other);
+  }
+
+  void initialise_delays_() {
+    // could do a simpler impl here I think fopr the no-delay case.
+    delay_result_.reserve(n_particles_ * n_groups_);
+    for (size_t i = 0; i < n_threads_; ++i) {
+      for (size_t j = 0; j < n_groups_; ++j) {
+        delay_result_.push_back(delays_[j].result());
+      }
+    }
+    if constexpr (has_delays_) {
+      // Create the space we need to save results - like internal we
+      // do this once per thread as we discard rapidly.
+      delay_result_.reserve(n_particles_ * n_groups_);
+      for (size_t i = 0; i < n_threads_; ++i) {
+        for (size_t j = 0; j < n_groups_; ++j) {
+          delay_result_.push_back(delays_[j].result());
+        }
+      }
+      for (size_t i = 0; i < n_groups_; ++i) {
+        ode_internals_[i].history_values.set_index(delays_[i].index());
+        ode_internals_other_[i].history_values.set_index(delays_[i].index());
+      }
+      control_.save_history = true;
+    }
   }
 
   void initialise_solver_(std::vector<size_t> index_group) {
