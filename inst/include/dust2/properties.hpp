@@ -158,7 +158,7 @@ auto do_delays(const std::vector<typename T::shared_state>& shared) {
 template <typename T, typename std::enable_if<!properties<T>::has_delays::value, T>::type* = nullptr>
 auto do_delays(const std::vector<typename T::shared_state>& shared) {
   using real_type = typename T::real_type;
-  return std::vector<ode::delays<real_type>>(shared.size(), dust2::ode::delays<real_type>{false, false, {}});
+  return std::vector<ode::delays<real_type>>(shared.size(), dust2::ode::delays<real_type>{{}});
 }
 
 }

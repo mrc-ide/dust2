@@ -463,6 +463,14 @@ private:
         }
       }
       control_.save_history = true;
+      for (size_t group = 0; group < n_groups_; ++group) {
+        const auto step_size_max_group =
+          step_size_max(control_.step_size_max, rhs_uses_delays_);
+        for (size_t thread = 0; thread < n_threads_; ++thread) {
+          const auto i = thread * n_groups_ + group;
+          solver_[i].control().step_size_max = step_size_max_group;
+        }
+      }
     } else {
       delay_result_.resize(n_particles_ * n_groups_);
     }

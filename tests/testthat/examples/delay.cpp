@@ -36,7 +36,7 @@ public:
   }
 
   static auto delays(const shared_state& shared) {
-    return dust2::ode::delays<real_type>(false, true, {{1, {3}}});
+    return dust2::ode::delays<real_type>({{1, {3}}});
   }
 
   static void initial(real_type time,
