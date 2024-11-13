@@ -156,7 +156,7 @@ openmp_check_limit <- function(n, limit, action, call = parent.frame()) {
   match_value(action, c("error", "fix"))
   if (n > limit) {
     msg <- "Requested number of threads '{n}' exceeds a limit of '{limit}'"
-    hint <- "See {.help dust_openmp_threads()} for details"
+    hint <- "See {.help [dust_openmp_threads()](dust2::dust_openmp_threads)} for details"
     if (action == "error") {
       cli::cli_abort(c(msg, i = hint), call = call)
     } else {

@@ -19,9 +19,12 @@
 ##' @param generator A system generator object, with class
 ##'   `dust_system_generator`
 ##'
-##' @param pars A list of parameters.  The format of this will depend on the
-##'   system.  If `n_groups` is 1 or more, then this must be a list of length
-##'   `n_groups` where each element is a list of parameters for your system.
+##' @param pars A list of parameters.  The format of this will depend
+##'   on the system.  If `n_groups` is 1 or more, then this must be a
+##'   list of length `n_groups` where each element is a list of
+##'   parameters for your system.  The default `list()` assumes your
+##'   system has no required parameters, but you may need to pass a
+##'   list of parameters here.
 ##'
 ##' @param n_particles The number of particles to create, defaulting
 ##'   to a single particle
@@ -62,7 +65,8 @@
 ##' @return A `dust_system` object, with opaque format.
 ##'
 ##' @export
-dust_system_create <- function(generator, pars, n_particles = 1, n_groups = 1,
+dust_system_create <- function(generator, pars = list(), n_particles = 1,
+                               n_groups = 1,
                                time = 0, dt = NULL, ode_control = NULL,
                                seed = NULL, deterministic = FALSE,
                                n_threads = 1,
@@ -568,8 +572,6 @@ print.dust_system_generator <- function(x, ...) {
   default_dt <- attr(x, "default_dt")
   parameters <- attr(x, "parameters")$name
   cli::cli_h1("<dust_system_generator: {name}>")
-  cli::cli_alert_info(
-    "Use 'dust2::dust_system_create()' to create a system with this generator")
   if (properties$has_compare) {
     cli::cli_bullets(c(
       i = "This system has 'compare_data' support"))
@@ -582,7 +584,10 @@ print.dust_system_generator <- function(x, ...) {
     cli::cli_bullets(c(">" = "{squote(parameters)}"))
   }
   cli::cli_alert_info(
-    "Use 'coef()' to get more information on parameters")
+    paste("Use {.help [dust2::dust_system_create()](dust2::dust_system_create)} to create a system",
+          "with this generator"))
+  cli::cli_alert_info(
+    "Use {.help [coef()](stats::coef)} to get more information on parameters")
 
   invisible(x)
 }

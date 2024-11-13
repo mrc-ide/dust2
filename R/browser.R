@@ -86,7 +86,7 @@ browser_welcome_message <- function(env, phase, time) {
   verbosity <- getOption("dust.browser_verbosity", "normal")
   if (verbosity == "normal") {
     cli::cli_alert_info(
-      "dust debug ('{phase}'; time = {time}): see {.help dust_browser} for help")
+      "dust debug ('{phase}'; time = {time}): see {.help [dust_browser](dust2::dust_browser)} for help")
   } else if (verbosity == "verbose") {
     cli::cli_alert_info("dust debug ('{phase}'; time = {time})")
     nms <- ls(env)
@@ -94,7 +94,7 @@ browser_welcome_message <- function(env, phase, time) {
     cli::cli_alert_info("'c' to continue, 'Q' to exit")
     cli::cli_alert_info(
       "Run {.run dust2::dust_browser_continue()} to stop debugging")
-    cli::cli_alert_info("See {.help dust_browser} for help")
+    cli::cli_alert_info("See {.help [dust_browser](dust2::dust_browser)} for help")
   }
 }
 

@@ -5,8 +5,8 @@ test_that("can print information about generators", {
                fixed = TRUE, all = FALSE)
   expect_match(
     res$messages,
-    "Use 'dust2::dust_system_create()' to create a system with this generator",
-    fixed = TRUE, all = FALSE)
+    "Use .*dust2::dust_system_create.* to create a system with this generator",
+    all = FALSE)
 })
 
 
