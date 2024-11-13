@@ -6,7 +6,7 @@
 \usage{
 dust_system_create(
   generator,
-  pars,
+  pars = list(),
   n_particles = 1,
   n_groups = 1,
   time = 0,
@@ -23,9 +23,12 @@ dust_system_create(
 \item{generator}{A system generator object, with class
 \code{dust_system_generator}}
 
-\item{pars}{A list of parameters.  The format of this will depend on the
-system.  If \code{n_groups} is 1 or more, then this must be a list of length
-\code{n_groups} where each element is a list of parameters for your system.}
+\item{pars}{A list of parameters.  The format of this will depend
+on the system.  If \code{n_groups} is 1 or more, then this must be a
+list of length \code{n_groups} where each element is a list of
+parameters for your system.  The default \code{list()} assumes your
+system has no required parameters, but you may need to pass a
+list of parameters here.}
 
 \item{n_particles}{The number of particles to create, defaulting
 to a single particle}
