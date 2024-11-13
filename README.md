@@ -1,7 +1,7 @@
 # dust2 <img src='man/figures/logo.png' align="right" height="139" />
 
 <!-- badges: start -->
-[![Project Status: Concept – Minimal or no implementation has been done yet, or the repository is only intended to be a limited example, demo, or proof-of-concept.](https://www.repostatus.org/badges/latest/concept.svg)](https://www.repostatus.org/#concept)
+[![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 [![R-CMD-check](https://github.com/mrc-ide/dust2/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main)](https://github.com/mrc-ide/dust2/actions/workflows/R-CMD-check.yaml)
 [![codecov.io](https://codecov.io/github/mrc-ide/dust2/coverage.svg?branch=main)](https://codecov.io/github/mrc-ide/dust2?branch=main)
 <!-- badges: end -->
@@ -16,6 +16,7 @@ The `dust2` package provides an engine for running dynamical systems in discrete
 
 * `vignette("design")` describes the problems `dust` tries to solve ([read on package website](https://mrc-ide.github.io/dust/articles/design.html))
 * `vignette("dust2")` describes `dust` by example, showing two simple systems and the methods that can drive them ([read on package website](https://mrc-ide.github.io/dust/articles/dust.html))
+* If you have used [`dust` version 1](https://mrc-ide.github.io/dust) before, see the [migration guide](https://mrc-ide.github.io/dust2/articles/migrating.html) to see what has changed.
 * [`odin2`](https://mrc-ide.github.io/odin2) is the way most `dust2` systems are written
 * The [odin & monty book](https://mrc-ide.github.io/odin-monty) shows how the package works in context
 * `vignette("writing")` shows how to write a `dust2` system by hand in C++
