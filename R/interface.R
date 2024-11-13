@@ -584,10 +584,10 @@ print.dust_system_generator <- function(x, ...) {
     cli::cli_bullets(c(">" = "{squote(parameters)}"))
   }
   cli::cli_alert_info(
-    paste("Use {.help dust2::dust_system_create()} to create a system",
+    paste("Use {.help [dust2::dust_system_create()](dust2::dust_system_create)} to create a system",
           "with this generator"))
   cli::cli_alert_info(
-    "Use {.help coef()} to get more information on parameters")
+    "Use {.help [coef()](stats::coef)} to get more information on parameters")
 
   invisible(x)
 }
