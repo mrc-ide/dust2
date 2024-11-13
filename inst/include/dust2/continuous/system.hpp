@@ -393,6 +393,8 @@ private:
   std::vector<bool> output_is_current_;
   std::vector<bool> requires_initialise_;
   static constexpr bool has_delays_ = properties<T>::has_delays::value;
+  static constexpr bool rhs_uses_delays_ = properties<T>::rhs_uses_delays;
+  static constexpr bool output_uses_delays_ = properties<T>::output_uses_delays;
 
   auto rhs_(size_t particle, size_t group, size_t thread) {
     const size_t i = thread * n_groups_ + group;
@@ -403,10 +405,8 @@ private:
     auto& delays = delays_[group];
     auto& delay_result = delay_result_[i];
     return [&](real_type t, const real_type* y, real_type* dydt) {
-      if constexpr (has_delays_) {
-        if (delays.rhs) {
-          delays.eval(t, history, delay_result);
-        }
+      if constexpr (rhs_uses_delays_) {
+        delays.eval(t, history, delay_result);
         T::rhs(t, y, shared, internal, delay_result, dydt);
       } else {
         T::rhs(t, y, shared, internal, dydt);
@@ -424,12 +424,8 @@ private:
       const auto& history = ode_internals_[j].history_values;
 
       real_type * y = state_.data() + j * n_state_;
-      if constexpr (has_delays_) {
-        // TODO: Consider responding to the type signature of
-        // T::output/T::rhs here? (mrc-5994)
-        if (delays.output) {
-          delays.eval(time_, history, delay_result_[i]);
-        }
+      if constexpr (output_uses_delays_) {
+        delays.eval(time_, history, delay_result_[i]);
         T::output(time_, y, shared, internal, delay_result_[i]);
       } else {
         T::output(time_, y, shared, internal);

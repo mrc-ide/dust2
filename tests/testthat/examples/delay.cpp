@@ -55,7 +55,6 @@ public:
                   const real_type * state,
                   const shared_state& shared,
                   internal_state& internal,
-                  const dust2::ode::delay_result_type<real_type>& delays,
                   real_type * state_deriv) {
     const auto S = state[0];
     const auto I = state[1];
