@@ -560,7 +560,7 @@ print.dust_system <- function(x, ...) {
     cli::cli_bullets(c(">" = "{squote(x$parameters$name)}"))
   }
   cli::cli_alert_info(
-    "Use 'coef()' to get more information on parameters")
+    "Use {.help [coef()](stats::coef)} to get more information on parameters")
   invisible(x)
 }
 
