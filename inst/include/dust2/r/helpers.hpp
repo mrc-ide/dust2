@@ -653,5 +653,14 @@ inline void check_externalptr_valid(SEXP ptr, const char * context) {
   }
 }
 
+template <typename T>
+T* safely_read_externalptr(SEXP ptr, const char * context) {
+  if (!R_ExternalPtrAddr(ptr)) {
+    cpp11::stop("Pointer has been serialised, cannot continue safely (%s)",
+                context);
+  }
+  return cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+}
+
 }
 }
