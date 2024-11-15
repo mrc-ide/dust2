@@ -11,6 +11,7 @@ template <typename T>
 cpp11::sexp dust2_filter_update_pars(cpp11::sexp ptr,
                                      cpp11::list r_pars,
                                      cpp11::sexp r_index_group) {
+  dust2::r::check_externalptr_valid(ptr, "filter_update_pars");
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
   const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
@@ -26,6 +27,7 @@ cpp11::sexp dust2_filter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
                              cpp11::sexp r_index_group,
                              bool preserve_particle_dimension,
                              bool preserve_group_dimension) {
+  dust2::r::check_externalptr_valid(ptr, "filter_run");
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
   const auto index_state = check_index(r_index_state, obj->sys.n_state(),
@@ -55,6 +57,7 @@ cpp11::sexp dust2_filter_last_trajectories(cpp11::sexp ptr,
                                            bool select_random_particle,
                                            bool preserve_particle_dimension,
                                            bool preserve_group_dimension) {
+  dust2::r::check_externalptr_valid(ptr, "filter_last_trajectories");
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
 
@@ -100,6 +103,7 @@ cpp11::sexp dust2_filter_last_state(cpp11::sexp ptr,
                                     bool select_random_particle,
                                     bool preserve_particle_dimension,
                                     bool preserve_group_dimension) {
+  dust2::r::check_externalptr_valid(ptr, "filter_last_state");
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
 
@@ -138,6 +142,7 @@ cpp11::sexp dust2_filter_last_state(cpp11::sexp ptr,
 
 template <typename T>
 cpp11::sexp dust2_filter_rng_state(cpp11::sexp ptr) {
+  dust2::r::check_externalptr_valid(ptr, "filter_rng_state");
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
   using rng_state_type = typename T::rng_state_type;
 
@@ -165,6 +170,7 @@ cpp11::sexp dust2_filter_rng_state(cpp11::sexp ptr) {
 
 template <typename T>
 cpp11::sexp dust2_filter_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
+  dust2::r::check_externalptr_valid(ptr, "filter_set_rng_state");
   auto *obj = cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
   using rng_state_type = typename T::rng_state_type;
   using rng_int_type = typename rng_state_type::int_type;

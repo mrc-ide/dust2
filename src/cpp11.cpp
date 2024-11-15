@@ -747,6 +747,13 @@ extern "C" SEXP _dust2_test_min(SEXP r_x, SEXP r_m) {
     return cpp11::as_sexp(test_min(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_x), cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(r_m)));
   END_CPP11
 }
+// tools.cpp
+SEXP check_externalptr(SEXP ptr, SEXP allow_rebuild);
+extern "C" SEXP _dust2_check_externalptr(SEXP ptr, SEXP allow_rebuild) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(check_externalptr(cpp11::as_cpp<cpp11::decay_t<SEXP>>(ptr), cpp11::as_cpp<cpp11::decay_t<SEXP>>(allow_rebuild)));
+  END_CPP11
+}
 // walk.cpp
 SEXP dust2_system_walk_alloc(cpp11::list r_pars, cpp11::sexp r_time, cpp11::list r_time_control, cpp11::sexp r_n_particles, cpp11::sexp r_n_groups, cpp11::sexp r_seed, cpp11::sexp r_deterministic, cpp11::sexp r_n_threads);
 extern "C" SEXP _dust2_dust2_system_walk_alloc(SEXP r_pars, SEXP r_time, SEXP r_time_control, SEXP r_n_particles, SEXP r_n_groups, SEXP r_seed, SEXP r_deterministic, SEXP r_n_threads) {
@@ -834,6 +841,7 @@ extern "C" SEXP _dust2_dust2_system_walk_simulate(SEXP ptr, SEXP r_times, SEXP r
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
+    {"_dust2_check_externalptr",                        (DL_FUNC) &_dust2_check_externalptr,                        2},
     {"_dust2_cpp_openmp_info",                          (DL_FUNC) &_dust2_cpp_openmp_info,                          0},
     {"_dust2_dust2_filter_malaria_alloc",               (DL_FUNC) &_dust2_dust2_filter_malaria_alloc,               9},
     {"_dust2_dust2_filter_malaria_last_state",          (DL_FUNC) &_dust2_dust2_filter_malaria_last_state,          4},

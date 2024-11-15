@@ -768,3 +768,35 @@ test_that("can share data in filter", {
 
   expect_identical(ll1, ll2)
 })
+
+
+test_that("prevent access to the filter after serialisation", {
+  data <- data.frame(incidence = c(3, 2, 2, 2),
+                     time = c(1, 2, 3, 4))
+  sir <- dust_example("sir")
+  filter <- dust_filter_create(sir, 0, data, n_particles = 20)
+  len <- length(filter$initial_rng_state)
+  dust_likelihood_run(filter, list())
+
+  filter <- unserialize(serialize(filter, NULL))
+  expect_error(
+    dust_likelihood_run(filter, NULL),
+    "Pointer has been serialised, cannot continue safely (filter_run)",
+    fixed = TRUE)
+  expect_error(
+    dust_likelihood_run(filter, list()),
+    "Pointer has been serialised, cannot continue safely (filter_update_pars)",
+    fixed = TRUE)
+  expect_error(
+    dust_likelihood_last_trajectories(filter),
+    "Pointer has been serialised, cannot continue safely (filter_last_trajectories)",
+    fixed = TRUE)
+  expect_error(
+    dust_likelihood_last_state(filter),
+    "Pointer has been serialised, cannot continue safely (filter_last_state)",
+    fixed = TRUE)
+  expect_error(
+    dust_likelihood_rng_state(filter),
+    "Pointer has been serialised, cannot continue safely (filter_rng_state)",
+    fixed = TRUE)
+})
