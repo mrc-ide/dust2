@@ -424,10 +424,6 @@ test_min <- function(r_x, r_m) {
   .Call(`_dust2_test_min`, r_x, r_m)
 }
 
-check_externalptr <- function(ptr, allow_rebuild) {
-  .Call(`_dust2_check_externalptr`, ptr, allow_rebuild)
-}
-
 dust2_system_walk_alloc <- function(r_pars, r_time, r_time_control, r_n_particles, r_n_groups, r_seed, r_deterministic, r_n_threads) {
   .Call(`_dust2_dust2_system_walk_alloc`, r_pars, r_time, r_time_control, r_n_particles, r_n_groups, r_seed, r_deterministic, r_n_threads)
 }
