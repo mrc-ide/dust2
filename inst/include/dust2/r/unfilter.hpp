@@ -11,6 +11,7 @@ template <typename T>
 cpp11::sexp dust2_unfilter_update_pars(cpp11::sexp ptr,
                                        cpp11::list r_pars,
                                        cpp11::sexp r_index_group) {
+  dust2::r::check_externalptr_valid(ptr, "unfilter_update_pars");
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
   const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
@@ -26,6 +27,7 @@ cpp11::sexp dust2_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
                                cpp11::sexp r_index_group,
                                bool preserve_particle_dimension,
                                bool preserve_group_dimension) {
+  dust2::r::check_externalptr_valid(ptr, "unfilter_run");
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
   const auto index_state = check_index(r_index_state, obj->sys.n_state(),
@@ -62,6 +64,7 @@ cpp11::sexp dust2_unfilter_last_trajectories(cpp11::sexp ptr,
                                              bool select_random_particle,
                                              bool preserve_particle_dimension,
                                              bool preserve_group_dimension) {
+  dust2::r::check_externalptr_valid(ptr, "unfilter_last_trajectories");
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
 
@@ -96,6 +99,7 @@ cpp11::sexp dust2_unfilter_last_state(cpp11::sexp ptr,
                                       bool select_random_particle,
                                       bool preserve_particle_dimension,
                                       bool preserve_group_dimension) {
+  dust2::r::check_externalptr_valid(ptr, "unfilter_last_state");
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
 
@@ -119,6 +123,7 @@ template <typename T>
 cpp11::sexp dust2_discrete_unfilter_last_gradient(cpp11::sexp ptr,
                                                   bool preserve_particle_dimension,
                                                   bool preserve_group_dimension) {
+  dust2::r::check_externalptr_valid(ptr, "unfilter_last_gradient");
   auto *obj =
     cpp11::as_cpp<cpp11::external_pointer<unfilter<T>>>(ptr).get();
   const auto& is_current = obj->adjoint_is_current();
