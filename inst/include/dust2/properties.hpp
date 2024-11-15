@@ -44,6 +44,39 @@ struct test_has_delays: std::false_type {};
 template <class T>
 struct test_has_delays<T, std::void_t<decltype(T::delays)>>: std::true_type {};
 
+// These test that the signature of rhs and output consume the delays
+// argument. Not especially lovely to read!
+template <typename T>
+using test_rhs_signature_uses_delays = std::is_invocable<decltype(T::rhs), typename T::real_type, typename T::real_type*, typename T::shared_state&, typename T::internal_state&, typename dust2::ode::delay_result_type<typename T::real_type>&, typename T::real_type*>;
+
+template <typename T>
+using test_output_signature_uses_delays = std::is_invocable<decltype(T::output), typename T::real_type, typename T::real_type*, typename T::shared_state&, typename T::internal_state&, typename dust2::ode::delay_result_type<typename T::real_type>&>;
+
+// Because not all functions have output, and because I can't work out
+// how to get template checks to short circuit, I have done this with
+// 'if constexpr' which *does* short circuit, getting us a compile
+// time result that checks for all of:
+// * existance of delays
+// * existance of output
+// * an output function that consumes the delay
+template <typename T>
+constexpr bool test_output_uses_delays() {
+  if constexpr (test_has_delays<T>::value && test_has_output<T>::value) {
+    return test_output_signature_uses_delays<T>::value;
+  } else {
+    return false;
+  }
+}
+
+template <typename T>
+constexpr bool test_rhs_uses_delays() {
+  if constexpr (test_has_delays<T>::value) {
+    return test_rhs_signature_uses_delays<T>::value;
+  } else {
+    return false;
+  }
+}
+
 }
 
 template<typename T>
@@ -54,6 +87,9 @@ struct properties {
   using is_mixed_time = typename std::conditional<internals::test_has_rhs<T>::value && internals::test_has_update<T>::value, std::true_type, std::false_type>::type;
   using has_output = typename std::conditional<internals::test_has_rhs<T>::value && internals::test_has_output<T>::value, std::true_type, std::false_type>::type;
   using has_delays = internals::test_has_delays<T>;
+  // Because of the above these are now actual numbers rather than types; we may make this change everywhere...
+  static constexpr bool rhs_uses_delays = internals::test_rhs_uses_delays<T>();
+  static constexpr bool output_uses_delays = internals::test_output_uses_delays<T>();
 };
 
 // wrappers around some uses of member functions that may or may not
@@ -122,7 +158,7 @@ auto do_delays(const std::vector<typename T::shared_state>& shared) {
 template <typename T, typename std::enable_if<!properties<T>::has_delays::value, T>::type* = nullptr>
 auto do_delays(const std::vector<typename T::shared_state>& shared) {
   using real_type = typename T::real_type;
-  return std::vector<ode::delays<real_type>>(shared.size(), dust2::ode::delays<real_type>{false, false, {}});
+  return std::vector<ode::delays<real_type>>(shared.size(), dust2::ode::delays<real_type>{{}});
 }
 
 }
