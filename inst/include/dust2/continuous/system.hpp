@@ -44,6 +44,7 @@ public:
     n_state_ode_(n_state_ - n_state_output_),
     n_particles_(n_particles),
     n_groups_(shared.size()),
+    n_threads_(n_threads),
     n_particles_total_(n_particles_ * n_groups_),
 
     dt_(dt),
@@ -66,8 +67,7 @@ public:
     errors_(n_particles_total_),
     rng_(n_particles_total_, seed, deterministic),
     delays_(do_delays<T>(shared_)),
-    solver_(n_state_ode_, control_),
-    n_threads_(n_threads),
+    solver_(n_groups_ * n_threads_, {n_state_ode_, control_}),
     output_is_current_(n_groups_),
     requires_initialise_(n_groups_, true) {
     initialise_delays_();
@@ -84,13 +84,14 @@ public:
     for (auto group : index_group) {
       for (size_t particle = 0; particle < n_particles_; ++particle) {
         const auto thread = tools::thread_index();
+        const auto i = thread * n_groups_ + group;
         const auto k = n_particles_ * group + particle;
         const auto offset = k * n_state_;
         real_type * y = state_data + offset;
         try {
-          solver_.run(time_, time, y, zero_every_[group],
-                      ode_internals_[k],
-                      rhs_(particle, group, thread));
+          solver_[i].run(time_, time, y, zero_every_[group],
+                         ode_internals_[k],
+                         rhs_(particle, group, thread));
         } catch (std::exception const& e) {
           errors_.capture(e, k);
         }
@@ -118,6 +119,7 @@ public:
     for (auto group : index_group) {
       for (size_t particle = 0; particle < n_particles_; ++particle) {
         const auto thread = tools::thread_index();
+        const auto i = thread * n_groups_ + group;
         const auto k = n_particles_ * group + particle;
         const auto offset = k * n_state_;
         auto& rng_state = rng_.state(k);
@@ -128,15 +130,15 @@ public:
           for (size_t step = 0; step < n_steps; ++step) {
             const real_type t0 = t1;
             t1 = (step == n_steps - 1) ? time : time_ + step * dt_;
-            solver_.run(t0, t1, y, zero_every_[group],
-                        ode_internals_[k],
-                        rhs_(particle, group, thread));
+            solver_[i].run(t0, t1, y, zero_every_[group],
+                           ode_internals_[k],
+                           rhs_(particle, group, thread));
             std::copy_n(y, n_state_ode_, y_other);
             update_(particle, group, thread,
                     time, y, rng_state, y_other);
             std::swap(y, y_other);
-            solver_.initialise(time_, y, ode_internals_[k],
-                               rhs_(particle, group, thread));
+            solver_[i].initialise(time_, y, ode_internals_[k],
+                                  rhs_(particle, group, thread));
           }
           } catch (std::exception const& e) {
           errors_.capture(e, k);
@@ -365,6 +367,7 @@ private:
   size_t n_state_ode_;
   size_t n_particles_;
   size_t n_groups_;
+  size_t n_threads_;
   size_t n_particles_total_;
   real_type dt_;
   ode::control<real_type> control_;
@@ -386,8 +389,7 @@ private:
   dust2::utils::errors errors_;
   monty::random::prng<rng_state_type> rng_;
   std::vector<ode::delays<real_type>> delays_;
-  ode::solver<real_type> solver_;
-  size_t n_threads_;
+  std::vector<ode::solver<real_type>> solver_;
   std::vector<bool> output_is_current_;
   std::vector<bool> requires_initialise_;
   static constexpr bool has_delays_ = properties<T>::has_delays::value;
@@ -451,21 +453,20 @@ private:
       // do this once per thread as we don't retain contents across
       // time steps.
       delay_result_.reserve(n_particles_ * n_groups_);
-      for (size_t i = 0; i < n_threads_; ++i) {
-        for (size_t j = 0; j < n_groups_; ++j) {
-          delay_result_.push_back(delays_[j].result());
+      for (size_t i = 0, k = 0; i < n_threads_; ++i) {
+        for (size_t group = 0; group < n_groups_; ++group, ++k) {
+          delay_result_.push_back(delays_[group].result());
+          solver_[k].control().step_size_max =
+            delays_[group].step_size_max(control_.step_size_max);
         }
       }
-      for (size_t i = 0; i < n_groups_; ++i) {
-        ode_internals_[i].history_values.set_index(delays_[i].index());
-        ode_internals_other_[i].history_values.set_index(delays_[i].index());
+      for (size_t i = 0, k = 0; i < n_groups_; ++i) {
+        for (size_t j = 0; j < n_particles_; ++j, ++k) {
+          ode_internals_[k].history_values.set_index(delays_[i].index());
+          ode_internals_other_[k].history_values.set_index(delays_[i].index());
+        }
       }
       control_.save_history = true;
-      // TODO: we need to store solvers per thread and group as
-      // otherwise they're writing to the same location.  Then this
-      // becomes a loop over groups, which is nicer (mrc-5995)
-      solver_.control().step_size_max =
-        delays_[0].step_size_max(control_.step_size_max);
     } else {
       delay_result_.resize(n_particles_ * n_groups_);
     }
@@ -491,12 +492,13 @@ private:
       for (size_t particle = 0; particle < n_particles_; ++particle) {
         if (requires_initialise_[group]) {
           const auto thread = tools::thread_index();
+          const auto i = thread * n_groups_ + group;
           const auto k = n_particles_ * group + particle;
           const auto offset = k * n_state_;
           real_type * y = state_data + offset;
           try {
-            solver_.initialise(time_, y, ode_internals_[k],
-                               rhs_(particle, group, thread));
+            solver_[i].initialise(time_, y, ode_internals_[k],
+                                  rhs_(particle, group, thread));
           } catch (std::exception const& e) {
             errors_.capture(e, k);
           }
