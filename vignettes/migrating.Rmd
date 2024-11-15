@@ -68,12 +68,12 @@ First the core methods that represent most usage:
 Action        | dust 1.x.x         | dust2
 --------------+--------------------+---------------------------------
 Allocate      | `$new()`           | `dust_system_create()` (1)
-Run to time   | `$run()`           | `dust_system_create()` (2)
+Run to time   | `$run()`           | `dust_system_run_to_time()` (2)
 Simulate      | `$simulate()`      | `dust_system_simulate()`
 Update state  | `$update_state()`  | `dust_system_set_state()` (3)
-              |                    | `dust_system_set_state_initial()`
-              |                    | `dust_system_set_time()`
-              |                    | `dust_system_set_pars()`
+&nbsp;        | &nbsp;             | `dust_system_set_state_initial()`
+&nbsp;        | &nbsp;             | `dust_system_set_time()`
+&nbsp;        | &nbsp;             | `dust_system_set_pars()`
 Get state     | `$state()`         | `dust_system_state()`
 Get time      | `$time()`          | `dust_system_time()`
 Reorder       | `$reorder()`       | `dust_system_reorder()`
@@ -92,7 +92,7 @@ Action              | dust 1.x.x            | dust2
 Get name            | `$name()`             | `$name`
 State size          | `$n_state()`          | `$n_state`
 Number of particles | `$n_particles()`      | `$n_particles` (1)
-                    | `$n_particles_each()` |
+&nbsp;              | `$n_particles_each()` |
 Number of groups    | `$n_pars()`           | `$n_groups`
 Number of threads   | `$n_threads()`        | `$n_threads`
 Supports compare    | `$has_compare()`      | `$properties$has_compare`
