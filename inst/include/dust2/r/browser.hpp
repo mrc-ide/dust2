@@ -21,7 +21,7 @@ void save(T x, const char * name, cpp11::environment env) {
 template <typename T, size_t rank>
 void save(T *x, array::dimensions<rank> dim, const char * name,
           cpp11::environment env) {
-  const R_xlen_t size = dim.size();
+  const R_xlen_t size = dim.size;
   cpp11::writable::doubles r_x(size);
   std::copy_n(x, size, REAL(r_x));
   if (rank > 1) {
