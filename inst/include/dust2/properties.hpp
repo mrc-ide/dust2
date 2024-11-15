@@ -1,6 +1,7 @@
 #pragma once
 
 #include <dust2/packing.hpp>
+#include <dust2/continuous/delays.hpp>
 #include <dust2/zero.hpp>
 #include <vector>
 
@@ -38,6 +39,11 @@ struct test_has_output: std::false_type {};
 template <class T>
 struct test_has_output<T, std::void_t<decltype(T::output)>>: std::true_type {};
 
+template <class T, class = void>
+struct test_has_delays: std::false_type {};
+template <class T>
+struct test_has_delays<T, std::void_t<decltype(T::delays)>>: std::true_type {};
+
 }
 
 template<typename T>
@@ -47,6 +53,7 @@ struct properties {
   using has_zero_every = internals::test_has_zero_every<T>;
   using is_mixed_time = typename std::conditional<internals::test_has_rhs<T>::value && internals::test_has_update<T>::value, std::true_type, std::false_type>::type;
   using has_output = typename std::conditional<internals::test_has_rhs<T>::value && internals::test_has_output<T>::value, std::true_type, std::false_type>::type;
+  using has_delays = internals::test_has_delays<T>;
 };
 
 // wrappers around some uses of member functions that may or may not
@@ -101,7 +108,21 @@ auto zero_every_vec(const std::vector<typename T::shared_state>& shared) {
   return std::vector<zero_every_type<real_type>>(shared.size(), dust2::zero_every_type<real_type>());
 }
 
+template <typename T, typename std::enable_if<properties<T>::has_delays::value, T>::type* = nullptr>
+auto do_delays(const std::vector<typename T::shared_state>& shared) {
+  using real_type = typename T::real_type;
+  std::vector<ode::delays<real_type>> ret;
+  ret.reserve(shared.size());
+  for (size_t i = 0; i < shared.size(); ++i) {
+    ret.push_back(T::delays(shared[i]));
+  }
+  return ret;
+}
 
-
+template <typename T, typename std::enable_if<!properties<T>::has_delays::value, T>::type* = nullptr>
+auto do_delays(const std::vector<typename T::shared_state>& shared) {
+  using real_type = typename T::real_type;
+  return std::vector<ode::delays<real_type>>(shared.size(), dust2::ode::delays<real_type>{false, false, {}});
+}
 
 }

@@ -1,15 +1,14 @@
 #include <dust2/common.hpp>
 
-// [[dust2::class(sirode)]]
+// [[dust2::class(sirdelay)]]
 // [[dust2::time_type(continuous)]]
-// [[dust2::has_compare()]]
 // [[dust2::parameter(I0, rank = 0, constant = FALSE, required = FALSE)]]
 // [[dust2::parameter(N, rank = 0, constant = TRUE, required = FALSE)]]
 // [[dust2::parameter(beta, rank = 0, constant = FALSE, required = FALSE)]]
 // [[dust2::parameter(gamma, rank = 0, constant = FALSE, required = FALSE)]]
-class sirode {
+class sirdelay {
 public:
-  sirode() = delete;
+  sirdelay() = delete;
 
   using real_type = double;
 
@@ -32,6 +31,14 @@ public:
     return dust2::packing{{"S", {}}, {"I", {}}, {"R", {}}, {"cases_cumul", {}}, {"cases_inc", {}}};
   }
 
+  static size_t size_output() {
+    return 1;
+  }
+
+  static auto delays(const shared_state& shared) {
+    return dust2::ode::delays<real_type>(false, true, {{1, {3}}});
+  }
+
   static void initial(real_type time,
                       const shared_state& shared,
                       internal_state& internal,
@@ -48,6 +55,7 @@ public:
                   const real_type * state,
                   const shared_state& shared,
                   internal_state& internal,
+                  const dust2::ode::delay_result_type<real_type>& delays,
                   real_type * state_deriv) {
     const auto S = state[0];
     const auto I = state[1];
@@ -57,7 +65,14 @@ public:
     state_deriv[1] = rate_SI - rate_IR;
     state_deriv[2] = rate_IR;
     state_deriv[3] = rate_SI;
-    state_deriv[4] = rate_SI;
+  }
+
+  static void output(real_type time,
+                     real_type * state,
+                     const shared_state& shared,
+                     internal_state& internal,
+                     const dust2::ode::delay_result_type<real_type>& delays) {
+    state[4] = state[3] - delays[0][0];
   }
 
   static shared_state build_shared(cpp11::list pars) {
@@ -68,35 +83,9 @@ public:
     return shared_state{N, I0, beta, gamma};
   }
 
-  // This is the bit that we'll use to do fast parameter updating, and
-  // we'll guarantee somewhere that the size does not change.
   static void update_shared(cpp11::list pars, shared_state& shared) {
     shared.I0 = dust2::r::read_real(pars, "I0", shared.I0);
     shared.beta = dust2::r::read_real(pars, "beta", shared.beta);
     shared.gamma = dust2::r::read_real(pars, "gamma", shared.gamma);
-  }
-
-  static auto zero_every(const shared_state& shared) {
-    return dust2::zero_every_type<real_type>{{1, {4}}}; // zero[1] = {4};
-  }
-
-  static data_type build_data(cpp11::list r_data, const shared_state& shared) {
-    auto data = static_cast<cpp11::list>(r_data);
-    auto incidence = dust2::r::read_real(data, "incidence", NA_REAL);
-    return data_type{incidence};
-  }
-
-  static real_type compare_data(const real_type time,
-                                const real_type * state,
-                                const data_type& data,
-                                const shared_state& shared,
-                                internal_state& internal,
-                                rng_state_type& rng_state) {
-    const auto incidence_observed = data.incidence;
-    if (std::isnan(data.incidence)) {
-      return 0;
-    }
-    const auto incidence_modelled = state[4];
-    return monty::density::poisson(incidence_observed, incidence_modelled, true);
   }
 };
