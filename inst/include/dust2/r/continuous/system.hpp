@@ -108,7 +108,7 @@ cpp11::sexp ode_internals_to_sexp(const ode::internals<real_type>& internals,
 
 template <typename T>
 SEXP dust2_system_internals(cpp11::sexp ptr, bool include_coefficients, bool include_history) {
-  auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+  auto *obj = dust2::r::safely_read_externalptr<T>(ptr, "system_internals");
   const auto& internals = obj->ode_internals();
   cpp11::writable::list ret(internals.size());
   for (size_t i = 0; i < internals.size(); ++i) {

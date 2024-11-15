@@ -11,8 +11,7 @@ template <typename T>
 cpp11::sexp dust2_filter_update_pars(cpp11::sexp ptr,
                                      cpp11::list r_pars,
                                      cpp11::sexp r_index_group) {
-  auto *obj =
-    cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
+  auto *obj = dust2::r::safely_read_externalptr<filter<T>>(ptr, "filter_update_pars");
   const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
     check_index(r_index_group, obj->sys.n_groups(), "index_group");
   update_pars(obj->sys, r_pars, index_group);
@@ -26,8 +25,7 @@ cpp11::sexp dust2_filter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
                              cpp11::sexp r_index_group,
                              bool preserve_particle_dimension,
                              bool preserve_group_dimension) {
-  auto *obj =
-    cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
+  auto *obj = dust2::r::safely_read_externalptr<filter<T>>(ptr, "filter_run");
   const auto index_state = check_index(r_index_state, obj->sys.n_state(),
                                        "index_state");
   const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
@@ -55,8 +53,7 @@ cpp11::sexp dust2_filter_last_trajectories(cpp11::sexp ptr,
                                            bool select_random_particle,
                                            bool preserve_particle_dimension,
                                            bool preserve_group_dimension) {
-  auto *obj =
-    cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
+  auto *obj = dust2::r::safely_read_externalptr<filter<T>>(ptr, "filter_last_trajectories");
 
   const auto& trajectories = obj->last_trajectories();
   const auto& is_current = obj->last_trajectories_are_current();
@@ -100,8 +97,7 @@ cpp11::sexp dust2_filter_last_state(cpp11::sexp ptr,
                                     bool select_random_particle,
                                     bool preserve_particle_dimension,
                                     bool preserve_group_dimension) {
-  auto *obj =
-    cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
+  auto *obj = dust2::r::safely_read_externalptr<filter<T>>(ptr, "filter_last_state");
 
   const auto& index_group = obj->last_index_group();
 
@@ -138,7 +134,7 @@ cpp11::sexp dust2_filter_last_state(cpp11::sexp ptr,
 
 template <typename T>
 cpp11::sexp dust2_filter_rng_state(cpp11::sexp ptr) {
-  auto *obj = cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
+  auto *obj = dust2::r::safely_read_externalptr<filter<T>>(ptr, "filter_rng_state");
   using rng_state_type = typename T::rng_state_type;
 
   // Undo the construction as above so that the rng state comes out in
@@ -165,7 +161,7 @@ cpp11::sexp dust2_filter_rng_state(cpp11::sexp ptr) {
 
 template <typename T>
 cpp11::sexp dust2_filter_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
-  auto *obj = cpp11::as_cpp<cpp11::external_pointer<filter<T>>>(ptr).get();
+  auto *obj = dust2::r::safely_read_externalptr<filter<T>>(ptr, "filter_set_rng_state");
   using rng_state_type = typename T::rng_state_type;
   using rng_int_type = typename rng_state_type::int_type;
 

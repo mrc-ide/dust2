@@ -17,7 +17,7 @@ void check_errors(T* obj, const char *action) {
 
 template <typename T>
 SEXP dust2_system_run_to_time(cpp11::sexp ptr, cpp11::sexp r_time) {
-  auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+  auto *obj = dust2::r::safely_read_externalptr<T>(ptr, "system_run_to_time");
   check_errors(obj, "run");
   const auto time = check_time(r_time, "time");
   const auto curr = obj->time();
@@ -35,7 +35,7 @@ SEXP dust2_system_state(cpp11::sexp ptr, cpp11::sexp r_index_state,
                         cpp11::sexp r_index_group,
                         bool preserve_particle_dimension,
                         bool preserve_group_dimension) {
-  auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+  auto *obj = dust2::r::safely_read_externalptr<T>(ptr, "system_state");
   check_errors(obj, "get state from");
   const auto n_state = obj->n_state();
   const auto n_particles = obj->n_particles();
@@ -105,7 +105,7 @@ SEXP dust2_system_state(cpp11::sexp ptr, cpp11::sexp r_index_state,
 
 template <typename T>
 SEXP dust2_system_time(cpp11::sexp ptr) {
-  auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+  auto *obj = dust2::r::safely_read_externalptr<T>(ptr, "system_time");
   check_errors(obj, "get time from");
   return cpp11::as_sexp(obj->time());
 }
@@ -124,7 +124,7 @@ SEXP dust2_system_time(cpp11::sexp ptr) {
 // In the case where we have time, that goes in the last position
 template <typename T>
 SEXP dust2_system_set_state_initial(cpp11::sexp ptr) {
-  auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+  auto *obj = dust2::r::safely_read_externalptr<T>(ptr, "system_set_state_initial");
   obj->set_state_initial(obj->all_groups());
   return R_NilValue;
 }
@@ -132,7 +132,7 @@ SEXP dust2_system_set_state_initial(cpp11::sexp ptr) {
 template <typename T>
 SEXP dust2_system_set_state(cpp11::sexp ptr,
                             cpp11::list r_state) {
-  auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+  auto *obj = dust2::r::safely_read_externalptr<T>(ptr, "system_set_state");
   set_state(*obj, r_state);
   return R_NilValue;
 }
@@ -141,7 +141,7 @@ SEXP dust2_system_set_state(cpp11::sexp ptr,
 // bookkeeping really.
 template <typename T>
 SEXP dust2_system_reorder(cpp11::sexp ptr, cpp11::integers r_index) {
-  auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+  auto *obj = dust2::r::safely_read_externalptr<T>(ptr, "system_reorder");
   check_errors(obj, "reorder");
   const auto n_particles = obj->n_particles();
   const auto n_groups = obj->n_groups();
@@ -165,13 +165,13 @@ SEXP dust2_system_reorder(cpp11::sexp ptr, cpp11::integers r_index) {
 
 template <typename T>
 SEXP dust2_system_rng_state(cpp11::sexp ptr) {
-  auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+  auto *obj = dust2::r::safely_read_externalptr<T>(ptr, "system_rng_state");
   return rng_state_as_raw(obj->rng_state());
 }
 
 template <typename T>
 SEXP dust2_system_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
-  auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+  auto *obj = dust2::r::safely_read_externalptr<T>(ptr, "system_set_rng_state");
   using rng_state_type = typename T::rng_state_type;
   const auto n_streams = obj->n_particles();
   const auto rng_state =
@@ -182,7 +182,7 @@ SEXP dust2_system_set_rng_state(cpp11::sexp ptr, cpp11::sexp r_rng_state) {
 
 template <typename T>
 SEXP dust2_system_set_time(cpp11::sexp ptr, cpp11::sexp r_time) {
-  auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+  auto *obj = dust2::r::safely_read_externalptr<T>(ptr, "system_set_time");
   check_errors(obj, "set time for");
   const auto time = check_time(r_time, "time");
   obj->set_time(time);
@@ -191,7 +191,7 @@ SEXP dust2_system_set_time(cpp11::sexp ptr, cpp11::sexp r_time) {
 
 template <typename T>
 SEXP dust2_system_update_pars(cpp11::sexp ptr, cpp11::list r_pars) {
-  auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+  auto *obj = dust2::r::safely_read_externalptr<T>(ptr, "system_update_pars");
   update_pars(*obj, r_pars, obj->all_groups());
   return R_NilValue;
 }
@@ -206,7 +206,7 @@ SEXP dust2_system_compare_data(cpp11::sexp ptr,
   using system_type = typename T::system_type;
   using data_type = typename system_type::data_type;
 
-  auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+  auto *obj = dust2::r::safely_read_externalptr<T>(ptr, "system_compare_data");
   check_errors(obj, "compare data for");
   const auto n_groups = obj->n_groups();
   const auto& shared = obj->shared();
@@ -233,7 +233,7 @@ SEXP dust2_system_simulate(cpp11::sexp ptr,
                            bool preserve_particle_dimension,
                            bool preserve_group_dimension) {
   using real_type = typename T::real_type;
-  auto *obj = cpp11::as_cpp<cpp11::external_pointer<T>>(ptr).get();
+  auto *obj = dust2::r::safely_read_externalptr<T>(ptr, "system_simulate");
   check_errors(obj, "simulate");
   const auto n_state = obj->n_state();
   const auto times = check_time_sequence(obj->time(), r_times, false, "time");
