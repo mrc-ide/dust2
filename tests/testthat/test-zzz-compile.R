@@ -105,7 +105,7 @@ test_that("can compile a model with delays", {
   dust_system_set_state_initial(cmp)
   y_cmp <- dust_system_simulate(cmp, t)
 
-  gen <- dust_compile("examples/delay.cpp", quiet = TRUE, debug = TRUE)
+  gen <- dust_compile("examples/delay.cpp", quiet = FALSE, debug = TRUE)
   sys <- dust_system_create(gen, list())
   dust_system_set_state_initial(sys)
   y <- dust_system_simulate(sys, t)
