@@ -646,13 +646,6 @@ inline cpp11::sexp packing_to_r(const dust2::packing& packing_info) {
   return ret;
 }
 
-inline void check_externalptr_valid(SEXP ptr, const char * context) {
-  if (!R_ExternalPtrAddr(ptr)) {
-    cpp11::stop("Pointer has been serialised, cannot continue safely (%s)",
-                context);
-  }
-}
-
 template <typename T>
 T* safely_read_externalptr(SEXP ptr, const char * context) {
   if (!R_ExternalPtrAddr(ptr)) {
