@@ -248,10 +248,8 @@ SEXP dust2_system_simulate(cpp11::sexp ptr,
 
   dust2::trajectories<real_type> h(n_state, n_particles, n_groups, n_times);
   h.set_index_and_reset(index_state, index_group);
-  for (size_t i = 0; i < n_times; ++i) {
-    obj->run_to_time(times[i], index_group);
-    h.add(times[i], obj->state().begin());
-  }
+
+  obj->simulate(times, index_group, h);
 
   // There is an extra copy here vs using the R memory to back the
   // trajectories.  That's an optimisation that would be fairly easy to
