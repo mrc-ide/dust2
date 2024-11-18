@@ -161,6 +161,15 @@ public:
     throw std::runtime_error("Write run_to_time() with saved history");
   }
 
+  void simulate(const std::vector<real_type>& times,
+                const std::vector<size_t>& index_group,
+                dust2::trajectories<real_type>& history) {
+    for (auto t : times) {
+      run_to_time(t, index_group);
+      history.add(t, state().begin());
+    }
+  }
+
   void set_state_initial(const std::vector<size_t>& index_group) {
     errors_.reset();
     real_type * state_data = state_.data();
