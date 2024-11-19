@@ -149,10 +149,6 @@ public:
                              real_type * adjoint_next) {
     const auto S = state[0];
     const auto I = state[1];
-
-    const auto p_SI = 1 - monty::math::exp(-shared.beta * I / shared.N * dt);
-    const auto p_IR = 1 - monty::math::exp(-shared.gamma * dt);
-
     const auto adj_S = adjoint[0];
     const auto adj_I = adjoint[1];
     const auto adj_R = adjoint[2];
@@ -162,7 +158,9 @@ public:
     const auto adj_gamma = adjoint[6];
     const auto adj_I0 = adjoint[7];
 
-    const auto adj_lambda = 0;
+    const auto p_SI = 1 - monty::math::exp(-shared.beta * I / shared.N * dt);
+    const auto p_IR = 1 - monty::math::exp(-shared.gamma * dt);
+
     const auto adj_n_IR = -adj_I + adj_R;
     const auto adj_n_SI = adj_cases_inc + adj_cases_cumul + adj_I + -adj_S;
     const auto adj_p_IR = adj_n_IR * I;
@@ -172,8 +170,8 @@ public:
     adjoint_next[1] = adj_n_IR * p_IR + adj_p_SI * (shared.beta * dt) * monty::math::exp(-shared.beta * I * dt / shared.N) / shared.N + adj_I;
     adjoint_next[2] = adj_R;
     adjoint_next[3] = adj_cases_cumul;
-    adjoint_next[4] = adj_lambda + adj_cases_inc * (dust2::tools::is_evenly_divisible_by(time, static_cast<real_type>(1)) ? 0 : 1);
-    adjoint_next[5] = adj_beta + adj_p_SI * (I * dt) * monty::math::exp(-shared.beta * I * dt / shared.N) / shared.N;
+    adjoint_next[4] = adj_cases_inc;
+    adjoint_next[5] = adj_beta + adj_p_SI * I * dt * monty::math::exp(-shared.beta * I * dt / shared.N) / shared.N;
     adjoint_next[6] = adj_gamma + adj_p_IR * monty::math::exp(-shared.gamma);
     adjoint_next[7] = adj_I0;
   }
@@ -186,11 +184,14 @@ public:
                                    internal_state& internal,
                                    real_type * adjoint_next) {
     const real_type cases_inc = state[4];
+    const real_type noise = 1 / shared.exp_noise;
+    const real_type lambda = cases_inc + noise;
+    const real_type adj_lambda = data.incidence / lambda - 1;
     adjoint_next[0] = adjoint[0];
     adjoint_next[1] = adjoint[1];
     adjoint_next[2] = adjoint[2];
     adjoint_next[3] = adjoint[3];
-    adjoint_next[4] = adjoint[4] + data.incidence / cases_inc - 1;
+    adjoint_next[4] = adjoint[4] + adj_lambda;
     adjoint_next[5] = adjoint[5];
     adjoint_next[6] = adjoint[6];
     adjoint_next[7] = adjoint[7];

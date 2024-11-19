@@ -328,7 +328,7 @@ public:
         auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
         try {
           adjoint_run_particle(time0, dt_, n_steps, stride,
-                               shared_[i], internal_i,
+                               shared_[i], internal_i, zero_every_[i],
                                state + offset_state,
                                adjoint_curr + offset_adjoint,
                                adjoint_next + offset_adjoint);
@@ -446,6 +446,7 @@ private:
                                    const size_t stride,
                                    const shared_state& shared,
                                    internal_state& internal,
+                                   const zero_every_type<real_type>& zero_every,
                                    const real_type* state,
                                    real_type* adjoint_curr,
                                    real_type* adjoint_next) {
@@ -460,6 +461,13 @@ private:
                         internal,
                         adjoint_next);
       std::swap(adjoint_curr, adjoint_next);
+      for (const auto& el : zero_every) {
+        if (std::fmod(time_i, el.first) == 0) {
+          for (const auto j : el.second) {
+            adjoint_curr[j] = 0;
+          }
+        }
+      }
     }
   }
 };
