@@ -45,6 +45,11 @@ public:
     return offset_;
   }
 
+  template <typename Iter>
+  void copy_offset(Iter it) {
+    std::copy(offset_.begin(), offset_.end(), it);
+  }
+
   bool operator!=(const packing& other) const {
     return data_ != other.data();
   }
