@@ -26,7 +26,7 @@ public:
     size_ = std::accumulate(len_.begin(), len_.end(), 0);
   }
 
-  packing() {
+  packing() : size_(0) {
   }
 
   auto size() const {
