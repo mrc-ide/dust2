@@ -218,7 +218,7 @@ dust_template_data <- function(name,
        has_adjoint = deparse1(has_adjoint),
        parameters = deparse_df(parameters, 4),
        default_dt = deparse1(default_dt),
-       package = paste0(name, mangle %||% ""),
+       package = paste0(gsub("[^A-Za-z0-9]", ".", name), mangle %||% ""),
        linking_to = linking_to,
        cpp_std = cpp_std,
        compiler_options = compiler_options)
