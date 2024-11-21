@@ -242,7 +242,7 @@ dust_likelihood_rng_state <- function(obj) {
 dust_likelihood_set_rng_state <- function(obj, rng_state) {
   check_is_dust_likelihood(obj)
   if (is.null(obj$ptr)) {
-    assert_raw(rng_state, length(obj$initial_rng_state))
+    assert_raw(rng_state, obj$initial_rng_state_length)
     assign("initial_rng_state", rng_state, obj)
   } else {
     obj$methods$set_rng_state(obj$ptr, rng_state)
