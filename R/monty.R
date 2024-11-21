@@ -216,6 +216,10 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
     set_rng_state <- NULL
   }
 
+  restore <- function() {
+    rm(list = "ptr", envir = obj)
+  }
+
   ## I think that reconstructing the filter here to decouple any
   ## linkage with the provided filter would be easier to understand,
   ## so that we really copy the filter.  This just requires a copy
@@ -231,6 +235,7 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
          parameters = packer$names(),
          domain = domain,
          observer = observer,
+         restore = restore,
          get_rng_state = get_rng_state,
          set_rng_state = set_rng_state),
     properties)

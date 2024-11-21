@@ -68,3 +68,18 @@ logistic_analytic <- function(r, k, times, y0) {
               numeric(len))
   rbind(y, colSums(y))
 }
+
+
+local_sir_generator <- function() {
+  skip_for_compilation()
+  gen <- getOption("dust.testing.local_sir_generator", NULL)
+  if (!is.null(gen)) {
+    return(gen)
+  }
+  code <- gsub("sir", "mysir", readLines(dust2_file("examples/sir.cpp")))
+  filename <- tempfile(fileext = ".cpp")
+  writeLines(code, filename)
+  gen <- dust_compile(filename, quiet = TRUE, debug = TRUE)
+  options(dust.testing.local_sir_generator = gen)
+  gen
+}
