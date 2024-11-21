@@ -23,7 +23,6 @@ public:
       offset_.push_back(size_);
       size_ += len_i;
     }
-    size_ = std::accumulate(len_.begin(), len_.end(), 0);
   }
 
   packing() : size_(0) {
@@ -39,10 +38,6 @@ public:
 
   auto& data() const {
     return data_;
-  }
-
-  auto& offset() const {
-    return offset_;
   }
 
   template <typename Iter>
