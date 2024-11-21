@@ -59,6 +59,15 @@ test_that("can add parameter information", {
 })
 
 
+test_that("can cope with class name containing underscore", {
+  res <- dust_template_data(
+    "my_thing", "my_thing", "discrete", FALSE, FALSE, NULL, NULL)
+  expect_equal(res$class, "my_thing")
+  expect_equal(res$name, "my_thing")
+  expect_equal(res$package, "my.thing")
+})
+
+
 test_that("can select optimisation level", {
   expect_equal(validate_compiler_options(NULL, NULL), "")
   expect_equal(validate_compiler_options("-Xf", NULL), "-Xf")
