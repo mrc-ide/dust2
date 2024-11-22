@@ -100,7 +100,6 @@ test_that("can run system with more variables than output", {
 
 test_that("can compile a model with delays", {
   skip_for_compilation()
-  pkgload::load_all(compile = FALSE)
   cmp <- dust_system_create(sirode, list())
   t <- seq(0, 100, 4)
   dust_system_set_state_initial(cmp)
