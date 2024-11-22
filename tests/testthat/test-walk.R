@@ -85,7 +85,7 @@ test_that("provided dt is reasonable", {
     "Expected 'dt' to be greater than 0")
   expect_error(
     dust_system_create(walk(), pars, n_particles = 10, dt = 1.5),
-    "Expected 'dt' to be at most 1")
+    "Expected 'dt' to be an integer, if greater than 1")
   expect_error(
     dust_system_create(walk(), pars, n_particles = 10, dt = sqrt(2) / 2),
     "Expected 'dt' to be the inverse of an integer")
@@ -109,6 +109,18 @@ test_that("time aligns to grid when dt is less than 1", {
     dust_system_create(walk(), pars, n_particles = 10, dt = 0.25, time = 1.1),
     "'time' must be a multiple of 'dt' (0.25)",
     fixed = TRUE)
+})
+
+test_that("time aligns to grid when dt is more than 1", {
+  pars <- list(sd = 1, random_initial = TRUE)
+  obj <- dust_system_create(walk(), pars, n_particles = 10, dt = 2.0,
+                            time = 0.0)
+  expect_equal(dust_system_time(obj), 0.0)
+
+  expect_error(
+    dust_system_create(walk(), pars, n_particles = 10, dt = 2.0,
+                            time = 1.0),
+    "'time' must be a multiple of 'dt'")
 })
 
 
