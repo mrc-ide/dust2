@@ -636,8 +636,8 @@ dim.dust_system <- function(x, ...) {
 }
 
 ##' @export
-coef.dust_system <- function(x, ...) {
-  x$parameters
+coef.dust_system <- function(object, ...) {
+  object$parameters
 }
 
 
