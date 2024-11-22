@@ -295,5 +295,13 @@ print.dust_likelihood <- function(x, ...) {
   time_type <- attr(x$generator, "properties")$time_type
   cli::cli_bullets(
     c(i = describe_time(time_type, NULL, x$time_control$dt)))
+  cli::cli_alert_info(
+    "Use {.help [coef()](stats::coef)} to get more information on parameters")
   invisible(x)
+}
+
+
+##' @export
+coef.dust_likelihood <- function(object, ...) {
+  coef(object$generator)
 }
