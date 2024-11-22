@@ -98,9 +98,9 @@ cpp11::sexp ode_internals_to_sexp(const ode::internals<real_type>& internals,
       history_coef = std::copy(h.c5.begin(), h.c5.end(), history_coef);
     }
     set_array_dims(r_history_coef, {n_history_state, 5, n_history_entries});
-    auto r_history = cpp11::writable::list{"time"_nm = r_history_time,
-                                           "size"_nm = r_history_size,
-                                           "coefficients"_nm = r_history_coef};
+    auto r_history = cpp11::writable::list{"time"_nm = std::move(r_history_time),
+                                           "size"_nm = std::move(r_history_size),
+                                           "coefficients"_nm = std::move(r_history_coef)};
     ret["history"] = cpp11::as_sexp(r_history);
   }
   return ret;

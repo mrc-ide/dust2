@@ -304,7 +304,7 @@ inline void set_array_dims(cpp11::sexp data,
   for (size_t i = 0; i < dims.size(); ++i, ++dim_i) {
     r_dim[i] = *dim_i;
   }
-  data.attr("dim") = r_dim;
+  data.attr("dim") = std::move(r_dim);
 }
 
 template <typename Iter>
@@ -646,7 +646,7 @@ inline cpp11::sexp packing_to_r(const dust2::packing& packing_info) {
     ret[i] = cpp11::writable::integers(data[i].second.begin(),
                                        data[i].second.end());
   }
-  ret.attr("names") = nms;
+  ret.attr("names") = std::move(nms);
   return ret;
 }
 

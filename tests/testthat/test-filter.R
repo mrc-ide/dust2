@@ -800,3 +800,16 @@ test_that("prevent access to the filter after serialisation", {
     "Pointer has been serialised, cannot continue safely (filter_rng_state)",
     fixed = TRUE)
 })
+
+
+test_that("can get coefficients from filter", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  dt <- 1
+  n_particles <- 100
+  seed <- 42
+  obj <- dust_filter_create(sir(), time_start, data, dt = dt,
+                            n_particles = n_particles, seed = seed)
+  expect_equal(coef(obj), coef(sir))
+})

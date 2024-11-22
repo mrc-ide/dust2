@@ -61,6 +61,15 @@ inline std::vector<size_t> integer_sequence(size_t n) {
   return ret;
 }
 
+inline std::vector<size_t> integer_sequence(size_t n, size_t offset) {
+  std::vector<size_t> ret;
+  ret.reserve(n);
+  for (size_t i = 0; i < n; ++i) {
+    ret.push_back(i + offset);
+  }
+  return ret;
+}
+
 template <typename T>
 std::vector<T> subset(const std::vector<T>& x, const std::vector<size_t> index) {
   std::vector<T> ret;
