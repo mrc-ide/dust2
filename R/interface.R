@@ -621,6 +621,7 @@ describe_time <- function(time_type, default_dt, dt) {
   }
 }
 
+##' @importFrom stats coef
 ##' @export
 coef.dust_system_generator <- function(object, ...) {
   attr(object, "parameters")
@@ -635,8 +636,8 @@ dim.dust_system <- function(x, ...) {
 }
 
 ##' @export
-coef.dust_system <- function(x, ...) {
-  x$parameters
+coef.dust_system <- function(object, ...) {
+  object$parameters
 }
 
 
