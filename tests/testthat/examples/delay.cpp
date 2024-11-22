@@ -36,7 +36,7 @@ public:
   }
 
   static auto delays(const shared_state& shared) {
-    return dust2::ode::delays<real_type>({{1, {3}}});
+    return dust2::ode::delays<real_type>({{1, {{3, 1}}}});
   }
 
   static void initial(real_type time,
@@ -71,7 +71,8 @@ public:
                      const shared_state& shared,
                      internal_state& internal,
                      const dust2::ode::delay_result_type<real_type>& delays) {
-    state[4] = state[3] - delays[0][0];
+    const auto& delay_I = delays[0].data[0];
+    state[4] = state[3] - delay_I;
   }
 
   static shared_state build_shared(cpp11::list pars) {
