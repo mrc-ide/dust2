@@ -697,7 +697,7 @@ check_time_sequence <- function(time, time_control,
   }
 
   dt <- time_control$dt
-  if (!is.null(dt)) {
+  if ((!is.null(dt)) && (dt <= 1)) {
     #rem <- time %% dt # The problem is 10 %% 0.25 = 0, but 10 %% 0.1 = 0.1
     rem <- fmod(time, dt)
     err <- abs(rem) > sqrt(.Machine$double.eps)
