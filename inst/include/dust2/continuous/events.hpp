@@ -28,7 +28,7 @@ bool is_root(const real_type a, const real_type b, const root_type& root) {
   return false;
 }
 
-template<typename real_type>
+template <typename real_type>
 struct event {
   size_t index;
   real_type value;
@@ -36,8 +36,18 @@ struct event {
   root_type root = root_type::both;
 };
 
-template<typename real_type>
+template <typename real_type>
 using events_type = std::vector<event<real_type>>;
+
+template <typename real_type>
+struct event_history_element {
+  real_type time;
+  size_t index;
+  real_type sign;
+};
+
+template <typename real_type>
+using event_history = std::vector<event_history_element<real_type>>;
 
 }
 }

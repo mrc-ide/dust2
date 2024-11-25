@@ -34,6 +34,7 @@ template <typename real_type>
 struct internals {
   history_step<real_type> last;
   history<real_type> history_values;
+  event_history<real_type> events;
 
   std::vector<real_type> dydt;
   std::vector<real_type> step_times;
@@ -334,6 +335,7 @@ private:
     bool found = false;
     size_t idx_first = 0;
     real_type t1 = t0 + h;
+    real_type sign = 0;
 
     for (size_t idx_event = 0; idx_event < events.size(); ++idx_event) {
       const auto& e = events[idx_event];
@@ -342,7 +344,9 @@ private:
       auto fn = [&](auto t) {
         return internals.last.interpolate(t, idx_state) - value;
       };
-      if (is_root(fn(t0), fn(t1), e.root)) {
+      const auto f_t0 = fn(t0);
+      const auto f_t1 = fn(t1);
+      if (is_root(f_t0, f_t1, e.root)) {
         // These probably should move into the ode control, but there
         // should really be any great need to change them, and the
         // interpolation is expected to be quite fast and accurate.
@@ -352,6 +356,7 @@ private:
         found = true;
         idx_first = idx_event;
         t1 = root.x;
+        sign = f_t0 < 0 ? 1 : -1;
       }
       if (found) {
         internals.last.interpolate(t1, y_next_.data());
@@ -361,7 +366,7 @@ private:
         // We need to modify the history here so that search will find
         // the right point.
         internals.last.t1 = t1;
-        // TODO: log event!
+        internals.events.push_back({t1, idx_first, sign});
       }
     }
     return t1;

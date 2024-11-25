@@ -67,7 +67,9 @@ cpp11::sexp ode_internals_to_sexp(const ode::internals<real_type>& internals,
     "n_steps_accepted"_nm = cpp11::as_sexp(internals.n_steps_accepted),
     "n_steps_rejected"_nm = cpp11::as_sexp(internals.n_steps_rejected),
     "coefficients"_nm = R_NilValue,
-    "history"_nm = R_NilValue};
+    "history"_nm = R_NilValue,
+    "events"_nm = R_NilValue};
+
   if (include_coefficients) {
     auto r_coef = cpp11::writable::doubles_matrix<>(internals.last.c1.size(), 5);
     auto coef = REAL(r_coef);
@@ -106,6 +108,21 @@ cpp11::sexp ode_internals_to_sexp(const ode::internals<real_type>& internals,
                                            "h"_nm = std::move(r_history_h),
                                            "coefficients"_nm = std::move(r_history_coef)};
     ret["history"] = cpp11::as_sexp(r_history);
+  }
+  if (!internals.events.empty()) {
+    const auto n_events = internals.events.size();
+    auto r_event_time = cpp11::writable::doubles(n_events);
+    auto r_event_index = cpp11::writable::integers(n_events);
+    auto r_event_sign = cpp11::writable::doubles(n_events);
+    for (size_t i = 0; i < n_events; ++i) {
+      r_event_time[i] = internals.events[i].time;
+      r_event_index[i] = static_cast<int>(internals.events[i].index);
+      r_event_sign[i] = internals.events[i].sign;
+    }
+    auto r_events = cpp11::writable::list{"time"_nm = std::move(r_event_time),
+                                          "index"_nm = std::move(r_event_index),
+                                          "sign"_nm = std::move(r_event_sign)};
+    ret["events"] = cpp11::as_sexp(r_events);
   }
   return ret;
 }

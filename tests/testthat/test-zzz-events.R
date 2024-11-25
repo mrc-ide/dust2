@@ -6,6 +6,9 @@ test_that("can run system with roots and events", {
   t <- seq(0, 6, length.out = 500)
   y <- dust_system_simulate(sys, t)
 
+  info <- dust_system_internals(sys)
+  expect_equal(nrow(info$events[[1]]), 3)
+
   ## This is realy not great, but at this point I don't know who is
   ## worse.  Qualitatively we're about right though and I need to go
   ## through and compare with an analytic solution as here we've got
