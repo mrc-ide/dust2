@@ -44,7 +44,7 @@ public:
   }
 
   static shared_state build_shared(cpp11::list pars) {
-    const real_type g = 9.81;
+    const real_type g = 9.8;
     const real_type height = dust2::r::read_real(pars, "height", 0);
     const real_type velocity = dust2::r::read_real(pars, "velocity", 10);
     const real_type damp = dust2::r::read_real(pars, "damp", 0.9);
