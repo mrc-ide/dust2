@@ -2,6 +2,7 @@
 
 #include <dust2/packing.hpp>
 #include <dust2/continuous/delays.hpp>
+#include <dust2/continuous/events.hpp>
 #include <dust2/zero.hpp>
 #include <vector>
 
@@ -43,6 +44,11 @@ template <class T, class = void>
 struct test_has_delays: std::false_type {};
 template <class T>
 struct test_has_delays<T, std::void_t<decltype(T::delays)>>: std::true_type {};
+
+template <class T, class = void>
+struct test_has_events: std::false_type {};
+template <class T>
+struct test_has_events<T, std::void_t<decltype(T::events)>>: std::true_type {};
 
 // These test that the signature of rhs and output consume the delays
 // argument. Not especially lovely to read!
@@ -90,6 +96,7 @@ struct properties {
   // Because of the above these are now actual numbers rather than types; we may make this change everywhere...
   static constexpr bool rhs_uses_delays = internals::test_rhs_uses_delays<T>();
   static constexpr bool output_uses_delays = internals::test_output_uses_delays<T>();
+  using has_events = internals::test_has_events<T>;
 };
 
 // wrappers around some uses of member functions that may or may not
@@ -159,6 +166,23 @@ template <typename T, typename std::enable_if<!properties<T>::has_delays::value,
 auto do_delays(const std::vector<typename T::shared_state>& shared) {
   using real_type = typename T::real_type;
   return std::vector<ode::delays<real_type>>(shared.size(), dust2::ode::delays<real_type>{{}});
+}
+
+template <typename T, typename std::enable_if<properties<T>::has_events::value, T>::type* = nullptr>
+auto do_events(const std::vector<typename T::shared_state>& shared) {
+  using real_type = typename T::real_type;
+  std::vector<ode::events_type<real_type>> ret;
+  ret.reserve(shared.size());
+  for (size_t i = 0; i < shared.size(); ++i) {
+    ret.push_back(T::events(shared[i]));
+  }
+  return ret;
+}
+
+template <typename T, typename std::enable_if<!properties<T>::has_events::value, T>::type* = nullptr>
+auto do_events(const std::vector<typename T::shared_state>& shared) {
+  using real_type = typename T::real_type;
+  return std::vector<ode::events_type<real_type>>(shared.size(), dust2::ode::events_type<real_type>{{}});
 }
 
 }
