@@ -296,7 +296,8 @@ private:
   void accept(real_type t, real_type h, real_type* y, ode::internals<real_type>& internals) {
     // We might want to only do this bit if we'll actually use the
     // history, but it's pretty cheap really.
-    internals.last.t = t;
+    internals.last.t0 = t;
+    internals.last.t1 = t + h;
     internals.last.h = h;
     for (size_t i = 0; i < n_variables_; ++i) {
       const auto ydiff = y_next_[i] - y[i];
@@ -320,7 +321,7 @@ private:
     }
     for (const auto& el : zero_every) {
       const auto period = el.first;
-      const auto t_last_step = internals.last.t;
+      const auto t_last_step = internals.last.t0;
       const int n = std::floor(t / period);
       const int m = std::floor(t_last_step / period);
       if (n > m) {
@@ -351,7 +352,7 @@ private:
     for (const auto& el : zero_every) {
       const auto period = el.first;
       if (internals.last.h > period) {
-        const auto t_last_step = internals.last.t;
+        const auto t_last_step = internals.last.t0;
         const int n = std::ceil(t / period);
         const int m = std::ceil(t_last_step / period);
         if (n > m) {

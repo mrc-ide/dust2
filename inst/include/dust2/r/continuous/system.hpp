@@ -89,7 +89,7 @@ cpp11::sexp ode_internals_to_sexp(const ode::internals<real_type>& internals,
     auto history_time = REAL(r_history_time);
     auto history_size = REAL(r_history_size);
     for (auto& h: internals.history_values.data()) {
-      *history_time++ = h.t;
+      *history_time++ = h.t0;
       *history_size++ = h.h;
       history_coef = std::copy(h.c1.begin(), h.c1.end(), history_coef);
       history_coef = std::copy(h.c2.begin(), h.c2.end(), history_coef);

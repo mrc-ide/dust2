@@ -11,7 +11,8 @@ namespace ode {
 // A single piece of history
 template <typename real_type>
 struct history_step {
-  real_type t;
+  real_type t0;
+  real_type t1;
   real_type h;
   std::vector<real_type> c1;
   std::vector<real_type> c2;
@@ -20,7 +21,8 @@ struct history_step {
   std::vector<real_type> c5;
 
   history_step(size_t n_variables) :
-    t(0),
+    t0(0),
+    t1(0),
     h(0),
     c1(n_variables),
     c2(n_variables),
@@ -29,11 +31,12 @@ struct history_step {
     c5(n_variables) {
   }
 
-  history_step() : t(0), h(0) {
+  history_step() : t0(0), t1(0), h(0) {
   }
 
-  history_step(real_type t, real_type h, std::vector<real_type> c1, std::vector<real_type> c2, std::vector<real_type> c3, std::vector<real_type> c4, std::vector<real_type> c5) :
-    t(t),
+  history_step(real_type t0, real_type t1, real_type h, std::vector<real_type> c1, std::vector<real_type> c2, std::vector<real_type> c3, std::vector<real_type> c4, std::vector<real_type> c5) :
+    t0(t0),
+    t1(t1),
     h(h),
     c1(c1),
     c2(c2),
@@ -45,7 +48,7 @@ struct history_step {
   template <typename Iter>
   void interpolate(real_type time, const std::vector<size_t>& index,
                    Iter result) const {
-    const auto u = (time - t) / h;
+    const auto u = (time - t0) / h;
     const auto v = 1 - u;
     for (auto i : index) {
       *result = c1[i] + u * (c2[i] + v * (c3[i] + u * (c4[i] + v * c5[i])));
@@ -55,7 +58,7 @@ struct history_step {
 
   template <typename Iter>
   void interpolate(real_type time, Iter result) const {
-    const auto u = (time - t) / h;
+    const auto u = (time - t0) / h;
     const auto v = 1 - u;
     for (size_t i = 0; i < c1.size(); ++i) {
       *result = c1[i] + u * (c2[i] + v * (c3[i] + u * (c4[i] + v * c5[i])));
@@ -64,7 +67,8 @@ struct history_step {
   }
 
   history_step subset(std::vector<size_t> index) const {
-    return history_step(t,
+    return history_step(t0,
+                        t1,
                         h,
                         tools::subset(c1, index),
                         tools::subset(c2, index),
@@ -129,7 +133,7 @@ public:
   template <typename Iter>
   bool interpolate(real_type time, const std::vector<size_t>& index,
                    Iter result) const {
-    if (data_.empty() || time < data_[0].t) {
+    if (data_.empty() || time < data_[0].t0) {
       for (size_t i = 0; i < index.size(); ++i) {
         *result = initial_state_[i];
         ++result;
@@ -138,7 +142,7 @@ public:
     } else {
       const auto it = std::lower_bound(data_.begin(), data_.end(), time,
                                        [](const auto& h, const auto& value) {
-                                         return value > (h.t + h.h);
+                                         return value > h.t1;
                                        });
       if (it == data_.end()) {
         throw std::runtime_error("Failed to locate history element");
