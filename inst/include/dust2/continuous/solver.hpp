@@ -9,6 +9,7 @@
 #include <dust2/tools.hpp>
 #include <dust2/zero.hpp>
 #include <dust2/continuous/control.hpp>
+#include <dust2/continuous/events.hpp>
 #include <dust2/continuous/history.hpp>
 
 namespace dust2 {
