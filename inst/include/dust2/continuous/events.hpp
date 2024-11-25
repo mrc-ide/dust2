@@ -30,10 +30,20 @@ bool is_root(const real_type a, const real_type b, const root_type& root) {
 
 template <typename real_type>
 struct event {
-  size_t index;
-  real_type value;
-  std::function<void(real_type, real_type*)> action; // time, y
+  using test_type = std::function<real_type(const real_type, const real_type*)>;
+  using action_type = std::function<void(const real_type, real_type*)>;
+  std::vector<size_t> index;
   root_type root = root_type::both;
+  test_type test;
+  action_type action;
+
+  event(const std::vector<size_t>& index, test_type test, action_type action, root_type root = root_type::both) :
+    index(index), root(root), test(test), action(action) {
+  }
+
+  event(size_t index, action_type action, root_type root = root_type::both) :
+    event({index}, [](real_type t, const real_type* y) { return y[0]; }, action, root) {
+  }
 };
 
 template <typename real_type>

@@ -332,17 +332,17 @@ private:
   real_type apply_events(real_type t0, real_type h, const real_type* y,
                          const events_type<real_type>& events,
                          ode::internals<real_type>& internals) {
-    bool found = false;
-    size_t idx_first = 0;
+    size_t idx_first = events.size();
     real_type t1 = t0 + h;
     real_type sign = 0;
 
     for (size_t idx_event = 0; idx_event < events.size(); ++idx_event) {
       const auto& e = events[idx_event];
-      const auto idx_state = e.index;
-      const auto value = e.value;
+      // temporary, will update soon - we can use y_stiff I think?
+      std::vector<real_type> y_tmp(e.index.size());
       auto fn = [&](auto t) {
-        return internals.last.interpolate(t, idx_state) - value;
+        internals.last.interpolate(t, e.index, y_tmp.begin());
+        return e.test(t, y_tmp.data());
       };
       const auto f_t0 = fn(t0);
       const auto f_t1 = fn(t1);
@@ -353,12 +353,11 @@ private:
         constexpr real_type eps = 1e-6;
         constexpr size_t steps = 100;
         auto root = lostturnip::find_result<real_type>(fn, t0, t1, eps, steps);
-        found = true;
         idx_first = idx_event;
         t1 = root.x;
         sign = f_t0 < 0 ? 1 : -1;
       }
-      if (found) {
+      if (idx_first < events.size()) {
         internals.last.interpolate(t1, y_next_.data());
         // These actions probably will have needed to bind
         // shared/internal eventually, that will be done elsewhere.

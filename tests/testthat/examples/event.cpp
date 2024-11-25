@@ -59,10 +59,11 @@ public:
     // We can capture 'shared' by scope here, but not internal; that
     // would require a second phase of binding, which would need to be
     // done by the system.
-    dust2::ode::event<real_type> e{0, 0, [&](double t, double* y) {
+    auto action = [&](double t, double* y) {
       y[0] = 0;
       y[1] = -shared.damp * y[1];
-    }};
+    };
+    dust2::ode::event<real_type> e(0, action);
     return dust2::ode::events_type<real_type>({e});
   }
 };
