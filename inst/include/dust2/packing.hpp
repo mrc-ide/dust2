@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <numeric>
 #include <stdexcept>
 #include <string>
@@ -42,7 +43,7 @@ public:
 
   template <typename Iter>
   void copy_offset(Iter it) {
-    std::copy(offset_.begin(), offset_.end(), it);
+    std::copy_n(offset_.begin(), data_.size(), it);
   }
 
   bool operator!=(const packing& other) const {
