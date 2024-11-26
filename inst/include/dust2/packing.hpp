@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm>
 #include <numeric>
 #include <stdexcept>
 #include <string>
@@ -43,7 +42,12 @@ public:
 
   template <typename Iter>
   void copy_offset(Iter it) {
-    std::copy_n(offset_.begin(), data_.size(), it);
+    // Avoiding std::copy and std::copy_n as we get a false positive
+    // warning about memmove here that would be worth looking into
+    // later.
+    for (size_t i = 0; i < data_.size(); ++i, ++it) {
+      *it = offset_[i];
+    }
   }
 
   bool operator!=(const packing& other) const {
