@@ -177,6 +177,7 @@ public:
 
       if (err <= 1) {
         success = true;
+        update_interpolation(t, h, y, internals);
         accept(t, h, y, internals);
         internals.n_steps_accepted++;
         if (control_.debug_record_step_times) {
@@ -293,7 +294,7 @@ public:
   }
 
 private:
-  void accept(real_type t, real_type h, real_type* y, ode::internals<real_type>& internals) {
+  void update_interpolation(real_type t, real_type h, real_type* y, ode::internals<real_type>& internals) {
     // We might want to only do this bit if we'll actually use the
     // history, but it's pretty cheap really.
     internals.last.t0 = t;
@@ -307,7 +308,9 @@ private:
       internals.last.c3[i] = bspl;
       internals.last.c4[i] = -h * k2_[i] + ydiff - bspl;
     }
+  }
 
+  void accept(real_type t, real_type h, real_type* y, ode::internals<real_type>& internals) {
     std::copy_n(k2_.begin(), n_variables_, internals.dydt.begin());
     std::copy_n(y_next_.begin(), n_variables_, y);
   }
