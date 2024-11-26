@@ -66,15 +66,6 @@ struct history_step {
     }
   }
 
-  real_type interpolate(real_type time, size_t i) const {
-    // Consider special case for u or v == 0
-    // u == 0: return c1[i]
-    // v == 0: return c1[i] + c2[i]
-    const auto u = (time - t0) / h;
-    const auto v = 1 - u;
-    return c1[i] + u * (c2[i] + v * (c3[i] + u * (c4[i] + v * c5[i])));
-  }
-
   history_step subset(std::vector<size_t> index) const {
     return history_step(t0,
                         t1,
