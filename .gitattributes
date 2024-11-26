@@ -7,4 +7,4 @@ src/sir.cpp linguist-generated=true
 src/sirode.cpp linguist-generated=true
 src/walk.cpp linguist-generated=true
 R/import-*.R linguist-generated=true
-inst/include/lostturnip.hpp linguist-vendored=true
+inst/include/lostturnip.hpp linguist-vendored=true linguist-generated=true
