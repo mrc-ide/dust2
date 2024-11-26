@@ -83,14 +83,17 @@ cpp11::sexp ode_internals_to_sexp(const ode::internals<real_type>& internals,
     const auto n_history_state = internals.history_values.n_state();
     auto r_history_coef =
       cpp11::writable::doubles(n_history_state * 5 * n_history_entries);
-    auto r_history_time = cpp11::writable::doubles(n_history_entries);
-    auto r_history_size = cpp11::writable::doubles(n_history_entries);
+    auto r_history_t0 = cpp11::writable::doubles(n_history_entries);
+    auto r_history_t1 = cpp11::writable::doubles(n_history_entries);
+    auto r_history_h = cpp11::writable::doubles(n_history_entries);
     auto history_coef = REAL(r_history_coef);
-    auto history_time = REAL(r_history_time);
-    auto history_size = REAL(r_history_size);
+    auto history_t0 = REAL(r_history_t0);
+    auto history_t1 = REAL(r_history_t1);
+    auto history_h = REAL(r_history_h);
     for (auto& h: internals.history_values.data()) {
-      *history_time++ = h.t;
-      *history_size++ = h.h;
+      *history_t0++ = h.t0;
+      *history_t1++ = h.t1;
+      *history_h++ = h.h;
       history_coef = std::copy(h.c1.begin(), h.c1.end(), history_coef);
       history_coef = std::copy(h.c2.begin(), h.c2.end(), history_coef);
       history_coef = std::copy(h.c3.begin(), h.c3.end(), history_coef);
@@ -98,8 +101,9 @@ cpp11::sexp ode_internals_to_sexp(const ode::internals<real_type>& internals,
       history_coef = std::copy(h.c5.begin(), h.c5.end(), history_coef);
     }
     set_array_dims(r_history_coef, {n_history_state, 5, n_history_entries});
-    auto r_history = cpp11::writable::list{"time"_nm = std::move(r_history_time),
-                                           "size"_nm = std::move(r_history_size),
+    auto r_history = cpp11::writable::list{"t0"_nm = std::move(r_history_t0),
+                                           "t1"_nm = std::move(r_history_t1),
+                                           "h"_nm = std::move(r_history_h),
                                            "coefficients"_nm = std::move(r_history_coef)};
     ret["history"] = cpp11::as_sexp(r_history);
   }
