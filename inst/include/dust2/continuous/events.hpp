@@ -31,7 +31,7 @@ bool is_root(const real_type a, const real_type b, const root_type& root) {
 template <typename real_type>
 struct event {
   using test_type = std::function<real_type(const real_type, const real_type*)>;
-  using action_type = std::function<void(const real_type, real_type*)>;
+  using action_type = std::function<void(const real_type, const real_type, real_type*)>;
   std::vector<size_t> index;
   root_type root = root_type::both;
   test_type test;

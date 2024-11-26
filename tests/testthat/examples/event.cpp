@@ -56,10 +56,7 @@ public:
   }
 
   static auto events(const shared_state& shared, internal_state& internal) {
-    // We can capture 'shared' by scope here, but not internal; that
-    // would require a second phase of binding, which would need to be
-    // done by the system.
-    auto action = [&](double t, double* y) {
+    auto action = [&](const double t, const double sign, double* y) {
       y[0] = 0;
       y[1] = -shared.damp * y[1];
     };

@@ -360,7 +360,7 @@ private:
       }
       if (idx_first < events.size()) {
         internals.last.interpolate(t1, y_next_.data());
-        events[idx_first].action(t1, y_next_.data());
+        events[idx_first].action(t1, sign, y_next_.data());
         // We need to modify the history here so that search will find
         // the right point.
         internals.last.t1 = t1;
