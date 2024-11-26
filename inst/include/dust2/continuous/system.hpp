@@ -91,7 +91,7 @@ public:
         const auto offset = k * n_state_;
         real_type * y = state_data + offset;
         try {
-          solver_[i].run(time_, time, y, zero_every_[group], events_[group],
+          solver_[i].run(time_, time, y, zero_every_[group], events_[i],
                          ode_internals_[k],
                          rhs_(particle, group, thread));
         } catch (std::exception const& e) {
@@ -132,7 +132,7 @@ public:
           for (size_t step = 0; step < n_steps; ++step) {
             const real_type t0 = t1;
             t1 = (step == n_steps - 1) ? time : time_ + step * dt_;
-            solver_[i].run(t0, t1, y, zero_every_[group], events_[group],
+            solver_[i].run(t0, t1, y, zero_every_[group], events_[i],
                            ode_internals_[k],
                            rhs_(particle, group, thread));
             std::copy_n(y, n_state_ode_, y_other);
