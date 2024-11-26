@@ -55,7 +55,7 @@ public:
     shared.damp = dust2::r::read_real(pars, "damp", shared.damp);
   }
 
-  static auto events(const shared_state& shared) {
+  static auto events(const shared_state& shared, internal_state& internal) {
     // We can capture 'shared' by scope here, but not internal; that
     // would require a second phase of binding, which would need to be
     // done by the system.

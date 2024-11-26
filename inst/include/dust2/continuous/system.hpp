@@ -68,7 +68,7 @@ public:
     errors_(n_particles_total_),
     rng_(n_particles_total_, seed, deterministic),
     delays_(do_delays<T>(shared_)),
-    events_(do_events<T>(shared_)),
+    events_(do_events<T>(shared_, internal_)),
     solver_(n_groups_ * n_threads_, {n_state_ode_, control_}),
     output_is_current_(n_groups_),
     requires_initialise_(n_groups_, true) {

@@ -169,20 +169,31 @@ auto do_delays(const std::vector<typename T::shared_state>& shared) {
 }
 
 template <typename T, typename std::enable_if<properties<T>::has_events::value, T>::type* = nullptr>
-auto do_events(const std::vector<typename T::shared_state>& shared) {
+auto do_events(const std::vector<typename T::shared_state>& shared,
+               std::vector<typename T::internal_state>& internal) {
   using real_type = typename T::real_type;
   std::vector<ode::events_type<real_type>> ret;
-  ret.reserve(shared.size());
-  for (size_t i = 0; i < shared.size(); ++i) {
-    ret.push_back(T::events(shared[i]));
+
+  const auto n_groups = shared.size();
+  const auto n_threads = internal.size();
+  ret.reserve(n_threads * n_groups);
+  auto iter = internal.begin();
+  for (size_t i = 0; i < n_threads; ++i) {
+    for (auto& s : shared) {
+      ret.push_back(T::events(s, *iter));
+      ++iter;
+    }
   }
   return ret;
 }
 
 template <typename T, typename std::enable_if<!properties<T>::has_events::value, T>::type* = nullptr>
-auto do_events(const std::vector<typename T::shared_state>& shared) {
+auto do_events(const std::vector<typename T::shared_state>& shared,
+               std::vector<typename T::internal_state>& internal) {
   using real_type = typename T::real_type;
-  return std::vector<ode::events_type<real_type>>(shared.size(), dust2::ode::events_type<real_type>{{}});
+  const auto len = shared.size() * internal.size();
+  const auto empty = dust2::ode::events_type<real_type>{{}};
+  return std::vector<ode::events_type<real_type>>(len, empty);
 }
 
 }
