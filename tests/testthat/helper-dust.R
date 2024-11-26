@@ -85,23 +85,12 @@ local_sir_generator <- function() {
 }
 
 
-example_bounce <- function(t) {
-  skip_if_not_installed("deSolve")
-  ball <- function(t, y, parms) {
-    dy1 <- y[2]
-    dy2 <- -9.8
-    list(c(dy1, dy2))
+example_bounce_analytic <- function(t, v0 = 10, damp = 0.9, g = 9.8) {
+  t0 <- 0
+  while (last(t0) < last(t)) {
+    t0 <- c(t0, last(t0) + 2 * v0 * damp^(length(t0) - 1) / g)
   }
-  yini <- c(height = 0, velocity = 10)
-  rootfunc <- function(t, y, parms) {
-    y[1]
-  }
-  eventfunc <- function(t, y, parms) {
-    y[1] <- 0
-    y[2] <- -0.9 * y[2]
-    y
-  }
-  deSolve::ode(times = t, y = yini, func = ball,
-               parms = NULL, rootfunc = rootfunc,
-               events = list(func = eventfunc, root = TRUE))
+  i <- findInterval(t, t0)
+  y <- v0 * damp^(i - 1) * (t - t0[i]) - 0.5 * g * (t - t0[i])^2
+  list(y = y, roots = t0[t0 > 0 & t0 < last(t)])
 }

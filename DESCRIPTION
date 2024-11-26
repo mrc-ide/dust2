@@ -27,7 +27,6 @@ Suggests:
     callr,
     cpp11,
     decor,
-    deSolve,
     fs,
     glue,
     knitr,
