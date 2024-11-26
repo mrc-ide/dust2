@@ -156,6 +156,7 @@ public:
     auto success = false;
     auto reject = false;
     auto truncated = false;
+    auto event = false;
     auto h = internals.step_size;
 
     while (!success) {
@@ -185,10 +186,12 @@ public:
         update_interpolation(t, h, y, internals);
         // If we end up using a std::array of these, we can make this
         // constexpr, which is nice.
+        // This would be step 21 atm.
         if (!events.empty()) {
           const auto t_next = apply_events(t, h, y, events, internals);
           if (t_next < t + h) {
-            truncated = true;
+            event = true;
+            truncated = false;
             h = t_next - t;
             rhs(t_next, y_next_.data(), k2_.data());
           }
@@ -199,7 +202,7 @@ public:
           internals.step_times.push_back(truncated ? t_end : t + h);
         }
         internals.save_history();
-        if (!truncated) {
+        if (!truncated && !event) {
           const auto fac_old =
             std::max(internals.error, static_cast<real_type>(1e-4));
           auto fac = fac11 / std::pow(fac_old, control_.beta);
