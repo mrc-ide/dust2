@@ -184,9 +184,6 @@ public:
       if (err <= 1) {
         success = true;
         update_interpolation(t, h, y, internals);
-        // If we end up using a std::array of these, we can make this
-        // constexpr, which is nice.
-        // This would be step 21 atm.
         if (!events.empty()) {
           const auto t_next = apply_events(t, h, y, events, internals);
           if (t_next < t + h) {
@@ -341,11 +338,12 @@ private:
 
     for (size_t idx_event = 0; idx_event < events.size(); ++idx_event) {
       const auto& e = events[idx_event];
-      // temporary, will update soon - we can use y_stiff I think?
-      std::vector<real_type> y_tmp(e.index.size());
+      // Use y_stiff as temporary space here, it's only used
+      // transiently and within the step
+      real_type * y_t = y_stiff_.data();
       auto fn = [&](auto t) {
-        internals.last.interpolate(t, e.index, y_tmp.begin());
-        return e.test(t, y_tmp.data());
+        internals.last.interpolate(t, e.index, y_t);
+        return e.test(t, y_t);
       };
       const auto f_t0 = fn(t0);
       const auto f_t1 = fn(t1);
@@ -362,8 +360,6 @@ private:
       }
       if (idx_first < events.size()) {
         internals.last.interpolate(t1, y_next_.data());
-        // These actions probably will have needed to bind
-        // shared/internal eventually, that will be done elsewhere.
         events[idx_first].action(t1, y_next_.data());
         // We need to modify the history here so that search will find
         // the right point.
