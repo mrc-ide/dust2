@@ -7,3 +7,4 @@ src/malaria.cpp
 src/sir.cpp
 src/sirode.cpp
 src/walk.cpp
+inst/include/lostturnip.hpp
