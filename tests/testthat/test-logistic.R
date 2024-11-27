@@ -348,8 +348,6 @@ test_that("can save step times for debugging", {
 })
 
 
-
-
 test_that("can save history", {
   pars <- list(n = 3, r = c(0.1, 0.2, 0.3), K = rep(100, 3))
   ctl <- dust_ode_control(save_history = TRUE, debug_record_step_times = TRUE)
@@ -364,9 +362,10 @@ test_that("can save history", {
   expect_true("history" %in% names(d))
   history <- d$history[[1]]
   n_steps <- d$n_steps_accepted
-  expect_length(history$time, n_steps)
-  expect_equal(history$time, d$step_times[[1]][-(n_steps + 1)])
-  expect_equal(history$size, diff(d$step_times[[1]]))
+  expect_length(history$t0, n_steps)
+  expect_equal(history$t0, d$step_times[[1]][-(n_steps + 1)])
+  expect_equal(history$t1, d$step_times[[1]][-1])
+  expect_equal(history$h, diff(d$step_times[[1]]))
   expect_equal(history$coefficients[, , n_steps], d$coefficients[[1]])
 })
 
