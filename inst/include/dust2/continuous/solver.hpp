@@ -4,9 +4,12 @@
 #include <cmath>
 #include <stdexcept>
 #include <vector>
+#include <lostturnip.hpp>
+
 #include <dust2/tools.hpp>
 #include <dust2/zero.hpp>
 #include <dust2/continuous/control.hpp>
+#include <dust2/continuous/events.hpp>
 #include <dust2/continuous/history.hpp>
 
 namespace dust2 {
@@ -31,6 +34,7 @@ template <typename real_type>
 struct internals {
   history_step<real_type> last;
   history<real_type> history_values;
+  event_history<real_type> events;
 
   std::vector<real_type> dydt;
   std::vector<real_type> step_times;
@@ -147,10 +151,12 @@ public:
   // Take a single step
   template <typename Rhs>
   real_type step(real_type t, real_type t_end, real_type* y,
+                 const events_type<real_type>& events,
                  ode::internals<real_type>& internals, Rhs rhs) {
     auto success = false;
     auto reject = false;
     auto truncated = false;
+    auto event = false;
     auto h = internals.step_size;
 
     while (!success) {
@@ -178,13 +184,22 @@ public:
       if (err <= 1) {
         success = true;
         update_interpolation(t, h, y, internals);
+        if (!events.empty()) {
+          const auto t_next = apply_events(t, h, y, events, internals);
+          if (t_next < t + h) {
+            event = true;
+            truncated = false;
+            h = t_next - t;
+            rhs(t_next, y_next_.data(), k2_.data());
+          }
+        }
         accept(t, h, y, internals);
         internals.n_steps_accepted++;
         if (control_.debug_record_step_times) {
           internals.step_times.push_back(truncated ? t_end : t + h);
         }
         internals.save_history();
-        if (!truncated) {
+        if (!truncated && !event) {
           const auto fac_old =
             std::max(internals.error, static_cast<real_type>(1e-4));
           auto fac = fac11 / std::pow(fac_old, control_.beta);
@@ -209,11 +224,12 @@ public:
   template <typename Rhs>
   void run(real_type t, real_type t_end, real_type* y,
            zero_every_type<real_type>& zero_every,
+           const events_type<real_type>& events,
            ode::internals<real_type>& internals, Rhs rhs) {
     if (control_.critical_times.empty()) {
       while (t < t_end) {
         apply_zero_every(t, y, zero_every, internals);
-        t = step(t, t_end, y, internals, rhs);
+        t = step(t, t_end, y, events, internals, rhs);
       }
     } else {
       // Slightly more complex loop which ensures we never integrate
@@ -224,7 +240,7 @@ public:
       auto t_end_i = (tc == tc_end || *tc >= t_end) ? t_end : *tc;
       while (t < t_end) {
         apply_zero_every(t, y, zero_every, internals);
-        t = step(t, t_end_i, y, internals, rhs);
+        t = step(t, t_end_i, y, events, internals, rhs);
         if (t >= t_end_i && t < t_end) {
           ++tc;
           t_end_i = (tc == tc_end || *tc >= t_end) ? t_end : *tc;
@@ -295,8 +311,6 @@ public:
 
 private:
   void update_interpolation(real_type t, real_type h, real_type* y, ode::internals<real_type>& internals) {
-    // We might want to only do this bit if we'll actually use the
-    // history, but it's pretty cheap really.
     internals.last.t0 = t;
     internals.last.t1 = t + h;
     internals.last.h = h;
@@ -313,6 +327,47 @@ private:
   void accept(real_type t, real_type h, real_type* y, ode::internals<real_type>& internals) {
     std::copy_n(k2_.begin(), n_variables_, internals.dydt.begin());
     std::copy_n(y_next_.begin(), n_variables_, y);
+  }
+
+  real_type apply_events(real_type t0, real_type h, const real_type* y,
+                         const events_type<real_type>& events,
+                         ode::internals<real_type>& internals) {
+    size_t idx_first = events.size();
+    real_type t1 = t0 + h;
+    real_type sign = 0;
+
+    for (size_t idx_event = 0; idx_event < events.size(); ++idx_event) {
+      const auto& e = events[idx_event];
+      // Use y_stiff as temporary space here, it's only used
+      // transiently and within the step
+      real_type * y_t = y_stiff_.data();
+      auto fn = [&](auto t) {
+        internals.last.interpolate(t, e.index, y_t);
+        return e.test(t, y_t);
+      };
+      const auto f_t0 = fn(t0);
+      const auto f_t1 = fn(t1);
+      if (is_root(f_t0, f_t1, e.root)) {
+        // These probably should move into the ode control, but there
+        // should really be any great need to change them, and the
+        // interpolation is expected to be quite fast and accurate.
+        constexpr real_type eps = 1e-6;
+        constexpr size_t steps = 100;
+        auto root = lostturnip::find_result<real_type>(fn, t0, t1, eps, steps);
+        idx_first = idx_event;
+        t1 = root.x;
+        sign = f_t0 < 0 ? 1 : -1;
+      }
+      if (idx_first < events.size()) {
+        internals.last.interpolate(t1, y_next_.data());
+        events[idx_first].action(t1, sign, y_next_.data());
+        // We need to modify the history here so that search will find
+        // the right point.
+        internals.last.t1 = t1;
+        internals.events.push_back({t1, idx_first, sign});
+      }
+    }
+    return t1;
   }
 
   void apply_zero_every(real_type t, real_type* y,
