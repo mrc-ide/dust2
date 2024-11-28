@@ -17,7 +17,7 @@ test_that("can run system with roots and events", {
   r <- info$events[[1]]
   expect_equal(nrow(r), 3)
   expect_equal(r$time, cmp$roots, tolerance = 1e-6)
-  expect_equal(r$index, rep(0L, 3))
+  expect_equal(r$index, rep(1L, 3))
   expect_equal(r$sign, rep(-1, 3))
 
   ## Stop at all roots:

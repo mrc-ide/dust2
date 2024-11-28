@@ -116,7 +116,7 @@ cpp11::sexp ode_internals_to_sexp(const ode::internals<real_type>& internals,
     auto r_event_sign = cpp11::writable::doubles(n_events);
     for (size_t i = 0; i < n_events; ++i) {
       r_event_time[i] = internals.events[i].time;
-      r_event_index[i] = static_cast<int>(internals.events[i].index);
+      r_event_index[i] = static_cast<int>(internals.events[i].index) + 1;
       r_event_sign[i] = internals.events[i].sign;
     }
     auto r_events = cpp11::writable::list{"time"_nm = std::move(r_event_time),
