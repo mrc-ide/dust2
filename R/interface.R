@@ -485,7 +485,10 @@ dust_system_internals <- function(sys, include_coefficients = FALSE,
     error = vnapply(dat, "[[", "error"),
     n_steps = viapply(dat, "[[", "n_steps"),
     n_steps_accepted = viapply(dat, "[[", "n_steps_accepted"),
-    n_steps_rejected = viapply(dat, "[[", "n_steps_rejected"))
+    n_steps_rejected = viapply(dat, "[[", "n_steps_rejected"),
+    events = I(lapply(dat, function(x) {
+      if (is.null(x$events)) NULL else as.data.frame(x$events)
+    })))
   if (include_coefficients) {
     ret$coefficients <- I(lapply(dat, "[[", "coefficients"))
   }

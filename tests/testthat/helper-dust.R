@@ -83,3 +83,14 @@ local_sir_generator <- function() {
   options(dust.testing.local_sir_generator = gen)
   gen
 }
+
+
+example_bounce_analytic <- function(t, v0 = 10, damp = 0.9, g = 9.8) {
+  t0 <- 0
+  while (last(t0) < last(t)) {
+    t0 <- c(t0, last(t0) + 2 * v0 * damp^(length(t0) - 1) / g)
+  }
+  i <- findInterval(t, t0)
+  y <- v0 * damp^(i - 1) * (t - t0[i]) - 0.5 * g * (t - t0[i])^2
+  list(y = y, roots = t0[t0 > 0 & t0 < last(t)])
+}
