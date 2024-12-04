@@ -4,8 +4,11 @@
 ## easier to read (and quite a lot slower due to churn in state).
 filter_manual <- function(generator, pars, time_start, data, dt, n_particles,
                           seed) {
-  r <- monty::monty_rng$new(n_streams = 1, seed = seed)
-  seed <- monty::monty_rng$new(n_streams = 1, seed = seed)$jump()$jump()$state()
+  r <- monty::monty_rng_create(n_streams = 1, seed = seed)
+  seed <-monty::monty_rng_state(
+    monty::monty_rng_jump(
+      monty::monty_rng_create(n_streams = 1, seed = seed),
+      2))
 
   obj <- dust_system_create(generator, pars, n_particles,
                             time = time_start, dt = dt, seed = seed)
@@ -30,7 +33,7 @@ filter_manual <- function(generator, pars, time_start, data, dt, n_particles,
       tmp <- dust_system_compare_data(obj, as.list(data[i, ]))
       w <- exp(tmp - max(tmp))
       ll <- ll + log(mean(w)) + max(tmp)
-      u <- r$random_real(1)
+      u <- monty::monty_random_real(r)
       k <- test_resample_weight(w, u) + 1L
       state <- dust_system_state(obj)
       if (save_trajectories) {
