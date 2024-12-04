@@ -141,9 +141,9 @@ test_that("running filter does not advance the second internal state", {
   dust_likelihood_last_state(obj, select_random_particle = TRUE)
   s3 <- dust_likelihood_rng_state(obj)
 
-  r <- monty::monty_rng$new(s1[33:64])
-  r$random_real(1)
-  expect_equal(s3[33:64], r$state())
+  r <- monty::monty_rng_create(seed = s1[33:64])
+  monty::monty_random_real(r)
+  expect_equal(s3[33:64], monty::monty_rng_state(r))
   expect_equal(s3[-(33:64)], s2[-(33:64)])
 })
 
@@ -166,7 +166,8 @@ test_that("can run a nested particle filter and get the same result", {
 
   ## Here, we can check the layout of the rng within the filter and system:
   n_streams <- (n_particles + 2) * 2
-  r <- monty::monty_rng$new(n_streams = n_streams, seed = seed)$state()
+  r <- monty::monty_rng_state(
+    monty::monty_rng_create(n_streams = n_streams, seed = seed))
   s <- dust_likelihood_rng_state(obj)
   expect_equal(s, r)
 
@@ -473,7 +474,8 @@ test_that("can skip over just some groups with missing data", {
 
   ## see test some way above for this:
   n_streams <- (n_particles + 2) * 2
-  r <- monty::monty_rng$new(n_streams = n_streams, seed = seed)$state()
+  r <- monty::monty_rng_state(
+    monty::monty_rng_create(n_streams = n_streams, seed = seed))
   seed2 <- r[seq_len(32) + (n_particles + 2) * 32]
 
   obj <- dust_filter_create(sir(), time_start, data, dt = dt,
