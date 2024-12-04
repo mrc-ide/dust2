@@ -5,7 +5,7 @@
 filter_manual <- function(generator, pars, time_start, data, dt, n_particles,
                           seed) {
   r <- monty::monty_rng_create(n_streams = 1, seed = seed)
-  seed <-monty::monty_rng_state(
+  seed <- monty::monty_rng_state(
     monty::monty_rng_jump(
       monty::monty_rng_create(n_streams = 1, seed = seed),
       2))
