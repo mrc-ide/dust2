@@ -53,12 +53,18 @@ check_dt <- function(dt, allow_null = FALSE, name = deparse(substitute(dt)),
   if (dt <= 0) {
     cli::cli_abort("Expected '{name}' to be greater than 0")
   }
-  if (dt > 1) {
-    cli::cli_abort("Expected '{name}' to be at most 1")
-  }
-  if (!rlang::is_integerish(1 / dt)) {
-    cli::cli_abort("Expected '{name}' to be the inverse of an integer",
-                   arg = "dt", call = call)
+  if (dt >= 1) {
+    if (!rlang::is_integerish(dt) || is.infinite(dt)) {
+      cli::cli_abort(
+        "Expected '{name}' to be an integer, if greater than  1",
+        arg = "dt", call = call)
+    }
+  } else {
+    if (!rlang::is_integerish(1 / dt)) {
+      cli::cli_abort(
+        "Expected '{name}' to be the inverse of an integer, if less than 1",
+        arg = "dt", call = call)
+    }
   }
   dt
 }
