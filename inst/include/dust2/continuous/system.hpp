@@ -15,6 +15,7 @@
 #include <dust2/packing.hpp>
 #include <dust2/properties.hpp>
 #include <dust2/tools.hpp>
+#include <dust2/trajectories.hpp>
 #include <dust2/zero.hpp>
 #include <monty/random/random.hpp>
 
