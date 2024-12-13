@@ -465,7 +465,7 @@ private:
       for (size_t i = 0, k = 0; i < n_threads_; ++i) {
         for (size_t group = 0; group < n_groups_; ++group, ++k) {
           delay_result_.push_back(delays_[group].result());
-          solver_[k].control().step_size_max =
+          solver_[k].control.step_size_max =
             delays_[group].step_size_max(control_.step_size_max,
                                          rhs_uses_delays_);
         }
