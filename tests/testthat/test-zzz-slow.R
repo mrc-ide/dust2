@@ -34,6 +34,7 @@ test_that("can run a model with internal storage", {
   seed <- dust_system_rng_state(sys)
   y <- drop(dust_system_simulate(sys, 1:20))
 
-  r <- monty::monty_rng$new(seed = seed)$normal(20 * len, 0, 1)
+  rng <- monty::monty_rng_create(seed = seed)
+  r <- monty::monty_random_n_normal(20 * len, 0, 1, rng)
   expect_equal(y, cumsum(colMeans(matrix(r, len, 20))))
 })

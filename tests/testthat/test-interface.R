@@ -73,7 +73,8 @@ test_that("can control dropping of single-element group dimensions", {
                              seed = 42)
   dust_system_set_state_initial(obj1)
   dust_system_set_state_initial(obj2)
-  r <- monty::monty_rng$new(seed = 42, n_streams = 10)$normal(3, 0, 1)
+  rng <- monty::monty_rng_create(seed = 42, n_streams = 10)
+  r <- monty::monty_random_n_normal(3, 0, 1, rng)
   expect_equal(dim(obj1), c(3, 10, 1))
   expect_equal(dim(obj2), c(3, 10))
 
@@ -92,7 +93,8 @@ test_that("can control dropping of single-element particle dimensions", {
                              seed = 42)
   dust_system_set_state_initial(obj1)
   dust_system_set_state_initial(obj2)
-  r <- monty::monty_rng$new(seed = 42, n_streams = 2)$normal(3, 0, 1)
+  rng <- monty::monty_rng_create(seed = 42, n_streams = 2)
+  r <- monty::monty_random_n_normal(3, 0, 1, rng)
   expect_equal(dim(obj1), c(3, 1, 2))
   expect_equal(dim(obj2), c(3, 2))
 
@@ -112,7 +114,8 @@ test_that("can control dropping of all dimensions", {
 
   dust_system_set_state_initial(obj1)
   dust_system_set_state_initial(obj2)
-  r <- monty::monty_rng$new(seed = 42, n_streams = 1)$normal(3, 0, 1)
+  rng <- monty::monty_rng_create(seed = 42, n_streams = 1)
+  r <- monty::monty_random_n_normal(3, 0, 1, rng)
   expect_equal(dim(obj1), c(3, 1, 1))
   expect_equal(dim(obj2), 3)
 

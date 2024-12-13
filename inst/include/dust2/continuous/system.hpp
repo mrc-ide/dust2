@@ -15,6 +15,7 @@
 #include <dust2/packing.hpp>
 #include <dust2/properties.hpp>
 #include <dust2/tools.hpp>
+#include <dust2/trajectories.hpp>
 #include <dust2/zero.hpp>
 #include <monty/random/random.hpp>
 
@@ -159,6 +160,15 @@ public:
                    const std::vector<size_t>& index_group,
                    real_type *state_history) {
     throw std::runtime_error("Write run_to_time() with saved history");
+  }
+
+  void simulate(const std::vector<real_type>& times,
+                const std::vector<size_t>& index_group,
+                dust2::trajectories<real_type>& history) {
+    for (auto t : times) {
+      run_to_time(t, index_group);
+      history.add(t, state().begin());
+    }
   }
 
   void set_state_initial(const std::vector<size_t>& index_group) {
