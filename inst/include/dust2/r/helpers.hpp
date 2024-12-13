@@ -236,11 +236,15 @@ inline double check_dt(cpp11::list r_time_control, bool enabled = true,
     cpp11::stop("Expected 'dt' to be greater than 0");
   }
   if (dt > 1) {
-    cpp11::stop("Expected 'dt' to be at most 1");
+    if (!is_integer_like(dt, eps)) {
+      cpp11::stop("Expected 'dt' to be an integer, if above 1");
+    }
   }
-  const auto inv_dt = 1 / dt;
-  if (!is_integer_like(inv_dt, eps)) {
-    cpp11::stop("Expected 'dt' to be the inverse of an integer");
+  if (dt < 1) {
+    const auto inv_dt = 1 / dt;
+    if (!is_integer_like(inv_dt, eps)) {
+      cpp11::stop("Expected 'dt' to be the inverse of an integer, if below 1");
+    }
   }
   return dt;
 }
