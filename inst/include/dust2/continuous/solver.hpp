@@ -74,8 +74,8 @@ template <typename real_type>
 class solver {
 public:
   solver(size_t n_variables, ode::control<real_type> control) :
+    control(control),
     n_variables_(n_variables),
-    control_(control),
     y_next_(n_variables_),
     y_stiff_(n_variables_),
     k2_(n_variables_),
@@ -83,13 +83,8 @@ public:
     k4_(n_variables_),
     k5_(n_variables_),
     k6_(n_variables_),
-    facc1_(1 / control_.factor_min),
-    facc2_(1 / control_.factor_max) {
-  }
-
-  // TODO: probably better to make this a public field (mrc-5992)
-  auto& control() {
-    return control_;
+    facc1_(1 / control.factor_min),
+    facc2_(1 / control.factor_max) {
   }
 
   template <typename Rhs>
@@ -137,8 +132,8 @@ public:
     }
 
     // Compute error:
-    const auto atol = control_.atol;
-    const auto rtol = control_.rtol;
+    const auto atol = control.atol;
+    const auto rtol = control.rtol;
     real_type err = 0.0;
     for (size_t i = 0; i < n_variables_; ++i) {
       auto sk =
@@ -160,12 +155,12 @@ public:
     auto h = internals.step_size;
 
     while (!success) {
-      if (internals.n_steps > control_.max_steps) {
+      if (internals.n_steps > control.max_steps) {
         // throw a nicer error for all of these, with the current
         // time etc.
         throw std::runtime_error("too many steps");
       }
-      if (h < control_.step_size_min) {
+      if (h < control.step_size_min) {
         throw std::runtime_error("step too small");
       }
       if (h <= std::abs(t) * std::numeric_limits<real_type>::epsilon()) {
@@ -179,7 +174,7 @@ public:
       const auto err = try_step(t, h, y, internals.dydt.data(),
                                 internals.last.c5.data(), rhs);
       internals.n_steps++;
-      const auto fac11 = std::pow(err, control_.constant);
+      const auto fac11 = std::pow(err, control.constant);
 
       if (err <= 1) {
         success = true;
@@ -195,17 +190,17 @@ public:
         }
         accept(t, h, y, internals);
         internals.n_steps_accepted++;
-        if (control_.debug_record_step_times) {
+        if (control.debug_record_step_times) {
           internals.step_times.push_back(truncated ? t_end : t + h);
         }
         internals.save_history();
         if (!truncated && !event) {
           const auto fac_old =
             std::max(internals.error, static_cast<real_type>(1e-4));
-          auto fac = fac11 / std::pow(fac_old, control_.beta);
-          fac = clamp(fac / control_.factor_safe, facc2_, facc1_);
+          auto fac = fac11 / std::pow(fac_old, control.beta);
+          fac = clamp(fac / control.factor_safe, facc2_, facc1_);
           const auto h_new = h / fac;
-          const auto h_max = reject ? h : control_.step_size_max;
+          const auto h_max = reject ? h : control.step_size_max;
           internals.step_size = std::min(h_new, h_max);
           internals.error = err;
         }
@@ -214,7 +209,7 @@ public:
         if (internals.n_steps_accepted >= 1) {
           internals.n_steps_rejected++;
         }
-        h /= std::min(facc1_, fac11 / control_.factor_safe);
+        h /= std::min(facc1_, fac11 / control.factor_safe);
       }
     }
 
@@ -226,7 +221,7 @@ public:
            zero_every_type<real_type>& zero_every,
            const events_type<real_type>& events,
            ode::internals<real_type>& internals, Rhs rhs) {
-    if (control_.critical_times.empty()) {
+    if (control.critical_times.empty()) {
       while (t < t_end) {
         apply_zero_every(t, y, zero_every, internals);
         t = step(t, t_end, y, events, internals, rhs);
@@ -235,8 +230,8 @@ public:
       // Slightly more complex loop which ensures we never integrate
       // over the times within our critical times.  The upper loop is
       // a special case of this but is kept simple.
-      auto tc_end = control_.critical_times.end();
-      auto tc = std::upper_bound(control_.critical_times.begin(), tc_end, t);
+      auto tc_end = control.critical_times.end();
+      auto tc = std::upper_bound(control.critical_times.begin(), tc_end, t);
       auto t_end_i = (tc == tc_end || *tc >= t_end) ? t_end : *tc;
       while (t < t_end) {
         apply_zero_every(t, y, zero_every, internals);
@@ -254,7 +249,7 @@ public:
   void initialise(const real_type t, const real_type* y,
                   ode::internals<real_type>& internals, Rhs rhs) {
     internals.reset(y);
-    if (control_.debug_record_step_times) {
+    if (control.debug_record_step_times) {
       internals.step_times.push_back(t);
     }
     auto f0 = internals.dydt.data();
@@ -270,14 +265,14 @@ public:
     real_type norm_y = 0.0;
 
     for (size_t i = 0; i < n_variables_; ++i) {
-      const real_type sk = control_.atol + control_.rtol * std::abs(y[i]);
+      const real_type sk = control.atol + control.rtol * std::abs(y[i]);
       norm_f += square(f0[i] / sk);
       norm_y += square(y[i] / sk);
     }
     // Magic numbers here, from Hairer
     real_type h = (norm_f <= 1e-10 || norm_y <= 1e-10) ?
       1e-6 : std::sqrt(norm_y / norm_f) * 0.01;
-    h = std::min(h, control_.step_size_max);
+    h = std::min(h, control.step_size_max);
 
     // Perform an explicit Euler step
     for (size_t i = 0; i < n_variables_; ++i) {
@@ -288,7 +283,7 @@ public:
     // Estimate the second derivative of the solution:
     real_type der2 = 0.0;
     for (size_t i = 0; i < n_variables_; ++i) {
-      const real_type sk = control_.atol + control_.rtol * std::abs(y[i]);
+      const real_type sk = control.atol + control.rtol * std::abs(y[i]);
       der2 += square((f1[i] - f0[i]) / sk);
     }
     der2 = std::sqrt(der2) / h;
@@ -304,8 +299,8 @@ public:
     if (!std::isfinite(h)) {
       throw std::runtime_error("Initial step size was not finite");
     }
-    h = std::max(h, control_.step_size_min * 100);
-    h = std::min(h, control_.step_size_max);
+    h = std::max(h, control.step_size_min * 100);
+    h = std::min(h, control.step_size_max);
     internals.step_size = h;
   }
 
@@ -427,8 +422,10 @@ private:
     }
   }
 
+  ode::control<real_type> control;
+
+private:
   size_t n_variables_;
-  ode::control<real_type> control_;
   std::vector<real_type> y_next_;
   std::vector<real_type> y_stiff_;
   std::vector<real_type> k2_;
