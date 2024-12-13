@@ -11,6 +11,7 @@
 #include <dust2/packing.hpp>
 #include <dust2/properties.hpp>
 #include <dust2/tools.hpp>
+#include <dust2/trajectories.hpp>
 #include <dust2/zero.hpp>
 #include <monty/random/random.hpp>
 
@@ -115,6 +116,15 @@ public:
     }
     errors_.report();
     time_ = time_ + n_steps * dt_;
+  }
+
+  void simulate(const std::vector<real_type>& times,
+                const std::vector<size_t>& index_group,
+                dust2::trajectories<real_type>& history) {
+    for (auto t : times) {
+      run_to_time(t, index_group);
+      history.add(t, state_.begin());
+    }
   }
 
   void set_state_initial(const std::vector<size_t>& index_group) {
