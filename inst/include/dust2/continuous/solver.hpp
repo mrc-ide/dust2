@@ -73,6 +73,8 @@ struct internals {
 template <typename real_type>
 class solver {
 public:
+  ode::control<real_type> control;
+
   solver(size_t n_variables, ode::control<real_type> control) :
     control(control),
     n_variables_(n_variables),
@@ -421,8 +423,6 @@ private:
       }
     }
   }
-
-  ode::control<real_type> control;
 
 private:
   size_t n_variables_;
