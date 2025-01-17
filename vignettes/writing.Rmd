@@ -299,7 +299,7 @@ The interface looks slightly different for ODE models, because we are not updati
 
 ```{r, echo = FALSE, results = "asis"}
 sirode_code <- readLines("examples/sirode.cpp")
-cc_output(sir_code)
+cc_output(sirode_code)
 ```
 
 We have made changes to the annotations, replaced `update` with `rhs` and updated `compare_data`, otherwise everything remains the same (except for a minor change dropping the `exp_noise` parameter which was not needed here).
@@ -327,13 +327,13 @@ stopifnot(all(diff(vapply(methods_sirode, "[[", 1, 1)) > 0))
 The `rhs` method follows the `sir` model's update one closely, but returns rates into `state_deriv` rather than updating `state_next`.   Note that this function does not accept an `rng_state` argument.
 
 ```{r, echo = FALSE, results = "asis"}
-cc_output(sir_code[methods_sir$rhs])
+cc_output(sirode_code[methods_sirode$rhs])
 ```
 
 The `compare_data` method has changed slightly as we no longer add random noise to the modelled data:
 
 ```{r, echo = FALSE, results = "asis"}
-cc_output(sir_code[methods_sir$compare_data])
+cc_output(sirode_code[methods_sirode$compare_data])
 ```
 
 # Continuous time models with additional output
