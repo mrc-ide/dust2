@@ -33,25 +33,25 @@ public:
     ll_(n_particles_ * n_groups_, 0),
     ll_step_(n_particles_ * n_groups_, 0),
     trajectories_(n_state_, n_particles_, n_groups_, time_.size()),
-    restart_(n_state_, n_particles_, n_groups_, 0),
+    snapshots_(n_state_, n_particles_, n_groups_, 0),
     adjoint_(n_state_, n_particles_, n_groups_),
     trajectories_are_current_(n_particles_ * n_groups_),
-    restart_is_current_(n_particles_ * n_groups_),
+    snapshots_are_current_(n_particles_ * n_groups_),
     adjoint_is_current_(n_particles_ * n_groups_),
     gradient_is_current_(false) {
   }
 
   void run(bool set_initial,
            bool save_trajectories,
-           const std::vector<real_type>& save_restart,
+           const std::vector<real_type>& save_snapshots,
            const std::vector<size_t>& index_state,
            const std::vector<size_t>& index_group) {
     const bool adjoint = false;
-    reset(set_initial, save_trajectories, save_restart, index_state, index_group, adjoint);
+    reset(set_initial, save_trajectories, save_snapshots, index_state, index_group, adjoint);
     const auto n_times = time_.size();
 
     auto it_data = data_.begin();
-    auto it_restart = save_restart.begin();
+    auto it_snapshots = save_snapshots.begin();
     for (size_t i = 0; i < n_times; ++i, it_data += n_groups_) {
       sys.run_to_time(time_[i], index_group);
       sys.compare_data(it_data, n_groups_data_, index_group, ll_step_.begin());
@@ -61,9 +61,9 @@ public:
       if (save_trajectories) {
         trajectories_.add(time_[i], sys.state().begin());
       }
-      if (it_restart != save_restart.end() && *it_restart == time_[i]) {
-        restart_.add(time_[i], sys.state().begin());
-        ++it_restart;
+      if (it_snapshots != save_snapshots.end() && *it_snapshots == time_[i]) {
+        snapshots_.add(time_[i], sys.state().begin());
+        ++it_snapshots;
       }
     }
 
@@ -72,9 +72,9 @@ public:
         trajectories_are_current_[i] = true;
       }
     }
-    if (!save_restart.empty()) {
+    if (!save_snapshots.empty()) {
       for (auto i : index_group) {
-        restart_is_current_[i] = true;
+        snapshots_are_current_[i] = true;
       }
     }
 
@@ -88,11 +88,11 @@ public:
   // same answers as the normal version, at the cost of more memory.
   void run_adjoint(bool set_initial,
                    bool save_trajectories,
-                   const std::vector<real_type> save_restart,
+                   const std::vector<real_type> save_snapshots,
                    const std::vector<size_t>& index_state,
                    const std::vector<size_t>& index_group) {
     const bool adjoint = true;
-    reset(set_initial, save_trajectories, save_restart, index_state, index_group, adjoint);
+    reset(set_initial, save_trajectories, save_snapshots, index_state, index_group, adjoint);
 
     // Run the entire forward time simulation
     sys.run_to_time(time_.back(), index_group, adjoint_.state(0));
@@ -100,7 +100,7 @@ public:
     // Then all the data comparison in one pass.  This bit can
     // theoretically be parallelised but it's unlikely to be
     // important in most models.
-    auto it_restart = save_restart.begin();
+    auto it_snapshots = save_snapshots.begin();
     const auto n_times = time_.size();
     for (size_t i = 0; i < n_times; ++i) {
       const auto state_i = adjoint_.state(i + 1);
@@ -112,16 +112,16 @@ public:
       if (save_trajectories) {
         trajectories_.add(time_[i], state_i);
       }
-      if (it_restart != save_restart.end() && *it_restart == time_[i]) {
+      if (it_snapshots != save_snapshots.end() && *it_snapshots == time_[i]) {
         trajectories_.add(time_[i], state_i);
-        ++it_restart;
+        ++it_snapshots;
       }
     }
 
     for (auto i : index_group) {
       adjoint_is_current_[i] = true;
       trajectories_are_current_[i] = save_trajectories;
-      restart_is_current_[i] = !save_restart.empty();
+      snapshots_are_current_[i] = !save_snapshots.empty();
     }
 
     if (!tools::is_trivial_index(index_group, n_groups_)) {
@@ -141,12 +141,12 @@ public:
     return trajectories_are_current_;
   }
 
-  auto& last_restart() const {
-    return restart_;
+  auto& last_snapshots() const {
+    return snapshots_;
   }
 
-  auto& last_restart_is_current() const {
-    return restart_is_current_;
+  auto& last_snapshots_are_current() const {
+    return snapshots_are_current_;
   }
 
   auto& last_index_group() const {
@@ -177,33 +177,33 @@ private:
   std::vector<real_type> ll_;
   std::vector<real_type> ll_step_;
   trajectories<real_type> trajectories_;
-  trajectories<real_type> restart_;
+  trajectories<real_type> snapshots_;
   adjoint_data<real_type> adjoint_;
   std::vector<bool> trajectories_are_current_;
-  std::vector<bool> restart_is_current_;
+  std::vector<bool> snapshots_are_current_;
   std::vector<size_t> last_index_group_;
   std::vector<bool> adjoint_is_current_;
   bool gradient_is_current_;
 
   void reset(bool set_initial,
              bool save_trajectories,
-             const std::vector<real_type>& save_restart,
+             const std::vector<real_type>& save_snapshots,
              const std::vector<size_t>& index_state,
              const std::vector<size_t>& index_group,
              bool adjoint) {
     std::fill(trajectories_are_current_.begin(),
               trajectories_are_current_.end(),
               false);
-    std::fill(restart_is_current_.begin(),
-              restart_is_current_.end(),
+    std::fill(snapshots_are_current_.begin(),
+              snapshots_are_current_.end(),
               false);
     std::fill(adjoint_is_current_.begin(), adjoint_is_current_.end(), false);
     gradient_is_current_ = false;
     if (save_trajectories) {
       trajectories_.set_index_and_reset(index_state, index_group);
     }
-    if (!save_restart.empty()) {
-      restart_.set_n_times_and_reset(save_restart.size(), index_group);
+    if (!save_snapshots.empty()) {
+      snapshots_.set_n_times_and_reset(save_snapshots.size(), index_group);
     }
     if (adjoint) {
       adjoint_.init_history(time_start_, time_, sys.dt());

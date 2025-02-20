@@ -60,13 +60,13 @@ inline void check_rank(cpp11::sexp value, size_t rank, const char * name) {
 }
 
 template <typename real_type>
-std::vector<real_type> check_save_restart(cpp11::sexp r_save_restart) {
-  if (r_save_restart == R_NilValue || LENGTH(r_save_restart) == 0) {
+std::vector<real_type> check_save_snapshots(cpp11::sexp r_save_snapshots) {
+  if (r_save_snapshots == R_NilValue || LENGTH(r_save_snapshots) == 0) {
     return std::vector<real_type>();
   }
-  size_t len = LENGTH(r_save_restart);
+  size_t len = LENGTH(r_save_snapshots);
   std::vector<real_type> ret(len);
-  auto tmp = cpp11::as_cpp<cpp11::doubles>(r_save_restart);
+  auto tmp = cpp11::as_cpp<cpp11::doubles>(r_save_snapshots);
   std::copy(tmp.begin(), tmp.end(), ret.begin());
   return ret;
 }

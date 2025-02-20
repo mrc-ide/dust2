@@ -22,7 +22,7 @@ template <typename T>
 cpp11::sexp dust2_filter_run(cpp11::sexp ptr,
                              cpp11::sexp r_initial,
                              bool save_trajectories,
-                             cpp11::sexp r_save_restart,
+                             cpp11::sexp r_save_snapshots,
                              bool adjoint,
                              cpp11::sexp r_index_state,
                              cpp11::sexp r_index_group,
@@ -34,12 +34,12 @@ cpp11::sexp dust2_filter_run(cpp11::sexp ptr,
   const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
     check_index(r_index_group, obj->sys.n_groups(), "index_group");
   using real_type = typename T::real_type;
-  const auto save_restart = check_save_restart<real_type>(r_save_restart);
+  const auto save_snapshots = check_save_snapshots<real_type>(r_save_snapshots);
 
   if (r_initial != R_NilValue) {
     set_state(obj->sys, cpp11::as_cpp<cpp11::list>(r_initial));
   }
-  obj->run(r_initial == R_NilValue, save_trajectories, save_restart, index_state, index_group);
+  obj->run(r_initial == R_NilValue, save_trajectories, save_snapshots, index_state, index_group);
 
   const auto& ll = obj->last_log_likelihood();
   cpp11::writable::doubles ret(index_group.size());
@@ -96,33 +96,33 @@ cpp11::sexp dust2_filter_last_trajectories(cpp11::sexp ptr,
 }
 
 template <typename T>
-cpp11::sexp dust2_filter_last_restart(cpp11::sexp ptr,
-                                      bool select_random_particle,
-                                      bool preserve_particle_dimension,
-                                      bool preserve_group_dimension) {
+cpp11::sexp dust2_filter_last_snapshots(cpp11::sexp ptr,
+                                        bool select_random_particle,
+                                        bool preserve_particle_dimension,
+                                        bool preserve_group_dimension) {
   auto *obj = dust2::r::safely_read_externalptr<filter<T>>(ptr, "filter_last_trajectories");
 
-  const auto& restart = obj->last_restart();
-  const auto& is_current = obj->last_restart_is_current();
+  const auto& snapshots = obj->last_snapshots();
+  const auto& is_current = obj->last_snapshots_are_current();
   if (!tools::any(is_current)) {
-    cpp11::stop("Restart is not current");
+    cpp11::stop("Snapshots are not current");
   }
 
   // We might relax this later, but will require some tools to work
   // with the output, really.
   constexpr bool reorder = true;
 
-  const auto n_state = restart.n_state();
-  const auto n_particles = select_random_particle ? 1 : restart.n_particles();
-  const auto n_groups = restart.n_groups();
-  const auto n_times = restart.n_times();
+  const auto n_state = snapshots.n_state();
+  const auto n_particles = select_random_particle ? 1 : snapshots.n_particles();
+  const auto n_groups = snapshots.n_groups();
+  const auto n_times = snapshots.n_times();
 
   const auto& index_particle = select_random_particle ?
-    obj->select_random_particle(restart.index_group()) : std::vector<size_t>{};
+    obj->select_random_particle(snapshots.index_group()) : std::vector<size_t>{};
 
   const auto len = n_state * n_particles * n_groups * n_times;
   cpp11::sexp ret = cpp11::writable::doubles(len);
-  restart.export_state(REAL(ret), reorder, index_particle);
+  snapshots.export_state(REAL(ret), reorder, index_particle);
   if (select_random_particle) {
     if (preserve_group_dimension) {
       set_array_dims(ret, {n_state, n_particles * n_groups, n_times});

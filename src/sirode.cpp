@@ -192,8 +192,8 @@ SEXP dust2_unfilter_sirode_update_pars(cpp11::sexp ptr, cpp11::list r_pars, cpp1
 }
 
 [[cpp11::register]]
-SEXP dust2_unfilter_sirode_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_trajectories, cpp11::sexp save_restart, bool adjoint, cpp11::sexp r_index_state, cpp11::sexp r_index_group, bool preserve_particle_dimension, bool preserve_group_dimension) {
-  return dust2::r::dust2_unfilter_run<dust2::dust_continuous<sirode>>(ptr, r_initial, save_trajectories, save_restart, adjoint, r_index_state, r_index_group, preserve_particle_dimension, preserve_group_dimension);
+SEXP dust2_unfilter_sirode_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_trajectories, cpp11::sexp save_snapshots, bool adjoint, cpp11::sexp r_index_state, cpp11::sexp r_index_group, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_unfilter_run<dust2::dust_continuous<sirode>>(ptr, r_initial, save_trajectories, save_snapshots, adjoint, r_index_state, r_index_group, preserve_particle_dimension, preserve_group_dimension);
 }
 
 [[cpp11::register]]
@@ -202,8 +202,8 @@ SEXP dust2_unfilter_sirode_last_trajectories(cpp11::sexp ptr, bool select_random
 }
 
 [[cpp11::register]]
-SEXP dust2_unfilter_sirode_last_restart(cpp11::sexp ptr, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension) {
-  return dust2::r::dust2_unfilter_last_restart<dust2::dust_continuous<sirode>>(ptr, select_random_particle, preserve_particle_dimension, preserve_group_dimension);
+SEXP dust2_unfilter_sirode_last_snapshots(cpp11::sexp ptr, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_unfilter_last_snapshots<dust2::dust_continuous<sirode>>(ptr, select_random_particle, preserve_particle_dimension, preserve_group_dimension);
 }
 
 [[cpp11::register]]
@@ -217,8 +217,8 @@ SEXP dust2_filter_sirode_update_pars(cpp11::sexp ptr, cpp11::list r_pars, cpp11:
 }
 
 [[cpp11::register]]
-SEXP dust2_filter_sirode_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_trajectories, cpp11::sexp save_restart, bool adjoint, cpp11::sexp index_state, cpp11::sexp index_group, bool preserve_particle_dimension, bool preserve_group_dimension) {
-  return dust2::r::dust2_filter_run<dust2::dust_continuous<sirode>>(ptr, r_initial, save_trajectories, save_restart, adjoint, index_state, index_group, preserve_particle_dimension, preserve_group_dimension);
+SEXP dust2_filter_sirode_run(cpp11::sexp ptr, cpp11::sexp r_initial, bool save_trajectories, cpp11::sexp save_snapshots, bool adjoint, cpp11::sexp index_state, cpp11::sexp index_group, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_filter_run<dust2::dust_continuous<sirode>>(ptr, r_initial, save_trajectories, save_snapshots, adjoint, index_state, index_group, preserve_particle_dimension, preserve_group_dimension);
 }
 
 [[cpp11::register]]
@@ -227,8 +227,8 @@ SEXP dust2_filter_sirode_last_trajectories(cpp11::sexp ptr, bool select_random_p
 }
 
 [[cpp11::register]]
-SEXP dust2_filter_sirode_last_restart(cpp11::sexp ptr, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension) {
-  return dust2::r::dust2_filter_last_restart<dust2::dust_continuous<sirode>>(ptr, select_random_particle, preserve_particle_dimension, preserve_group_dimension);
+SEXP dust2_filter_sirode_last_snapshots(cpp11::sexp ptr, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension) {
+  return dust2::r::dust2_filter_last_snapshots<dust2::dust_continuous<sirode>>(ptr, select_random_particle, preserve_particle_dimension, preserve_group_dimension);
 }
 
 [[cpp11::register]]

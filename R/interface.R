@@ -892,10 +892,10 @@ dust_system_generator_methods <- function(generator) {
 
   if (has_compare) {
     methods_unfilter <- c("alloc", "run", "update_pars", "last_trajectories",
-                          "last_restart", "last_state", "last_gradient")
+                          "last_snapshots", "last_state", "last_gradient")
     methods$unfilter <- get_methods(methods_unfilter, "unfilter", name)
     methods_filter <- c("alloc", "run", "update_pars", "last_trajectories",
-                        "last_restart", "last_state",
+                        "last_snapshots", "last_state",
                         "rng_state", "set_rng_state")
     methods$filter <- get_methods(methods_filter, "filter", name)
   }
