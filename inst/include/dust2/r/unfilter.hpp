@@ -19,8 +19,11 @@ cpp11::sexp dust2_unfilter_update_pars(cpp11::sexp ptr,
 }
 
 template <typename T>
-cpp11::sexp dust2_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
-                               bool save_trajectories, bool adjoint,
+cpp11::sexp dust2_unfilter_run(cpp11::sexp ptr,
+                               cpp11::sexp r_initial,
+                               bool save_trajectories,
+                               cpp11::sexp r_save_restart,
+                               bool adjoint,
                                cpp11::sexp r_index_state,
                                cpp11::sexp r_index_group,
                                bool preserve_particle_dimension,
@@ -30,15 +33,18 @@ cpp11::sexp dust2_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
                                        "index_state");
   const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
     check_index(r_index_group, obj->sys.n_groups(), "index_group");
+  using real_type = typename T::real_type;
+  const auto save_restart = check_save_restart<real_type>(r_save_restart);
 
   if (r_initial != R_NilValue) {
     set_state(obj->sys, cpp11::as_cpp<cpp11::list>(r_initial));
   }
   if (adjoint) {
-    obj->run_adjoint(r_initial == R_NilValue, save_trajectories, index_state,
-                     index_group);
+    obj->run_adjoint(r_initial == R_NilValue, save_trajectories, save_restart,
+                     index_state, index_group);
   } else {
-    obj->run(r_initial == R_NilValue, save_trajectories, index_state, index_group);
+    obj->run(r_initial == R_NilValue, save_trajectories, save_restart,
+             index_state, index_group);
   }
 
   const auto n_groups = index_group.size();

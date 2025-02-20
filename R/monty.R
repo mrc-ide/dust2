@@ -79,13 +79,17 @@
 ##'   the logical compartments, or an integer vector being an index
 ##'   into the state.
 ##'
+##' @param save_restart Optional vector of times where restart
+##'   information is required.
+##'
 ##' @return A [monty::monty_model] object
 ##'
 ##' @export
 dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
                                   failure_is_impossible = FALSE,
                                   save_state = FALSE,
-                                  save_trajectories = FALSE) {
+                                  save_trajectories = FALSE,
+                                  save_restart = NULL) {
   assert_is(obj, "dust_likelihood")
 
   is_grouped <- !is.null(obj$groups)
@@ -104,7 +108,8 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
 
   domain <- monty::monty_domain_expand(domain, packer)
   save_trajectories <- validate_save_trajectories(save_trajectories)
-  observer <- dust_observer(obj, save_state, save_trajectories$enabled)
+  observer <- dust_observer(obj, save_state, save_trajectories$enabled,
+                            save_restart)
 
   ## We configure saving trajectories on creation I think, which then
   ## affects density.  Start without trajectories?  Realistically
@@ -156,6 +161,7 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
           obj,
           pars,
           initial = if (is.null(initial)) NULL else initial(pars),
+          save_restart = save_restart,
           save_trajectories = save_trajectories$enabled,
           index_state = save_trajectories$index)
         attr(ptr, "last_density") <- if (is_grouped) sum(ret) else ret
@@ -272,11 +278,11 @@ validate_save_trajectories <- function(save_trajectories,
 }
 
 
-dust_observer <- function(obj, save_state, save_trajectories,
+dust_observer <- function(obj, save_state, save_trajectories, save_restart,
                           call = parent.frame()) {
   assert_scalar_logical(save_state, call = call)
 
-  if (!save_trajectories && !save_state) {
+  if (!save_trajectories && !save_state && is.null(save_restart)) {
     return(NULL)
   }
 
@@ -289,6 +295,12 @@ dust_observer <- function(obj, save_state, save_trajectories,
 
     if (save_trajectories) {
       ret$trajectories <- dust_likelihood_last_trajectories(
+        obj,
+        select_random_particle = TRUE)
+    }
+
+    if (!is.null(save_restart)) {
+      ret$restart <- dust_likelihood_last_restart(
         obj,
         select_random_particle = TRUE)
     }

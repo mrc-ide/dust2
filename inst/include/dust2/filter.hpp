@@ -35,14 +35,18 @@ public:
     ll_(n_groups_, 0),
     ll_step_(n_groups_ * n_particles_, 0),
     trajectories_(n_state_, n_particles_, n_groups_, time_.size()),
+    restart_(n_state_, n_particles_, n_groups_, 0),
     trajectories_are_current_(n_groups_, false),
+    restart_is_current_(n_groups_, false),
     random_particle_(n_groups_, n_particles_) {
   }
 
-  void run(bool set_initial, bool save_trajectories,
+  void run(bool set_initial,
+           bool save_trajectories,
+           const std::vector<real_type>& save_restart,
            const std::vector<size_t>& index_state,
            const std::vector<size_t>& index_group) {
-    reset(set_initial, save_trajectories, index_state, index_group);
+    reset(set_initial, save_trajectories, save_restart, index_state, index_group);
 
     // Just store this here; later once we have state to save we can
     // probably use that vector instead.
@@ -106,6 +110,14 @@ public:
     return trajectories_are_current_;
   }
 
+  auto& last_restart() const {
+    return restart_;
+  }
+
+  auto& last_restart_is_current() const {
+    return restart_is_current_;
+  }
+
   auto& last_index_group() const {
     return last_index_group_.empty() ? sys.all_groups() : last_index_group_;
   }
@@ -140,18 +152,28 @@ private:
   std::vector<real_type> ll_;
   std::vector<real_type> ll_step_;
   trajectories<real_type> trajectories_;
+  trajectories<real_type> restart_;
   std::vector<bool> trajectories_are_current_;
+  std::vector<bool> restart_is_current_;
   std::vector<size_t> last_index_group_;
   std::vector<size_t> random_particle_;
 
-  void reset(bool set_initial, bool save_trajectories,
+  void reset(bool set_initial,
+             bool save_trajectories,
+             const std::vector<real_type>& save_restart,
              const std::vector<size_t>& index_state,
              const std::vector<size_t>& index_group) {
     std::fill(trajectories_are_current_.begin(),
               trajectories_are_current_.end(),
               false);
+    std::fill(restart_is_current_.begin(),
+              restart_is_current_.end(),
+              false);
     if (save_trajectories) {
       trajectories_.set_index_and_reset(index_state, index_group);
+    }
+    if (!save_restart.empty()) {
+      restart_.set_n_times_and_reset(save_restart.size(), index_group);
     }
     std::fill(ll_.begin(), ll_.end(), 0);
     sys.set_time(time_start_);

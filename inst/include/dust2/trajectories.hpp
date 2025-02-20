@@ -40,6 +40,12 @@ public:
     position_ = 0;
   }
 
+  void set_n_times_and_reset(size_t n_times,
+                             const std::vector<size_t>& index_group) {
+    n_times_ = n_times;
+    set_index_and_reset(std::vector<size_t>(), index_group);
+  }
+
   template <typename IterReal>
   void add(real_type time, IterReal iter_state) {
     copy_state_(iter_state);

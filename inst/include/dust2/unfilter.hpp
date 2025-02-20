@@ -33,17 +33,21 @@ public:
     ll_(n_particles_ * n_groups_, 0),
     ll_step_(n_particles_ * n_groups_, 0),
     trajectories_(n_state_, n_particles_, n_groups_, time_.size()),
+    restart_(n_state_, n_particles_, n_groups_, 0),
     adjoint_(n_state_, n_particles_, n_groups_),
     trajectories_are_current_(n_particles_ * n_groups_),
+    restart_is_current_(n_particles_ * n_groups_),
     adjoint_is_current_(n_particles_ * n_groups_),
     gradient_is_current_(false) {
   }
 
-  void run(bool set_initial, bool save_trajectories,
+  void run(bool set_initial,
+           bool save_trajectories,
+           const std::vector<real_type>& save_restart,
            const std::vector<size_t>& index_state,
            const std::vector<size_t>& index_group) {
     const bool adjoint = false;
-    reset(set_initial, save_trajectories, index_state, index_group, adjoint);
+    reset(set_initial, save_trajectories, save_restart, index_state, index_group, adjoint);
     const auto n_times = time_.size();
 
     auto it_data = data_.begin();
@@ -72,11 +76,13 @@ public:
   // This part here we can _always_ do, even if the system does not
   // actually support adjoint methods.  It should give exactly the
   // same answers as the normal version, at the cost of more memory.
-  void run_adjoint(bool set_initial, bool save_trajectories,
+  void run_adjoint(bool set_initial,
+                   bool save_trajectories,
+                   const std::vector<real_type> save_restart,
                    const std::vector<size_t>& index_state,
                    const std::vector<size_t>& index_group) {
     const bool adjoint = true;
-    reset(set_initial, save_trajectories, index_state, index_group, adjoint);
+    reset(set_initial, save_trajectories, save_restart, index_state, index_group, adjoint);
 
     // Run the entire forward time simulation
     sys.run_to_time(time_.back(), index_group, adjoint_.state(0));
@@ -119,6 +125,14 @@ public:
     return trajectories_are_current_;
   }
 
+  auto& last_restart() const {
+    return restart_;
+  }
+
+  auto& last_restart_is_current() const {
+    return restart_is_current_;
+  }
+
   auto& last_index_group() const {
     return last_index_group_.empty() ? sys.all_groups() : last_index_group_;
   }
@@ -147,23 +161,33 @@ private:
   std::vector<real_type> ll_;
   std::vector<real_type> ll_step_;
   trajectories<real_type> trajectories_;
+  trajectories<real_type> restart_;
   adjoint_data<real_type> adjoint_;
   std::vector<bool> trajectories_are_current_;
+  std::vector<bool> restart_is_current_;
   std::vector<size_t> last_index_group_;
   std::vector<bool> adjoint_is_current_;
   bool gradient_is_current_;
 
-  void reset(bool set_initial, bool save_trajectories,
+  void reset(bool set_initial,
+             bool save_trajectories,
+             const std::vector<real_type>& save_restart,
              const std::vector<size_t>& index_state,
              const std::vector<size_t>& index_group,
              bool adjoint) {
     std::fill(trajectories_are_current_.begin(),
               trajectories_are_current_.end(),
               false);
+    std::fill(restart_is_current_.begin(),
+              restart_is_current_.end(),
+              false);
     std::fill(adjoint_is_current_.begin(), adjoint_is_current_.end(), false);
     gradient_is_current_ = false;
     if (save_trajectories) {
       trajectories_.set_index_and_reset(index_state, index_group);
+    }
+    if (!save_restart.empty()) {
+      restart_.set_n_times_and_reset(save_restart.size(), index_group);
     }
     if (adjoint) {
       adjoint_.init_history(time_start_, time_, sys.dt());

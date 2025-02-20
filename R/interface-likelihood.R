@@ -44,6 +44,7 @@
 ##' @export
 dust_likelihood_run <- function(obj, pars, initial = NULL,
                                 save_trajectories = FALSE,
+                                save_restart = NULL,
                                 adjoint = NULL,
                                 index_state = NULL,
                                 index_group = NULL) {
@@ -94,6 +95,7 @@ dust_likelihood_run <- function(obj, pars, initial = NULL,
   obj$methods$run(obj$ptr,
                   initial,
                   save_trajectories,
+                  save_restart,
                   adjoint,
                   index_state,
                   index_group,
@@ -210,6 +212,21 @@ dust_likelihood_last_state <- function(obj, select_random_particle = FALSE) {
                          select_random_particle,
                          obj$preserve_particle_dimension,
                          obj$preserve_group_dimension)
+}
+
+
+dust_likelihood_last_restart <- function(obj, select_random_particle = FALSE) {
+  check_is_dust_likelihood(obj)
+  if (is.null(obj$ptr)) {
+    cli::cli_abort(c(
+      "Trajectories are not current",
+      i = "Likelihood has not yet been run"))
+  }
+  assert_scalar_logical(select_random_particle)
+  obj$methods$last_restart(obj$ptr,
+                           select_random_particle,
+                           obj$preserve_particle_dimension,
+                           obj$preserve_group_dimension)
 }
 
 
