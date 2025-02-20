@@ -51,8 +51,6 @@ cpp11::sexp dust2_filter_run(cpp11::sexp ptr,
   return ret;
 }
 
-// We might accept index_state here too later, allowing subsetting and
-// validation of the index used.
 template <typename T>
 cpp11::sexp dust2_filter_last_trajectories(cpp11::sexp ptr,
                                            bool select_random_particle,
@@ -81,6 +79,50 @@ cpp11::sexp dust2_filter_last_trajectories(cpp11::sexp ptr,
   const auto len = n_state * n_particles * n_groups * n_times;
   cpp11::sexp ret = cpp11::writable::doubles(len);
   trajectories.export_state(REAL(ret), reorder, index_particle);
+  if (select_random_particle) {
+    if (preserve_group_dimension) {
+      set_array_dims(ret, {n_state, n_particles * n_groups, n_times});
+    } else {
+      set_array_dims(ret, {n_state, n_particles * n_groups * n_times});
+    }
+  } else {
+    if (preserve_group_dimension) {
+      set_array_dims(ret, {n_state, n_particles, n_groups, n_times});
+    } else {
+      set_array_dims(ret, {n_state, n_particles * n_groups, n_times});
+    }
+  }
+  return ret;
+}
+
+template <typename T>
+cpp11::sexp dust2_filter_last_restart(cpp11::sexp ptr,
+                                      bool select_random_particle,
+                                      bool preserve_particle_dimension,
+                                      bool preserve_group_dimension) {
+  auto *obj = dust2::r::safely_read_externalptr<filter<T>>(ptr, "filter_last_trajectories");
+
+  const auto& restart = obj->last_restart();
+  const auto& is_current = obj->last_restart_is_current();
+  if (!tools::any(is_current)) {
+    cpp11::stop("Restart is not current");
+  }
+
+  // We might relax this later, but will require some tools to work
+  // with the output, really.
+  constexpr bool reorder = true;
+
+  const auto n_state = restart.n_state();
+  const auto n_particles = select_random_particle ? 1 : restart.n_particles();
+  const auto n_groups = restart.n_groups();
+  const auto n_times = restart.n_times();
+
+  const auto& index_particle = select_random_particle ?
+    obj->select_random_particle(restart.index_group()) : std::vector<size_t>{};
+
+  const auto len = n_state * n_particles * n_groups * n_times;
+  cpp11::sexp ret = cpp11::writable::doubles(len);
+  restart.export_state(REAL(ret), reorder, index_particle);
   if (select_random_particle) {
     if (preserve_group_dimension) {
       set_array_dims(ret, {n_state, n_particles * n_groups, n_times});

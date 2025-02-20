@@ -230,6 +230,13 @@ extern "C" SEXP _dust2_dust2_unfilter_malaria_last_trajectories(SEXP ptr, SEXP s
   END_CPP11
 }
 // malaria.cpp
+SEXP dust2_unfilter_malaria_last_restart(cpp11::sexp ptr, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_unfilter_malaria_last_restart(SEXP ptr, SEXP select_random_particle, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_unfilter_malaria_last_restart(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(select_random_particle), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
+  END_CPP11
+}
+// malaria.cpp
 SEXP dust2_unfilter_malaria_last_state(cpp11::sexp ptr, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension);
 extern "C" SEXP _dust2_dust2_unfilter_malaria_last_state(SEXP ptr, SEXP select_random_particle, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
   BEGIN_CPP11
@@ -255,6 +262,13 @@ SEXP dust2_filter_malaria_last_trajectories(cpp11::sexp ptr, bool select_random_
 extern "C" SEXP _dust2_dust2_filter_malaria_last_trajectories(SEXP ptr, SEXP select_random_particle, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
   BEGIN_CPP11
     return cpp11::as_sexp(dust2_filter_malaria_last_trajectories(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(select_random_particle), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
+  END_CPP11
+}
+// malaria.cpp
+SEXP dust2_filter_malaria_last_restart(cpp11::sexp ptr, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_filter_malaria_last_restart(SEXP ptr, SEXP select_random_particle, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_filter_malaria_last_restart(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(select_random_particle), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // malaria.cpp
@@ -412,6 +426,13 @@ extern "C" SEXP _dust2_dust2_unfilter_sir_last_trajectories(SEXP ptr, SEXP selec
   END_CPP11
 }
 // sir.cpp
+SEXP dust2_unfilter_sir_last_restart(cpp11::sexp ptr, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_unfilter_sir_last_restart(SEXP ptr, SEXP select_random_particle, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_unfilter_sir_last_restart(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(select_random_particle), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
+  END_CPP11
+}
+// sir.cpp
 SEXP dust2_unfilter_sir_last_state(cpp11::sexp ptr, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension);
 extern "C" SEXP _dust2_dust2_unfilter_sir_last_state(SEXP ptr, SEXP select_random_particle, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
   BEGIN_CPP11
@@ -437,6 +458,13 @@ SEXP dust2_filter_sir_last_trajectories(cpp11::sexp ptr, bool select_random_part
 extern "C" SEXP _dust2_dust2_filter_sir_last_trajectories(SEXP ptr, SEXP select_random_particle, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
   BEGIN_CPP11
     return cpp11::as_sexp(dust2_filter_sir_last_trajectories(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(select_random_particle), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
+  END_CPP11
+}
+// sir.cpp
+SEXP dust2_filter_sir_last_restart(cpp11::sexp ptr, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_filter_sir_last_restart(SEXP ptr, SEXP select_random_particle, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_filter_sir_last_restart(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(select_random_particle), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // sir.cpp
@@ -601,6 +629,13 @@ extern "C" SEXP _dust2_dust2_unfilter_sirode_last_trajectories(SEXP ptr, SEXP se
   END_CPP11
 }
 // sirode.cpp
+SEXP dust2_unfilter_sirode_last_restart(cpp11::sexp ptr, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_unfilter_sirode_last_restart(SEXP ptr, SEXP select_random_particle, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_unfilter_sirode_last_restart(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(select_random_particle), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
+  END_CPP11
+}
+// sirode.cpp
 SEXP dust2_unfilter_sirode_last_state(cpp11::sexp ptr, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension);
 extern "C" SEXP _dust2_dust2_unfilter_sirode_last_state(SEXP ptr, SEXP select_random_particle, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
   BEGIN_CPP11
@@ -626,6 +661,13 @@ SEXP dust2_filter_sirode_last_trajectories(cpp11::sexp ptr, bool select_random_p
 extern "C" SEXP _dust2_dust2_filter_sirode_last_trajectories(SEXP ptr, SEXP select_random_particle, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
   BEGIN_CPP11
     return cpp11::as_sexp(dust2_filter_sirode_last_trajectories(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(select_random_particle), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
+  END_CPP11
+}
+// sirode.cpp
+SEXP dust2_filter_sirode_last_restart(cpp11::sexp ptr, bool select_random_particle, bool preserve_particle_dimension, bool preserve_group_dimension);
+extern "C" SEXP _dust2_dust2_filter_sirode_last_restart(SEXP ptr, SEXP select_random_particle, SEXP preserve_particle_dimension, SEXP preserve_group_dimension) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(dust2_filter_sirode_last_restart(cpp11::as_cpp<cpp11::decay_t<cpp11::sexp>>(ptr), cpp11::as_cpp<cpp11::decay_t<bool>>(select_random_particle), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_particle_dimension), cpp11::as_cpp<cpp11::decay_t<bool>>(preserve_group_dimension)));
   END_CPP11
 }
 // sirode.cpp
@@ -836,6 +878,7 @@ extern "C" {
 static const R_CallMethodDef CallEntries[] = {
     {"_dust2_cpp_openmp_info",                          (DL_FUNC) &_dust2_cpp_openmp_info,                          0},
     {"_dust2_dust2_filter_malaria_alloc",               (DL_FUNC) &_dust2_dust2_filter_malaria_alloc,               9},
+    {"_dust2_dust2_filter_malaria_last_restart",        (DL_FUNC) &_dust2_dust2_filter_malaria_last_restart,        4},
     {"_dust2_dust2_filter_malaria_last_state",          (DL_FUNC) &_dust2_dust2_filter_malaria_last_state,          4},
     {"_dust2_dust2_filter_malaria_last_trajectories",   (DL_FUNC) &_dust2_dust2_filter_malaria_last_trajectories,   4},
     {"_dust2_dust2_filter_malaria_rng_state",           (DL_FUNC) &_dust2_dust2_filter_malaria_rng_state,           1},
@@ -843,6 +886,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_filter_malaria_set_rng_state",       (DL_FUNC) &_dust2_dust2_filter_malaria_set_rng_state,       2},
     {"_dust2_dust2_filter_malaria_update_pars",         (DL_FUNC) &_dust2_dust2_filter_malaria_update_pars,         3},
     {"_dust2_dust2_filter_sir_alloc",                   (DL_FUNC) &_dust2_dust2_filter_sir_alloc,                   9},
+    {"_dust2_dust2_filter_sir_last_restart",            (DL_FUNC) &_dust2_dust2_filter_sir_last_restart,            4},
     {"_dust2_dust2_filter_sir_last_state",              (DL_FUNC) &_dust2_dust2_filter_sir_last_state,              4},
     {"_dust2_dust2_filter_sir_last_trajectories",       (DL_FUNC) &_dust2_dust2_filter_sir_last_trajectories,       4},
     {"_dust2_dust2_filter_sir_rng_state",               (DL_FUNC) &_dust2_dust2_filter_sir_rng_state,               1},
@@ -850,6 +894,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_filter_sir_set_rng_state",           (DL_FUNC) &_dust2_dust2_filter_sir_set_rng_state,           2},
     {"_dust2_dust2_filter_sir_update_pars",             (DL_FUNC) &_dust2_dust2_filter_sir_update_pars,             3},
     {"_dust2_dust2_filter_sirode_alloc",                (DL_FUNC) &_dust2_dust2_filter_sirode_alloc,                9},
+    {"_dust2_dust2_filter_sirode_last_restart",         (DL_FUNC) &_dust2_dust2_filter_sirode_last_restart,         4},
     {"_dust2_dust2_filter_sirode_last_state",           (DL_FUNC) &_dust2_dust2_filter_sirode_last_state,           4},
     {"_dust2_dust2_filter_sirode_last_trajectories",    (DL_FUNC) &_dust2_dust2_filter_sirode_last_trajectories,    4},
     {"_dust2_dust2_filter_sirode_rng_state",            (DL_FUNC) &_dust2_dust2_filter_sirode_rng_state,            1},
@@ -923,17 +968,20 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dust2_dust2_system_walk_time",                   (DL_FUNC) &_dust2_dust2_system_walk_time,                   1},
     {"_dust2_dust2_system_walk_update_pars",            (DL_FUNC) &_dust2_dust2_system_walk_update_pars,            2},
     {"_dust2_dust2_unfilter_malaria_alloc",             (DL_FUNC) &_dust2_dust2_unfilter_malaria_alloc,             8},
+    {"_dust2_dust2_unfilter_malaria_last_restart",      (DL_FUNC) &_dust2_dust2_unfilter_malaria_last_restart,      4},
     {"_dust2_dust2_unfilter_malaria_last_state",        (DL_FUNC) &_dust2_dust2_unfilter_malaria_last_state,        4},
     {"_dust2_dust2_unfilter_malaria_last_trajectories", (DL_FUNC) &_dust2_dust2_unfilter_malaria_last_trajectories, 4},
     {"_dust2_dust2_unfilter_malaria_run",               (DL_FUNC) &_dust2_dust2_unfilter_malaria_run,               9},
     {"_dust2_dust2_unfilter_malaria_update_pars",       (DL_FUNC) &_dust2_dust2_unfilter_malaria_update_pars,       3},
     {"_dust2_dust2_unfilter_sir_alloc",                 (DL_FUNC) &_dust2_dust2_unfilter_sir_alloc,                 8},
     {"_dust2_dust2_unfilter_sir_last_gradient",         (DL_FUNC) &_dust2_dust2_unfilter_sir_last_gradient,         3},
+    {"_dust2_dust2_unfilter_sir_last_restart",          (DL_FUNC) &_dust2_dust2_unfilter_sir_last_restart,          4},
     {"_dust2_dust2_unfilter_sir_last_state",            (DL_FUNC) &_dust2_dust2_unfilter_sir_last_state,            4},
     {"_dust2_dust2_unfilter_sir_last_trajectories",     (DL_FUNC) &_dust2_dust2_unfilter_sir_last_trajectories,     4},
     {"_dust2_dust2_unfilter_sir_run",                   (DL_FUNC) &_dust2_dust2_unfilter_sir_run,                   9},
     {"_dust2_dust2_unfilter_sir_update_pars",           (DL_FUNC) &_dust2_dust2_unfilter_sir_update_pars,           3},
     {"_dust2_dust2_unfilter_sirode_alloc",              (DL_FUNC) &_dust2_dust2_unfilter_sirode_alloc,              8},
+    {"_dust2_dust2_unfilter_sirode_last_restart",       (DL_FUNC) &_dust2_dust2_unfilter_sirode_last_restart,       4},
     {"_dust2_dust2_unfilter_sirode_last_state",         (DL_FUNC) &_dust2_dust2_unfilter_sirode_last_state,         4},
     {"_dust2_dust2_unfilter_sirode_last_trajectories",  (DL_FUNC) &_dust2_dust2_unfilter_sirode_last_trajectories,  4},
     {"_dust2_dust2_unfilter_sirode_run",                (DL_FUNC) &_dust2_dust2_unfilter_sirode_run,                9},

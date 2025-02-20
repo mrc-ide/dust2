@@ -95,6 +95,39 @@ cpp11::sexp dust2_unfilter_last_trajectories(cpp11::sexp ptr,
 }
 
 template <typename T>
+cpp11::sexp dust2_unfilter_last_restart(cpp11::sexp ptr,
+                                        bool select_random_particle,
+                                        bool preserve_particle_dimension,
+                                        bool preserve_group_dimension) {
+  auto *obj = dust2::r::safely_read_externalptr<unfilter<T>>(ptr, "unfilter_last_restart");
+
+  const auto& restart = obj->last_restart();
+  const auto& is_current = obj->last_restart_is_current();
+  if (!tools::any(is_current)) {
+    cpp11::stop("Restart is not current");
+  }
+
+  constexpr bool reorder = false; // never needed
+
+  const auto n_state = restart.n_state();
+  const auto n_particles = restart.n_particles();
+  const auto n_groups = restart.n_groups();
+  const auto n_times = restart.n_times();
+
+  const auto len = n_state * n_particles * n_groups * n_times;
+  cpp11::sexp ret = cpp11::writable::doubles(len);
+  restart.export_state(REAL(ret), reorder, {});
+  if (preserve_group_dimension && preserve_particle_dimension) {
+    set_array_dims(ret, {n_state, n_particles, n_groups, n_times});
+  } else if (preserve_group_dimension || preserve_particle_dimension) {
+    set_array_dims(ret, {n_state, n_particles * n_groups, n_times});
+  } else {
+    set_array_dims(ret, {n_state * n_particles * n_groups, n_times});
+  }
+  return ret;
+}
+
+template <typename T>
 cpp11::sexp dust2_unfilter_last_state(cpp11::sexp ptr,
                                       bool select_random_particle,
                                       bool preserve_particle_dimension,
