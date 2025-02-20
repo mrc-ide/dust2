@@ -53,6 +53,7 @@ public:
     std::vector<size_t> index(n_particles_ * n_groups_);
 
     auto it_data = data_.begin();
+    auto it_restart = save_restart.begin();
     for (auto time : time_) {
       sys.run_to_time(time, index_group);
       sys.compare_data(it_data, n_groups_data_, index_group, ll_step_.begin());
@@ -84,13 +85,21 @@ public:
       if (save_trajectories) {
         trajectories_.add(time, sys.state().begin(), index.begin());
       }
+      if (it_restart != save_restart.end() && *it_restart == time) {
+        restart_.add(time, sys.state().begin(), index.begin());
+        ++it_restart;
+      }
       // early exit (perhaps)
-      // save snapshots (perhaps)
     }
 
     if (save_trajectories) {
       for (auto i : index_group) {
         trajectories_are_current_[i] = true;
+      }
+    }
+    if (!save_restart.empty()) {
+      for (auto i : index_group) {
+        restart_is_current_[i] = true;
       }
     }
     if (!tools::is_trivial_index(index_group, n_groups_)) {

@@ -51,6 +51,7 @@ public:
     const auto n_times = time_.size();
 
     auto it_data = data_.begin();
+    auto it_restart = save_restart.begin();
     for (size_t i = 0; i < n_times; ++i, it_data += n_groups_) {
       sys.run_to_time(time_[i], index_group);
       sys.compare_data(it_data, n_groups_data_, index_group, ll_step_.begin());
@@ -60,11 +61,20 @@ public:
       if (save_trajectories) {
         trajectories_.add(time_[i], sys.state().begin());
       }
+      if (it_restart != save_restart.end() && *it_restart == time_[i]) {
+        restart_.add(time_[i], sys.state().begin());
+        ++it_restart;
+      }
     }
 
     if (save_trajectories) {
       for (auto i : index_group) {
         trajectories_are_current_[i] = true;
+      }
+    }
+    if (!save_restart.empty()) {
+      for (auto i : index_group) {
+        restart_is_current_[i] = true;
       }
     }
 
@@ -90,6 +100,7 @@ public:
     // Then all the data comparison in one pass.  This bit can
     // theoretically be parallelised but it's unlikely to be
     // important in most models.
+    auto it_restart = save_restart.begin();
     const auto n_times = time_.size();
     for (size_t i = 0; i < n_times; ++i) {
       const auto state_i = adjoint_.state(i + 1);
@@ -101,11 +112,16 @@ public:
       if (save_trajectories) {
         trajectories_.add(time_[i], state_i);
       }
+      if (it_restart != save_restart.end() && *it_restart == time_[i]) {
+        trajectories_.add(time_[i], state_i);
+        ++it_restart;
+      }
     }
 
     for (auto i : index_group) {
       adjoint_is_current_[i] = true;
       trajectories_are_current_[i] = save_trajectories;
+      restart_is_current_[i] = !save_restart.empty();
     }
 
     if (!tools::is_trivial_index(index_group, n_groups_)) {
