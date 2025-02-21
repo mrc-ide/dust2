@@ -22,6 +22,9 @@
 ##'   have data.  If `index_state` is non-`NULL`, the trajectories are
 ##'   limited to these states.
 ##'
+##' @param save_snapshots Optional vector of times at which we should
+##'   record snapshots of the entire state of the system.
+##'
 ##' @param adjoint Optional logical, indicating if we should enable
 ##'   adjoint history saving. This is enabled by default if your model
 ##'   has an adjoint, but can be disabled or enabled even when your
