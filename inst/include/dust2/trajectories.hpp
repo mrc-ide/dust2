@@ -59,6 +59,11 @@ public:
     update_position(time, true);
   }
 
+  template <typename IterSize>
+  void update_order(IterSize iter_order) {
+    // TODO - implementation here.
+  }
+
   // These allow a consumer to allocate the right size structures for
   // time and state for the total that we've actually used.
   auto size_time() const {

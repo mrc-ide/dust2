@@ -267,3 +267,21 @@ test_that("can reorder trajectories on the way out", {
                       select_particle = c(2, 6))[[2]],
     m[, c(3, 1), ])
 })
+
+
+test_that("can use snapshots", {
+  time <- seq(0, 10, length.out = 11)
+  save_snapshots <- c(3, 7)
+  n_state <- 6
+  n_particles <- 7
+  n_groups <- 3
+  n_time <- length(time)
+  s <- lapply(seq_along(time), function(i) {
+    array(runif(n_state * n_particles * n_groups),
+          c(n_state, n_particles, n_groups))
+  })
+  s_arr <- array(unlist(s), c(n_state, n_particles, n_groups, n_time))
+
+  test_snapshots(time, save_snapshots, s, reorder = FALSE)
+
+})
