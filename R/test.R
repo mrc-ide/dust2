@@ -9,6 +9,9 @@ test_trajectories <- function(time, state, order = NULL,
 test_snapshots <- function(time, save_snapshots, state, order = NULL,
                            index_group = NULL, select_particle = NULL,
                            reorder = FALSE) {
+  if (is.numeric(save_snapshots)) {
+    save_snapshots <- time %in% save_snapshots
+  }
   test_snapshots_(time, save_snapshots, state, order,
                   index_group, select_particle, reorder)
 }

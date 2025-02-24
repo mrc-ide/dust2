@@ -282,6 +282,7 @@ test_that("can use snapshots", {
   })
   s_arr <- array(unlist(s), c(n_state, n_particles, n_groups, n_time))
 
-  test_snapshots(time, save_snapshots, s, reorder = FALSE)
-
+  res <- test_snapshots(time, save_snapshots, s, reorder = FALSE)
+  expect_equal(res[[1]], save_snapshots)
+  expect_equal(res[[2]], s_arr[, , , save_snapshots + 1])
 })

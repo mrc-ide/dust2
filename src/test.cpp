@@ -95,7 +95,7 @@ cpp11::sexp test_trajectories_(cpp11::doubles r_time,
 cpp11::sexp test_snapshots_(cpp11::doubles r_time,
                             cpp11::logicals r_save_snapshots,
                             cpp11::list r_state,
-                            cpp11::list r_order,
+                            cpp11::sexp r_order,
                             cpp11::sexp r_index_group,
                             cpp11::sexp r_select_particle,
                             bool reorder) {
