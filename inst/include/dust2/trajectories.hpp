@@ -61,7 +61,26 @@ public:
 
   template <typename IterSize>
   void update_order(IterSize iter_order) {
-    // TODO - implementation here.
+    if (position_ == 0) {
+      return;
+    }
+    // Take a copy of the previous order, for now:
+    auto iter = order_.begin() + (position_ - 1) * len_order_;
+
+    // If this approach works, we might store this.
+    // std::vector<size_t> prev(len_order_);
+    // for (size_t i = 0; i < len_order_; ++i) {
+    //   ...
+    // }
+    std::vector<size_t> prev = std::vector<size_t>(iter, iter + len_order_);
+
+    // This needs updating for more than one group still, but let's
+    // get this working for a single case first!
+    for (size_t i = 0; i < len_order_; ++i) {
+      *iter = prev[*iter_order];
+      ++iter;
+      ++iter_order;
+    }
   }
 
   // These allow a consumer to allocate the right size structures for

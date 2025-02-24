@@ -302,3 +302,43 @@ test_that("can use snapshots", {
   expect_equal(res[, 2, ], s_arr_snapshots[, 4, 2, ])
   expect_equal(res[, 3, ], s_arr_snapshots[, 2, 3, ])
 })
+
+
+test_that("can reorder snapshots on the way out", {
+  ## This is really hard to get right so let's actually simulate forward:
+  time <- seq(0, 10, length.out = 11)
+  n_time <- length(time)
+  n_state <- 6
+  n_particles <- 7
+  n_groups <- 3
+  state <- vector("list", length(time))
+  order <- vector("list", length(time))
+  true <- array(NA_real_, c(n_state, n_particles, n_groups, n_time))
+  s <- array(0, c(n_state, n_particles, n_groups))
+  set.seed(1)
+  for (i in seq_along(time)) {
+    s <- s + runif(length(s))
+    if (i > 1 && i %% 2 == 0) {
+      k <- replicate(n_groups, sample(n_particles, replace = TRUE))
+      order[[i]] <- as.integer(k - 1L)
+      for (j in seq_len(n_groups)) {
+        s[, , j] <- s[, k[, j], j] + 1
+        true[, , j, seq_len(i - 1)] <- true[, k[, j], j, seq_len(i - 1)]
+      }
+    }
+    state[[i]] <- s
+    true[, , , i] <- s
+  }
+
+  state_arr <- array(unlist(state), dim(true))
+
+  save_snapshots <- c(3, 7)
+
+  res1 <- test_snapshots(time, save_snapshots, state,
+                         order = order, reorder = FALSE)
+  expect_equal(res1, list(save_snapshots, state_arr[, , , save_snapshots + 1]))
+
+  res2 <- test_snapshots(time, save_snapshots, state,
+                         order = order, reorder = TRUE)
+  expect_equal(res2, list(save_snapshots, true[, , , save_snapshots + 1]))
+})
