@@ -269,6 +269,8 @@ test_that("can reorder trajectories on the way out", {
 })
 
 
+## Same basic approach as the non-reordered version of trajectories.
+## This is the easy bit.
 test_that("can use snapshots", {
   time <- seq(0, 10, length.out = 11)
   save_snapshots <- c(3, 7)
@@ -281,8 +283,22 @@ test_that("can use snapshots", {
           c(n_state, n_particles, n_groups))
   })
   s_arr <- array(unlist(s), c(n_state, n_particles, n_groups, n_time))
+  s_arr_snapshots <- s_arr[, , , save_snapshots + 1]
 
-  res <- test_snapshots(time, save_snapshots, s, reorder = FALSE)
-  expect_equal(res[[1]], save_snapshots)
-  expect_equal(res[[2]], s_arr[, , , save_snapshots + 1])
+  expect_equal(test_snapshots(time, save_snapshots, s, reorder = FALSE),
+               list(save_snapshots, s_arr_snapshots))
+  expect_equal(test_snapshots(time, save_snapshots, s, reorder = TRUE),
+               list(save_snapshots, s_arr_snapshots))
+  expect_equal(test_snapshots(time, save_snapshots, s,
+                              order = vector("list", length(time)),
+                              reorder = TRUE),
+               list(save_snapshots, s_arr_snapshots))
+
+  res <- test_snapshots(time, save_snapshots, s,
+                        select_particle = c(6, 4, 2))[[2]]
+  expect_equal(dim(res), c(n_state, n_groups, 2))
+
+  expect_equal(res[, 1, ], s_arr_snapshots[, 6, 1, ])
+  expect_equal(res[, 2, ], s_arr_snapshots[, 4, 2, ])
+  expect_equal(res[, 3, ], s_arr_snapshots[, 2, 3, ])
 })
