@@ -35,14 +35,14 @@ test_that("can use trajectories", {
   s_arr <- array(unlist(s), c(n_state, n_particles, n_groups, n_time))
 
   expect_equal(test_trajectories(time, s, reorder = TRUE),
-               list(time, s_arr))
+               list(time, s_arr, NULL))
   expect_equal(test_trajectories(time, s, reorder = FALSE),
-               list(time, s_arr))
+               list(time, s_arr, NULL))
   expect_equal(test_trajectories(time, s[1:3], reorder = TRUE),
-               list(time[1:3], s_arr[, , , 1:3]))
+               list(time[1:3], s_arr[, , , 1:3], NULL))
   expect_equal(test_trajectories(time, s, order = vector("list", length(time)),
                                  reorder = TRUE),
-               list(time, s_arr))
+               list(time, s_arr, NULL))
 
   res <- test_trajectories(time, s, select_particle = c(6, 4, 2))[[2]]
   expect_equal(dim(res), c(n_state, n_groups, n_time))
@@ -94,21 +94,21 @@ test_that("can reorder trajectories with no groups", {
   ## Pass in, but ignore index
   expect_equal(
     test_trajectories(time, state, order = order, reorder = FALSE),
-    list(time, state_arr))
+    list(time, state_arr, NULL))
 
   ## Really simple, add an index that does not reorder anything:
   expect_equal(
     test_trajectories(time, state[1], order = order[1], reorder = TRUE),
-    list(time[1], state_arr[, , , 1, drop = FALSE]))
+    list(time[1], state_arr[, , , 1, drop = FALSE], NULL))
   expect_equal(
     test_trajectories(time, state[1:2], order = list(NULL, 0:6),
                       reorder = TRUE),
-    list(time[1:2], state_arr[, , , 1:2, drop = FALSE]))
+    list(time[1:2], state_arr[, , , 1:2, drop = FALSE], NULL))
 
   ## Proper reordering with the full index:
   expect_equal(
     test_trajectories(time, state, order = order, reorder = TRUE),
-    list(time, true))
+    list(time, true, NULL))
 
   expect_equal(
     test_trajectories(time, state, order = order, reorder = FALSE,
@@ -149,9 +149,9 @@ test_that("can reorder trajectories on the way out", {
 
   state_arr <- array(unlist(state), dim(true))
   expect_equal(test_trajectories(time, state, order = order, reorder = FALSE),
-               list(time, state_arr))
+               list(time, state_arr, NULL))
   expect_equal(test_trajectories(time, state, order = order, reorder = TRUE),
-               list(time, true))
+               list(time, true, NULL))
 })
 
 
@@ -171,14 +171,14 @@ test_that("can extract trajectories with group index, no reordering", {
   s_arr <- array(unlist(s), c(n_state, n_particles, n_groups, n_time))
 
   expect_equal(test_trajectories(time, s, index_group = NULL),
-               list(time, s_arr))
+               list(time, s_arr, NULL))
   expect_equal(test_trajectories(time, s, index_group = seq_len(n_groups)),
-               list(time, s_arr))
+               list(time, s_arr, NULL))
 
   expect_equal(test_trajectories(time, s, index_group = 2),
-               list(time, s_arr[, , 2, , drop = FALSE]))
+               list(time, s_arr[, , 2, , drop = FALSE], NULL))
   expect_equal(test_trajectories(time, s, index_group = c(3, 1)),
-               list(time, s_arr[, , c(3, 1), , drop = FALSE]))
+               list(time, s_arr[, , c(3, 1), , drop = FALSE], NULL))
 
   m <- test_trajectories(time, s, select_particle = c(6, 4, 2))[[2]]
   expect_equal(dim(m), c(n_state, n_groups, n_time))
@@ -226,34 +226,34 @@ test_that("can reorder trajectories on the way out", {
   state_arr <- array(unlist(state), dim(true))
   expect_equal(
     test_trajectories(time, state, order = order, reorder = TRUE),
-    list(time, true))
+    list(time, true, NULL))
   expect_equal(
     test_trajectories(time, state, order = order, reorder = TRUE,
                       index_group = 1:3),
-    list(time, true))
+    list(time, true, NULL))
 
   expect_equal(
     test_trajectories(time, state, order = order, reorder = TRUE,
                       index_group = 1),
-    list(time, true[, , 1, , drop = FALSE]))
+    list(time, true[, , 1, , drop = FALSE], NULL))
   expect_equal(
     test_trajectories(time, state, order = order, reorder = TRUE,
                       index_group = 2),
-    list(time, true[, , 2, , drop = FALSE]))
+    list(time, true[, , 2, , drop = FALSE], NULL))
   expect_equal(
     test_trajectories(time, state, order = order, reorder = TRUE,
                       index_group = 3),
-    list(time, true[, , 3, , drop = FALSE]))
+    list(time, true[, , 3, , drop = FALSE], NULL))
 
   expect_equal(
     test_trajectories(time, state, order = order, reorder = TRUE,
                       index_group = 3:2),
-    list(time, true[, , 3:2, , drop = FALSE]))
+    list(time, true[, , 3:2, , drop = FALSE], NULL))
 
   expect_equal(
     test_trajectories(time, state, order = order, reorder = TRUE,
                       index_group = 3:1),
-    list(time, true[, , 3:1, ]))
+    list(time, true[, , 3:1, ], NULL))
 
   m <- test_trajectories(time, state, order = order, reorder = TRUE,
                          select_particle = c(6, 4, 2))[[2]]

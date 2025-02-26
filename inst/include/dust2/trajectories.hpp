@@ -107,6 +107,10 @@ public:
     return position_state_;
   }
 
+  auto n_snapshots() const {
+    return position_snapshot_;
+  }
+
   auto& index_group() const {
     return index_group_;
   }
@@ -245,7 +249,7 @@ public:
               std::copy_n(iter_src_j, n_state_total_, iter_dest_j);
             } else {
               auto iter_dest_j = iter_dest + j * n_state_total_;
-              for (size_t k = 0; k < n_particles; ++k) {
+              for (size_t k = 0; k < n_particles_; ++k) {
                 auto iter_src_k = iter_src +
                   j * n_state_total_ * n_particles_ +
                   index_particle[j * n_particles_ + k] * n_state_total_;
@@ -263,13 +267,13 @@ public:
 
         if (reorder_[i]) {
           const auto iter_order = order_.begin() + i * len_order_;
-          for (size_t j = 0; j < n_groups; ++j) {
+          for (size_t j = 0; j < n_groups_; ++j) {
             const auto iter_order_j = iter_order + j * n_particles_;
             if (use_select_particle) {
               index_particle[j] = *(iter_order_j + index_particle[j]);
             } else {
               const auto index_particle_j = index_particle.begin() + j * n_particles_;
-              for (size_t k = 0; k < n_groups; ++k) {
+              for (size_t k = 0; k < n_groups_; ++k) {
                 const auto index_particle_k = index_particle_j + k;
                 *index_particle_k = *(iter_order_j + *index_particle_k);
               }

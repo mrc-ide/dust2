@@ -400,8 +400,8 @@ test_scale_log_weights <- function(w) {
   .Call(`_dust2_test_scale_log_weights`, w)
 }
 
-test_trajectories_ <- function(r_time, r_state, r_order, r_index_state, r_index_group, r_select_particle, reorder) {
-  .Call(`_dust2_test_trajectories_`, r_time, r_state, r_order, r_index_state, r_index_group, r_select_particle, reorder)
+test_trajectories_ <- function(r_time, r_state, r_order, r_index_state, r_index_group, r_select_particle, r_times_snapshot, save_state, reorder) {
+  .Call(`_dust2_test_trajectories_`, r_time, r_state, r_order, r_index_state, r_index_group, r_select_particle, r_times_snapshot, save_state, reorder)
 }
 
 test_check_dimensions <- function(value, r_dim, name) {
