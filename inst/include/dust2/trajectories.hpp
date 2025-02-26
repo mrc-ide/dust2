@@ -132,7 +132,18 @@ public:
     if (!reorder && !use_select_particle) {
       // Optimised for simplest case of just dumping out everything
       std::copy_n(state_.begin(), position_state_ * len_state_, iter);
-    } else if (reorder) {
+    } else if (!reorder) {
+      for (size_t i = 0; i < position_state_; ++i) {
+        const auto iter_state = state_.begin() + i * len_state_;
+        for (size_t j = 0; j < n_groups_; ++j) {
+          const auto offset_state = j * n_state_ * n_particles_;
+          const auto offset_j = select_particle[j] * n_state_;
+          iter = std::copy_n(iter_state + offset_state + offset_j,
+                             n_state_,
+                             iter);
+        }
+      }
+    } else {
       const size_t n_particles_out = use_select_particle ? 1 : n_particles_;
       std::vector<size_t> index_particle(n_particles_out * n_groups_);
       for (size_t i = 0; i < n_groups_; ++i) {
@@ -156,13 +167,13 @@ public:
           const auto offset_output =
             i * len_state_out + j * n_state_ * n_particles_out;
           if (use_select_particle) {
-            reorder_single_(iter_state + offset_state,
+            reorder_state_single_(iter_state + offset_state,
                             iter_order + offset_index,
                             reorder_[i],
                             iter + offset_output,
                             index_particle[j]);
           } else {
-            reorder_group_(iter_state + offset_state,
+            reorder_state_group_(iter_state + offset_state,
                            iter_order + offset_index,
                            reorder_[i],
                            iter + offset_output,
@@ -170,15 +181,100 @@ public:
           }
         }
       }
-    } else {
-      for (size_t i = 0; i < position_state_; ++i) {
-        const auto iter_state = state_.begin() + i * len_state_;
+    }
+  }
+
+  // There is some opportunity to harmonise with above, but we'll get
+  // things working before trying that.
+  template <typename Iter>
+  void export_snapshots(Iter iter,
+                        bool reorder,
+                        const std::vector<size_t>& select_particle) const {
+    reorder = reorder && n_particles_ > 1 && position_order_ > 0 &&
+      tools::any(reorder_);
+    auto use_select_particle = !select_particle.empty();
+
+    if (!reorder && !use_select_particle) {
+      // Optimised for simplest case of just dumping out everything
+      const auto len = n_state_total_ * n_particles_ * n_groups_total_;
+      std::copy_n(snapshots_.begin(), position_snapshot_ * len, iter);
+    } else if (!reorder) {
+      const auto len = n_state_total_ * n_particles_ * n_groups_total_;
+      for (size_t i = 0; i < position_snapshot_; ++i) {
+        const auto iter_snapshot = snapshots_.begin() + i * len;
         for (size_t j = 0; j < n_groups_; ++j) {
-          const auto offset_state = j * n_state_ * n_particles_;
-          const auto offset_j = select_particle[j] * n_state_;
-          iter = std::copy_n(iter_state + offset_state + offset_j,
-                             n_state_,
+          const auto offset_snapshot = j * n_state_total_ * n_particles_;
+          const auto offset_j = select_particle[j] * n_state_total_;
+          iter = std::copy_n(iter_snapshot + offset_snapshot + offset_j,
+                             n_state_total_,
                              iter);
+        }
+      }
+    } else {
+      const size_t n_particles_out = use_select_particle ? 1 : n_particles_;
+      std::vector<size_t> index_particle(n_particles_out * n_groups_);
+      for (size_t i = 0; i < n_groups_; ++i) {
+        if (use_select_particle) {
+          index_particle[i] = select_particle[i];
+        } else {
+          for (size_t j = 0, k = i * n_particles_; j < n_particles_; ++j, ++k) {
+            index_particle[k] = j;
+          }
+        }
+      }
+
+      const auto len_state_out = n_state_total_ * n_particles_out * n_groups_;
+      size_t i_snapshot = n_snapshots_ - 1;
+      real_type time_next_snapshot = times_snapshot_[i_snapshot];
+
+      for (size_t irev = 0; irev < position_order_; ++irev) {
+        const auto i = position_order_ - irev - 1;
+        const auto time = times_order_[i];
+
+        if (time == time_next_snapshot) {
+          const auto iter_src = snapshots_.begin() +
+            i_snapshot * n_state_total_ * n_particles_ * n_groups_total_;
+          const auto iter_dest = iter + i_snapshot * len_state_out;
+          for (size_t j = 0; j < n_groups_; ++j) {
+            if (use_select_particle) {
+              const auto index_particle_j = index_particle[j];
+              auto iter_src_j = iter_src +
+                j * n_state_total_ * n_particles_ +
+                index_particle_j * n_state_total_;
+              auto iter_dest_j = iter_dest + j * n_state_total_;
+              std::copy_n(iter_src_j, n_state_total_, iter_dest_j);
+            } else {
+              auto iter_dest_j = iter_dest + j * n_state_total_;
+              for (size_t k = 0; k < n_particles; ++k) {
+                auto iter_src_k = iter_src +
+                  j * n_state_total_ * n_particles_ +
+                  index_particle[j * n_particles_ + k] * n_state_total_;
+                auto iter_dest_k = iter_dest_j + k * n_state_total_;
+                std::copy_n(iter_src_k, n_state_total_, iter_dest_k);
+              }
+            }
+          }
+
+          if (i_snapshot == 0) {
+            break;
+          }
+          --i_snapshot;
+        }
+
+        if (reorder_[i]) {
+          const auto iter_order = order_.begin() + i * len_order_;
+          for (size_t j = 0; j < n_groups; ++j) {
+            const auto iter_order_j = iter_order + j * n_particles_;
+            if (use_select_particle) {
+              index_particle[j] = *(iter_order_j + index_particle[j]);
+            } else {
+              const auto index_particle_j = index_particle.begin() + j * n_particles_;
+              for (size_t k = 0; k < n_groups; ++k) {
+                const auto index_particle_k = index_particle_j + k;
+                *index_particle_k = *(iter_order_j + *index_particle_k);
+              }
+            }
+          }
         }
       }
     }
@@ -214,25 +310,14 @@ private:
   bool use_index_state_;
   bool use_index_group_;
 
-  template <typename Iter>
-  void reorder_group_(typename std::vector<size_t>::iterator iter_order,
-                      typename std::vector<size_t>::iterator index_particle) {
-    for (size_t i = 0; i < n_particles_; ++i) {
-      const auto index_particle_i = index_particle + i;
-      *index_particle_i = *(iter_order + *index_particle_i);
-    }
-
-  }
-
-
   // Reference implementation for this is mcstate::history_single and
   // mcstate::history_multiple
   template <typename Iter>
-  void reorder_group_(typename std::vector<real_type>::const_iterator iter_state,
-                      typename std::vector<size_t>::const_iterator iter_order,
-                      bool reorder,
-                      Iter iter_dest,
-                      typename std::vector<size_t>::iterator index_particle) const {
+  void reorder_state_group_(typename std::vector<real_type>::const_iterator iter_state,
+                            typename std::vector<size_t>::const_iterator iter_order,
+                            bool reorder,
+                            Iter iter_dest,
+                            typename std::vector<size_t>::iterator index_particle) const {
     for (size_t i = 0; i < n_particles_; ++i) {
       std::copy_n(iter_state + *(index_particle + i) * n_state_,
                   n_state_,
@@ -245,11 +330,11 @@ private:
   }
 
   template <typename Iter>
-  void reorder_single_(typename std::vector<real_type>::const_iterator iter_state,
-                       typename std::vector<size_t>::const_iterator iter_order,
-                       bool reorder,
-                       Iter iter_dest,
-                       size_t& index_particle) const {
+  void reorder_state_single_(typename std::vector<real_type>::const_iterator iter_state,
+                             typename std::vector<size_t>::const_iterator iter_order,
+                             bool reorder,
+                             Iter iter_dest,
+                             size_t& index_particle) const {
     std::copy_n(iter_state + index_particle * n_state_,
                 n_state_,
                 iter_dest);
