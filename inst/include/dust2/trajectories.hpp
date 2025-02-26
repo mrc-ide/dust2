@@ -17,13 +17,19 @@ public:
     n_groups_(n_groups),
     n_groups_total_(n_groups),
     n_times_(n_times),
+    n_times_total_(n_times),
     len_state_(n_state_total_ * n_particles_ * n_groups_total_),
     len_order_(n_particles_ * n_groups_total_),
-    position_(0) {
+    position_state_(0),
+    position_order_(0) {
   }
 
+  // We might not actually store the index of time here, but something
+  // else instead, because we don't really
   void set_index_and_reset(const std::vector<size_t>& index_state,
-                           const std::vector<size_t>& index_group) {
+                           const std::vector<size_t>& index_group,
+                           size_t n_times) {
+    n_times_ = n_time;
     index_state_ = index_state;
     index_group_ = index_group;
     use_index_state_ = !tools::is_trivial_index(index_state_, n_state_total_);
@@ -32,62 +38,54 @@ public:
     n_groups_ = use_index_group_ ? index_group.size() : n_groups_total_;
     len_state_ = n_state_ * n_particles_ * n_groups_;
 
-    times_.resize(n_times_);
+    times_state_.resize(n_times_);
     state_.resize(len_state_ * n_times_);
-    order_.resize(len_order_ * n_times_);
-    reorder_.resize(n_times_);
 
-    position_ = 0;
+    times_order_.resize(n_times_);
+    order_.resize(len_order_ * n_times_total_);
+    reorder_.resize(n_times_total_);
+
+    position_state_ = 0;
+    position_order_ = 0;
   }
 
-  void set_n_times_and_reset(size_t n_times,
-                             const std::vector<size_t>& index_group) {
-    n_times_ = n_times;
-    set_index_and_reset(std::vector<size_t>(), index_group);
-  }
-
+  // in this case we are not reordering at all.
   template <typename IterReal>
   void add(real_type time, IterReal iter_state) {
     copy_state_(iter_state);
-    update_position(time, false);
+    times_state_[position_state_] = time;
+    position_state_++;
+
+    reorder_[position_order_] = false;
+    position_order_++;
   }
 
   template <typename IterReal, typename IterSize>
   void add(real_type time, IterReal iter_state, IterSize iter_order) {
     copy_state_(iter_state);
-    copy_order_(iter_order);
-    update_position(time, true);
+    times_state_[position_state_] = time;
+    position_state_++;
+
+    // copy_order_(iter_order);
+    // times_order_[position_order_] = time;
+    // reorder_[position_order_] = true;
+    // position_order_++;
+    update_order(iter_order);
   }
 
   template <typename IterSize>
   void update_order(IterSize iter_order) {
-    if (position_ == 0) {
-      return;
-    }
-    // Take a copy of the previous order, for now:
-    auto iter = order_.begin() + (position_ - 1) * len_order_;
-
-    // If this approach works, we might store this.
-    // std::vector<size_t> prev(len_order_);
-    // for (size_t i = 0; i < len_order_; ++i) {
-    //   ...
-    // }
-    std::vector<size_t> prev = std::vector<size_t>(iter, iter + len_order_);
-
-    // This needs updating for more than one group still, but let's
-    // get this working for a single case first!
-    for (size_t i = 0; i < len_order_; ++i) {
-      *iter = prev[*iter_order];
-      ++iter;
-      ++iter_order;
-    }
+    copy_order_(iter_order);
+    times_order_[position_order_] = time;
+    reorder_[position_order_] = true;
+    position_order_++;
   }
 
   // These allow a consumer to allocate the right size structures for
   // time and state for the total that we've actually used.
-  auto size_time() const {
-    return position_;
-  }
+  // auto size_time() const {
+  //   return position_state_;
+  // }
 
   auto n_state() const {
     return n_state_;
@@ -102,7 +100,7 @@ public:
   }
 
   auto n_times() const {
-    return position_;
+    return position_state_;
   }
 
   auto& index_group() const {
@@ -111,7 +109,7 @@ public:
 
   template <typename Iter>
   void export_time(Iter iter) const {
-    std::copy_n(times_.begin(), position_, iter);
+    std::copy_n(times_state_.begin(), position_state_, iter);
   }
 
   // Note that this uses 'select_particle' to avoid conflict with our
@@ -119,56 +117,19 @@ public:
   // rectangle defined by the combination of the group/particle values
   // but pairs of (group,particle)'s.
   template <typename Iter>
-  void export_state(Iter iter, bool reorder,
+  void export_state(Iter iter,
+                    bool reorder,
                     const std::vector<size_t>& select_particle) const {
-    reorder = reorder && n_particles_ > 1 && position_ > 0 &&
+    reorder = reorder && n_particles_ > 1 && position_order_ > 0 &&
       tools::any(reorder_);
 
     auto use_select_particle = !select_particle.empty();
 
     if (!reorder && !use_select_particle) {
       // Optimised for simplest case of just dumping out everything
-      std::copy_n(state_.begin(), position_ * len_state_, iter);
-    } else if (reorder) {
-      const size_t n_particles_out = use_select_particle ? 1 : n_particles_;
-      std::vector<size_t> index_particle(n_particles_out * n_groups_);
-      for (size_t i = 0; i < n_groups_; ++i) {
-        if (use_select_particle) {
-          index_particle[i] = select_particle[i];
-        } else {
-          for (size_t j = 0, k = i * n_particles_; j < n_particles_; ++j, ++k) {
-            index_particle[k] = j;
-          }
-        }
-      }
-
-      const auto len_state_out = n_state_ * n_particles_out * n_groups_;
-      for (size_t irev = 0; irev < position_; ++irev) {
-        const auto i = position_ - irev - 1;
-        const auto iter_order = order_.begin() + i * len_order_;
-        const auto iter_state = state_.begin() + i * len_state_;
-        for (size_t j = 0; j < n_groups_; ++j) {
-          const auto offset_state = j * n_state_ * n_particles_;
-          const auto offset_index = j * n_particles_;
-          const auto offset_output =
-            i * len_state_out + j * n_state_ * n_particles_out;
-          if (use_select_particle) {
-            reorder_single_(iter_state + offset_state,
-                            iter_order + offset_index,
-                            reorder_[i],
-                            iter + offset_output,
-                            index_particle[j]);
-          } else {
-            reorder_group_(iter_state + offset_state,
-                           iter_order + offset_index,
-                           reorder_[i],
-                           iter + offset_output,
-                           index_particle.begin() + offset_index);
-          }
-        }
-      }
-    } else {
-      for (size_t i = 0; i < position_; ++i) {
+      std::copy_n(state_.begin(), position_state_ * len_state_, iter);
+    } else if (!reorder) {
+      for (size_t i = 0; i < position_state_; ++i) {
         const auto iter_state = state_.begin() + i * len_state_;
         for (size_t j = 0; j < n_groups_; ++j) {
           const auto offset_state = j * n_state_ * n_particles_;
@@ -178,12 +139,15 @@ public:
                              iter);
         }
       }
-    }
-  }
+    } else if (use_select_particle) {
+    } else {
+      for (size_t i = 0; i < n_groups_; ++j) {
+        reorder_group_(i);
+      }
 
-  template <typename Iter>
-  void export_order(Iter iter) const {
-    std::copy_n(order_.begin(), position_ * len_order_, iter);
+
+
+    }
   }
 
 private:
@@ -193,17 +157,57 @@ private:
   size_t n_groups_;
   size_t n_groups_total_;
   size_t n_times_;
+  size_t n_times_total_;
   size_t len_state_; // length of an update to state
   size_t len_order_; // length of an update to order
-  size_t position_;
-  std::vector<real_type> times_;
+  size_t position_state_;
+  size_t position_order_;
+  std::vector<real_type> times_state_;
+  std::vector<real_type> times_order_;
   std::vector<real_type> state_;
   std::vector<size_t> order_;
   std::vector<bool> reorder_;
   std::vector<size_t> index_state_;
   std::vector<size_t> index_group_;
+  std::vector<size_t> order_single_;
+  std::vector<size_t> order_time_;
+  bool std::vector<bool> reordered_;
   bool use_index_state_;
   bool use_index_group_;
+
+  void apply_reorder() {
+    if (!reordered_) {
+      // Set up the empty order:
+      for (size_t j = 0; j < n_groups; ++j) {
+        for (size_t k = 0; k < n_particles; ++k) {
+          order_time_[j * n_particles + k] = k;
+        }
+      }
+
+      // We can do better here and just reorder state once we hit it I
+      // think.
+      for (size_t irev = 0; irev < n_times_; ++i) {
+        const auto i = position_order_ - irev - 1;
+        for (size_t j = 0; j < n_groups; ++j) {
+          for (size_t k = 0; k < n_particles; ++k) {
+
+          }
+        }
+      }
+    }
+  }
+
+
+  template <typename Iter>
+  void reorder_group_(typename std::vector<size_t>::iterator iter_order,
+                      typename std::vector<size_t>::iterator index_particle) {
+    for (size_t i = 0; i < n_particles_; ++i) {
+      const auto index_particle_i = index_particle + i;
+      *index_particle_i = *(iter_order + *index_particle_i);
+    }
+
+  }
+
 
   // Reference implementation for this is mcstate::history_single and
   // mcstate::history_multiple
@@ -236,12 +240,6 @@ private:
     if (reorder) {
       index_particle = *(iter_order + index_particle);
     }
-  }
-
-  void update_position(real_type time, bool reorder) {
-    times_[position_] = time;
-    reorder_[position_] = reorder;
-    position_++;
   }
 
   template <typename IterReal>

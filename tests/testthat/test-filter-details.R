@@ -338,6 +338,11 @@ test_that("can reorder snapshots on the way out", {
                          order = order, reorder = FALSE)
   expect_equal(res1, list(save_snapshots, state_arr[, , , save_snapshots + 1]))
 
+  ## This is going to be quite annoying, I think, because we are
+  ## essentially doing the reordering?  I think we need to tweak the
+  ## snapshots structure to say that this is a "sparse" recording and
+  ## only save some state, then we can use the exact same logic and
+  ## avoid as much churn.
   res2 <- test_snapshots(time, save_snapshots, state,
                          order = order, reorder = TRUE)
   expect_equal(res2, list(save_snapshots, true[, , , save_snapshots + 1]))

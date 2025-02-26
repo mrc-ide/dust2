@@ -80,6 +80,10 @@ public:
         }
       }
 
+      // Some of the bookkeeping might be easier if we did the reorder
+      // *after* saving trajectories, but that leaves the system a
+      // little inconsistent (the trajectorties would not hold the
+      // final state, but the state just before reordering).
       sys.reorder(index.begin(), index_group);
 
       if (save_trajectories) {
