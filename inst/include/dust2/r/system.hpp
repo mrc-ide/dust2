@@ -247,7 +247,8 @@ SEXP dust2_system_simulate(cpp11::sexp ptr,
   const auto n_times = times.size();
 
   dust2::trajectories<real_type> h(n_state, n_particles, n_groups, n_times);
-  h.set_index_and_reset(index_state, index_group);
+  std::vector<real_type> save_snapshots;
+  h.set_index_and_reset(index_state, index_group, true, save_snapshots);
 
   obj->simulate(times, index_group, h);
 

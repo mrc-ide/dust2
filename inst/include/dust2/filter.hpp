@@ -35,9 +35,7 @@ public:
     ll_(n_groups_, 0),
     ll_step_(n_groups_ * n_particles_, 0),
     trajectories_(n_state_, n_particles_, n_groups_, time_.size()),
-    snapshots_(n_state_, n_particles_, n_groups_, 0),
     trajectories_are_current_(n_groups_, false),
-    snapshots_are_current_(n_groups_, false),
     random_particle_(n_groups_, n_particles_) {
   }
 
@@ -46,14 +44,17 @@ public:
            const std::vector<real_type>& save_snapshots,
            const std::vector<size_t>& index_state,
            const std::vector<size_t>& index_group) {
-    reset(set_initial, save_trajectories, save_snapshots, index_state, index_group);
+    reset(set_initial, save_trajectories, save_snapshots,
+          index_state, index_group);
 
     // Just store this here; later once we have state to save we can
     // probably use that vector instead.
     std::vector<size_t> index(n_particles_ * n_groups_);
 
+    save_trajectories = save_trajectories || !save_snapshots.empty();
+
     auto it_data = data_.begin();
-    auto it_snapshots = save_snapshots.begin();
+
     for (auto time : time_) {
       sys.run_to_time(time, index_group);
       sys.compare_data(it_data, n_groups_data_, index_group, ll_step_.begin());
@@ -89,21 +90,12 @@ public:
       if (save_trajectories) {
         trajectories_.add(time, sys.state().begin(), index.begin());
       }
-      if (it_snapshots != save_snapshots.end() && *it_snapshots == time) {
-        snapshots_.add(time, sys.state().begin(), index.begin());
-        ++it_snapshots;
-      }
       // early exit (perhaps)
     }
 
     if (save_trajectories) {
       for (auto i : index_group) {
         trajectories_are_current_[i] = true;
-      }
-    }
-    if (!save_snapshots.empty()) {
-      for (auto i : index_group) {
-        snapshots_are_current_[i] = true;
       }
     }
     if (!tools::is_trivial_index(index_group, n_groups_)) {
@@ -121,14 +113,6 @@ public:
 
   auto& last_trajectories_are_current() const {
     return trajectories_are_current_;
-  }
-
-  auto& last_snapshots() const {
-    return snapshots_;
-  }
-
-  auto& last_snapshots_are_current() const {
-    return snapshots_are_current_;
   }
 
   auto& last_index_group() const {
@@ -165,9 +149,7 @@ private:
   std::vector<real_type> ll_;
   std::vector<real_type> ll_step_;
   trajectories<real_type> trajectories_;
-  trajectories<real_type> snapshots_;
   std::vector<bool> trajectories_are_current_;
-  std::vector<bool> snapshots_are_current_;
   std::vector<size_t> last_index_group_;
   std::vector<size_t> random_particle_;
 
@@ -179,14 +161,9 @@ private:
     std::fill(trajectories_are_current_.begin(),
               trajectories_are_current_.end(),
               false);
-    std::fill(snapshots_are_current_.begin(),
-              snapshots_are_current_.end(),
-              false);
-    if (save_trajectories) {
-      trajectories_.set_index_and_reset(index_state, index_group);
-    }
-    if (!save_snapshots.empty()) {
-      snapshots_.set_n_times_and_reset(save_snapshots.size(), index_group);
+    if (save_trajectories || !save_snapshots.empty()) {
+      trajectories_.set_index_and_reset(index_state, index_group,
+                                        save_trajectories, save_snapshots);
     }
     std::fill(ll_.begin(), ll_.end(), 0);
     sys.set_time(time_start_);

@@ -17,44 +17,48 @@ public:
     n_groups_(n_groups),
     n_groups_total_(n_groups),
     n_times_(n_times),
-    n_times_total_(n_times),
+    n_snapshots_(0),
     len_state_(n_state_total_ * n_particles_ * n_groups_total_),
     len_order_(n_particles_ * n_groups_total_),
     position_state_(0),
-    position_order_(0) {
+    position_snapshot_(0),
+    position_order_(0),
+    save_state_(false) {
   }
 
   // We might not actually store the index of time here, but something
   // else instead, because we don't really
   void set_index_and_reset(const std::vector<size_t>& index_state,
                            const std::vector<size_t>& index_group,
-                           size_t n_times) {
-    n_times_ = n_time;
+                           bool save_state,
+                           const std::vector<real_type>& times_snapshot) {
+    save_state_ = save_state,
     index_state_ = index_state;
     index_group_ = index_group;
     use_index_state_ = !tools::is_trivial_index(index_state_, n_state_total_);
     use_index_group_ = !tools::is_trivial_index(index_group_, n_groups_total_);
     n_state_ = use_index_state_ ? index_state.size() : n_state_total_;
     n_groups_ = use_index_group_ ? index_group.size() : n_groups_total_;
+    n_snapshots_ = times_snapshot_.size();
     len_state_ = n_state_ * n_particles_ * n_groups_;
 
     times_state_.resize(n_times_);
-    state_.resize(len_state_ * n_times_);
-
     times_order_.resize(n_times_);
-    order_.resize(len_order_ * n_times_total_);
-    reorder_.resize(n_times_total_);
+    state_.resize(len_state_ * n_times_);
+    snapshots_.resize(n_state_total_ * n_snapshots_);
+
+    order_.resize(len_order_ * n_times_);
+    reorder_.resize(n_times_);
 
     position_state_ = 0;
     position_order_ = 0;
+    position_snapshot_ = 0;
   }
 
   // in this case we are not reordering at all.
   template <typename IterReal>
   void add(real_type time, IterReal iter_state) {
-    copy_state_(iter_state);
-    times_state_[position_state_] = time;
-    position_state_++;
+    add_state(time, iter_state);
 
     reorder_[position_order_] = false;
     position_order_++;
@@ -62,30 +66,30 @@ public:
 
   template <typename IterReal, typename IterSize>
   void add(real_type time, IterReal iter_state, IterSize iter_order) {
-    copy_state_(iter_state);
-    times_state_[position_state_] = time;
-    position_state_++;
+    add_state(time, iter_state);
 
-    // copy_order_(iter_order);
-    // times_order_[position_order_] = time;
-    // reorder_[position_order_] = true;
-    // position_order_++;
-    update_order(iter_order);
-  }
-
-  template <typename IterSize>
-  void update_order(IterSize iter_order) {
     copy_order_(iter_order);
     times_order_[position_order_] = time;
     reorder_[position_order_] = true;
     position_order_++;
   }
 
-  // These allow a consumer to allocate the right size structures for
-  // time and state for the total that we've actually used.
-  // auto size_time() const {
-  //   return position_state_;
-  // }
+  template <typename IterReal>
+  void add_state(real_type time, IterReal iter_state) {
+    if (save_state_) {
+      copy_state_(iter_state);
+      times_state_[position_state_] = time;
+      position_state_++;
+    }
+
+    const bool save_snapshot =
+      position_snapshot_ < n_snapshots_ &&
+      time == times_snapshot_[position_snapshot_];
+    if (save_snapshot) {
+      copy_snapshot_(iter_state);
+      position_snapshot_++;
+    }
+  }
 
   auto n_state() const {
     return n_state_;
@@ -128,7 +132,45 @@ public:
     if (!reorder && !use_select_particle) {
       // Optimised for simplest case of just dumping out everything
       std::copy_n(state_.begin(), position_state_ * len_state_, iter);
-    } else if (!reorder) {
+    } else if (reorder) {
+      const size_t n_particles_out = use_select_particle ? 1 : n_particles_;
+      std::vector<size_t> index_particle(n_particles_out * n_groups_);
+      for (size_t i = 0; i < n_groups_; ++i) {
+        if (use_select_particle) {
+          index_particle[i] = select_particle[i];
+        } else {
+          for (size_t j = 0, k = i * n_particles_; j < n_particles_; ++j, ++k) {
+            index_particle[k] = j;
+          }
+        }
+      }
+
+      const auto len_state_out = n_state_ * n_particles_out * n_groups_;
+      for (size_t irev = 0; irev < position_state_; ++irev) {
+        const auto i = position_state_ - irev - 1;
+        const auto iter_order = order_.begin() + i * len_order_;
+        const auto iter_state = state_.begin() + i * len_state_;
+        for (size_t j = 0; j < n_groups_; ++j) {
+          const auto offset_state = j * n_state_ * n_particles_;
+          const auto offset_index = j * n_particles_;
+          const auto offset_output =
+            i * len_state_out + j * n_state_ * n_particles_out;
+          if (use_select_particle) {
+            reorder_single_(iter_state + offset_state,
+                            iter_order + offset_index,
+                            reorder_[i],
+                            iter + offset_output,
+                            index_particle[j]);
+          } else {
+            reorder_group_(iter_state + offset_state,
+                           iter_order + offset_index,
+                           reorder_[i],
+                           iter + offset_output,
+                           index_particle.begin() + offset_index);
+          }
+        }
+      }
+    } else {
       for (size_t i = 0; i < position_state_; ++i) {
         const auto iter_state = state_.begin() + i * len_state_;
         for (size_t j = 0; j < n_groups_; ++j) {
@@ -139,14 +181,6 @@ public:
                              iter);
         }
       }
-    } else if (use_select_particle) {
-    } else {
-      for (size_t i = 0; i < n_groups_; ++j) {
-        reorder_group_(i);
-      }
-
-
-
     }
   }
 
@@ -158,45 +192,27 @@ private:
   size_t n_groups_total_;
   size_t n_times_;
   size_t n_times_total_;
+  size_t n_snapshots_;
   size_t len_state_; // length of an update to state
   size_t len_order_; // length of an update to order
   size_t position_state_;
+  size_t position_snapshot_;
   size_t position_order_;
   std::vector<real_type> times_state_;
+  std::vector<real_type> times_snapshot_;
   std::vector<real_type> times_order_;
   std::vector<real_type> state_;
+  std::vector<real_type> snapshots_;
   std::vector<size_t> order_;
   std::vector<bool> reorder_;
   std::vector<size_t> index_state_;
   std::vector<size_t> index_group_;
   std::vector<size_t> order_single_;
   std::vector<size_t> order_time_;
-  bool std::vector<bool> reordered_;
+  std::vector<bool> reordered_;
+  bool save_state_;
   bool use_index_state_;
   bool use_index_group_;
-
-  void apply_reorder() {
-    if (!reordered_) {
-      // Set up the empty order:
-      for (size_t j = 0; j < n_groups; ++j) {
-        for (size_t k = 0; k < n_particles; ++k) {
-          order_time_[j * n_particles + k] = k;
-        }
-      }
-
-      // We can do better here and just reorder state once we hit it I
-      // think.
-      for (size_t irev = 0; irev < n_times_; ++i) {
-        const auto i = position_order_ - irev - 1;
-        for (size_t j = 0; j < n_groups; ++j) {
-          for (size_t k = 0; k < n_particles; ++k) {
-
-          }
-        }
-      }
-    }
-  }
-
 
   template <typename Iter>
   void reorder_group_(typename std::vector<size_t>::iterator iter_order,
@@ -244,7 +260,7 @@ private:
 
   template <typename IterReal>
   void copy_state_(IterReal iter_src) {
-    auto iter_dst = state_.begin() + position_ * len_state_;
+    auto iter_dst = state_.begin() + position_state_ * len_state_;
     if (!use_index_state_ && !use_index_group_) {
       std::copy_n(iter_src, len_state_, iter_dst);
     } else if (!use_index_state_) {
@@ -266,9 +282,24 @@ private:
     }
   }
 
+  template <typename IterReal>
+  void copy_snapshot_(IterReal iter_src) {
+    // const auto len = n_state_total_ * n_particles_ * n_groups_;
+    // auto iter_dst = state_.begin() + position_snapshot_ * len;
+    // if (!use_index_group_) {
+    //   std::copy_n(iter_src, len, iter_dst);
+    // } else {
+    //   const auto len = n_state_total_ * n_particles_;
+    //   for (auto i : index_group_) {
+    //     const auto iter_src_i = iter_src + i * len;
+    //     iter_dst = std::copy_n(iter_src_i, len, iter_dst);
+    //   }
+    // }
+  }
+
   template <typename IterSize>
   void copy_order_(IterSize iter_src) {
-    auto iter_dst = order_.begin() + position_ * len_order_;
+    auto iter_dst = order_.begin() + position_order_ * len_order_;
     if (!use_index_group_) {
       std::copy_n(iter_src,
                   len_order_,

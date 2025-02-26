@@ -404,10 +404,6 @@ test_trajectories_ <- function(r_time, r_state, r_order, r_index_state, r_index_
   .Call(`_dust2_test_trajectories_`, r_time, r_state, r_order, r_index_state, r_index_group, r_select_particle, reorder)
 }
 
-test_snapshots_ <- function(r_time, r_save_snapshots, r_state, r_order, r_index_group, r_select_particle, reorder) {
-  .Call(`_dust2_test_snapshots_`, r_time, r_save_snapshots, r_state, r_order, r_index_group, r_select_particle, reorder)
-}
-
 test_check_dimensions <- function(value, r_dim, name) {
   .Call(`_dust2_test_check_dimensions`, value, r_dim, name)
 }

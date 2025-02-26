@@ -58,7 +58,9 @@ cpp11::sexp test_trajectories_(cpp11::doubles r_time,
   }
 
   dust2::trajectories<double> h(n_state, n_particles, n_groups, n_times);
-  h.set_index_and_reset(index_state, index_group);
+  const auto save_state = true;
+  const std::vector<double> times_snapshot;
+  h.set_index_and_reset(index_state, index_group, save_state, times_snapshot);
   for (size_t i = 0; i < static_cast<size_t>(r_state.size()); ++i) {
     if (r_order == R_NilValue) {
       h.add(r_time[i], REAL(r_state[i]));
@@ -68,79 +70,6 @@ cpp11::sexp test_trajectories_(cpp11::doubles r_time,
         h.add(r_time[i], REAL(r_state[i]));
       } else {
         h.add(r_time[i], REAL(r_state[i]), INTEGER(el));
-      }
-    }
-  }
-
-  const size_t n_particles_out = select_particle.empty() ? n_particles : 1;
-  const auto n_state_out = h.n_state();
-  const auto n_groups_out = h.n_groups();
-  const auto n_times_out = h.n_times();
-  cpp11::writable::doubles ret_time(static_cast<int>(n_times_out));
-  const size_t len = n_state_out * n_particles_out * n_groups_out * n_times_out;
-  cpp11::writable::doubles ret_state(static_cast<int>(len));
-  h.export_time(REAL(ret_time));
-  h.export_state(REAL(ret_state), reorder, select_particle);
-
-  if (use_select_particle) {
-    dust2::r::set_array_dims(ret_state, {n_state_out, n_particles_out * n_groups_out, n_times_out});
-  } else {
-    dust2::r::set_array_dims(ret_state, {n_state_out, n_particles_out, n_groups_out, n_times_out});
-  }
-
-  return cpp11::writable::list{ret_time, ret_state};
-}
-
-[[cpp11::register]]
-cpp11::sexp test_snapshots_(cpp11::doubles r_time,
-                            cpp11::logicals r_save_snapshots,
-                            cpp11::list r_state,
-                            cpp11::sexp r_order,
-                            cpp11::sexp r_index_group,
-                            cpp11::sexp r_select_particle,
-                            bool reorder) {
-  const size_t n_times_save = std::accumulate(r_save_snapshots.begin(), r_save_snapshots.end(), 0);
-  cpp11::sexp el0 = r_state[0];
-  auto r_dim = cpp11::as_cpp<cpp11::integers>(el0.attr("dim"));
-  const size_t n_state = r_dim[0];
-  const size_t n_particles = r_dim[1];
-  const size_t n_groups = r_dim[2];
-  std::vector<size_t> all_groups;
-  for (size_t i = 0; i < n_groups; ++i) {
-    all_groups.push_back(i);
-  }
-  std::vector<size_t> index_state; // trivial index
-  const auto index_group = r_index_group == R_NilValue ? all_groups :
-    dust2::r::check_index(r_index_group, all_groups.size(), "index_group");
-
-  std::vector<size_t> select_particle;
-  const bool use_select_particle = r_select_particle != R_NilValue;
-  if (use_select_particle) {
-    dust2::r::check_length(r_select_particle, index_group.size(),
-                           "select_particle");
-    select_particle = dust2::r::check_index(r_select_particle, n_particles,
-                                            "select_particle");
-  }
-
-  dust2::trajectories<double> h(n_state, n_particles, n_groups, 0);
-  h.set_n_times_and_reset(n_times_save, index_group);
-
-  for (size_t i = 0; i < static_cast<size_t>(r_state.size()); ++i) {
-    if (r_save_snapshots[i]) {
-      if (r_order == R_NilValue) {
-        h.add(r_time[i], REAL(r_state[i]));
-      } else {
-        cpp11::sexp el = cpp11::as_cpp<cpp11::list>(r_order)[i];
-        if (el == R_NilValue) {
-          h.add(r_time[i], REAL(r_state[i]));
-        } else {
-          h.add(r_time[i], REAL(r_state[i]), INTEGER(el));
-        }
-      }
-    } else if (r_order != R_NilValue) {
-      cpp11::sexp el = cpp11::as_cpp<cpp11::list>(r_order)[i];
-      if (el != R_NilValue) {
-        h.update_order(INTEGER(el));
       }
     }
   }
