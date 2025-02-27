@@ -236,7 +236,7 @@ dust_likelihood_last_snapshots <- function(obj,
   check_is_dust_likelihood(obj)
   if (is.null(obj$ptr)) {
     cli::cli_abort(c(
-      "Trajectories are not current",
+      "Snapshots are not current",
       i = "Likelihood has not yet been run"))
   }
   assert_scalar_logical(select_random_particle)

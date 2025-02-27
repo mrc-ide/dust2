@@ -831,23 +831,19 @@ test_that("can run particle filter and save snapshots", {
   expect_error(dust_likelihood_last_snapshots(obj),
                "Snapshots are not current")
   res1 <- dust_likelihood_run(obj, pars)
-  expect_error(dust_likelihood_last_trajectories(obj),
+  expect_error(dust_likelihood_last_snapshots(obj),
                "Snapshots are not current")
+
   res2 <- dust_likelihood_run(obj, NULL, save_trajectories = TRUE)
+  expect_error(dust_likelihood_last_snapshots(obj),
+               "Snapshots are not current")
   h2 <- dust_likelihood_last_trajectories(obj)
-  expect_equal(dim(h2), c(5, 100, 4))
-  res3 <- dust_likelihood_run(obj, NULL)
-  expect_error(dust_likelihood_last_trajectories(obj),
-               "Trajectories are not current")
 
-  cmp_filter <- sir_filter_manual(
-    pars, time_start, data, dt, n_particles, seed)
-  cmp1 <- cmp_filter(NULL)
-  cmp2 <- cmp_filter(NULL, save_trajectories = TRUE)
-  cmp3 <- cmp_filter(NULL)
+  res3 <- dust_likelihood_run(obj, NULL,
+                              save_trajectories = TRUE,
+                              save_snapshots = c(4, 12))
+  h3 <- dust_likelihood_last_trajectories(obj)
+  s3 <- dust_likelihood_last_snapshots(obj)
 
-  expect_equal(res1, cmp1$log_likelihood)
-  expect_equal(res2, cmp2$log_likelihood)
-  expect_equal(res3, cmp3$log_likelihood)
-  expect_equal(h2, cmp2$trajectories)
+  expect_equal(s3, h3[, , c(1, 3)])
 })
