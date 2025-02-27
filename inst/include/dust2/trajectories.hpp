@@ -35,6 +35,7 @@ public:
     save_state_ = save_state,
     index_state_ = index_state;
     index_group_ = index_group;
+    times_snapshot_ = times_snapshot;
     use_index_state_ = !tools::is_trivial_index(index_state_, n_state_total_);
     use_index_group_ = !tools::is_trivial_index(index_group_, n_groups_total_);
     n_state_ = use_index_state_ ? index_state.size() : n_state_total_;
@@ -45,7 +46,7 @@ public:
     times_state_.resize(n_times_);
     times_order_.resize(n_times_);
     state_.resize(len_state_ * n_times_);
-    snapshots_.resize(n_state_total_ * n_snapshots_);
+    snapshots_.resize(n_state_total_ * n_particles_ * n_groups_ * n_snapshots_);
 
     order_.resize(len_order_ * n_times_);
     reorder_.resize(n_times_);
@@ -373,17 +374,17 @@ private:
 
   template <typename IterReal>
   void copy_snapshot_(IterReal iter_src) {
-    // const auto len = n_state_total_ * n_particles_ * n_groups_;
-    // auto iter_dst = state_.begin() + position_snapshot_ * len;
-    // if (!use_index_group_) {
-    //   std::copy_n(iter_src, len, iter_dst);
-    // } else {
-    //   const auto len = n_state_total_ * n_particles_;
-    //   for (auto i : index_group_) {
-    //     const auto iter_src_i = iter_src + i * len;
-    //     iter_dst = std::copy_n(iter_src_i, len, iter_dst);
-    //   }
-    // }
+    const auto len = n_state_total_ * n_particles_ * n_groups_;
+    auto iter_dst = snapshots_.begin() + position_snapshot_ * len;
+    if (!use_index_group_) {
+      std::copy_n(iter_src, len, iter_dst);
+    } else {
+      const auto len_i = n_state_total_ * n_particles_;
+      for (auto i : index_group_) {
+        const auto iter_src_i = iter_src + i * len_i;
+        iter_dst = std::copy_n(iter_src_i, len_i, iter_dst);
+      }
+    }
   }
 
   template <typename IterSize>

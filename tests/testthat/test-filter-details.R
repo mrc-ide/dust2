@@ -267,3 +267,40 @@ test_that("can reorder trajectories on the way out", {
                       select_particle = c(2, 6))[[2]],
     m[, c(3, 1), ])
 })
+
+
+## Same basic approach as the non-reordered version of trajectories.
+## This is the easy bit.
+test_that("can use snapshots", {
+  time <- seq(0, 10, length.out = 11)
+  save_snapshots <- c(3, 7)
+  n_state <- 6
+  n_particles <- 7
+  n_groups <- 3
+  n_time <- length(time)
+  s <- lapply(seq_along(time), function(i) {
+    array(runif(n_state * n_particles * n_groups),
+          c(n_state, n_particles, n_groups))
+  })
+  s_arr <- array(unlist(s), c(n_state, n_particles, n_groups, n_time))
+  s_arr_snapshots <- s_arr[, , , save_snapshots + 1]
+
+  expect_equal(test_trajectories(time, s, times_snapshot = save_snapshots, reorder = FALSE),
+               list(time, s_arr, s_arr_snapshots))
+  expect_equal(test_trajectories(time, s, times_snapshot = save_snapshots, reorder = TRUE),
+               list(time, s_arr, s_arr_snapshots))
+  expect_equal(test_trajectories(time, s,
+                                 order = vector("list", length(time)),
+                                 times_snapshot = save_snapshots,
+                                 reorder = TRUE),
+               list(time, s_arr, s_arr_snapshots))
+
+  res <- test_trajectories(time, s,
+                           times_snapshot = save_snapshots,
+                           select_particle = c(6, 4, 2))[[3]]
+  expect_equal(dim(res), c(n_state, n_groups, 2))
+
+  expect_equal(res[, 1, ], s_arr_snapshots[, 6, 1, ])
+  expect_equal(res[, 2, ], s_arr_snapshots[, 4, 2, ])
+  expect_equal(res[, 3, ], s_arr_snapshots[, 2, 3, ])
+})
