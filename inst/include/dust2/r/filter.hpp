@@ -60,7 +60,7 @@ cpp11::sexp dust2_filter_last_trajectories(cpp11::sexp ptr,
 
   const auto& trajectories = obj->last_trajectories();
   const auto& is_current = obj->last_trajectories_are_current();
-  if (!tools::any(is_current)) {
+  if (!tools::any(is_current) || trajectories.n_times() == 0) {
     cpp11::stop("Trajectories are not current");
   }
 
@@ -100,44 +100,43 @@ cpp11::sexp dust2_filter_last_snapshots(cpp11::sexp ptr,
                                         bool select_random_particle,
                                         bool preserve_particle_dimension,
                                         bool preserve_group_dimension) {
-  // auto *obj = dust2::r::safely_read_externalptr<filter<T>>(ptr, "filter_last_trajectories");
+  auto *obj = dust2::r::safely_read_externalptr<filter<T>>(ptr, "filter_last_snapshots");
 
-  // const auto& snapshots = obj->last_snapshots();
-  // const auto& is_current = obj->last_snapshots_are_current();
-  // if (!tools::any(is_current)) {
-  //   cpp11::stop("Snapshots are not current");
-  // }
+  const auto& trajectories = obj->last_trajectories();
+  const auto& is_current = obj->last_trajectories_are_current();
+  if (!tools::any(is_current) || trajectories.n_snapshots() == 0) {
+    cpp11::stop("Snapshots are not current");
+  }
 
-  // // We might relax this later, but will require some tools to work
-  // // with the output, really.
-  // constexpr bool reorder = true;
+  // We might relax this later, but will require some tools to work
+  // with the output, really.
+  constexpr bool reorder = true;
 
-  // const auto n_state = snapshots.n_state();
-  // const auto n_particles = select_random_particle ? 1 : snapshots.n_particles();
-  // const auto n_groups = snapshots.n_groups();
-  // const auto n_times = snapshots.n_times();
+  const auto n_state = obj->sys.n_state();
+  const auto n_particles = select_random_particle ? 1 : trajectories.n_particles();
+  const auto n_groups = trajectories.n_groups();
+  const auto n_times = trajectories.n_snapshots();
 
-  // const auto& index_particle = select_random_particle ?
-  //   obj->select_random_particle(snapshots.index_group()) : std::vector<size_t>{};
+  const auto& index_particle = select_random_particle ?
+    obj->select_random_particle(trajectories.index_group()) : std::vector<size_t>{};
 
-  // const auto len = n_state * n_particles * n_groups * n_times;
-  // cpp11::sexp ret = cpp11::writable::doubles(len);
-  // snapshots.export_state(REAL(ret), reorder, index_particle);
-  // if (select_random_particle) {
-  //   if (preserve_group_dimension) {
-  //     set_array_dims(ret, {n_state, n_particles * n_groups, n_times});
-  //   } else {
-  //     set_array_dims(ret, {n_state, n_particles * n_groups * n_times});
-  //   }
-  // } else {
-  //   if (preserve_group_dimension) {
-  //     set_array_dims(ret, {n_state, n_particles, n_groups, n_times});
-  //   } else {
-  //     set_array_dims(ret, {n_state, n_particles * n_groups, n_times});
-  //   }
-  // }
-  // return ret;
-  return R_NilValue;
+  const auto len = n_state * n_particles * n_groups * n_times;
+  cpp11::sexp ret = cpp11::writable::doubles(len);
+  trajectories.export_snapshots(REAL(ret), reorder, index_particle);
+  if (select_random_particle) {
+    if (preserve_group_dimension) {
+      set_array_dims(ret, {n_state, n_particles * n_groups, n_times});
+    } else {
+      set_array_dims(ret, {n_state, n_particles * n_groups * n_times});
+    }
+  } else {
+    if (preserve_group_dimension) {
+      set_array_dims(ret, {n_state, n_particles, n_groups, n_times});
+    } else {
+      set_array_dims(ret, {n_state, n_particles * n_groups, n_times});
+    }
+  }
+  return ret;
 }
 
 template <typename T>

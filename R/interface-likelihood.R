@@ -218,6 +218,19 @@ dust_likelihood_last_state <- function(obj, select_random_particle = FALSE) {
 }
 
 
+##' Get the last snapshots from a likelihood.
+##'
+##' @title Get likelihood snapshots
+##'
+##' @inheritParams dust_likelihood_last_trajectories
+##'
+##' @return An array.  If ungrouped this will have dimensions `state`
+##'   x `particle` x `time` (where `time` here is along your snapshot
+##'   times), and if grouped then `state` x `particle` x `group` x
+##'   `time`.  If `select_random_particle = TRUE`, the second
+##'   (particle) dimension will be dropped.
+##'
+##' @export
 dust_likelihood_last_snapshots <- function(obj,
                                            select_random_particle = FALSE) {
   check_is_dust_likelihood(obj)
