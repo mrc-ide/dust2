@@ -304,3 +304,111 @@ test_that("can use snapshots", {
   expect_equal(res[, 2, ], s_arr_snapshots[, 4, 2, ])
   expect_equal(res[, 3, ], s_arr_snapshots[, 2, 3, ])
 })
+
+
+test_that("can reorder snapshots on the way out", {
+  d <- example_trajectories(n_state = 6)
+
+  save_snapshots <- c(3, 7)
+  i <- save_snapshots + 1
+
+  ## Pass in, but ignore index
+  expect_equal(
+    test_trajectories(d$time, d$state$raw,
+                      times_snapshot = save_snapshots,
+                      order = d$order$c,
+                      reorder = FALSE),
+    list(d$time, d$state$array, d$state$array[, , , i, drop = FALSE]))
+
+  ## Still correct where we don't save trajectories
+  expect_equal(
+    test_trajectories(d$time, d$state$raw,
+                      times_snapshot = save_snapshots,
+                      order = d$order$c,
+                      save_state = FALSE,
+                      reorder = FALSE),
+    list(numeric(), NULL, d$state$array[, , , i, drop = FALSE]))
+
+  ## Still correct where we filter trajectories by state
+  expect_equal(
+    test_trajectories(d$time, d$state$raw,
+                      times_snapshot = save_snapshots,
+                      order = d$order$c,
+                      index_state = c(2, 4, 6),
+                      reorder = FALSE),
+    list(d$time,
+         d$state$array[c(2, 4, 6), , , , drop = FALSE],
+         d$state$array[, , , i, drop = FALSE]))
+
+  ## Reorder
+  expect_equal(
+    test_trajectories(d$time, d$state$raw,
+                      times_snapshot = save_snapshots,
+                      order = d$order$c,
+                      reorder = TRUE),
+    list(d$time, d$state$true, d$state$true[, , , i, drop = FALSE]))
+
+  ## Reorder, don't save state
+  expect_equal(
+    test_trajectories(d$time, d$state$raw,
+                      times_snapshot = save_snapshots,
+                      order = d$order$c,
+                      save_state = FALSE,
+                      reorder = TRUE),
+    list(numeric(), NULL, d$state$true[, , , i, drop = FALSE]))
+
+  ## Reorder, filter state
+  expect_equal(
+    test_trajectories(d$time, d$state$raw,
+                      times_snapshot = save_snapshots,
+                      order = d$order$c,
+                      index_state = c(2, 4, 6),
+                      reorder = TRUE),
+    list(d$time,
+         d$state$true[c(2, 4, 6), , , , drop = FALSE],
+         d$state$true[, , , i, drop = FALSE]))
+
+  ## Select a particle
+  expect_equal(
+    test_trajectories(d$time, d$state$raw,
+                      times_snapshot = save_snapshots,
+                      order = d$order$c,
+                      reorder = TRUE,
+                      select_particle = 3)[[3]],
+    array(d$state$true[, 3, , i], c(d$n_state, 1, 2)))
+})
+
+
+test_that("can reorder grouped snapshots", {
+  d <- example_trajectories(n_state = 6, n_groups = 3)
+  save_snapshots <- c(3, 7)
+  i <- save_snapshots + 1
+
+  expect_equal(
+    test_trajectories(d$time, d$state$raw,
+                      times_snapshot = save_snapshots,
+                      order = d$order$c,
+                      reorder = FALSE),
+    list(d$time, d$state$array, d$state$array[, , , i, drop = FALSE]))
+
+  expect_equal(
+    test_trajectories(d$time, d$state$raw,
+                      times_snapshot = save_snapshots,
+                      order = d$order$c,
+                      reorder = TRUE),
+    list(d$time, d$state$true, d$state$true[, , , i, drop = FALSE]))
+
+  res <- test_trajectories(d$time, d$state$raw,
+                           times_snapshot = save_snapshots,
+                           order = d$order$c,
+                           select_particle = c(6, 4, 2),
+                           reorder = TRUE)[[3]]
+  cmp <- test_trajectories(d$time, d$state$raw,
+                           times_snapshot = save_snapshots,
+                           order = d$order$c,
+                           reorder = TRUE)[[3]]
+  expect_equal(dim(res), c(d$n_state, d$n_groups, 2))
+  expect_equal(res[, 1, ], cmp[, 6, 1, ])
+  expect_equal(res[, 2, ], cmp[, 4, 2, ])
+  expect_equal(res[, 3, ], cmp[, 2, 3, ])
+})

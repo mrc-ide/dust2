@@ -241,19 +241,15 @@ public:
             i_snapshot * n_state_total_ * n_particles_ * n_groups_total_;
           const auto iter_dest = iter + i_snapshot * len_state_out;
           for (size_t j = 0; j < n_groups_; ++j) {
+            auto iter_dest_j = iter_dest + j * n_state_total_ * n_particles_out;
+            auto iter_src_j = iter_src + j * n_state_total_ * n_particles_;
             if (use_select_particle) {
-              const auto index_particle_j = index_particle[j];
-              auto iter_src_j = iter_src +
-                j * n_state_total_ * n_particles_ +
-                index_particle_j * n_state_total_;
-              auto iter_dest_j = iter_dest + j * n_state_total_;
-              std::copy_n(iter_src_j, n_state_total_, iter_dest_j);
+              auto iter_src_k = iter_src_j + index_particle[j] * n_state_total_;
+              auto iter_dest_k = iter_dest_j;
+              std::copy_n(iter_src_k, n_state_total_, iter_dest_k);
             } else {
-              auto iter_dest_j = iter_dest + j * n_state_total_;
               for (size_t k = 0; k < n_particles_; ++k) {
-                auto iter_src_k = iter_src +
-                  j * n_state_total_ * n_particles_ +
-                  index_particle[j * n_particles_ + k] * n_state_total_;
+                auto iter_src_k = iter_src_j + index_particle[j * n_particles_ + k] * n_state_total_;
                 auto iter_dest_k = iter_dest_j + k * n_state_total_;
                 std::copy_n(iter_src_k, n_state_total_, iter_dest_k);
               }
@@ -264,6 +260,7 @@ public:
             break;
           }
           --i_snapshot;
+          time_next_snapshot = times_snapshot_[i_snapshot];
         }
 
         if (reorder_[i]) {
@@ -274,7 +271,7 @@ public:
               index_particle[j] = *(iter_order_j + index_particle[j]);
             } else {
               const auto index_particle_j = index_particle.begin() + j * n_particles_;
-              for (size_t k = 0; k < n_groups_; ++k) {
+              for (size_t k = 0; k < n_particles_; ++k) {
                 const auto index_particle_k = index_particle_j + k;
                 *index_particle_k = *(iter_order_j + *index_particle_k);
               }
