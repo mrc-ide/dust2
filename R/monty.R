@@ -197,6 +197,7 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
         obj,
         pars,
         initial = if (is.null(initial)) NULL else initial(pars),
+        save_snapshots = save_snapshots,
         save_trajectories = save_trajectories$enabled,
         index_state = save_trajectories$index)
       if (is_grouped) sum(ll) else ll
