@@ -834,16 +834,47 @@ test_that("can run particle filter and save snapshots", {
   expect_error(dust_likelihood_last_snapshots(obj),
                "Snapshots are not current")
 
-  res2 <- dust_likelihood_run(obj, NULL, save_trajectories = TRUE)
+  res2 <- dust_likelihood_run(obj, pars, save_trajectories = TRUE)
   expect_error(dust_likelihood_last_snapshots(obj),
                "Snapshots are not current")
   h2 <- dust_likelihood_last_trajectories(obj)
 
-  res3 <- dust_likelihood_run(obj, NULL,
+  res3 <- dust_likelihood_run(obj, pars,
                               save_trajectories = TRUE,
                               save_snapshots = c(4, 12))
   h3 <- dust_likelihood_last_trajectories(obj)
   s3 <- dust_likelihood_last_snapshots(obj)
 
   expect_equal(s3, h3[, , c(1, 3)])
+
+  res4 <- dust_likelihood_run(obj, pars,
+                              save_trajectories = FALSE,
+                              save_snapshots = c(4, 12))
+  expect_error(dust_likelihood_last_trajectories(obj),
+               "Trajectories are not current")
+  s4 <- dust_likelihood_last_snapshots(obj)
+  expect_equal(dim(s4), dim(s3))
+})
+
+
+test_that("snapshot times must be increasing and found in data", {
+  pars <- list(beta = 0.1, gamma = 0.2, N = 1000, I0 = 10, exp_noise = 1e6)
+
+  time_start <- 0
+  data <- data.frame(time = c(4, 8, 12, 16), incidence = 1:4)
+  dt <- 1
+  n_particles <- 100
+  seed <- 42
+
+  obj <- dust_filter_create(sir(), time_start, data,
+                            n_particles = n_particles, seed = seed)
+  expect_error(
+    dust_likelihood_run(obj, pars, save_snapshots = c(12, 4)),
+    "Values in 'save_snapshots' must be increasing")
+  expect_error(
+    dust_likelihood_run(obj, pars, save_snapshots = c(4.1, 12)),
+    "All elements of 'save_snapshots' must be found in 'time'")
+  expect_error(
+    dust_likelihood_run(obj, pars, save_snapshots = c(4.1, 13)),
+    "All elements of 'save_snapshots' must be found in 'time'")
 })

@@ -687,17 +687,7 @@ check_time_sequence <- function(time, time_control,
                    arg = name, call = call)
   }
 
-  err <- diff(time) <= 0
-  if (any(err)) {
-    i <- which(err)
-    detail <- tail_errors(sprintf(
-      "'{name}[%d]' (%s) must be greater than '{name}[%d]' (%s)",
-      i + 1, time[i + 1], i, time[i]))
-    cli::cli_abort(
-      c("Values in '{name}' must be increasing",
-        detail),
-      arg = name, call = call)
-  }
+  check_increasing(time, name = name, call = call)
 
   dt <- time_control$dt
   if ((!is.null(dt)) && (dt <= 1)) {
@@ -722,6 +712,22 @@ check_time_sequence <- function(time, time_control,
   }
 
   as.numeric(time)
+}
+
+
+check_increasing <- function(x, name = deparse(substitute(x)),
+                             call = parent.frame()) {
+  err <- diff(x) <= 0
+  if (any(err)) {
+    i <- which(err)
+    detail <- tail_errors(sprintf(
+      "'{name}[%d]' (%s) must be greater than '{name}[%d]' (%s)",
+      i + 1, x[i + 1], i, x[i]))
+    cli::cli_abort(
+      c("Values in '{name}' must be increasing",
+        detail),
+      arg = name, call = call)
+  }
 }
 
 

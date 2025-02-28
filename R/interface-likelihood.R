@@ -80,6 +80,18 @@ dust_likelihood_run <- function(obj, pars, initial = NULL,
     ## Here we might check for adjoint = TRUE in a stochastic model?
   }
 
+  if (!is.null(save_snapshots)) {
+    check_increasing(save_snapshots)
+    ok <- save_snapshots %in% obj$inputs$time
+    if (!all(ok)) {
+      err <- save_snapshots[!ok]
+      cli::cli_abort(
+        c("All elements of 'save_snapshots' must be found in 'time'",
+          x = "Invalid value{?s}: {format(err)}"),
+        arg = "save_snapshots")
+    }
+  }
+
   ## This must be evaluated *after* we're guaranteed to be initialised
   ## so that we can access `n_groups`
   index_state <- check_index(index_state, max = obj$n_state,
