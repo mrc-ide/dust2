@@ -305,8 +305,6 @@ private:
   std::vector<bool> reorder_;
   std::vector<size_t> index_state_;
   std::vector<size_t> index_group_;
-  std::vector<size_t> order_single_;
-  std::vector<size_t> order_time_;
   std::vector<bool> reordered_;
   bool save_state_;
   bool use_index_state_;
