@@ -22,6 +22,9 @@
 ##'   have data.  If `index_state` is non-`NULL`, the trajectories are
 ##'   limited to these states.
 ##'
+##' @param save_snapshots Optional vector of times at which we should
+##'   record snapshots of the entire state of the system.
+##'
 ##' @param adjoint Optional logical, indicating if we should enable
 ##'   adjoint history saving. This is enabled by default if your model
 ##'   has an adjoint, but can be disabled or enabled even when your
@@ -44,6 +47,7 @@
 ##' @export
 dust_likelihood_run <- function(obj, pars, initial = NULL,
                                 save_trajectories = FALSE,
+                                save_snapshots = NULL,
                                 adjoint = NULL,
                                 index_state = NULL,
                                 index_group = NULL) {
@@ -76,6 +80,18 @@ dust_likelihood_run <- function(obj, pars, initial = NULL,
     ## Here we might check for adjoint = TRUE in a stochastic model?
   }
 
+  if (!is.null(save_snapshots)) {
+    check_increasing(save_snapshots)
+    ok <- save_snapshots %in% obj$inputs$time
+    if (!all(ok)) {
+      err <- save_snapshots[!ok]
+      cli::cli_abort(
+        c("All elements of 'save_snapshots' must be found in 'time'",
+          x = "Invalid value{?s}: {format(err)}"),
+        arg = "save_snapshots")
+    }
+  }
+
   ## This must be evaluated *after* we're guaranteed to be initialised
   ## so that we can access `n_groups`
   index_state <- check_index(index_state, max = obj$n_state,
@@ -94,6 +110,7 @@ dust_likelihood_run <- function(obj, pars, initial = NULL,
   obj$methods$run(obj$ptr,
                   initial,
                   save_trajectories,
+                  save_snapshots,
                   adjoint,
                   index_state,
                   index_group,
@@ -210,6 +227,35 @@ dust_likelihood_last_state <- function(obj, select_random_particle = FALSE) {
                          select_random_particle,
                          obj$preserve_particle_dimension,
                          obj$preserve_group_dimension)
+}
+
+
+##' Get the last snapshots from a likelihood.
+##'
+##' @title Get likelihood snapshots
+##'
+##' @inheritParams dust_likelihood_last_trajectories
+##'
+##' @return An array.  If ungrouped this will have dimensions `state`
+##'   x `particle` x `time` (where `time` here is along your snapshot
+##'   times), and if grouped then `state` x `particle` x `group` x
+##'   `time`.  If `select_random_particle = TRUE`, the second
+##'   (particle) dimension will be dropped.
+##'
+##' @export
+dust_likelihood_last_snapshots <- function(obj,
+                                           select_random_particle = FALSE) {
+  check_is_dust_likelihood(obj)
+  if (is.null(obj$ptr)) {
+    cli::cli_abort(c(
+      "Snapshots are not current",
+      i = "Likelihood has not yet been run"))
+  }
+  assert_scalar_logical(select_random_particle)
+  obj$methods$last_snapshots(obj$ptr,
+                             select_random_particle,
+                             obj$preserve_particle_dimension,
+                             obj$preserve_group_dimension)
 }
 
 

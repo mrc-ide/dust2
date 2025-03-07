@@ -9,6 +9,7 @@ dust_likelihood_run(
   pars,
   initial = NULL,
   save_trajectories = FALSE,
+  save_snapshots = NULL,
   adjoint = NULL,
   index_state = NULL,
   index_group = NULL
@@ -32,6 +33,9 @@ runs; this has a small overhead in runtime and in memory.
 Particle trajectories will be saved at each time for which you
 have data.  If \code{index_state} is non-\code{NULL}, the trajectories are
 limited to these states.}
+
+\item{save_snapshots}{Optional vector of times at which we should
+record snapshots of the entire state of the system.}
 
 \item{adjoint}{Optional logical, indicating if we should enable
 adjoint history saving. This is enabled by default if your model

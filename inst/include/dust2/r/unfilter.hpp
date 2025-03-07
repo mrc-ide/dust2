@@ -19,8 +19,11 @@ cpp11::sexp dust2_unfilter_update_pars(cpp11::sexp ptr,
 }
 
 template <typename T>
-cpp11::sexp dust2_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
-                               bool save_trajectories, bool adjoint,
+cpp11::sexp dust2_unfilter_run(cpp11::sexp ptr,
+                               cpp11::sexp r_initial,
+                               bool save_trajectories,
+                               cpp11::sexp r_save_snapshots,
+                               bool adjoint,
                                cpp11::sexp r_index_state,
                                cpp11::sexp r_index_group,
                                bool preserve_particle_dimension,
@@ -30,15 +33,18 @@ cpp11::sexp dust2_unfilter_run(cpp11::sexp ptr, cpp11::sexp r_initial,
                                        "index_state");
   const auto index_group = r_index_group == R_NilValue ? obj->sys.all_groups() :
     check_index(r_index_group, obj->sys.n_groups(), "index_group");
+  using real_type = typename T::real_type;
+  const auto save_snapshots = check_save_snapshots<real_type>(r_save_snapshots);
 
   if (r_initial != R_NilValue) {
     set_state(obj->sys, cpp11::as_cpp<cpp11::list>(r_initial));
   }
   if (adjoint) {
-    obj->run_adjoint(r_initial == R_NilValue, save_trajectories, index_state,
-                     index_group);
+    obj->run_adjoint(r_initial == R_NilValue, save_trajectories, save_snapshots,
+                     index_state, index_group);
   } else {
-    obj->run(r_initial == R_NilValue, save_trajectories, index_state, index_group);
+    obj->run(r_initial == R_NilValue, save_trajectories, save_snapshots,
+             index_state, index_group);
   }
 
   const auto n_groups = index_group.size();
@@ -64,7 +70,7 @@ cpp11::sexp dust2_unfilter_last_trajectories(cpp11::sexp ptr,
 
   const auto& trajectories = obj->last_trajectories();
   const auto& is_current = obj->last_trajectories_are_current();
-  if (!tools::any(is_current)) {
+  if (!tools::any(is_current) || trajectories.n_times() == 0) {
     cpp11::stop("Trajectories are not current");
   }
 
@@ -78,6 +84,39 @@ cpp11::sexp dust2_unfilter_last_trajectories(cpp11::sexp ptr,
   const auto len = n_state * n_particles * n_groups * n_times;
   cpp11::sexp ret = cpp11::writable::doubles(len);
   trajectories.export_state(REAL(ret), reorder, {});
+  if (preserve_group_dimension && preserve_particle_dimension) {
+    set_array_dims(ret, {n_state, n_particles, n_groups, n_times});
+  } else if (preserve_group_dimension || preserve_particle_dimension) {
+    set_array_dims(ret, {n_state, n_particles * n_groups, n_times});
+  } else {
+    set_array_dims(ret, {n_state * n_particles * n_groups, n_times});
+  }
+  return ret;
+}
+
+template <typename T>
+cpp11::sexp dust2_unfilter_last_snapshots(cpp11::sexp ptr,
+                                          bool select_random_particle,
+                                          bool preserve_particle_dimension,
+                                          bool preserve_group_dimension) {
+  auto *obj = dust2::r::safely_read_externalptr<unfilter<T>>(ptr, "unfilter_last_snapshots");
+
+  const auto& trajectories = obj->last_trajectories();
+  const auto& is_current = obj->last_trajectories_are_current();
+  if (!tools::any(is_current) || trajectories.n_snapshots() == 0) {
+    cpp11::stop("Snapshots are not current");
+  }
+
+  constexpr bool reorder = false; // never needed
+
+  const auto n_state = obj->sys.n_state();
+  const auto n_particles = trajectories.n_particles();
+  const auto n_groups = trajectories.n_groups();
+  const auto n_times = trajectories.n_snapshots();
+
+  const auto len = n_state * n_particles * n_groups * n_times;
+  cpp11::sexp ret = cpp11::writable::doubles(len);
+  trajectories.export_snapshots(REAL(ret), reorder, {});
   if (preserve_group_dimension && preserve_particle_dimension) {
     set_array_dims(ret, {n_state, n_particles, n_groups, n_times});
   } else if (preserve_group_dimension || preserve_particle_dimension) {

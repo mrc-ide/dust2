@@ -31,6 +31,8 @@ cpp11::sexp test_trajectories_(cpp11::doubles r_time,
                                cpp11::sexp r_index_state,
                                cpp11::sexp r_index_group,
                                cpp11::sexp r_select_particle,
+                               cpp11::sexp r_times_snapshot,
+                               bool save_state,
                                bool reorder) {
   const size_t n_times = r_time.size();
   cpp11::sexp el0 = r_state[0];
@@ -57,8 +59,12 @@ cpp11::sexp test_trajectories_(cpp11::doubles r_time,
                                             "select_particle");
   }
 
+  const auto times_snapshot = r_times_snapshot == R_NilValue ?
+    std::vector<double>() :
+    cpp11::as_cpp<std::vector<double>>(r_times_snapshot);
+
   dust2::trajectories<double> h(n_state, n_particles, n_groups, n_times);
-  h.set_index_and_reset(index_state, index_group);
+  h.set_index_and_reset(index_state, index_group, save_state, times_snapshot);
   for (size_t i = 0; i < static_cast<size_t>(r_state.size()); ++i) {
     if (r_order == R_NilValue) {
       h.add(r_time[i], REAL(r_state[i]));
@@ -77,16 +83,37 @@ cpp11::sexp test_trajectories_(cpp11::doubles r_time,
   const auto n_groups_out = h.n_groups();
   const auto n_times_out = h.n_times();
   cpp11::writable::doubles ret_time(static_cast<int>(n_times_out));
-  const size_t len = n_state_out * n_particles_out * n_groups_out * n_times_out;
-  cpp11::writable::doubles ret_state(static_cast<int>(len));
-  h.export_time(REAL(ret_time));
-  h.export_state(REAL(ret_state), reorder, select_particle);
 
-  if (use_select_particle) {
-    dust2::r::set_array_dims(ret_state, {n_state_out, n_particles_out * n_groups_out, n_times_out});
-  } else {
-    dust2::r::set_array_dims(ret_state, {n_state_out, n_particles_out, n_groups_out, n_times_out});
+  cpp11::sexp ret_state = R_NilValue;
+  cpp11::sexp ret_snapshots = R_NilValue;
+
+  if (save_state) {
+    const size_t len = n_state_out * n_particles_out * n_groups_out * n_times_out;
+    cpp11::writable::doubles arr(static_cast<int>(len));
+    h.export_time(REAL(ret_time));
+    h.export_state(REAL(arr), reorder, select_particle);
+
+    if (use_select_particle) {
+      dust2::r::set_array_dims(arr, {n_state_out, n_particles_out * n_groups_out, n_times_out});
+    } else {
+      dust2::r::set_array_dims(arr, {n_state_out, n_particles_out, n_groups_out, n_times_out});
+    }
+    ret_state = arr;
   }
 
-  return cpp11::writable::list{ret_time, ret_state};
+  if (!times_snapshot.empty()) {
+    const auto n_snapshots = h.n_snapshots();
+    const size_t len = n_state * n_particles_out * n_groups_out * n_snapshots;
+    cpp11::writable::doubles arr(static_cast<int>(len));
+    h.export_snapshots(REAL(arr), reorder, select_particle);
+
+    if (use_select_particle) {
+      dust2::r::set_array_dims(arr, {n_state, n_particles_out * n_groups_out, n_snapshots});
+    } else {
+      dust2::r::set_array_dims(arr, {n_state, n_particles_out, n_groups_out, n_snapshots});
+    }
+    ret_snapshots = arr;
+  }
+
+  return cpp11::writable::list{ret_time, ret_state, ret_snapshots};
 }

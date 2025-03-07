@@ -39,16 +39,22 @@ public:
     random_particle_(n_groups_, n_particles_) {
   }
 
-  void run(bool set_initial, bool save_trajectories,
+  void run(bool set_initial,
+           bool save_trajectories,
+           const std::vector<real_type>& save_snapshots,
            const std::vector<size_t>& index_state,
            const std::vector<size_t>& index_group) {
-    reset(set_initial, save_trajectories, index_state, index_group);
+    reset(set_initial, save_trajectories, save_snapshots,
+          index_state, index_group);
 
     // Just store this here; later once we have state to save we can
     // probably use that vector instead.
     std::vector<size_t> index(n_particles_ * n_groups_);
 
+    save_trajectories = save_trajectories || !save_snapshots.empty();
+
     auto it_data = data_.begin();
+
     for (auto time : time_) {
       sys.run_to_time(time, index_group);
       sys.compare_data(it_data, n_groups_data_, index_group, ll_step_.begin());
@@ -75,13 +81,16 @@ public:
         }
       }
 
+      // Some of the bookkeeping might be easier if we did the reorder
+      // *after* saving trajectories, but that leaves the system a
+      // little inconsistent (the trajectorties would not hold the
+      // final state, but the state just before reordering).
       sys.reorder(index.begin(), index_group);
 
       if (save_trajectories) {
         trajectories_.add(time, sys.state().begin(), index.begin());
       }
       // early exit (perhaps)
-      // save snapshots (perhaps)
     }
 
     if (save_trajectories) {
@@ -144,14 +153,17 @@ private:
   std::vector<size_t> last_index_group_;
   std::vector<size_t> random_particle_;
 
-  void reset(bool set_initial, bool save_trajectories,
+  void reset(bool set_initial,
+             bool save_trajectories,
+             const std::vector<real_type>& save_snapshots,
              const std::vector<size_t>& index_state,
              const std::vector<size_t>& index_group) {
     std::fill(trajectories_are_current_.begin(),
               trajectories_are_current_.end(),
               false);
-    if (save_trajectories) {
-      trajectories_.set_index_and_reset(index_state, index_group);
+    if (save_trajectories || !save_snapshots.empty()) {
+      trajectories_.set_index_and_reset(index_state, index_group,
+                                        save_trajectories, save_snapshots);
     }
     std::fill(ll_.begin(), ll_.end(), 0);
     sys.set_time(time_start_);

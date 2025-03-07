@@ -35,6 +35,7 @@ reference:
     contents:
       - dust_likelihood_last_state
       - dust_likelihood_last_trajectories
+      - dust_likelihood_last_snapshots
       - dust_likelihood_last_gradient
   - subtitle: Interface to monty
     contents:

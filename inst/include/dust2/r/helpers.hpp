@@ -59,6 +59,18 @@ inline void check_rank(cpp11::sexp value, size_t rank, const char * name) {
   }
 }
 
+template <typename real_type>
+std::vector<real_type> check_save_snapshots(cpp11::sexp r_save_snapshots) {
+  if (r_save_snapshots == R_NilValue || LENGTH(r_save_snapshots) == 0) {
+    return std::vector<real_type>();
+  }
+  size_t len = LENGTH(r_save_snapshots);
+  std::vector<real_type> ret(len);
+  auto tmp = cpp11::as_cpp<cpp11::doubles>(r_save_snapshots);
+  std::copy(tmp.begin(), tmp.end(), ret.begin());
+  return ret;
+}
+
 template <size_t rank>
 void check_dimensions(cpp11::sexp value,
                       const dust2::array::dimensions<rank>& dim,

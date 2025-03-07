@@ -39,11 +39,13 @@ public:
     gradient_is_current_(false) {
   }
 
-  void run(bool set_initial, bool save_trajectories,
+  void run(bool set_initial,
+           bool save_trajectories,
+           const std::vector<real_type>& save_snapshots,
            const std::vector<size_t>& index_state,
            const std::vector<size_t>& index_group) {
     const bool adjoint = false;
-    reset(set_initial, save_trajectories, index_state, index_group, adjoint);
+    reset(set_initial, save_trajectories, save_snapshots, index_state, index_group, adjoint);
     const auto n_times = time_.size();
 
     auto it_data = data_.begin();
@@ -72,11 +74,15 @@ public:
   // This part here we can _always_ do, even if the system does not
   // actually support adjoint methods.  It should give exactly the
   // same answers as the normal version, at the cost of more memory.
-  void run_adjoint(bool set_initial, bool save_trajectories,
+  void run_adjoint(bool set_initial,
+                   bool save_trajectories,
+                   const std::vector<real_type> save_snapshots,
                    const std::vector<size_t>& index_state,
                    const std::vector<size_t>& index_group) {
     const bool adjoint = true;
-    reset(set_initial, save_trajectories, index_state, index_group, adjoint);
+    reset(set_initial, save_trajectories, save_snapshots, index_state, index_group, adjoint);
+
+    save_trajectories = save_trajectories || !save_snapshots.empty();
 
     // Run the entire forward time simulation
     sys.run_to_time(time_.back(), index_group, adjoint_.state(0));
@@ -153,7 +159,9 @@ private:
   std::vector<bool> adjoint_is_current_;
   bool gradient_is_current_;
 
-  void reset(bool set_initial, bool save_trajectories,
+  void reset(bool set_initial,
+             bool save_trajectories,
+             const std::vector<real_type>& save_snapshots,
              const std::vector<size_t>& index_state,
              const std::vector<size_t>& index_group,
              bool adjoint) {
@@ -162,8 +170,9 @@ private:
               false);
     std::fill(adjoint_is_current_.begin(), adjoint_is_current_.end(), false);
     gradient_is_current_ = false;
-    if (save_trajectories) {
-      trajectories_.set_index_and_reset(index_state, index_group);
+    if (save_trajectories || !save_snapshots.empty()) {
+      trajectories_.set_index_and_reset(index_state, index_group,
+                                        save_trajectories, save_snapshots);
     }
     if (adjoint) {
       adjoint_.init_history(time_start_, time_, sys.dt());

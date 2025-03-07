@@ -11,7 +11,8 @@ dust_likelihood_monty(
   domain = NULL,
   failure_is_impossible = FALSE,
   save_state = FALSE,
-  save_trajectories = FALSE
+  save_trajectories = FALSE,
+  save_snapshots = NULL
 )
 }
 \arguments{
@@ -53,6 +54,11 @@ at the time series.}
 should be saved.  This can also be a character vector indicating
 the logical compartments, or an integer vector being an index
 into the state.}
+
+\item{save_snapshots}{Optional vector of times where we snapshot
+the entire state.  You can restart your system from these
+points.  They must line up exactly with the times in your
+filter.}
 }
 \value{
 A \link[monty:monty_model]{monty::monty_model} object
