@@ -122,6 +122,14 @@ dust_likelihood_run <- function(obj, pars, initial = NULL,
 dust_likelihood_ensure_initialised <- function(obj, pars) {
   is_uninitialised <- is.null(obj$ptr)
   if (is_uninitialised) {
+    ## Where deserialisation has happened into an environment where
+    ## the package is not loaded, the environment of the method is set
+    ## to the global environment.  The other way we'd be able to tell
+    ## this is if the package is not loaded.
+    if (identical(environment(obj$methods$alloc), .GlobalEnv)) {
+      methods <- dust_system_generator_methods(obj$generator)$filter
+      assign("methods", methods, obj)
+    }
     index_group <- NULL
     pars <- check_pars(pars, obj$n_groups, index_group,
                        obj$preserve_group_dimension)
