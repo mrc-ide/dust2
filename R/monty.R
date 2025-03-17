@@ -226,7 +226,9 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
   }
 
   restore <- function() {
-    rm(list = "ptr", envir = obj)
+    if (!is.null(obj$ptr)) {
+      rm(list = "ptr", envir = obj)
+    }
   }
 
   ## I think that reconstructing the filter here to decouple any
