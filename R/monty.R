@@ -110,6 +110,8 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
 
   domain <- monty::monty_domain_expand(domain, packer)
   save_trajectories <- validate_save_trajectories(save_trajectories)
+  save_trajectories$uninitialised <-
+    save_trajectories$enabled && !is.null(save_trajectories$subset)
   observer <- dust_observer(obj, save_state, save_trajectories$enabled,
                             save_snapshots)
 
@@ -150,12 +152,11 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
     ## object.
     density <- function(x) {
       pars <- packer_unpack(packer, x)
-      was_uninitialised <- dust_likelihood_ensure_initialised(obj, pars)
-      needs_trajectories_index <- was_uninitialised &&
-        save_trajectories$enabled && !is.null(save_trajectories$subset)
-      if (needs_trajectories_index) {
+      dust_likelihood_ensure_initialised(obj, pars)
+      if (save_trajectories$uninitialised) {
         env$save_trajectories$index <-
           obj$packer_state$subset(save_trajectories$subset)$index
+        env$save_trajectories$uninitialised <- FALSE
       }
       ptr <- obj$ptr
       if (!identical(x, attr(ptr, "last_pars"))) {
@@ -186,12 +187,11 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
   } else {
     density <- function(x) {
       pars <- packer_unpack(packer, x)
-      was_uninitialised <- dust_likelihood_ensure_initialised(obj, pars)
-      needs_trajectories_index <- was_uninitialised &&
-        save_trajectories$enabled && !is.null(save_trajectories$subset)
-      if (needs_trajectories_index) {
+      dust_likelihood_ensure_initialised(obj, pars)
+      if (save_trajectories$uninitialised) {
         env$save_trajectories$index <-
           obj$packer_state$subset(save_trajectories$subset)$index
+        env$save_trajectories$uninitialised <- FALSE
       }
       ll <- dust_likelihood_run(
         obj,

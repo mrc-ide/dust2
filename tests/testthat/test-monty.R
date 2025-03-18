@@ -363,3 +363,43 @@ test_that("can get snapshots from model", {
   expect_equal(names(res$observations), "snapshots")
   expect_equal(dim(res$observations$snapshots), c(5, 2, 27, 3))
 })
+
+
+test_that("cope with changing the trajectory index", {
+  d <- data.frame(
+    time = 1:5,
+    incidence = c(12, 23, 25, 36, 30))
+
+  filter <- dust2::dust_filter_create(sir, time_start = 0,
+                                      data = d, dt = 0.25,
+                                      n_particles = 200)
+
+  packer <- monty::monty_packer(scalar = c("beta", "gamma"),
+                                fixed = list(I0 = 10, N = 1000))
+  vcv <- diag(2) * 0.01
+  sampler <- monty::monty_sampler_random_walk(vcv)
+  prior <- monty::monty_dsl({
+    beta ~ Exponential(mean = 1)
+    gamma ~ Exponential(mean = 0.5)
+  })
+
+  likelihood <- dust2::dust_likelihood_monty(filter, packer,
+                                             save_trajectories = TRUE)
+  posterior <- likelihood + prior
+  samples <- monty::monty_sample(posterior, sampler, n_steps = 3,
+                                 initial = c(0.3, 0.1),
+                                 n_chains = 2)
+  expect_equal(
+    dim(samples$observations$trajectories),
+    c(5, 5, 3, 2)) # state, time, steps, chains
+
+  likelihood <- dust2::dust_likelihood_monty(filter, packer,
+                                             save_trajectories = "cases_inc")
+  posterior <- likelihood + prior
+  samples <- monty::monty_sample(posterior, sampler, n_steps = 3,
+                                 initial = c(0.3, 0.1),
+                                 n_chains = 2)
+  expect_equal(
+    dim(samples$observations$trajectories),
+    c(1, 5, 3, 2)) # state, time, steps, chains
+})
