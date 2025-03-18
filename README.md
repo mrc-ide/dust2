@@ -28,7 +28,15 @@ This package is a ground-up rewrite of [`dust`](https://mrc-ide.github.io/dust) 
 
 ## Installation
 
-To install `dust2`:
+Please install from our [r-universe](https://mrc-ide.r-universe.dev/):
+
+```r
+install.packages(
+  "dust2",
+  repos = c("https://mrc-ide.r-universe.dev", "https://cloud.r-project.org"))
+```
+
+If you prefer, you can install from GitHub with `remotes`:
 
 ```r
 remotes::install_github("mrc-ide/dust2", upgrade = FALSE)
