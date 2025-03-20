@@ -359,6 +359,13 @@ private:
         constexpr real_type eps = 1e-6;
         constexpr size_t steps = 100;
         t1 = lostturnip::find_result<real_type>(fn, t0, t1, eps, steps).x;
+        // Currently untested - in the case where we have two roots
+        // that would have been crossed in this time window, the one
+        // we are currently considering happens first so pre-empts the
+        // previously found events.
+        if (found_any) {
+          std::fill(found.begin(), found.end(), false);
+        }
       } else if (!(f_t1 == 0 && f_t0 != 0)) {
         // Consider the case where jump to a root *exactly* at t1;
         // this happens in coincident roots and with roots that are
@@ -370,7 +377,6 @@ private:
         // bookkeeping below and try the next event.
         continue;
       }
-
       sign[idx_event] = f_t0 < 0 ? 1 : -1;
       found[idx_event] = true;
       found_any = true;
