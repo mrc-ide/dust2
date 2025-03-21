@@ -329,9 +329,17 @@ private:
   real_type apply_events(real_type t0, real_type h, const real_type* y,
                          const events_type<real_type>& events,
                          ode::internals<real_type>& internals) {
-    size_t idx_first = events.size();
     real_type t1 = t0 + h;
-    real_type sign = 0;
+
+    // It might be worth saving this storage space in the solver, but
+    // I doubt it matters in pratice.  We need to save all the found
+    // events and their signs, even though probably only one will be
+    // found, because of the possibility that multiple events could
+    // happen at the same time (e.g., two time-scheduled events or two
+    // functions that happen to hit their roots at the same time).
+    std::vector<bool> found(events.size());
+    std::vector<real_type> sign(events.size());
+    bool found_any = false;
 
     for (size_t idx_event = 0; idx_event < events.size(); ++idx_event) {
       const auto& e = events[idx_event];
@@ -350,20 +358,44 @@ private:
         // interpolation is expected to be quite fast and accurate.
         constexpr real_type eps = 1e-6;
         constexpr size_t steps = 100;
-        auto root = lostturnip::find_result<real_type>(fn, t0, t1, eps, steps);
-        idx_first = idx_event;
-        t1 = root.x;
-        sign = f_t0 < 0 ? 1 : -1;
+        t1 = lostturnip::find_result<real_type>(fn, t0, t1, eps, steps).x;
+        // Currently untested - in the case where we have two roots
+        // that would have been crossed in this time window, the one
+        // we are currently considering happens first so pre-empts the
+        // previously found events.
+        if (found_any) {
+          std::fill(found.begin(), found.end(), false);
+        }
+      } else if (!(f_t1 == 0 && f_t0 != 0)) {
+        // Consider the case where jump to a root *exactly* at t1;
+        // this happens in coincident roots and with roots that are
+        // based in time, and which we arrange for the solver to stop
+        // at (e.g., while using simulate()).
+        //
+        // This test is the inverse of this though, because in the
+        // case where we *don't* get an exact root we should skip the
+        // bookkeeping below and try the next event.
+        continue;
       }
-      if (idx_first < events.size()) {
-        internals.last.interpolate(t1, y_next_.data());
-        events[idx_first].action(t1, sign, y_next_.data());
-        // We need to modify the history here so that search will find
-        // the right point.
-        internals.last.t1 = t1;
-        internals.events.push_back({t1, idx_first, sign});
-      }
+      sign[idx_event] = f_t0 < 0 ? 1 : -1;
+      found[idx_event] = true;
+      found_any = true;
     }
+
+    // If we found at least one event, then reset the solver state
+    // back to the point of the event and apply all the events in
+    // turn.
+    if (found_any) {
+      internals.last.interpolate(t1, y_next_.data());
+      for (size_t idx_event = 0; idx_event < events.size(); ++idx_event) {
+        if (found[idx_event]) {
+          events[idx_event].action(t1, sign[idx_event], y_next_.data());
+          internals.events.push_back({t1, idx_event, sign[idx_event]});
+        }
+      }
+      internals.last.t1 = t1;
+    }
+
     return t1;
   }
 
