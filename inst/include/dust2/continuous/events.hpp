@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <string>
 #include <vector>
 
 namespace dust2 {
@@ -32,17 +33,18 @@ template <typename real_type>
 struct event {
   using test_type = std::function<real_type(const real_type, const real_type*)>;
   using action_type = std::function<void(const real_type, const real_type, real_type*)>;
+  std::string name;
   std::vector<size_t> index;
   root_type root = root_type::both;
   test_type test;
   action_type action;
 
-  event(const std::vector<size_t>& index, test_type test, action_type action, root_type root = root_type::both) :
-    index(index), root(root), test(test), action(action) {
+  event(std::string name, const std::vector<size_t>& index, test_type test, action_type action, root_type root = root_type::both) :
+    name(name), index(index), root(root), test(test), action(action) {
   }
 
-  event(size_t index, action_type action, root_type root = root_type::both) :
-    event({index}, [](real_type t, const real_type* y) { return y[0]; }, action, root) {
+  event(std::string name, size_t index, action_type action, root_type root = root_type::both) :
+    event(name, {index}, [](real_type t, const real_type* y) { return y[0]; }, action, root) {
   }
 };
 

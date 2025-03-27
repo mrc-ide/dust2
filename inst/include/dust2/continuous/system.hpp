@@ -367,6 +367,15 @@ public:
     return ode_internals_;
   }
 
+  auto event_names(size_t i) const {
+    std::vector<std::string> ret;
+    ret.reserve(events_.size());
+    for (const auto& el : events_[i]) {
+      ret.push_back(el.name);
+    }
+    return ret;
+  }
+
   bool errors_pending() const {
     return errors_.unresolved();
   }
