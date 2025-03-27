@@ -60,7 +60,7 @@ public:
       y[0] = 0;
       y[1] = -shared.damp * y[1];
     };
-    dust2::ode::event<real_type> e(0, action);
+    dust2::ode::event<real_type> e("bounce", 0, action);
     return dust2::ode::events_type<real_type>({e});
   }
 };

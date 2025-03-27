@@ -59,14 +59,16 @@ public:
     const auto n = shared.t_change.size();
     dust2::ode::events_type<real_type> events;
     events.reserve(n);
+    std::string prefix = "event-";
     for (size_t i = 0; i < n; ++i) {
+      const auto name = prefix + std::to_string(i + 1);
       auto test = [&, i](const double t, const real_type* y) {
         return t - shared.t_change[i];
       };
       auto action = [&, i](const double t, const double sign, double* y) {
         y[0] += shared.delta[i];
       };
-      events.push_back(dust2::ode::event<real_type>({}, test, action));
+      events.push_back(dust2::ode::event<real_type>(name, {}, test, action));
     }
     return events;
   }

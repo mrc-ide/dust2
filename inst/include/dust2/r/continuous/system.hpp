@@ -56,7 +56,8 @@ SEXP dust2_continuous_alloc(cpp11::list r_pars,
 template <typename real_type>
 cpp11::sexp ode_internals_to_sexp(const ode::internals<real_type>& internals,
                                   bool include_coefficients,
-                                  bool include_history) {
+                                  bool include_history,
+                                  std::vector<std::string> event_names) {
   using namespace cpp11::literals;
   auto ret = cpp11::writable::list{
     "dydt"_nm = cpp11::as_sexp(internals.dydt),
@@ -109,17 +110,21 @@ cpp11::sexp ode_internals_to_sexp(const ode::internals<real_type>& internals,
                                            "coefficients"_nm = std::move(r_history_coef)};
     ret["history"] = cpp11::as_sexp(r_history);
   }
-  if (!internals.events.empty()) {
+  if (!event_names.empty()) {
     const auto n_events = internals.events.size();
     auto r_event_time = cpp11::writable::doubles(n_events);
     auto r_event_index = cpp11::writable::integers(n_events);
     auto r_event_sign = cpp11::writable::doubles(n_events);
+    auto r_event_name = cpp11::writable::strings(n_events);
     for (size_t i = 0; i < n_events; ++i) {
+      const auto idx = internals.events[i].index;
       r_event_time[i] = internals.events[i].time;
-      r_event_index[i] = static_cast<int>(internals.events[i].index) + 1;
+      r_event_index[i] = static_cast<int>(idx) + 1;
       r_event_sign[i] = internals.events[i].sign;
+      r_event_name[i] = event_names[idx];
     }
-    auto r_events = cpp11::writable::list{"time"_nm = std::move(r_event_time),
+    auto r_events = cpp11::writable::list{"name"_nm = std::move(r_event_name),
+                                          "time"_nm = std::move(r_event_time),
                                           "index"_nm = std::move(r_event_index),
                                           "sign"_nm = std::move(r_event_sign)};
     ret["events"] = cpp11::as_sexp(r_events);
@@ -132,10 +137,17 @@ SEXP dust2_system_internals(cpp11::sexp ptr, bool include_coefficients, bool inc
   auto *obj = dust2::r::safely_read_externalptr<T>(ptr, "system_internals");
   const auto& internals = obj->ode_internals();
   cpp11::writable::list ret(internals.size());
-  for (size_t i = 0; i < internals.size(); ++i) {
-    ret[i] = ode_internals_to_sexp(internals[i],
-                                   include_coefficients,
-                                   include_history);
+  const auto n_groups = obj->n_groups();
+  const auto n_particles = obj->n_particles();
+  for (size_t i = 0; i < n_groups; ++i) {
+    const auto event_names = obj->event_names(i);
+    for (size_t j = 0; j < n_particles; ++j) {
+      const auto k = i * n_particles + j;
+      ret[k] = ode_internals_to_sexp(internals[k],
+                                     include_coefficients,
+                                     include_history,
+                                     event_names);
+    }
   }
   return cpp11::as_sexp(ret);
 
