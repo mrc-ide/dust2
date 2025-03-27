@@ -14,8 +14,8 @@ The `dust2` package provides an engine for running dynamical systems in discrete
 
 ## Get started
 
-* `vignette("design")` describes the problems `dust` tries to solve ([read on package website](https://mrc-ide.github.io/dust/articles/design.html))
-* `vignette("dust2")` describes `dust` by example, showing two simple systems and the methods that can drive them ([read on package website](https://mrc-ide.github.io/dust/articles/dust.html))
+* `vignette("design")` describes the problems `dust` tries to solve ([read on package website](https://mrc-ide.github.io/dust2/articles/design.html))
+* `vignette("dust2")` describes `dust` by example, showing two simple systems and the methods that can drive them ([read on package website](https://mrc-ide.github.io/dust2/articles/dust2.html))
 * If you have used [`dust` version 1](https://mrc-ide.github.io/dust) before, see the [migration guide](https://mrc-ide.github.io/dust2/articles/migrating.html) to see what has changed.
 * [`odin2`](https://mrc-ide.github.io/odin2) is the way most `dust2` systems are written
 * The [odin & monty book](https://mrc-ide.github.io/odin-monty) shows how the package works in context
