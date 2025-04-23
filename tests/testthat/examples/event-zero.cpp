@@ -65,7 +65,6 @@ public:
     const auto test_y = [&](real_type t, const real_type* y) { return y[0] - shared.value_y; };
     const auto test_z = [&](real_type t, const real_type* y) { return y[0] - shared.value_z; };
     auto no_action = [](const double t, const double sign, double* y) {
-      Rprintf("Triggering action at %f\n", t);
     };
 
     dust2::ode::events_type<real_type> events;
