@@ -82,3 +82,18 @@ test_that("can cope with coincident events", {
     drop(y),
     t * 0.2 + c(0, cumsum(pars$delta))[findInterval(t, pars$t_change) + 1])
 })
+
+
+test_that("allow events that do not alter the root", {
+  ## Solution is x^2 / 2r
+  gen <- dust_compile("examples/event-zero.cpp", quiet = TRUE, debug = TRUE)
+  ctl <- dust_ode_control(debug_record_step_times = TRUE, save_history = TRUE)
+  sys <- dust_system_create(gen, list(value_y = 6.3456), ode_control = ctl)
+  dust_system_run_to_time(sys, 100)
+  expect_equal(dust_system_time(sys), 100)
+  expect_equal(dust_system_state(sys), c(5000, 99.5)) # 100^2/2, (100^2 - 99^2)/2
+
+  info <- dust_system_internals(sys, include_history = TRUE)
+  expect_equal(info$events[[1]]$time, sqrt(2 * 6.3456))
+  expect_lt(info$n_steps, 20)
+})
