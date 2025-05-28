@@ -42,9 +42,11 @@ public:
 
   using rng_state_type = monty::random::generator<real_type>;
 
-  // State is modelled as [Sh, Ih, Sv, Iv, beta, Ev...]
+  // State is modelled as [Sh, Ih, Sv, Iv, Ev..., beta]
+  //
+  // The beta variable is special and not updated via the rhs
   static dust2::packing packing_state(const shared_state& shared) {
-    return dust2::packing{{"Sh", {}}, {"Ih", {}}, {"Sv", {}}, {"Iv", {}}, {"beta", {}}, {"Ev", {shared.n_rates}}};
+    return dust2::packing{{"Sh", {}}, {"Ih", {}}, {"Sv", {}}, {"Iv", {}}, {"Ev", {shared.n_rates}}, {"beta", {}}};
   }
 
   static void initial(real_type time,
@@ -56,10 +58,10 @@ public:
     state_next[1] = shared.initial_Ih;     // Ih
     state_next[2] = shared.initial_Sv;     // Sv
     state_next[3] = shared.initial_Iv;     // Iv
-    state_next[4] = shared.mu;             // beta
-    for (size_t i = 5; i < 5 + shared.n_rates; ++i) {
+    for (size_t i = 4; i < 4 + shared.n_rates; ++i) {
       state_next[i] = 0;
     }
+    state_next[4 + shared.n_rates] = shared.mu; // beta
   }
 
   static void rhs(real_type time,
@@ -71,18 +73,21 @@ public:
     const real_type Ih = state[1];
     const real_type Sv = state[2];
     const real_type Iv = state[3];
-    const real_type beta = state[4];
-    const real_type * Ev = state + 5;
+    const real_type * Ev = state + 4;
+    const real_type beta = state[4 + shared.n_rates];
+
     const real_type foi_h = shared.a * shared.bh * Iv;
     const real_type foi_v = shared.a * shared.bv * Ih;
-    state_deriv[5] = foi_v * Sv - (shared.n_rates / shared.tau) * Ev[0] - shared.mu * Ev[0];
+    state_deriv[4] = foi_v * Sv - (shared.n_rates / shared.tau) * Ev[0] - shared.mu * Ev[0];
     for (size_t i = 1; i < shared.n_rates; ++i) {
-      state_deriv[5 + i] = (shared.n_rates / shared.tau) * Ev[i - 1] - (shared.n_rates / shared.tau) * Ev[i] - shared.mu * Ev[i];
+      state_deriv[4 + i] = (shared.n_rates / shared.tau) * Ev[i - 1] - (shared.n_rates / shared.tau) * Ev[i] - shared.mu * Ev[i];
     }
     state_deriv[0] = - foi_h * Sh + shared.r * Ih;
     state_deriv[1] = foi_h * Sh - shared.r * Ih;
     state_deriv[2] = beta * shared.initial_Sv - foi_v * Sv - shared.mu * Sv;
     state_deriv[3] = (shared.n_rates / shared.tau) * Ev[shared.n_rates - 1] - shared.mu * Iv;
+    // For completeness....
+    state_deriv[4 + shared.n_rates] = 0;
   }
 
   static void update(real_type time,
@@ -92,8 +97,9 @@ public:
                      internal_state& internal,
                      rng_state_type& rng_state,
                      real_type * state_next) {
-    const real_type beta = state[4];
-    state_next[4] = beta * monty::math::exp(monty::random::normal<real_type>(rng_state, 0, shared.beta_volatility));
+    const size_t i = 4 + shared.n_rates;
+    const real_type beta = state[i];
+    state_next[i] = beta * monty::math::exp(monty::random::normal<real_type>(rng_state, 0, shared.beta_volatility));
   }
 
   static shared_state build_shared(cpp11::list pars) {
