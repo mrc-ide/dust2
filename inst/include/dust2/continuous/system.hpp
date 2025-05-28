@@ -137,7 +137,7 @@ public:
             solver_[i].run(t0, t1, y, zero_every_[group], events_[i],
                            ode_internals_[k],
                            rhs_(particle, group, thread));
-            std::copy_n(y, n_state_ode_, y_other);
+            std::copy_n(y, n_state_ode_ + n_state_special_, y_other);
             update_(particle, group, thread,
                     time, y, rng_state, y_other);
             std::swap(y, y_other);
@@ -244,7 +244,7 @@ public:
         const auto k_to = n_particles_ * i + j;
         const auto k_from = n_particles_ * i + *(iter + k_to);
         const auto n_state_copy =
-          output_is_current_[i] ? n_state_ : n_state_ode_;
+          output_is_current_[i] ? n_state_ : n_state_ode_ + n_state_special_;
         std::copy_n(state_.begin() + k_from * n_state_,
                     n_state_copy,
                     state_other_.begin() + k_to * n_state_);

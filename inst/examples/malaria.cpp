@@ -10,6 +10,7 @@
 // [[dust2::parameter(initial_Ih, required = FALSE, constant = TRUE)]]
 // [[dust2::parameter(initial_Iv, required = FALSE, constant = TRUE)]]
 // [[dust2::parameter(initial_Sv, required = FALSE, constant = TRUE)]]
+// [[dust2::parameter(beta_volatility, required = FALSE, constant = TRUE)]]
 class malaria {
 public:
   malaria() = delete;
@@ -49,6 +50,10 @@ public:
     return dust2::packing{{"Sh", {}}, {"Ih", {}}, {"Sv", {}}, {"Iv", {}}, {"Ev", {shared.n_rates}}, {"beta", {}}};
   }
 
+  static size_t size_special() {
+    return 1;
+  }
+
   static void initial(real_type time,
                       const shared_state& shared,
                       internal_state& internal,
@@ -86,8 +91,6 @@ public:
     state_deriv[1] = foi_h * Sh - shared.r * Ih;
     state_deriv[2] = beta * shared.initial_Sv - foi_v * Sv - shared.mu * Sv;
     state_deriv[3] = (shared.n_rates / shared.tau) * Ev[shared.n_rates - 1] - shared.mu * Iv;
-    // For completeness....
-    state_deriv[4 + shared.n_rates] = 0;
   }
 
   static void update(real_type time,
@@ -112,7 +115,7 @@ public:
     const real_type initial_Iv = dust2::r::read_real(pars, "initial_Iv", 18);
     const real_type initial_Sv = dust2::r::read_real(pars, "initial_Sv", 100);
 
-    const real_type beta_volatility = 0.5;
+    const real_type beta_volatility = dust2::r::read_real(pars, "beta_volatility", 0.5);
     const real_type bh = 0.05;
     const real_type bv = 0.05;
     const real_type p = 0.9; // Daily probability of vector survival
