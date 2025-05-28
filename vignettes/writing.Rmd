@@ -375,3 +375,17 @@ dust2::dust_compile("examples/walk.cpp", debug = TRUE)
 dust2::dust_compile("examples/sir.cpp", debug = TRUE)
 dust2::dust_compile("examples/sirode.cpp", debug = TRUE)
 ```
+
+# Continuous time models with special variables
+
+There is a third class of variables that we need to consider, too; variables that form part of model state, but which do not update as part of the `rhs`; we will allow these to be referenced in the calculations, but they should not be changed in the `rhs`.  These **can** be changed in:
+
+* Any event
+* The `update` function, for mixed-time models
+* As part of the initial conditions (e.g., via `dust_system_set_state`)
+
+The total state vector is composed of a series of logical components, as specified by `packing_state()`.  We have three non-overlapping "blocks" of components, in order:
+
+* ode variables - always present as input, `rhs` must produce a derivative for these, and the value can be looked up anywhere. You must provide an initial condition.
+* special variables - always present as input, but excluded from calculation of derivatives. You must provide an initial condition.
+* output variables - present only output, cannot be present in initial conditions, cannot be looked up.

@@ -45,9 +45,9 @@ struct internals {
   size_t n_steps_rejected;
   bool save_history_;
 
-  internals(size_t n_variables, bool save_history) :
-    last(n_variables),
-    history_values(n_variables),
+  internals(size_t n_variables, size_t n_special, bool save_history) :
+    last(n_variables, n_special),
+    history_values(n_variables + n_special),
     dydt(n_variables),
     save_history_(save_history) {
     reset(last.c1.data());
@@ -75,11 +75,12 @@ class solver {
 public:
   ode::control<real_type> control;
 
-  solver(size_t n_variables, ode::control<real_type> control) :
+  solver(size_t n_variables, size_t n_special, ode::control<real_type> control) :
     control(control),
     n_variables_(n_variables),
-    y_next_(n_variables_),
-    y_stiff_(n_variables_),
+    n_special_(n_special),
+    y_next_(n_variables_ + n_special_),
+    y_stiff_(n_variables_ + n_special_),
     k2_(n_variables_),
     k3_(n_variables_),
     k4_(n_variables_),
@@ -251,6 +252,13 @@ public:
   void initialise(const real_type t, const real_type* y,
                   ode::internals<real_type>& internals, Rhs rhs) {
     internals.reset(y);
+    if (n_special_ > 0) {
+      // We will read from these, including specials, so set these
+      // into y_next_ and y_stiff_ ahead of time.  They cannot change
+      // between resets though.
+      std::copy_n(y + n_variables_, n_special_, y_next_.begin() + n_variables_);
+      std::copy_n(y + n_variables_, n_special_, y_stiff_.begin() + n_variables_);
+    }
     if (control.debug_record_step_times) {
       internals.step_times.push_back(t);
     }
@@ -318,6 +326,15 @@ private:
       internals.last.c2[i] = ydiff;
       internals.last.c3[i] = bspl;
       internals.last.c4[i] = -h * k2_[i] + ydiff - bspl;
+    }
+    // If there are any specials, we need to copy these over too.
+    // Alternatively, we might try
+    //   std::copy_n(y, internals.last.c1.size(), internals.last.c1.begin());
+    // which avoids some of the logic leaking through here.
+    if (internals.last.c1.size() > n_variables_) {
+      for (size_t i = n_variables_; i < internals.last.c1.size(); ++i) {
+        internals.last.c1[i] = y[i];
+      }
     }
   }
 
@@ -458,6 +475,7 @@ private:
 
 private:
   size_t n_variables_;
+  size_t n_special_;
   std::vector<real_type> y_next_;
   std::vector<real_type> y_stiff_;
   std::vector<real_type> k2_;

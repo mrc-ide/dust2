@@ -42,8 +42,9 @@ public:
     packing_state_(T::packing_state(shared[0])),
     packing_gradient_(do_packing_gradient<T>(shared[0])),
     n_state_(packing_state_.size()),
+    n_state_special_(do_n_state_special<T>(packing_state_)),
     n_state_output_(do_n_state_output<T>(packing_state_)),
-    n_state_ode_(n_state_ - n_state_output_),
+    n_state_ode_(n_state_ - n_state_output_ - n_state_special_),
     n_particles_(n_particles),
     n_groups_(shared.size()),
     n_threads_(n_threads),
@@ -54,7 +55,7 @@ public:
 
     state_(n_state_ * n_particles_total_),
     ode_internals_(n_particles_total_,
-                   {n_state_ode_, control_.save_history || has_delays_}),
+                   {n_state_ode_, n_state_special_, control_.save_history || has_delays_}),
 
     // For reordering to work:
     state_other_(n_state_ * n_particles_total_),
@@ -70,7 +71,7 @@ public:
     rng_(n_particles_total_, seed, deterministic),
     delays_(do_delays<T>(shared_)),
     events_(do_events<T>(shared_, internal_)),
-    solver_(n_groups_ * n_threads_, {n_state_ode_, control_}),
+    solver_(n_groups_ * n_threads_, {n_state_ode_, n_state_special_, control_}),
     output_is_current_(n_groups_),
     requires_initialise_(n_groups_, true) {
     initialise_delays_();
@@ -384,6 +385,7 @@ private:
   dust2::packing packing_state_;
   dust2::packing packing_gradient_;
   size_t n_state_;
+  size_t n_state_special_;
   size_t n_state_output_;
   size_t n_state_ode_;
   size_t n_particles_;

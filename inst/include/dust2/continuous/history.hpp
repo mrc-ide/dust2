@@ -20,11 +20,11 @@ struct history_step {
   std::vector<real_type> c4;
   std::vector<real_type> c5;
 
-  history_step(size_t n_variables) :
+  history_step(size_t n_variables, size_t n_special) :
     t0(0),
     t1(0),
     h(0),
-    c1(n_variables),
+    c1(n_variables + n_special),
     c2(n_variables),
     c3(n_variables),
     c4(n_variables),
@@ -50,8 +50,15 @@ struct history_step {
                    Iter result) const {
     const auto u = (time - t0) / h;
     const auto v = 1 - u;
+    const auto n_variables = c2.size();
     for (auto i : index) {
-      *result = c1[i] + u * (c2[i] + v * (c3[i] + u * (c4[i] + v * c5[i])));
+      if (i < n_variables) {
+        *result = c1[i] + u * (c2[i] + v * (c3[i] + u * (c4[i] + v * c5[i])));
+      } else {
+        // No interpolation of special variables between steps; they
+        // do not change (only at the points between steps).
+        *result = c1[i];
+      }
       ++result;
     }
   }
@@ -60,8 +67,13 @@ struct history_step {
   void interpolate(real_type time, Iter result) const {
     const auto u = (time - t0) / h;
     const auto v = 1 - u;
+    const auto n_variables = c2.size();
     for (size_t i = 0; i < c1.size(); ++i) {
-      *result = c1[i] + u * (c2[i] + v * (c3[i] + u * (c4[i] + v * c5[i])));
+      if (i < n_variables) {
+        *result = c1[i] + u * (c2[i] + v * (c3[i] + u * (c4[i] + v * c5[i])));
+      } else {
+        *result = c1[i];
+      }
       ++result;
     }
   }
