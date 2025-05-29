@@ -224,6 +224,10 @@ public:
            zero_every_type<real_type>& zero_every,
            const events_type<real_type>& events,
            ode::internals<real_type>& internals, Rhs rhs) {
+    if (n_special_ > 0) {
+      std::copy_n(y + n_variables_, n_special_, y_next_.begin() + n_variables_);
+      std::copy_n(y + n_variables_, n_special_, y_stiff_.begin() + n_variables_);
+    }
     if (control.critical_times.empty()) {
       while (t < t_end) {
         apply_zero_every(t, y, zero_every, internals);
@@ -252,19 +256,15 @@ public:
   void initialise(const real_type t, const real_type* y,
                   ode::internals<real_type>& internals, Rhs rhs) {
     internals.reset(y);
-    if (n_special_ > 0) {
-      // We will read from these, including specials, so set these
-      // into y_next_ and y_stiff_ ahead of time.  They cannot change
-      // between resets though.
-      std::copy_n(y + n_variables_, n_special_, y_next_.begin() + n_variables_);
-      std::copy_n(y + n_variables_, n_special_, y_stiff_.begin() + n_variables_);
-    }
     if (control.debug_record_step_times) {
       internals.step_times.push_back(t);
     }
     auto f0 = internals.dydt.data();
     auto f1 = k3_.data();
     auto y1 = y_next_.data();
+    if (n_special_ > 0) {
+      std::copy_n(y + n_variables_, n_special_, y1 + n_variables_);
+    }
 
     // Compute a first guess for explicit Euler as
     //   h = 0.01 * norm (y0) / norm (f0)

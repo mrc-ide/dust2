@@ -17,7 +17,7 @@ test_that("can apply stochastic updates by setting dt", {
   i_beta <- dust_unpack_index(sys)$beta
   beta <- y[i_beta, , ]
 
-  ## Equivalence to a deterinistic model:
+  ## Equivalence to a deterministic model:
   sys0 <- dust_system_create(malaria(), list(), n_particles = 10)
   for (i in seq_len(length(t) - 1)) {
     dust_system_set_state(sys0, y[, , i])

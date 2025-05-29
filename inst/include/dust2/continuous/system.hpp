@@ -109,11 +109,11 @@ public:
   template <typename mixed_time = typename dust2::properties<T>::is_mixed_time>
   typename std::enable_if<mixed_time::value, void>::type
   run_to_time(real_type time, const std::vector<size_t>& index_group) {
-    initialise_solver_(index_group);
     if (dt_ == 0) {
       run_to_time<std::false_type>(time, index_group);
       return;
     }
+    initialise_solver_(index_group);
     real_type * state_data = state_.data();
     real_type * state_other_data = state_other_.data();
     const size_t n_steps = (time - time_) / dt_;
