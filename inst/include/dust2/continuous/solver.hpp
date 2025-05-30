@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
+#include <tuple>
 #include <vector>
 #include <lostturnip.hpp>
 
@@ -183,11 +184,18 @@ public:
         success = true;
         update_interpolation(t, h, y, internals);
         if (!events.empty()) {
-          const auto t_next = apply_events(t, h, y, events, internals);
-          if (t_next < t + h) {
+          // Uses C++17's structured binding, which is a pecular syntax...
+          // https://en.cppreference.com/w/cpp/language/structured_binding.html
+          const auto [had_event, t_next] = apply_events(t, h, y, events, internals);
+          if (had_event) {
             event = true;
             truncated = false;
             h = t_next - t;
+            if (n_special_ > 0) {
+              const auto src = y_next_.begin() + n_variables_;
+              std::copy_n(src, n_special_, y + n_variables_);
+              std::copy_n(src, n_special_, y_stiff_.begin() + n_variables_);
+            }
             rhs(t_next, y_next_.data(), k2_.data());
           }
         }
@@ -343,9 +351,9 @@ private:
     std::copy_n(y_next_.begin(), n_variables_, y);
   }
 
-  real_type apply_events(real_type t0, real_type h, real_type* y,
-                         const events_type<real_type>& events,
-                         ode::internals<real_type>& internals) {
+  std::tuple<bool, real_type> apply_events(real_type t0, real_type h, const real_type* y,
+                                           const events_type<real_type>& events,
+                                           ode::internals<real_type>& internals) {
     real_type t1 = t0 + h;
 
     // It might be worth saving this storage space in the solver, but
@@ -407,18 +415,13 @@ private:
       for (size_t idx_event = 0; idx_event < events.size(); ++idx_event) {
         if (found[idx_event]) {
           events[idx_event].action(t1, sign[idx_event], y_next_.data());
-          if (n_special_ > 0) {
-            const auto src = y_next_.begin() + n_variables_;
-            std::copy_n(src, n_special_, y + n_variables_);
-            std::copy_n(src, n_special_, y_stiff_.begin() + n_variables_);
-          }
           internals.events.push_back({t1, idx_event, sign[idx_event]});
         }
       }
       internals.last.t1 = t1;
     }
 
-    return t1;
+    return {found_any, t1};
   }
 
   void apply_zero_every(real_type t, real_type* y,
