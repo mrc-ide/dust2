@@ -343,7 +343,7 @@ private:
     std::copy_n(y_next_.begin(), n_variables_, y);
   }
 
-  real_type apply_events(real_type t0, real_type h, const real_type* y,
+  real_type apply_events(real_type t0, real_type h, real_type* y,
                          const events_type<real_type>& events,
                          ode::internals<real_type>& internals) {
     real_type t1 = t0 + h;
@@ -407,6 +407,11 @@ private:
       for (size_t idx_event = 0; idx_event < events.size(); ++idx_event) {
         if (found[idx_event]) {
           events[idx_event].action(t1, sign[idx_event], y_next_.data());
+          if (n_special_ > 0) {
+            const auto src = y_next_.begin() + n_variables_;
+            std::copy_n(src, n_special_, y + n_variables_);
+            std::copy_n(src, n_special_, y_stiff_.begin() + n_variables_);
+          }
           internals.events.push_back({t1, idx_event, sign[idx_event]});
         }
       }
