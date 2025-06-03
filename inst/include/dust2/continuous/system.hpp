@@ -81,22 +81,15 @@ public:
   typename std::enable_if<!mixed_time::value, void>::type
   run_to_time(real_type time, const std::vector<size_t>& index_group) {
     initialise_solver_(index_group);
-    real_type * state_data = state_.data();
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
 #endif
     for (auto group : index_group) {
       for (size_t particle = 0; particle < n_particles_; ++particle) {
-        const auto thread = tools::thread_index();
-        const auto i = thread * n_groups_ + group;
-        const auto k = n_particles_ * group + particle;
-        const auto offset = k * n_state_;
-        real_type * y = state_data + offset;
         try {
-          solver_[i].run(time_, time, y, zero_every_[group], events_[i],
-                         ode_internals_[k],
-                         rhs_(particle, group, thread));
+          run_to_time1<std::false_type>(time, particle, group);
         } catch (std::exception const& e) {
+          const auto k = n_particles_ * group + particle;
           errors_.capture(e, k);
         }
       }
@@ -114,42 +107,21 @@ public:
       return;
     }
     initialise_solver_(index_group);
-    real_type * state_data = state_.data();
-    real_type * state_other_data = state_other_.data();
-    const size_t n_steps = (time - time_) / dt_;
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
 #endif
     for (auto group : index_group) {
       for (size_t particle = 0; particle < n_particles_; ++particle) {
-        const auto thread = tools::thread_index();
-        const auto i = thread * n_groups_ + group;
-        const auto k = n_particles_ * group + particle;
-        const auto offset = k * n_state_;
-        auto& rng_state = rng_.state(k);
-        real_type * y = state_data + offset;
-        real_type * y_other = state_other_data + offset;
         try {
-          real_type t1 = time_;
-          for (size_t step = 0; step < n_steps; ++step) {
-            const real_type t0 = t1;
-            t1 = (step == n_steps - 1) ? time : time_ + step * dt_;
-            solver_[i].run(t0, t1, y, zero_every_[group], events_[i],
-                           ode_internals_[k],
-                           rhs_(particle, group, thread));
-            std::copy_n(y, n_state_ode_ + n_state_special_, y_other);
-            update_(particle, group, thread,
-                    time, y, rng_state, y_other);
-            std::swap(y, y_other);
-            solver_[i].initialise(time_, y, ode_internals_[k],
-                                  rhs_(particle, group, thread));
-          }
-          } catch (std::exception const& e) {
+          run_to_time1<std::true_type>(time, particle, group);
+        } catch (std::exception const& e) {
+          const auto k = n_particles_ * group + particle;
           errors_.capture(e, k);
         }
       }
     }
     errors_.report();
+    const size_t n_steps = (time - time_) / dt_;
     if (n_steps % 2 == 1) {
       std::swap(state_, state_other_);
     }
@@ -577,6 +549,53 @@ private:
       for (auto i : index_group) {
         requires_initialise_[i] = true;
       }
+    }
+  }
+
+  template <typename mixed_time = typename dust2::properties<T>::is_mixed_time>
+  typename std::enable_if<!mixed_time::value, void>::type
+  run_to_time1(real_type time, size_t particle, size_t group) {
+    const auto thread = tools::thread_index();
+    const auto i = thread * n_groups_ + group;
+    const auto k = n_particles_ * group + particle;
+    const auto offset = k * n_state_;
+    real_type * y = state_.data() + offset;
+    solver_[i].run(time_, time, y, zero_every_[group], events_[i],
+                   ode_internals_[k],
+                   rhs_(particle, group, thread));
+  }
+
+  template <typename mixed_time = typename dust2::properties<T>::is_mixed_time>
+  typename std::enable_if<mixed_time::value, void>::type
+  run_to_time1(real_type time, size_t particle, size_t group) {
+    if (dt_ == 0) {
+      run_to_time1<std::false_type>(time, particle, group);
+      return;
+    }
+
+    const size_t n_steps = (time - time_) / dt_;
+
+    const auto thread = tools::thread_index();
+    const auto i = thread * n_groups_ + group;
+    const auto k = n_particles_ * group + particle;
+    const auto offset = k * n_state_;
+    auto& rng_state = rng_.state(k);
+    real_type * y = state_.data() + offset;
+    real_type * y_other = state_other_.data() + offset;
+
+    real_type t1 = time_;
+    for (size_t step = 0; step < n_steps; ++step) {
+      const real_type t0 = t1;
+      t1 = (step == n_steps - 1) ? time : time_ + step * dt_;
+      solver_[i].run(t0, t1, y, zero_every_[group], events_[i],
+                     ode_internals_[k],
+                     rhs_(particle, group, thread));
+      std::copy_n(y, n_state_ode_, y_other);
+      update_(particle, group, thread,
+              time, y, rng_state, y_other);
+      std::swap(y, y_other);
+      solver_[i].initialise(time_, y, ode_internals_[k],
+                            rhs_(particle, group, thread));
     }
   }
 };
