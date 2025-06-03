@@ -71,10 +71,15 @@ cpp11::sexp ode_internals_to_sexp(const ode::internals<real_type>& internals,
     "history"_nm = R_NilValue,
     "events"_nm = R_NilValue};
 
+  const auto n_variables = internals.last.c2.size();
+
   if (include_coefficients) {
-    auto r_coef = cpp11::writable::doubles_matrix<>(internals.last.c1.size(), 5);
+    auto r_coef = cpp11::writable::doubles_matrix<>(internals.last.c2.size(), 5);
     auto coef = REAL(r_coef);
-    coef = std::copy(internals.last.c1.begin(), internals.last.c1.end(), coef);
+    // TODO: we might want to use copy_n everywhere, just a little
+    // more churn.  Perhaps internals should also advertise
+    // n_variables more obviously?
+    coef = std::copy_n(internals.last.c1.begin(), n_variables, coef);
     coef = std::copy(internals.last.c2.begin(), internals.last.c2.end(), coef);
     coef = std::copy(internals.last.c3.begin(), internals.last.c3.end(), coef);
     coef = std::copy(internals.last.c4.begin(), internals.last.c4.end(), coef);
@@ -97,7 +102,7 @@ cpp11::sexp ode_internals_to_sexp(const ode::internals<real_type>& internals,
       *history_t0++ = h.t0;
       *history_t1++ = h.t1;
       *history_h++ = h.h;
-      history_coef = std::copy(h.c1.begin(), h.c1.end(), history_coef);
+      history_coef = std::copy_n(h.c1.begin(), n_variables, history_coef);
       history_coef = std::copy(h.c2.begin(), h.c2.end(), history_coef);
       history_coef = std::copy(h.c3.begin(), h.c3.end(), history_coef);
       history_coef = std::copy(h.c4.begin(), h.c4.end(), history_coef);

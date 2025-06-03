@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
+#include <tuple>
 #include <vector>
 #include <lostturnip.hpp>
 
@@ -45,9 +46,9 @@ struct internals {
   size_t n_steps_rejected;
   bool save_history_;
 
-  internals(size_t n_variables, bool save_history) :
-    last(n_variables),
-    history_values(n_variables),
+  internals(size_t n_variables, size_t n_special, bool save_history) :
+    last(n_variables, n_special),
+    history_values(n_variables + n_special),
     dydt(n_variables),
     save_history_(save_history) {
     reset(last.c1.data());
@@ -75,11 +76,12 @@ class solver {
 public:
   ode::control<real_type> control;
 
-  solver(size_t n_variables, ode::control<real_type> control) :
+  solver(size_t n_variables, size_t n_special, ode::control<real_type> control) :
     control(control),
     n_variables_(n_variables),
-    y_next_(n_variables_),
-    y_stiff_(n_variables_),
+    n_special_(n_special),
+    y_next_(n_variables_ + n_special_),
+    y_stiff_(n_variables_ + n_special_),
     k2_(n_variables_),
     k3_(n_variables_),
     k4_(n_variables_),
@@ -182,11 +184,18 @@ public:
         success = true;
         update_interpolation(t, h, y, internals);
         if (!events.empty()) {
-          const auto t_next = apply_events(t, h, y, events, internals);
-          if (t_next < t + h) {
+          // Uses C++17's structured binding, which is a pecular syntax...
+          // https://en.cppreference.com/w/cpp/language/structured_binding.html
+          const auto [had_event, t_next] = apply_events(t, h, y, events, internals);
+          if (had_event) {
             event = true;
             truncated = false;
             h = t_next - t;
+            if (n_special_ > 0) {
+              const auto src = y_next_.begin() + n_variables_;
+              std::copy_n(src, n_special_, y + n_variables_);
+              std::copy_n(src, n_special_, y_stiff_.begin() + n_variables_);
+            }
             rhs(t_next, y_next_.data(), k2_.data());
           }
         }
@@ -223,6 +232,10 @@ public:
            zero_every_type<real_type>& zero_every,
            const events_type<real_type>& events,
            ode::internals<real_type>& internals, Rhs rhs) {
+    if (n_special_ > 0) {
+      std::copy_n(y + n_variables_, n_special_, y_next_.begin() + n_variables_);
+      std::copy_n(y + n_variables_, n_special_, y_stiff_.begin() + n_variables_);
+    }
     if (control.critical_times.empty()) {
       while (t < t_end) {
         apply_zero_every(t, y, zero_every, internals);
@@ -257,6 +270,9 @@ public:
     auto f0 = internals.dydt.data();
     auto f1 = k3_.data();
     auto y1 = y_next_.data();
+    if (n_special_ > 0) {
+      std::copy_n(y + n_variables_, n_special_, y1 + n_variables_);
+    }
 
     // Compute a first guess for explicit Euler as
     //   h = 0.01 * norm (y0) / norm (f0)
@@ -319,6 +335,11 @@ private:
       internals.last.c3[i] = bspl;
       internals.last.c4[i] = -h * k2_[i] + ydiff - bspl;
     }
+    // If there are any specials, we need to copy these over too.
+    if (n_special_ > 0) {
+      std::copy_n(y + n_variables_, n_special_,
+                  internals.last.c1.begin() + n_variables_);
+    }
   }
 
   void accept(real_type t, real_type h, real_type* y, ode::internals<real_type>& internals) {
@@ -326,9 +347,9 @@ private:
     std::copy_n(y_next_.begin(), n_variables_, y);
   }
 
-  real_type apply_events(real_type t0, real_type h, const real_type* y,
-                         const events_type<real_type>& events,
-                         ode::internals<real_type>& internals) {
+  std::tuple<bool, real_type> apply_events(real_type t0, real_type h, const real_type* y,
+                                           const events_type<real_type>& events,
+                                           ode::internals<real_type>& internals) {
     real_type t1 = t0 + h;
 
     // It might be worth saving this storage space in the solver, but
@@ -396,7 +417,7 @@ private:
       internals.last.t1 = t1;
     }
 
-    return t1;
+    return {found_any, t1};
   }
 
   void apply_zero_every(real_type t, real_type* y,
@@ -458,6 +479,7 @@ private:
 
 private:
   size_t n_variables_;
+  size_t n_special_;
   std::vector<real_type> y_next_;
   std::vector<real_type> y_stiff_;
   std::vector<real_type> k2_;

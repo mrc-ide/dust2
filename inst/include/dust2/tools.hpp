@@ -75,7 +75,9 @@ std::vector<T> subset(const std::vector<T>& x, const std::vector<size_t> index) 
   std::vector<T> ret;
   ret.reserve(index.size());
   for (auto i : index) {
-    ret.push_back(x[i]);
+    if (i < x.size()) {
+      ret.push_back(x[i]);
+    }
   }
   return ret;
 }
