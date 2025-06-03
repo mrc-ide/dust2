@@ -77,9 +77,7 @@ public:
     initialise_delays_();
   }
 
-  template <typename mixed_time = typename dust2::properties<T>::is_mixed_time>
-  typename std::enable_if<!mixed_time::value, void>::type
-  run_to_time(real_type time, const std::vector<size_t>& index_group) {
+  void run_to_time(real_type time, const std::vector<size_t>& index_group) {
     initialise_solver_(index_group);
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
@@ -87,7 +85,7 @@ public:
     for (auto group : index_group) {
       for (size_t particle = 0; particle < n_particles_; ++particle) {
         try {
-          run_to_time1<std::false_type>(time, particle, group);
+          run_to_time1(time, particle, group);
         } catch (std::exception const& e) {
           const auto k = n_particles_ * group + particle;
           errors_.capture(e, k);
@@ -95,35 +93,11 @@ public:
       }
     }
     errors_.report();
-    time_ = time;
-    update_output_is_current(index_group, false);
-  }
-
-  template <typename mixed_time = typename dust2::properties<T>::is_mixed_time>
-  typename std::enable_if<mixed_time::value, void>::type
-  run_to_time(real_type time, const std::vector<size_t>& index_group) {
-    if (dt_ == 0) {
-      run_to_time<std::false_type>(time, index_group);
-      return;
-    }
-    initialise_solver_(index_group);
-#ifdef _OPENMP
-#pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
-#endif
-    for (auto group : index_group) {
-      for (size_t particle = 0; particle < n_particles_; ++particle) {
-        try {
-          run_to_time1<std::true_type>(time, particle, group);
-        } catch (std::exception const& e) {
-          const auto k = n_particles_ * group + particle;
-          errors_.capture(e, k);
-        }
+    if constexpr (properties<T>::is_mixed_time::value) {
+      const size_t n_steps = (time - time_) / dt_;
+      if (n_steps % 2 == 1) {
+        std::swap(state_, state_other_);
       }
-    }
-    errors_.report();
-    const size_t n_steps = (time - time_) / dt_;
-    if (n_steps % 2 == 1) {
-      std::swap(state_, state_other_);
     }
     time_ = time;
     update_output_is_current(index_group, false);
