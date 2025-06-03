@@ -388,4 +388,4 @@ The total state vector is composed of a series of logical components, as specifi
 
 * ode variables - always present as input, `rhs` must produce a derivative for these, and the value can be looked up anywhere. You must provide an initial condition.
 * special variables - always present as input, but excluded from calculation of derivatives. You must provide an initial condition, and you must update within the `update()` function (if used). You may also change these within events.
-* output variables - present only output, cannot be present in initial conditions, cannot be looked up.
+* output variables - present only in output, cannot be present in initial conditions, cannot be looked up.
