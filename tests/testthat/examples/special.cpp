@@ -50,8 +50,8 @@ public:
                      internal_state& internal,
                      rng_state_type& rng_state,
                      real_type * state_next) {
-    const real_type y = state[1];
-    state_next[1] = monty::random::normal<real_type>(rng_state, y, shared.sd);
+    const real_type b = state[1];
+    state_next[1] = monty::random::normal<real_type>(rng_state, b, shared.sd);
   }
 
   static shared_state build_shared(cpp11::list pars) {
