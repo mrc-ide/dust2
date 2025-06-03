@@ -35,10 +35,16 @@ struct test_has_rhs: std::false_type {};
 template <class T>
 struct test_has_rhs<T, std::void_t<decltype(T::rhs)>>: std::true_type {};
 
+// TODO: drive this from size_output, not from output perhaps?
 template <class T, class = void>
 struct test_has_output: std::false_type {};
 template <class T>
 struct test_has_output<T, std::void_t<decltype(T::output)>>: std::true_type {};
+
+template <class T, class = void>
+struct test_has_special: std::false_type {};
+template <class T>
+struct test_has_special<T, std::void_t<decltype(T::size_special)>>: std::true_type {};
 
 template <class T, class = void>
 struct test_has_delays: std::false_type {};
@@ -92,6 +98,7 @@ struct properties {
   using has_zero_every = internals::test_has_zero_every<T>;
   using is_mixed_time = typename std::conditional<internals::test_has_rhs<T>::value && internals::test_has_update<T>::value, std::true_type, std::false_type>::type;
   using has_output = typename std::conditional<internals::test_has_rhs<T>::value && internals::test_has_output<T>::value, std::true_type, std::false_type>::type;
+  using has_special = typename std::conditional<internals::test_has_rhs<T>::value && internals::test_has_special<T>::value, std::true_type, std::false_type>::type;
   using has_delays = internals::test_has_delays<T>;
   // Because of the above these are now actual numbers rather than types; we may make this change everywhere...
   static constexpr bool rhs_uses_delays = internals::test_rhs_uses_delays<T>();
@@ -121,17 +128,34 @@ dust2::packing do_packing_gradient(const typename T::shared_state &shared) {
   return dust2::packing{};
 }
 
-
-template <typename T, typename std::enable_if<properties<T>::has_output::value, T>::type* = nullptr>
-size_t do_n_state_output(const dust2::packing& packing) {
-  return std::accumulate(packing.len().end() - T::size_output(),
-                         packing.len().end(),
-                         0);
+template <typename T>
+size_t size_special() {
+  if constexpr (properties<T>::has_special::value) {
+    return T::size_special();
+  } else {
+    return 0;
+  }
 }
 
-template <typename T, typename std::enable_if<!properties<T>::has_output::value, T>::type* = nullptr>
+template <typename T>
+size_t size_output() {
+  if constexpr (properties<T>::has_output::value) {
+    return T::size_output();
+  } else {
+    return 0;
+  }
+}
+
+template <typename T>
+size_t do_n_state_special(const dust2::packing& packing) {
+  const auto end = packing.len().end() - size_output<T>();
+  return std::accumulate(end - size_special<T>(), end, 0);
+}
+
+template <typename T>
 size_t do_n_state_output(const dust2::packing& packing) {
-  return 0;
+  const auto end = packing.len().end();
+  return std::accumulate(end - size_output<T>(), end, 0);
 }
 
 template <typename T, typename std::enable_if<properties<T>::has_zero_every::value, T>::type* = nullptr>

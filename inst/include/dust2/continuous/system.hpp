@@ -42,8 +42,9 @@ public:
     packing_state_(T::packing_state(shared[0])),
     packing_gradient_(do_packing_gradient<T>(shared[0])),
     n_state_(packing_state_.size()),
+    n_state_special_(do_n_state_special<T>(packing_state_)),
     n_state_output_(do_n_state_output<T>(packing_state_)),
-    n_state_ode_(n_state_ - n_state_output_),
+    n_state_ode_(n_state_ - n_state_output_ - n_state_special_),
     n_particles_(n_particles),
     n_groups_(shared.size()),
     n_threads_(n_threads),
@@ -54,7 +55,7 @@ public:
 
     state_(n_state_ * n_particles_total_),
     ode_internals_(n_particles_total_,
-                   {n_state_ode_, control_.save_history || has_delays_}),
+                   {n_state_ode_, n_state_special_, control_.save_history || has_delays_}),
 
     // For reordering to work:
     state_other_(n_state_ * n_particles_total_),
@@ -70,87 +71,33 @@ public:
     rng_(n_particles_total_, seed, deterministic),
     delays_(do_delays<T>(shared_)),
     events_(do_events<T>(shared_, internal_)),
-    solver_(n_groups_ * n_threads_, {n_state_ode_, control_}),
+    solver_(n_groups_ * n_threads_, {n_state_ode_, n_state_special_, control_}),
     output_is_current_(n_groups_),
     requires_initialise_(n_groups_, true) {
     initialise_delays_();
   }
 
-  template <typename mixed_time = typename dust2::properties<T>::is_mixed_time>
-  typename std::enable_if<!mixed_time::value, void>::type
-  run_to_time(real_type time, const std::vector<size_t>& index_group) {
+  void run_to_time(real_type time, const std::vector<size_t>& index_group) {
     initialise_solver_(index_group);
-    real_type * state_data = state_.data();
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
 #endif
     for (auto group : index_group) {
       for (size_t particle = 0; particle < n_particles_; ++particle) {
-        const auto thread = tools::thread_index();
-        const auto i = thread * n_groups_ + group;
-        const auto k = n_particles_ * group + particle;
-        const auto offset = k * n_state_;
-        real_type * y = state_data + offset;
         try {
-          solver_[i].run(time_, time, y, zero_every_[group], events_[i],
-                         ode_internals_[k],
-                         rhs_(particle, group, thread));
+          run_to_time1(time, particle, group);
         } catch (std::exception const& e) {
+          const auto k = n_particles_ * group + particle;
           errors_.capture(e, k);
         }
       }
     }
     errors_.report();
-    time_ = time;
-    update_output_is_current(index_group, false);
-  }
-
-  template <typename mixed_time = typename dust2::properties<T>::is_mixed_time>
-  typename std::enable_if<mixed_time::value, void>::type
-  run_to_time(real_type time, const std::vector<size_t>& index_group) {
-    initialise_solver_(index_group);
-    if (dt_ == 0) {
-      run_to_time<std::false_type>(time, index_group);
-      return;
-    }
-    real_type * state_data = state_.data();
-    real_type * state_other_data = state_other_.data();
-    const size_t n_steps = (time - time_) / dt_;
-#ifdef _OPENMP
-#pragma omp parallel for schedule(static) num_threads(n_threads_) collapse(2)
-#endif
-    for (auto group : index_group) {
-      for (size_t particle = 0; particle < n_particles_; ++particle) {
-        const auto thread = tools::thread_index();
-        const auto i = thread * n_groups_ + group;
-        const auto k = n_particles_ * group + particle;
-        const auto offset = k * n_state_;
-        auto& rng_state = rng_.state(k);
-        real_type * y = state_data + offset;
-        real_type * y_other = state_other_data + offset;
-        try {
-          real_type t1 = time_;
-          for (size_t step = 0; step < n_steps; ++step) {
-            const real_type t0 = t1;
-            t1 = (step == n_steps - 1) ? time : time_ + step * dt_;
-            solver_[i].run(t0, t1, y, zero_every_[group], events_[i],
-                           ode_internals_[k],
-                           rhs_(particle, group, thread));
-            std::copy_n(y, n_state_ode_, y_other);
-            update_(particle, group, thread,
-                    time, y, rng_state, y_other);
-            std::swap(y, y_other);
-            solver_[i].initialise(time_, y, ode_internals_[k],
-                                  rhs_(particle, group, thread));
-          }
-          } catch (std::exception const& e) {
-          errors_.capture(e, k);
-        }
+    if constexpr (properties<T>::is_mixed_time::value) {
+      const size_t n_steps = (time - time_) / dt_;
+      if (n_steps % 2 == 1) {
+        std::swap(state_, state_other_);
       }
-    }
-    errors_.report();
-    if (n_steps % 2 == 1) {
-      std::swap(state_, state_other_);
     }
     time_ = time;
     update_output_is_current(index_group, false);
@@ -243,7 +190,7 @@ public:
         const auto k_to = n_particles_ * i + j;
         const auto k_from = n_particles_ * i + *(iter + k_to);
         const auto n_state_copy =
-          output_is_current_[i] ? n_state_ : n_state_ode_;
+          output_is_current_[i] ? n_state_ : n_state_ode_ + n_state_special_;
         std::copy_n(state_.begin() + k_from * n_state_,
                     n_state_copy,
                     state_other_.begin() + k_to * n_state_);
@@ -384,6 +331,7 @@ private:
   dust2::packing packing_state_;
   dust2::packing packing_gradient_;
   size_t n_state_;
+  size_t n_state_special_;
   size_t n_state_output_;
   size_t n_state_ode_;
   size_t n_particles_;
@@ -574,6 +522,53 @@ private:
       for (auto i : index_group) {
         requires_initialise_[i] = true;
       }
+    }
+  }
+
+  template <typename mixed_time = typename dust2::properties<T>::is_mixed_time>
+  typename std::enable_if<!mixed_time::value, void>::type
+  run_to_time1(real_type time, size_t particle, size_t group) {
+    const auto thread = tools::thread_index();
+    const auto i = thread * n_groups_ + group;
+    const auto k = n_particles_ * group + particle;
+    const auto offset = k * n_state_;
+    real_type * y = state_.data() + offset;
+    solver_[i].run(time_, time, y, zero_every_[group], events_[i],
+                   ode_internals_[k],
+                   rhs_(particle, group, thread));
+  }
+
+  template <typename mixed_time = typename dust2::properties<T>::is_mixed_time>
+  typename std::enable_if<mixed_time::value, void>::type
+  run_to_time1(real_type time, size_t particle, size_t group) {
+    if (dt_ == 0) {
+      run_to_time1<std::false_type>(time, particle, group);
+      return;
+    }
+
+    const size_t n_steps = (time - time_) / dt_;
+
+    const auto thread = tools::thread_index();
+    const auto i = thread * n_groups_ + group;
+    const auto k = n_particles_ * group + particle;
+    const auto offset = k * n_state_;
+    auto& rng_state = rng_.state(k);
+    real_type * y = state_.data() + offset;
+    real_type * y_other = state_other_.data() + offset;
+
+    real_type t1 = time_;
+    for (size_t step = 0; step < n_steps; ++step) {
+      const real_type t0 = t1;
+      t1 = (step == n_steps - 1) ? time : time_ + step * dt_;
+      solver_[i].run(t0, t1, y, zero_every_[group], events_[i],
+                     ode_internals_[k],
+                     rhs_(particle, group, thread));
+      std::copy_n(y, n_state_ode_, y_other);
+      update_(particle, group, thread,
+              time, y, rng_state, y_other);
+      std::swap(y, y_other);
+      solver_[i].initialise(time_, y, ode_internals_[k],
+                            rhs_(particle, group, thread));
     }
   }
 };
