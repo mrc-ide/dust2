@@ -336,13 +336,9 @@ private:
       internals.last.c4[i] = -h * k2_[i] + ydiff - bspl;
     }
     // If there are any specials, we need to copy these over too.
-    // Alternatively, we might try
-    //   std::copy_n(y, internals.last.c1.size(), internals.last.c1.begin());
-    // which avoids some of the logic leaking through here.
-    if (internals.last.c1.size() > n_variables_) {
-      for (size_t i = n_variables_; i < internals.last.c1.size(); ++i) {
-        internals.last.c1[i] = y[i];
-      }
+    if (n_special_ > 0) {
+      std::copy_n(y + n_variables_, n_special_,
+                  internals.last.c1.begin() + n_variables_);
     }
   }
 
