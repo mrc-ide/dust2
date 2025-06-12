@@ -36,6 +36,7 @@ struct internals {
   history_step<real_type> last;
   history<real_type> history_values;
   event_history<real_type> events;
+  std::vector<real_type> last_event;
 
   std::vector<real_type> dydt;
   std::vector<real_type> step_times;
@@ -322,6 +323,14 @@ public:
     internals.step_size = h;
   }
 
+  void initialise_events(const events_type<real_type>& events,
+                         ode::internals<real_type>& internals) {
+    internals.last_event.resize(events.size());
+    for (size_t i = 0; i < events.size(); ++i) {
+      internals.last_event[i] = -std::numeric_limits<real_type>::infinity();
+    }
+  }
+
 private:
   void update_interpolation(real_type t, real_type h, real_type* y, ode::internals<real_type>& internals) {
     internals.last.t0 = t;
@@ -363,6 +372,10 @@ private:
     bool found_any = false;
 
     for (size_t idx_event = 0; idx_event < events.size(); ++idx_event) {
+      // We've already seen this event.
+      if (internals.last_event[idx_event] == t0) {
+        continue;
+      }
       const auto& e = events[idx_event];
       // Use y_stiff as temporary space here, it's only used
       // transiently and within the step
@@ -412,6 +425,7 @@ private:
         if (found[idx_event]) {
           events[idx_event].action(t1, sign[idx_event], y_next_.data());
           internals.events.push_back({t1, idx_event, sign[idx_event]});
+          internals.last_event[idx_event] = t1;
         }
       }
       internals.last.t1 = t1;

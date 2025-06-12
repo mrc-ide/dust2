@@ -520,6 +520,7 @@ private:
           try {
             solver_[i].initialise(time_, y, ode_internals_[k],
                                   rhs_(particle, group, thread));
+            solver_[i].initialise_events(events_[i], ode_internals_[k]);
           } catch (std::exception const& e) {
             errors_.capture(e, k);
           }
