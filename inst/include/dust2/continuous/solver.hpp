@@ -400,7 +400,7 @@ private:
         if (found_any) {
           std::fill(found.begin(), found.end(), false);
         }
-      } else if (!(f_t1 == 0 && f_t0 != 0)) {
+      } else if (!is_root_at_b(f_t0, f_t1, e.root)) {
         // Consider the case where jump to a root *exactly* at t1;
         // this happens in coincident roots and with roots that are
         // based in time, and which we arrange for the solver to stop
