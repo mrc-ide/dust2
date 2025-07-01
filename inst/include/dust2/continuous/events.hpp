@@ -29,6 +29,20 @@ bool is_root(const real_type a, const real_type b, const root_type& root) {
   return false;
 }
 
+
+template <typename real_type>
+bool is_root_at_b(const real_type a, const real_type b, const root_type& root) {
+  switch(root) {
+  case root_type::both:
+    return b == 0 && a != 0;
+  case root_type::increase:
+    return b == 0 && a < 0;
+  case root_type::decrease:
+    return b == 0 && a > 0;
+  }
+  return false;
+}
+
 template <typename real_type>
 struct event {
   using test_type = std::function<real_type(const real_type, const real_type*)>;
