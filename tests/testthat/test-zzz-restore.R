@@ -54,11 +54,27 @@ test_that("Can restore model in monty context", {
   s <- monty::monty_sampler_random_walk(diag(2) * c(0.02, 0.02))
   r <- monty::monty_runner_callr(2)
 
-  set.seed(1)
-  res <- monty::monty_sample(m, s, 20, initial = c(0.2, 0.1), runner = r)
+  initial <- c(0.2, 0.1)
 
   set.seed(1)
-  cmp <- monty::monty_sample(m, s, 20, initial = c(0.2, 0.1))
+  res <- monty::monty_sample(m, s, 20, initial = initial, runner = r)
+
+  set.seed(1)
+  cmp <- monty::monty_sample(m, s, 20, initial = initial)
+
+  expect_equal(res, cmp)
+
+  ## And again, with unfilter:
+  obj <- dust_unfilter_create(mysir, time_start, data)
+  m <- dust_likelihood_monty(obj, packer) + prior
+  s <- monty::monty_sampler_random_walk(diag(2) * c(0.02, 0.02))
+  r <- monty::monty_runner_callr(2)
+
+  set.seed(1)
+  res <- monty::monty_sample(m, s, 20, initial = initial, runner = r)
+
+  set.seed(1)
+  cmp <- monty::monty_sample(m, s, 20, initial = initial)
 
   expect_equal(res, cmp)
 })
