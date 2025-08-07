@@ -127,7 +127,8 @@ dust_likelihood_ensure_initialised <- function(obj, pars) {
     ## to the global environment.  The other way we'd be able to tell
     ## this is if the package is not loaded.
     if (identical(environment(obj$methods$alloc), .GlobalEnv)) {
-      methods <- dust_system_generator_methods(obj$generator)$filter
+      cls <- if (obj$deterministic) "unfilter" else "filter"
+      methods <- dust_system_generator_methods(obj$generator)[[cls]]
       assign("methods", methods, obj)
     }
     index_group <- NULL
