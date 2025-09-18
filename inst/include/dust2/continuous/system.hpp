@@ -94,9 +94,11 @@ public:
     }
     errors_.report();
     if constexpr (properties<T>::is_mixed_time::value) {
-      const size_t n_steps = (time - time_) / dt_;
-      if (n_steps % 2 == 1) {
-        std::swap(state_, state_other_);
+      if (dt_ != 0) {
+        const size_t n_steps = (time - time_) / dt_;
+        if (n_steps % 2 == 1) {
+          std::swap(state_, state_other_);
+        }
       }
     }
     time_ = time;
