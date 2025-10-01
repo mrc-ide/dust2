@@ -49,3 +49,32 @@ test_that("Can compare to data", {
   expect_equal(dust_system_compare_data(sys, d),
                dbinom(d$positive, d$tested, s$Ih, log = TRUE))
 })
+
+test_that("Can get internals from mixed systems", {
+  n_particles <- 10
+  sys <- dust_system_create(
+    malaria(), list(), n_particles = n_particles, dt = 1
+  )
+  dust_system_set_state_initial(sys)
+  t <- seq(0, 20)
+  y <- dust_system_simulate(sys, t)
+
+  expect_no_condition(
+    dust_system_internals(sys)
+  )
+  expect_false(
+    is.null(dust_system_internals(sys))
+  )
+  
+  # same names as continuous system
+  s <- dust_system_create(sirode())
+  expect_identical(
+    names(dust_system_internals(sys)),
+    names(dust_system_internals(s))
+  )
+
+  expect_identical(
+    dust_system_internals(sys)[["particle"]],
+    seq(n_particles)
+  )
+})
