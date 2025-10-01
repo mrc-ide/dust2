@@ -888,7 +888,7 @@ dust_system_generator_methods <- function(generator) {
                     "update_pars",
                     "run_to_time", "simulate",
                     "reorder",
-                    if (time_type == "continuous") "internals")
+                    if (time_type != "discrete") "internals")
   methods_compare <- "compare_data"
   methods <- get_methods(c(methods_core, methods_compare), "system", name)
   ok <- !vapply(methods[methods_core], is.null, TRUE)
