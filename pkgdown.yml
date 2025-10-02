@@ -1,0 +1,16 @@
+pandoc: 3.1.11
+pkgdown: 2.1.3
+pkgdown_sha: ~
+articles:
+  data: data.html
+  design: design.html
+  details: details.html
+  dust2: dust2.html
+  migrating: migrating.html
+  packaging: packaging.html
+  periodic: periodic.html
+  writing: writing.html
+last_built: 2025-10-02T09:43Z
+urls:
+  reference: https://mrc-ide.github.io/dust2/reference
+  article: https://mrc-ide.github.io/dust2/articles
