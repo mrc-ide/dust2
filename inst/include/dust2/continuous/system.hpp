@@ -555,6 +555,7 @@ private:
     const auto i = thread * n_groups_ + group;
     const auto k = n_particles_ * group + particle;
     const auto offset = k * n_state_;
+    const auto n_variables = n_state_ode_ + n_state_special_;
     auto& rng_state = rng_.state(k);
     real_type * y = state_.data() + offset;
     real_type * y_other = state_other_.data() + offset;
@@ -566,12 +567,20 @@ private:
       solver_[i].run(t0, t1, y, zero_every_[group], events_[i],
                      ode_internals_[k],
                      rhs_(particle, group, thread));
-      std::copy_n(y, n_state_ode_, y_other);
+      std::copy_n(y, n_variables, y_other);
       update_(particle, group, thread,
               time, y, rng_state, y_other);
       std::swap(y, y_other);
-      solver_[i].initialise(time_, y, ode_internals_[k],
-                            rhs_(particle, group, thread));
+      // Only re-initialise the solver if the state has changed; this
+      // is relatively expensive and in systems where the update
+      // function is called very frequently relative to the number of
+      // ODE steps it will be wasteful.  For system implementing
+      // simple SDE solvers, this check is pointless though as we will
+      // always update.
+      if (!std::equal(y, y + n_variables, y_other)) {
+        solver_[i].initialise(time_, y, ode_internals_[k],
+                              rhs_(particle, group, thread));
+      }
     }
   }
 };
