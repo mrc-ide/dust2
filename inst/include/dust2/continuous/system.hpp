@@ -108,7 +108,47 @@ public:
   void run_to_time(real_type time,
                    const std::vector<size_t>& index_group,
                    real_type *state_history) {
-    throw std::runtime_error("Write run_to_time() with saved history");
+    initialise_solver_(index_group);
+    const auto stride = n_state_ * n_particles_total_;
+
+    // Copy initial state into history at position 0
+    std::copy_n(state_.begin(), stride, state_history);
+
+    // Integrate one integer time step at a time, saving state at each
+    // for the backward adjoint pass.  This matches the offset layout
+    // in adjoint_data with dt=0 where offset[i] = time * stride.
+    const size_t n_int_steps = static_cast<size_t>(
+        std::round(std::max(0.0, time - time_)));
+    real_type t_curr = time_;
+    for (size_t step = 0; step < n_int_steps; ++step) {
+      real_type t_next = time_ + step + 1;
+      if (step == n_int_steps - 1) {
+        t_next = time;
+      }
+      for (auto group : index_group) {
+        for (size_t particle = 0; particle < n_particles_; ++particle) {
+          const auto thread = tools::thread_index();
+          const auto i = thread * n_groups_ + group;
+          const auto k = n_particles_ * group + particle;
+          const auto offset = k * n_state_;
+          real_type * y = state_.data() + offset;
+          try {
+            solver_[i].run(t_curr, t_next, y, zero_every_[group],
+                           events_[i], ode_internals_[k],
+                           rhs_(particle, group, thread));
+          } catch (std::exception const& e) {
+            errors_.capture(e, k);
+          }
+        }
+      }
+      errors_.report();
+      // Save state to history at this integer time
+      std::copy_n(state_.begin(), stride,
+                  state_history + (step + 1) * stride);
+      t_curr = t_next;
+    }
+    time_ = time;
+    update_output_is_current(index_group, false);
   }
 
   void simulate(const std::vector<real_type>& times,
@@ -323,6 +363,271 @@ public:
       ret.push_back(el.name);
     }
     return ret;
+  }
+
+  auto n_adjoint() const {
+    return n_state_ + packing_gradient().size();
+  }
+
+  template <typename IterData>
+  void adjoint_compare_data(const real_type time,
+                            IterData data,
+                            const real_type * state,
+                            const size_t n_adjoint,
+                            const std::vector<size_t>& index_group,
+                            const real_type * adjoint_curr,
+                            real_type * adjoint_next) {
+    for (auto i : index_group) {
+      const auto data_i = data + i;
+      for (size_t j = 0; j < n_particles_; ++j) {
+        const auto k = n_particles_ * i + j;
+        const auto offset_state = k * n_state_;
+        const auto offset_adjoint = k * n_adjoint;
+        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
+        try {
+          T::adjoint_compare_data(time,
+                                  state + offset_state,
+                                  adjoint_curr + offset_adjoint,
+                                  *data_i,
+                                  shared_[i], internal_i,
+                                  adjoint_next + offset_adjoint);
+        } catch (std::exception const& e) {
+          errors_.capture(e, k);
+        }
+      }
+    }
+    errors_.report();
+  }
+
+  // For continuous models, adjoint_run_to_time integrates the adjoint
+  // ODE backward from time0 to time1 using the same DP5
+  // (Dormand-Prince 5th order) adaptive solver as the forward pass.
+  // The augmented system in backward time τ = time0 - t:
+  //
+  //   dy/dτ       = -f(y, θ, t0 - τ)        (forward state, reversed)
+  //   dλ_state/dτ = (∂f/∂y)^T * λ_state     (state adjoint, via J^T)
+  //   dλ_param/dτ = (∂f/∂θ)^T * λ_state     (parameter sensitivity)
+  //
+  // If the model provides adjoint_rhs(), we use it for the symbolic
+  // Jacobian transpose; otherwise fall back to finite differences.
+  bool adjoint_run_to_time(const real_type time0,
+                           const real_type time1,
+                           const real_type* state,
+                           const size_t n_adjoint,
+                           const std::vector<size_t>& index_group,
+                           real_type* adjoint_curr,
+                           real_type* adjoint_next) {
+    if (time0 <= time1) {
+      return false;
+    }
+
+    const size_t n_aug = n_state_ode_ + n_adjoint;
+
+    // For finite-difference fallback
+    thread_local std::vector<real_type> f_base, f_pert, y_pert;
+    if constexpr (!properties<T>::has_adjoint_rhs::value) {
+      f_base.resize(n_state_ode_);
+      f_pert.resize(n_state_ode_);
+      y_pert.resize(n_state_ode_);
+    }
+
+    // Reuse the forward DP5 control for the backward solver, with no
+    // special variables (the augmented system is a flat ODE).
+    thread_local std::vector<real_type> y_aug;
+    y_aug.resize(n_aug);
+
+    const real_type tau_end = time0 - time1;
+    zero_every_type<real_type> no_zero_every;
+    ode::events_type<real_type> no_events;
+
+    for (auto i : index_group) {
+      for (size_t j = 0; j < n_particles_; ++j) {
+        const auto k = n_particles_ * i + j;
+        const auto offset_state = k * n_state_;
+        const auto offset_adjoint = k * n_adjoint;
+        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
+
+        // Augmented initial: [forward_state, adjoint_state, adjoint_param]
+        std::copy_n(state + offset_state, n_state_ode_, y_aug.data());
+        std::copy_n(adjoint_curr + offset_adjoint, n_adjoint,
+                    y_aug.data() + n_state_ode_);
+
+        auto augmented_rhs = [&](real_type t_bwd, const real_type* y,
+                                 real_type* dydt) {
+          const real_type t_fwd = time0 - t_bwd;
+          const real_type* y_state = y;
+          const real_type* y_adj = y + n_state_ode_;
+
+          // Forward state: dy/dτ = -f(y)
+          T::rhs(t_fwd, y_state, shared_[i], internal_i, dydt);
+          for (size_t m = 0; m < n_state_ode_; ++m) {
+            dydt[m] = -dydt[m];
+          }
+
+          real_type* adj_deriv = dydt + n_state_ode_;
+
+          if constexpr (properties<T>::has_adjoint_rhs::value) {
+            T::adjoint_rhs(t_fwd, y_state, y_adj, shared_[i],
+                           internal_i, adj_deriv);
+          } else {
+            // Finite-difference fallback: compute J^T * λ_state
+            T::rhs(t_fwd, y_state, shared_[i], internal_i, f_base.data());
+            std::fill_n(adj_deriv, n_adjoint, 0);
+
+            std::copy_n(y_state, n_state_ode_, y_pert.data());
+            for (size_t m = 0; m < n_state_ode_; ++m) {
+              const real_type y_orig = y_pert[m];
+              const real_type h_fd = 1e-7 * (1.0 + std::abs(y_orig));
+              y_pert[m] = y_orig + h_fd;
+              T::rhs(t_fwd, y_pert.data(), shared_[i], internal_i,
+                      f_pert.data());
+              real_type dot = 0;
+              for (size_t n = 0; n < n_state_ode_; ++n) {
+                dot += y_adj[n] * (f_pert[n] - f_base[n]) / h_fd;
+              }
+              adj_deriv[m] = dot;
+              y_pert[m] = y_orig;
+            }
+          }
+        };
+
+        // DP5 integration of the augmented system (backward time
+        // τ ∈ [0, time0 - time1]).  If the model has zero_every, we
+        // must break at those boundaries so the forward state
+        // reconstruction matches the forward pass, and the
+        // corresponding adjoint state components are zeroed (since
+        // gradient doesn't flow through a state reset).
+        try {
+          // Collect zero_every boundary times in (time1, time0) as
+          // backward-time breakpoints, sorted ascending.
+          thread_local std::vector<real_type> breakpoints;
+          breakpoints.clear();
+          if (!zero_every_[i].empty()) {
+            for (const auto& el : zero_every_[i]) {
+              const auto period = el.first;
+              // Integer boundaries in (time1, time0)
+              const int n_lo = static_cast<int>(std::floor(time1 / period)) + 1;
+              const int n_hi = static_cast<int>(std::floor(time0 / period));
+              for (int n = n_lo; n <= n_hi; ++n) {
+                const real_type t_bdy = n * period;
+                if (t_bdy > time1 && t_bdy < time0) {
+                  breakpoints.push_back(time0 - t_bdy);
+                }
+              }
+            }
+            std::sort(breakpoints.begin(), breakpoints.end());
+            // Remove duplicates
+            breakpoints.erase(
+              std::unique(breakpoints.begin(), breakpoints.end(),
+                          [](real_type a, real_type b) {
+                            return std::abs(a - b) < 1e-12;
+                          }),
+              breakpoints.end());
+          }
+          breakpoints.push_back(tau_end);
+
+          real_type tau_start = 0;
+          for (size_t seg = 0; seg < breakpoints.size(); ++seg) {
+            const real_type tau_stop = breakpoints[seg];
+            if (tau_stop > tau_start + 1e-14) {
+              ode::solver<real_type> adj_solver(n_aug, 0, control_);
+              ode::internals<real_type> adj_internals(n_aug, 0, false);
+              adj_solver.initialise(tau_start, y_aug.data(), adj_internals,
+                                    augmented_rhs);
+              adj_solver.run(tau_start, tau_stop, y_aug.data(),
+                             no_zero_every, no_events, adj_internals,
+                             augmented_rhs);
+            }
+            // At breakpoints (not the final one), apply zero_every
+            // to the forward state and adjoint in the augmented vector.
+            if (seg < breakpoints.size() - 1) {
+              const real_type t_fwd = time0 - tau_stop;
+              for (const auto& el : zero_every_[i]) {
+                const auto period = el.first;
+                const real_type remainder =
+                    std::abs(t_fwd / period - std::round(t_fwd / period));
+                if (remainder < 1e-10) {
+                  for (const auto idx : el.second) {
+                    // Zero the forward state component
+                    if (idx < n_state_ode_) {
+                      y_aug[idx] = 0;
+                    }
+                    // Zero the corresponding adjoint state component
+                    // (gradient doesn't flow through a reset)
+                    if (idx < n_adjoint) {
+                      y_aug[n_state_ode_ + idx] = 0;
+                    }
+                  }
+                }
+              }
+            }
+            tau_start = tau_stop;
+          }
+        } catch (std::exception const& e) {
+          errors_.capture(e, k);
+        }
+
+        // Extract adjoint result
+        std::copy_n(y_aug.data() + n_state_ode_, n_adjoint,
+                    adjoint_next + offset_adjoint);
+
+        // Zero adjoint for zero_every variables at period boundaries.
+        // In the forward pass, zero_every resets certain state variables
+        // at multiples of their period.  The adjoint of a reset (y → 0)
+        // is: adj_input = 0 (no gradient flows through the reset).
+        // We check for boundaries in (time1, time0] and zero the
+        // corresponding adjoint state components.
+        if (!zero_every_[i].empty()) {
+          for (const auto& el : zero_every_[i]) {
+            const auto period = el.first;
+            const int n0 = static_cast<int>(std::floor(time0 / period));
+            const int n1 = static_cast<int>(std::floor(time1 / period));
+            // If time1 is exactly on a boundary, it belongs to the
+            // next period going forward, so the zero happens there.
+            const bool time1_on_boundary =
+                std::abs(time1 - n1 * period) < 1e-12 * period;
+            if (n0 > n1 || (n0 == n1 && time1_on_boundary && time1 > 0)) {
+              for (const auto idx : el.second) {
+                if (idx < n_adjoint) {
+                  adjoint_next[offset_adjoint + idx] = 0;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    errors_.report();
+    // DP5 writes to adjoint_next; caller must swap so the next
+    // iteration reads from adjoint_next (now in adjoint_curr position).
+    return true;
+  }
+
+  void adjoint_initial(const real_type time,
+                       const real_type * state,
+                       const size_t n_adjoint,
+                       const std::vector<size_t>& index_group,
+                       const real_type * adjoint_curr,
+                       real_type * adjoint_next) {
+    for (auto i : index_group) {
+      for (size_t j = 0; j < n_particles_; ++j) {
+        const auto k = n_particles_ * i + j;
+        const auto offset_state = k * n_state_;
+        const auto offset_adjoint = k * n_adjoint;
+        auto& internal_i = internal_[tools::thread_index() * n_groups_ + i];
+        try {
+          T::adjoint_initial(time,
+                             state + offset_state,
+                             adjoint_curr + offset_adjoint,
+                             shared_[i],
+                             internal_i,
+                             adjoint_next + offset_adjoint);
+        } catch (std::exception const& e) {
+          errors_.capture(e, k);
+        }
+      }
+    }
+    errors_.report();
   }
 
   bool errors_pending() const {
