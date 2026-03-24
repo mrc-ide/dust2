@@ -56,6 +56,11 @@ struct test_has_events: std::false_type {};
 template <class T>
 struct test_has_events<T, std::void_t<decltype(T::events)>>: std::true_type {};
 
+template <class T, class = void>
+struct test_has_adjoint_rhs: std::false_type {};
+template <class T>
+struct test_has_adjoint_rhs<T, std::void_t<decltype(&T::adjoint_rhs)>>: std::true_type {};
+
 // These test that the signature of rhs and output consume the delays
 // argument. Not especially lovely to read!
 template <typename T>
@@ -104,6 +109,7 @@ struct properties {
   static constexpr bool rhs_uses_delays = internals::test_rhs_uses_delays<T>();
   static constexpr bool output_uses_delays = internals::test_output_uses_delays<T>();
   using has_events = internals::test_has_events<T>;
+  using has_adjoint_rhs = internals::test_has_adjoint_rhs<T>;
 };
 
 // wrappers around some uses of member functions that may or may not
