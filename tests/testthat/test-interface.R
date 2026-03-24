@@ -253,3 +253,22 @@ test_that("system generator objects are immutable", {
     sir[1] <- 1,
     "Cannot write to 'dust_system_generator' objects, they are read-only")
 })
+
+
+test_that("time is checked correctly", {
+  time <- 1.25
+  expect_equal(check_time(time, list(dt = 0.25)), time)
+  time <- 4.3
+  expect_equal(check_time(time, list(dt = 0.1)), time)
+  expect_error(check_time(time, list(dt = 0.25)),
+               "'time' must be a multiple of 'dt' (0.25)",
+               fixed = TRUE)
+  
+  time <- seq(0, 10, by = 0.25)
+  expect_equal(check_time_sequence(time, list(dt = 0.25)), time)
+  time <- seq(0, 10, by = 0.1)
+  expect_equal(check_time_sequence(time, list(dt = 0.1)), time)
+  expect_error(check_time_sequence(time, list(dt = 0.25)),
+               "Values in 'time' must be multiples of 'dt' (0.25)",
+               fixed = TRUE)
+})

@@ -663,7 +663,10 @@ check_time <- function(time, time_control, name = "time",
   assert_scalar_numeric(time, name = name, call = call)
   dt <- time_control$dt
   if (!is.null(dt) && dt > 0) {
-    if (abs(fmod(time, dt)) > sqrt(.Machine$double.eps)) {
+    rem <- fmod(time, dt)
+    err <- abs(rem) > sqrt(.Machine$double.eps) &&
+      abs(rem) < dt - sqrt(.Machine$double.eps)
+    if (err) {
       if (dt == 1) {
         cli::cli_abort(
           "'{name}' must be integer-like, because 'dt' is 1",
