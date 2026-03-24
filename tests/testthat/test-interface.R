@@ -257,9 +257,9 @@ test_that("system generator objects are immutable", {
 
 test_that("time is checked correctly", {
   time <- 1.25
-  expect_equal(check_time(time, list(dt = 0.25)), time)
+  expect_silent(check_time(time, list(dt = 0.25)))
   time <- 4.3
-  expect_equal(check_time(time, list(dt = 0.1)), time)
+  expect_silent(check_time(time, list(dt = 0.1)))
   expect_error(check_time(time, list(dt = 0.25)),
                "'time' must be a multiple of 'dt' (0.25)",
                fixed = TRUE)
