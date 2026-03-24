@@ -693,7 +693,13 @@ check_time_sequence <- function(time, time_control,
   if ((!is.null(dt)) && (dt <= 1)) {
     #rem <- time %% dt # The problem is 10 %% 0.25 = 0, but 10 %% 0.1 = 0.1
     rem <- fmod(time, dt)
-    err <- abs(rem) > sqrt(.Machine$double.eps)
+    ## the second part of the condition here deals with a precision issue
+    ## where e.g. fmod(4.3, 0.1) is very slightly greater than -0.1 (= -dt)
+    ## when we'd expect it to be zero because 4.3 is clearly a multiple of 0.1
+    ## so while the 1st condition would flag it as an error, the 2nd will
+    ## de-flag it
+    err <- abs(rem) > sqrt(.Machine$double.eps) &
+      abs(rem) < dt - sqrt(.Machine$double.eps)
     if (any(err)) {
       i <- which(err)
       detail <- tail_errors(sprintf("'{name}[%d]' (%s) is invalid", i, time[i]))
