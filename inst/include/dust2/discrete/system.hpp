@@ -88,7 +88,7 @@ public:
     if (n_steps % 2 == 1) {
       std::swap(state_, state_next_);
     }
-    time_ = time_ + n_steps * dt_;
+    time_ = time;
   }
 
   void run_to_time(real_type time,
@@ -115,7 +115,7 @@ public:
       }
     }
     errors_.report();
-    time_ = time_ + n_steps * dt_;
+    time_ = time;
   }
 
   void simulate(const std::vector<real_type>& times,

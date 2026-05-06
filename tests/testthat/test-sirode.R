@@ -13,13 +13,13 @@ test_that("can run sirode model", {
   expect_equal(cumsum(res[5, , ]), res[4, , ])
   
   
-  ## output at intervals of 0.1 to check zero_every is working correctly
+  ## output at intervals of 0.01 to check zero_every is working correctly
   obj <- dust_system_create(sirode(), pars, n_particles = 1,
                             preserve_particle_dimension = TRUE,
                             ode_control = dust_ode_control(step_size_max = 0.8),
                             deterministic = TRUE)
   dust_system_set_state_initial(obj)
-  t <- seq(0, 10, by = 0.1)
+  t <- seq(0, 10, by = 0.01)
   res <- dust_system_simulate(obj, t)
   
   ## Cumulative cases never decrease:

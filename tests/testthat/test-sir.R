@@ -135,7 +135,7 @@ test_that("can reset cases daily", {
 })
 
 
-test_that("can reset cases daily with dt = 0.1", {
+test_that("can reset cases daily with dt = 0.01", {
   ## Testing with dt = 0.1 as modulo arithmetic works poorly in C++/R
   ## so we are checking the precision handles this sufficiently
   
@@ -144,9 +144,9 @@ test_that("can reset cases daily with dt = 0.1", {
   
   pars <- list(beta = 1.0, gamma = 0.5, N = 1000, I0 = 10, exp_noise = 1e6)
   obj <- dust_system_create(sir(), pars, n_particles = n_particles,
-                            dt = 0.1, seed = 42)
+                            dt = 0.01, seed = 42)
   dust_system_set_state_initial(obj)
-  t <- seq(0, 5, by = 0.1)
+  t <- seq(0, 20, by = 0.01)
   res <- dust_system_simulate(obj, t)
   
   ## Cumulative cases never decrease:
