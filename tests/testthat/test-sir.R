@@ -128,10 +128,35 @@ test_that("can reset cases daily", {
   ## Cumulative cases never decrease:
   expect_true(all(diff(t(res[4, , ])) >= 0))
 
-  ## Incidence resets somtimes:
+  ## Incidence resets sometimes:
   expect_true(any(diff(t(res[5, , ])) < 0))
 
   expect_equal(apply(res[5, , ], 1, cumsum), t(res[4, , ]))
+})
+
+
+test_that("can reset cases daily with dt = 0.01", {
+  ## Testing with dt = 0.1 as modulo arithmetic works poorly in C++/R
+  ## so we are checking the precision handles this sufficiently
+  
+  n_time <- 20
+  n_particles <- 100
+  
+  pars <- list(beta = 1.0, gamma = 0.5, N = 1000, I0 = 10, exp_noise = 1e6)
+  obj <- dust_system_create(sir(), pars, n_particles = n_particles,
+                            dt = 0.01, seed = 42)
+  dust_system_set_state_initial(obj)
+  t <- seq(0, 20, by = 0.01)
+  res <- dust_system_simulate(obj, t)
+  
+  ## Cumulative cases never decrease:
+  expect_true(all(diff(t(res[4, , ])) >= 0))
+  
+  ## Incidence resets sometimes:
+  expect_true(any(diff(t(res[5, , ])) < 0))
+  
+  expect_equal(apply(res[5, , t %% 1 == 0], 1, cumsum), 
+               t(res[4, , t %% 1 == 0]))
 })
 
 

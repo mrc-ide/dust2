@@ -88,7 +88,7 @@ public:
     if (n_steps % 2 == 1) {
       std::swap(state_, state_next_);
     }
-    time_ = time_ + n_steps * dt_;
+    time_ = time;
   }
 
   void run_to_time(real_type time,
@@ -115,7 +115,7 @@ public:
       }
     }
     errors_.report();
-    time_ = time_ + n_steps * dt_;
+    time_ = time;
   }
 
   void simulate(const std::vector<real_type>& times,
@@ -411,7 +411,7 @@ private:
     for (size_t i = 0; i < n_steps; ++i) {
       const auto time_i = time + i * dt;
       for (const auto& el : zero_every) {
-        if (std::fmod(time_i, el.first) == 0) {
+        if (tools::is_evenly_divisible_by(time_i, el.first)) {
           for (const auto j : el.second) {
             state[j] = 0;
           }
@@ -435,7 +435,7 @@ private:
     for (size_t i = 0; i < n_steps; ++i, state_next += stride) {
       const auto time_i = time + i * dt;
       for (const auto& el : zero_every) {
-        if (std::fmod(time_i, el.first) == 0) {
+        if (tools::is_evenly_divisible_by(time_i, el.first)) {
           std::copy_n(state_curr, n_state, state_model);
           state_curr = state_model;
           for (const auto j : el.second) {

@@ -21,7 +21,8 @@ inline bool is_evenly_divisible_by(double num, double by) {
   // than sqrt(precision) and is consistent with the maximum expected
   // accumulation of rounding error for pathological choices of dt.
   constexpr double eps = 1e-13;
-  return std::abs(std::fmod(num, by)) < eps;
+  return (std::abs(std::fmod(num, by)) < eps) || 
+    (by - std::abs(std::fmod(num, by)) < eps);
 }
 
 template <typename T, typename U>
