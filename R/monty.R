@@ -104,8 +104,10 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
           x = "'packer' has: {squote(packer$groups())}"),
         arg = "packer")
     }
+    parameter_groups <- packer$parameter_groups()
   } else {
     assert_is(packer, "monty_packer")
+    parameter_groups <- NULL
   }
 
   domain <- monty::monty_domain_expand(domain, packer)
@@ -129,7 +131,7 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
     has_gradient = obj$deterministic && obj$has_adjoint,
     allow_multiple_parameters = FALSE,
     has_observer = !is.null(observer),
-    has_parameter_groups = FALSE)
+    has_parameter_groups = is_grouped)
 
   gradient <- NULL
 
@@ -200,7 +202,14 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
         save_snapshots = save_snapshots,
         save_trajectories = save_trajectories$enabled,
         index_state = save_trajectories$index)
-      if (is_grouped) sum(ll) else ll
+      if (is_grouped) {
+        ll_by_group <- ll
+        names(ll_by_group) <- obj$groups
+        ll <- sum(ll)
+        attr(ll, "shared") <- 0
+        attr(ll, "groups") <- ll_by_group
+      }
+      ll
     }
   }
 
@@ -244,6 +253,7 @@ dust_likelihood_monty <- function(obj, packer, initial = NULL, domain = NULL,
          direct_sample = NULL,
          gradient = gradient,
          parameters = packer$names(),
+         parameter_groups = parameter_groups,
          domain = domain,
          observer = observer,
          restore = restore,
